@@ -1,0 +1,11 @@
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<?php if (strlen($this->message)): ?>
+	<p><?= $this->message ?></p>
+<?php endif ?>
+
+<?= $this->form ?>
+
+<?php $this->endblock(); ?>

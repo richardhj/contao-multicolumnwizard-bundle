@@ -1,0 +1,36 @@
+<?php
+
+$objDom = new \DOMDocument('1.0', 'utf-8');
+
+$table = $objDom->createElement(\Ferienpass\Model\DataProcessing::camelCaseColName($this->attribute->get('type')));
+$table->setAttribute('xmlns:aid', 'http://ns.adobe.com/AdobeInDesign/4.0/');
+$table->setAttribute('aid:table', 'table');
+
+$rc = 0;
+$cc = 0;
+
+foreach ((array)$this->raw as $row)
+{
+	$rc++;
+	$cc = 0;
+
+	foreach ($row as $col)
+	{
+		$cc++;
+
+		$cell = $objDom->createElement('Cell', htmlspecialchars(html_entity_decode($col['value']), ENT_XML1));
+		$cell->setAttribute('aid:table', 'cell');
+		$cell->setAttribute('aid:crows', '1');
+		$cell->setAttribute('aid:ccols', '1');
+		$cell->setAttribute('aid:ccolwidth', '150');
+
+		$table->appendChild($cell);
+	}
+}
+
+$table->setAttribute('aid:trows', $rc);
+$table->setAttribute('aid:tcols', $cc);
+
+$objDom->appendChild($table);
+
+echo $objDom->saveXML();

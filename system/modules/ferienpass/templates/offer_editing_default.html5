@@ -1,0 +1,14 @@
+<?php $this->extend('block_unsearchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<?php if (strlen($this->message)): ?>
+	<?= $this->message ?>
+<?php endif; if ($this->form): ?>
+	<?= $this->form ?>
+<?php endif; if (strlen($this->variants)): ?>
+	<div class="variants">
+		<?= $this->variants ?>
+	</div>
+<?php endif ?>
+<?php $this->endblock(); ?>

@@ -1,0 +1,35 @@
+@import "compass/css3/border-radius"
+$fa-font-path: "../../../../../files/font-awesome/fonts"
+@import "../../../../../files/font-awesome/scss/font-awesome"
+
+.be_overview .item
+  a
+    display: block
+    width: 105px
+    height: 70px
+    margin: 15px 0
+    padding: 5px
+    float: left
+    text-align: center
+    .fa
+      font-size: 42px
+      line-height: 70px
+      color: #ffffff
+      margin-bottom: 12px
+      &:before
+        background: #1d8db9
+        width: 70px
+        height: 70px
+        display: block
+        +border-radius(100%)
+        margin: 0 auto
+  &.disabled
+    pointer-events: none
+    cursor: default
+    .fa:before
+      background: #999999
+  &:hover
+    .fa:before
+      background: #209bc9
+  span
+    display: block

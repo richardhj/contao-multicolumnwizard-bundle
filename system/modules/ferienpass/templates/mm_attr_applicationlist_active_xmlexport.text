@@ -1,0 +1,19 @@
+<?php
+
+// Generate nothing
+if (!$this->raw)
+{
+	return 'Das Angebot verwendet nicht das Online-Anmeldesystem.';
+}
+
+$objDom = new \DOMDocument('1.0', 'utf-8');
+
+$node = $objDom->createElement(ucfirst($this->attribute->get('type')));
+$node->nodeValue = 'Gehen Sie auf folgende Seite, um sich für das Angebot anzumelden:';
+
+$link = $objDom->createElement('OnlineLink');
+$link->nodeName = Environment::get('url') . '/' . $this->item->get('vargroup');
+
+$objDom->appendChild($node);
+
+echo $objDom->saveXML();

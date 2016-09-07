@@ -1,0 +1,41 @@
+<?php $strRendersettings = isset($this->settings)? 'settings' : 'view'; ?>
+<?php if (count($this->data)): ?>
+
+<div class="layout_full">
+
+<table>
+<?php if(!$this->$strRendersettings->get('hideLabels')): ?>
+<thead>
+<tr>
+<?php foreach ($this->data[0]['attributes'] as $attribute): ?>
+	<th class="label"><?php echo $attribute; ?></th>
+<?php endforeach ?>
+	<th>&nbsp;</th>
+</tr>
+</thead>
+<?php endif; ?>
+
+<tbody>
+<?php foreach ($this->data as $arrItem): ?>
+<tr class="item <?php echo $arrItem['class']; ?>">
+<?php foreach ($arrItem['attributes'] as $field => $strName): ?>
+<?php if ((isset($arrItem[$this->getFormat()][$field]) && ($strValue = $arrItem[$this->getFormat()][$field])
+		|| (isset($arrItem['text'][$field]) && ($strValue = $arrItem['text'][$field])))): ?>
+<td class="field <?php echo $field; ?>">
+	<div class="value"> <?php echo $strValue; ?></div>
+</td>
+<?php endif; ?>
+<?php endforeach; ?>
+<td class="details">
+<?php if ($arrItem['jumpTo']['deep']): ?>
+	<a href="<?php echo $arrItem['jumpTo']['url']; ?>" class="lightbox-reload" data-lightbox=""><?php echo $this->details; ?></a>
+<?php endif; ?>
+</td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
+</div>
+<?php else: ?>
+<p class="info"><?php echo $this->noItemsMsg; ?></p>
+<?php endif; ?>

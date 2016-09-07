@@ -1,0 +1,30 @@
+<?php
+
+// Replace space with tabulator
+echo preg_replace(
+	'/^(' . Date::getRegexp() . ')\s((' . Date::getRegexp('H:i') . ').*)$/',
+	"$1\t$5",
+	$this->raw
+);
+
+//// For our InDesign layout we need to different date strings
+//
+//$objDom = new \DOMDocument('1.0', 'utf-8');
+//
+//$root = $objDom->createElement('Dates');
+//
+//// Add the default date string as node
+//$node = $objDom->createElement('DateTime');
+//// Use a tabulator as delimiter for date and time if it is a single-date-offer
+//$node->nodeValue = preg_replace('/^(' . Date::getRegexp() . ')\s((' . Date::getRegexp('H:i') . ').*)$/', '$1' . "\t" . '$5', $this->raw);
+//$root->appendChild($node);
+//
+//// Add the shortened version by imploding the dates
+//$node = $objDom->createElement('DateShortened');
+//preg_match_all('/(' . Date::getRegexp() . ')/', $this->raw, $matches);
+//$node->nodeValue = implode((strpos(',', $this->raw) !== false) ? ', ' : ' – ', $matches[1]);
+//$root->appendChild($node);
+//
+//$objDom->appendChild($root);
+//
+//echo $objDom->saveXML();

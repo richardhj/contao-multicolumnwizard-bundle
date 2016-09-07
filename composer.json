@@ -1,0 +1,28 @@
+{
+  "name": "richardhj/contao-ferienpass",
+  "description": "FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension",
+  "type": "contao-module",
+  "homepage": "https://ferienpass.online/",
+  "authors": [
+    {
+      "name": "Richard Henkenjohann",
+      "email": "richard@ferienpass.online",
+      "homepage": "http://henkenjohann.me",
+      "role": "Developer"
+    }
+  ],
+  "support": {
+    "email": "richard@ferienpass.online"
+  },
+  "require": {
+    "codefog/contao-haste": "~4.11",
+    "eluceo/ical": "~0.8",
+    "league/flysystem-dropbox": "~1.0",
+    "leounglaub/contao-simple-ajax": "3.2.x-dev",
+    "metamodels/bundle_all": "~2.0.0",
+    "netzmacht/contao-flysystem": "~1.0",
+    "pixelfear/oauth2-dropbox": "~0.1.1",
+    "terminal42/contao-conditionalselectmenu": "~3.0",
+    "terminal42/notification_center": "~1.3"
+  }
+}

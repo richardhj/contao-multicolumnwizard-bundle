@@ -1,0 +1,9 @@
+<div id="tl_buttons">
+	<a href="<?php echo $this->getReferer(true); ?>" class="header_back" title="<?php echo $this->backBT; ?>" accesskey="b" onclick="Backend.getScrollOffset();">
+		<?php echo $GLOBALS['TL_LANG']['MSC']['backBT'] ?>
+	</a>
+</div>
+
+<h2 class="sub_headline"><?php echo $this->headline ?></h2>
+
+<?php echo $this->content; ?>

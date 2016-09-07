@@ -1,0 +1,30 @@
+<?php $strRendersettings = isset($this->settings)? 'settings' : 'view'; ?>
+<?php if ($this->items->getCount()): ?>
+
+	<div class="layout_full">
+
+		<?php foreach ($this->items->parseAll($this->getFormat(), $this->view) as $arrItem): ?>
+			<div class="item <?php echo $arrItem['class']; ?><?php if (!$this->items->getItem()->isVariantBase()): ?> isvariant<?php elseif ($this->items->getItem()->getVariants(null)->getCount()): ?> isvariantbase<?php endif; ?>">
+
+				<?php foreach ($this->items->getItem()->getMetaModel()->getAttributes() as $field => $objAttribute): ?>
+					<?php if (($strValue = $arrItem[$this->getFormat()][$field]) || ($strValue = $arrItem['text'][$field])): ?>
+						<div class="field <?php echo $field; ?>">
+							<?php if(!$this->$strRendersettings->get('hideLabels')): ?>
+								<div class="label"><?php echo sprintf($GLOBALS['TL_LANG']['MSC']['field_label'], $objAttribute->getName()); ?></div>
+							<?php endif; ?>
+							<div class="value"> <?php echo $strValue; ?></div>
+						</div>
+					<?php endif; ?>
+				<?php endforeach; ?>
+				<div class="links">
+					<?php foreach($this->caller->getButtons($arrItem) as $arrButton): ?>
+						<a href="<?php echo $arrButton['href']; ?>" class="<?php echo $arrButton['class']; ?>" title="<?php echo $arrButton['title']; ?>"<?php echo $arrButton['attribute']; ?>><?php echo $arrButton['link']; ?></a>
+					<?php endforeach; ?>
+					<div class="clear"></div>
+				</div>
+			</div>
+		<?php $this->items->next(); endforeach; ?>
+	</div>
+<?php else: ?>
+	<p class="info"><?php echo $this->noItemsMsg; ?></p>
+<?php endif; ?>

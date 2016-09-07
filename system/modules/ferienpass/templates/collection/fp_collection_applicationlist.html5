@@ -1,0 +1,79 @@
+<?php
+
+use Ferienpass\Helper\Config;
+use Ferienpass\Model\Participant;
+use Haste\Util\Format;
+
+$countParticipants = count($this->items);
+$maxParticipants = \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer_id)->get(Config::get(Config::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX));
+$countParticipantsConfirmed = min($countParticipants, $maxParticipants);
+
+$strParticipantParentColName = Participant::getInstance()->getOwnerAttribute()->getColName();
+
+?>
+<div style="line-height:16px; font-size:12px;">
+<table cellspacing="0" cellpadding="0" border="0">
+    <tr>
+        <th width="20%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'firstname'); ?></th>
+        <th width="20%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'lastname'); ?></th>
+        <th width="15%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'phone'); ?></th>
+	    <th width="15%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'mobile'); ?></th>
+<!--        <th width="19%" style="font-weight:bold">--><?php //echo Format::dcaLabel('tl_member', 'email'); ?><!--</th>-->
+	    <th width="6%" style="font-weight:bold">Fotos</th>
+	    <th width="24%" style="font-weight:bold">Notizen/Unterschrift</th>
+    </tr>
+    <tr><td colspan="6" style="font-size:5px;line-height:5px; border-bottom: 2px solid #898989">&nbsp;</td></tr>
+	<?php for ($i = 0; $i < $countParticipantsConfirmed; $i++): ?>
+        <tr><td colspan="6" style="font-size:5px;line-height:5px<?php if($i!=0): ?>; border-top: 1px solid #c4c4c4<?php endif; ?>">&nbsp;</td></tr>
+        <tr>
+            <td><?php echo $this->items[$i]['participant_firstname']; ?></td>
+            <td><?php echo $this->items[$i]['participant_lastname']; ?></td>
+	        <td><?php echo $this->items[$i]['participant_phone'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['phone']; ?></td>
+            <td><?php echo $this->items[$i]['participant_mobile'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['mobile']; ?></td>
+<!--            <td>--><?php //echo $this->items[$i]['participant_email'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['email']; ?><!--</td>-->
+	        <td><?php echo $this->items[$i]['participant_agreement_photo'] ? 'ja' : 'nein'; ?></td>
+	        <td>&nbsp;</td>
+        </tr>
+        <tr><td colspan="6" style="font-size:5px;line-height:5px">&nbsp;</td></tr>
+        <?php endfor; ?>
+		<tr><td colspan="6" style="font-size:5px;line-height:5px; border-top: 1px solid #c4c4c4">&nbsp;</td></tr>
+    <tr><td colspan="6">&nbsp;</td></tr>
+	<tr>
+		<td colspan="5" style="font-size:14px; text-align:right; font-weight: bold">Maximale Teilnehmerzahl:</td>
+		<td style="font-size:14px; font-weight: bold"> <?php echo $maxParticipants; ?></td>
+	</tr>
+    <tr>
+        <td colspan="5" style="font-size:14px; text-align:right; font-weight: bold">Insgesamt angemeldet:</td>
+        <td style="font-size:14px; font-weight: bold"> <?php echo $countParticipants; ?></td>
+    </tr>
+	<tr><td colspan="6">&nbsp;</td></tr>
+	<tr><td colspan="6" style="font-size:16px;font-weight:bold">Warteliste</td></tr>
+	<tr><td colspan="6">&nbsp;</td></tr>
+	<?php if ($countParticipants > $maxParticipants): ?>
+		<tr>
+			<th width="20%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'firstname'); ?></th>
+			<th width="20%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'lastname'); ?></th>
+			<th width="15%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'phone'); ?></th>
+			<th width="15%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'mobile'); ?></th>
+			<!--        <th width="19%" style="font-weight:bold">--><?php //echo Format::dcaLabel('tl_member', 'email'); ?><!--</th>-->
+			<th width="6%" style="font-weight:bold">Fotos</th>
+			<th width="24%" style="font-weight:bold">Notizen/Unterschrift</th>
+		</tr>
+		<tr><td colspan="6" style="font-size:5px;line-height:5px; border-bottom: 2px solid #898989">&nbsp;</td></tr>
+		<?php for ($i = $maxParticipants; $i < $countParticipants; $i++): ?>
+			<tr><td colspan="6" style="font-size:5px;line-height:5px<?php if($i!=0): ?>; border-top: 1px solid #c4c4c4<?php endif; ?>">&nbsp;</td></tr>
+			<tr>
+				<td><?php echo $this->items[$i]['participant_firstname']; ?></td>
+				<td><?php echo $this->items[$i]['participant_lastname']; ?></td>
+				<td><?php echo $this->items[$i]['participant_phone'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['phone']; ?></td>
+				<td><?php echo $this->items[$i]['participant_mobile'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['mobile']; ?></td>
+<!--				<td>--><?php //echo $this->items[$i]['participant_email'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['email']; ?><!--</td>-->
+				<td><?php echo $this->items[$i]['participant_agreement_photo'] ? 'ja' : 'nein'; ?></td>
+				<td>&nbsp;</td>
+			</tr>
+			<tr><td colspan="6" style="font-size:5px;line-height:5px">&nbsp;</td></tr>
+		<?php endfor; ?>
+		<tr><td colspan="6" style="font-size:5px;line-height:5px; border-top: 1px solid #c4c4c4">&nbsp;</td></tr>
+	<?php endif; ?>
+</table>
+</div>

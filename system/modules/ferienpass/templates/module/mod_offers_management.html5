@@ -1,0 +1,1 @@
+<?php include TL_ROOT . '/system/modules/metamodels/templates/mod_metamodel_list.html5'; //@todo proper way with $this->insert();
