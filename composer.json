@@ -22,7 +22,7 @@
     "leounglaub/contao-simple-ajax": "3.2.x-dev",
     "metamodels/bundle_all": "~2.0.0",
     "netzmacht/contao-flysystem": "~1.0",
-    "pixelfear/oauth2-dropbox": "~0.1.1",
+    "pixelfear/oauth2-dropbox": "dev-master",
     "terminal42/contao-conditionalselectmenu": "~3.0",
     "terminal42/notification_center": "~1.3"
   },

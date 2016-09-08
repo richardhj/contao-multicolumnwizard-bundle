@@ -7,14 +7,7 @@
  *
  * @license LGPL-3.0+
  */
-
-
-/**
- * Register namespaces
- */
-NamespaceClassLoader::add('Ferienpass', 'system/modules/ferienpass/library');
-NamespaceClassLoader::add('MetaModels', 'system/modules/ferienpass/library');
-NamespaceClassLoader::add('League', 'system/modules/ferienpass/library');
+ 
 
 /**
  * Register the templates
