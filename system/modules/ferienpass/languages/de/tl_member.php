@@ -6,9 +6,12 @@
  * Time: 10:45
  */
 
+/** @noinspection PhpUndefinedMethodInspection */
+$table = \MemberModel::getTable();
+
 
 /**
  * Fields
  */
-//$GLOBALS['TL_LANG']['tl_member']['company'][0] = 'Veranstalter';
-//$GLOBALS['TL_LANG']['tl_member']['company'][1] = 'Hier können Sie den Namen des Veranstalters eintragen.';
+$GLOBALS['TL_LANG'][$table]['persist'][0] = 'nicht automatisch löschen';
+$GLOBALS['TL_LANG'][$table]['persist'][1] = 'Diesen Account von der automatischen Löschung ausschließen';
