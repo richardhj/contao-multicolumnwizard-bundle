@@ -17,6 +17,7 @@
   "require": {
     "php": "^5.4 || ^7.0",
     "codefog/contao-haste": "~4.11",
+    "contao-community-alliance/meta-palettes": "~1.9",
     "eluceo/ical": "~0.8",
     "league/flysystem-dropbox": "~1.0",
     "leounglaub/contao-simple-ajax": "3.2.x-dev",
