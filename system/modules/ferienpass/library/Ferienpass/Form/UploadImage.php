@@ -28,20 +28,19 @@ class UploadImage extends \UploadPreviewFieldFE
 	/**
 	 * Set upload folder for attribute
 	 *
-	 * @param array|null $arrAttributes
+	 * @param array|null $attributes
 	 */
-	public function __construct($arrAttributes=null)
+	public function __construct($attributes=null)
 	{
 		parent::__construct
 		(
 			array_merge
 			(
-				array
-				(
+				[
 					'uploadFolder' => '7a56a80f-f055-11e4-b330-ce2f81f95ce0', //@todo
 					'renameFile'   => 'angebot_##id##_' . substr(md5(uniqid(mt_rand())), 0, 6) //@todo
-				),
-				(array)$arrAttributes
+                ],
+				(array)$attributes
 			)
 		);
 	}

@@ -71,12 +71,12 @@ class AttendanceStatus extends Model
 	/**
 	 * Fine one message by its type
 	 *
-	 * @param string $strType
+	 * @param string $type
 	 *
 	 * @return AttendanceStatus
 	 */
-	public static function findByType($strType)
+	public static function findByType($type)
 	{
-		return static::findOneBy('type', $strType);
+		return static::findOneBy('type', $type);
 	}
 }

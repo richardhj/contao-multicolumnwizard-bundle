@@ -19,7 +19,6 @@ use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\Offer;
-use Haste\Util\Format;
 use MetaModels\DcGeneral\Data\Model;
 use MetaModels\Factory;
 
@@ -27,102 +26,92 @@ use MetaModels\Factory;
 class Dca extends Backend
 {
 
-	/**
-	 * Get MetaModels
-	 * @category options_callback
-	 * @return array
-	 */
-	public function getMetaModels()
-	{
-		$objFactory = Factory::getDefaultFactory();
-		$arrReturn = array();
+    /**
+     * Get MetaModels
+     * @category options_callback
+     * @return array
+     */
+    public function getMetaModels()
+    {
+        $factory = Factory::getDefaultFactory();
+        $return = [];
 
-		foreach ($objFactory->collectNames() as $table)
-		{
-			$arrReturn[$table] = $objFactory->getMetaModel($table)->getName();
-		}
+        foreach ($factory->collectNames() as $table) {
+            $return[$table] = $factory->getMetaModel($table)->getName();
+        }
 
-		return $arrReturn;
-	}
-
-
-	/**
-	 * Get MetaModel attributes grouped by MetaModel
-	 * @category options_callback
-	 * @return array
-	 */
-	public function getMetaModelsAttributes()
-	{
-		$arrReturn = array();
-
-		foreach ($this->getMetaModels() as $table => $metaModelTitle)
-		{
-			foreach (Factory::getDefaultFactory()->getMetaModel($table)->getAttributes() as $attribute => $objAttribute)
-			{
-//				if ($objAttribute->get('type') == 'select')
-//				{
-				$arrReturn[$table][$attribute] = $objAttribute->getName();
-//				}
-			}
-		}
-
-		return $arrReturn;
-	}
+        return $return;
+    }
 
 
-	/**
-	 * Check whether the type of the selected attribute fits with the one assumed
-	 *
-	 * @param mixed          $varValue
-	 * @param \DataContainer $dc
-	 *
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	public function checkMetaModelAttributeType($varValue, $dc)
-	{
-		$strAttributeType = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['metamodel_attribute_type'];
-		$strMetaModelTableName = \Config::get($GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']);
+    /**
+     * Get MetaModel attributes grouped by MetaModel
+     * @category options_callback
+     * @return array
+     */
+    public function getMetaModelsAttributes()
+    {
+        $return = [];
 
-		$objMetaModel = Factory::getDefaultFactory()->getMetaModel($strMetaModelTableName);
-		$objAttribute = $objMetaModel->getAttribute($varValue);
+        foreach ($this->getMetaModels() as $table => $metaModelTitle) {
+            foreach (Factory::getDefaultFactory()->getMetaModel($table)->getAttributes(
+            ) as $attributeName => $attribute) {
+                $return[$table][$attributeName] = $attribute->getName();
+            }
+        }
 
-		if ($objAttribute !== null && $objAttribute->get('type') != $strAttributeType)
-		{
-			throw new \Exception(sprintf('Selected attribute is not type "%s"', $strAttributeType));
-		}
-
-		return $varValue;
-	}
+        return $return;
+    }
 
 
-	/**
-	 * Get status change notifications
-	 * @category options_callback
-	 *
-	 * @return array
-	 */
-	public function getNotificationChoices()
-	{
-		$arrChoices = array();
-		$objNotifications = \Database::getInstance()
-			->query("SELECT id,title FROM tl_nc_notification WHERE type='offer_al_status_change' ORDER BY title");
+    /**
+     * Check whether the type of the selected attribute fits with the one assumed
+     *
+     * @param mixed          $value
+     * @param \DataContainer $dc
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function checkMetaModelAttributeType($value, $dc)
+    {
+        $attributeType = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['metamodel_attribute_type'];
+        $metaModelTableName = \Config::get(
+            $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']
+        );
 
-		while ($objNotifications->next())
-		{
-			$arrChoices[$objNotifications->id] = $objNotifications->title;
-		}
+        $metaModel = Factory::getDefaultFactory()->getMetaModel($metaModelTableName);
+        $attribute = $metaModel->getAttribute($value);
 
-		return $arrChoices;
-	}
+        if (null !== $attribute && $attributeType != $attribute->get('type')) {
+            throw new \Exception(sprintf('Selected attribute is not type "%s"', $attributeType));
+        }
+
+        return $value;
+    }
 
 
-	/**
-	 * Get all data processings with "sync" activated
-	 * @category options_callback
-	 *
-	 * @return array
-	 */
+    /**
+     * Get status change notifications
+     * @category options_callback
+     *
+     * @return array
+     */
+    public function getNotificationChoices()
+    {
+        $notifications = \Database::getInstance()
+            ->query("SELECT id,title FROM tl_nc_notification WHERE type='offer_al_status_change' ORDER BY title");
+
+        return $notifications->fetchEach('title');
+    }
+
+
+    /**
+     * Get all data processings with "sync" activated
+     * @category options_callback
+     *
+     * @return array
+     */
 //	public function getDataProcessingChoices()
 //	{
 //		/** @var \Model\Collection $objModel */
@@ -132,211 +121,204 @@ class Dca extends Backend
 //	}
 
 
-	/**
-	 * Get documents
-	 * @category options_callback
-	 *
-	 * @return array
-	 */
-	public function getDocumentChoices()
-	{
-		$objNotifications = \Database::getInstance()
-			->query("SELECT id,name FROM tl_ferienpass_document ORDER BY name");
+    /**
+     * Get documents
+     * @category options_callback
+     *
+     * @return array
+     */
+    public function getDocumentChoices()
+    {
+        $notifications = \Database::getInstance()
+            ->query("SELECT id,name FROM tl_ferienpass_document ORDER BY name");
 
-		$arrChoices = $objNotifications->fetchEach('name');
-
-		return $arrChoices;
-	}
+        return $notifications->fetchEach('name');
+    }
 
 
-	/**
-	 * Get all select attributes for the owner attribute
-	 * @category options_callback
-	 *
-	 * @param DcCompat $dc
-	 *
-	 * @return array
-	 */
-	public function getOwnerAttributeChoices($dc)
-	{
-		$objAttributes = \Database::getInstance()
-			->prepare("SELECT id,name FROM tl_metamodel_attribute WHERE pid=? AND type='select' AND select_id='id' ORDER BY sorting")
-			->execute($dc->id);
+    /**
+     * Get all select attributes for the owner attribute
+     * @category options_callback
+     *
+     * @param DcCompat $dc
+     *
+     * @return array
+     */
+    public function getOwnerAttributeChoices($dc)
+    {
+        $attributes = \Database::getInstance()
+            ->prepare(
+                "SELECT id,name FROM tl_metamodel_attribute WHERE pid=? AND type='select' AND select_id='id' ORDER BY sorting"
+            )
+            ->execute($dc->id);
 
-		$arrChoices = $objAttributes->fetchEach('name');
-
-		return $arrChoices;
-	}
-
-
-	/**
-	 * Get all metamodel render settings
-	 * @category options_callback
-	 *
-	 * @param \DataContainer $dc
-	 *
-	 * @return array
-	 */
-	public function getAllMetaModelRenderSettings($dc)
-	{
-		$objFilterSettings = \Database::getInstance()
-			->query('SELECT * FROM tl_metamodel_rendersettings');
-
-		$arrSettings = $objFilterSettings->fetchEach('name');
-
-		// Sort the render settings.
-		asort($arrSettings);
-
-		return $arrSettings;
-	}
+        return $attributes->fetchEach('name');
+    }
 
 
-	/**
-	 * Get all the offer MetaModel's render settings
-	 * @category options_callback
-	 *
-	 * @return array
-	 */
-	public function getOffersMetaModelRenderSettings()
-	{
-		$objRenderSettings = \Database::getInstance()
-			->prepare('SELECT * FROM tl_metamodel_rendersettings WHERE pid=?')
-			->execute(Offer::getInstance()->getMetaModel()->get('id'));
+    /**
+     * Get all metamodel render settings
+     * @category options_callback
+     *
+     * @param \DataContainer $dc
+     *
+     * @return array
+     */
+    public function getAllMetaModelRenderSettings($dc)
+    {
+        $renderSettings = \Database::getInstance()
+            ->query('SELECT * FROM tl_metamodel_rendersettings');
 
-		$arrSettings = $objRenderSettings->fetchEach('name');
-
-		// Sort the render settings.
-		asort($arrSettings);
-
-		return $arrSettings;
-	}
+        // Sort the render settings.
+        return asort($renderSettings->fetchEach('name'));
+    }
 
 
-	/**
-	 * Get all front end editable member dca fields
-	 * @category options_callback
-	 *
-	 * @return array
-	 */
-	public function getEditableMemberProperties()
-	{
-		$return = array();
+    /**
+     * Get all the offer MetaModel's render settings
+     * @category options_callback
+     *
+     * @return array
+     */
+    public function getOffersMetaModelRenderSettings()
+    {
+        $renderSettings = \Database::getInstance()
+            ->prepare('SELECT * FROM tl_metamodel_rendersettings WHERE pid=?')
+            ->execute(Offer::getInstance()->getMetaModel()->get('id'));
 
-		\System::loadLanguageFile('tl_member');
-		$this->loadDataContainer('tl_member');
-
-		foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $k => $v)
-		{
-			if ($v['eval']['feEditable'])
-			{
-				$return[$k] = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['label'][0];
-			}
-		}
-
-		return $return;
-	}
+        // Sort the render settings.
+        return asort($renderSettings->fetchEach('name'));
+    }
 
 
-	/**
-	 * Add default attendance status options if none are set
-	 * @category onload_callback
-	 */
-	public function addDefaultStatus()
-	{
-		if (Input::get('act') != '' || AttendanceStatus::countAll() > 0)
-		{
-			return;
-		}
+    /**
+     * Get all front end editable member dca fields
+     * @category options_callback
+     *
+     * @return array
+     */
+    public function getEditableMemberProperties()
+    {
+        $return = [];
 
-		$arrStatus = array();
+        \System::loadLanguageFile('tl_member');
+        $this->loadDataContainer('tl_member');
 
-		foreach ($GLOBALS['FERIENPASS_STATUS'] as $number => $status)
-		{
-			$arrStatus[] = array
-			(
-				'type'     => $number,
-				'name'     => lcfirst($status),
-				'cssClass' => $status
-			);
-		}
+        foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $k => $v) {
+            if ($v['eval']['feEditable']) {
+                $return[$k] = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['label'][0];
+            }
+        }
 
-		foreach ($arrStatus as $arrData)
-		{
-			$objStatus = new AttendanceStatus();
-			$objStatus->setRow($arrData);
-			$objStatus->save();
-		}
-	}
+        return $return;
+    }
 
 
-	public function addMemberEditLinkForParticipantListView(ModelToLabelEvent $objEvent)
-	{
-		$objModel = $objEvent->getModel();
+    /**
+     * Add default attendance status options if none are set
+     * @category onload_callback
+     */
+    public function addDefaultStatus()
+    {
+        if ('' !== Input::get('act') || AttendanceStatus::countAll() > 0) {
+            return;
+        }
 
-		if ($objModel instanceof Model && $objModel->getProviderName() == FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL))
-		{
-			$args = $objEvent->getArgs();
+        $status = [];
 
-			$objMetaModel = $objModel->getItem()->getMetaModel();
-			$strParentColName = $objMetaModel->getAttributeById($objMetaModel->get('owner_attribute'))->getColName();
+        foreach ($GLOBALS['FERIENPASS_STATUS'] as $number => $statusName) {
+            $status[] = [
+                'type'     => $number,
+                'name'     => lcfirst($statusName),
+                'cssClass' => $statusName,
+            ];
+        }
 
-			// No parent referenced
-			if (!$args[$strParentColName])
-			{
-				return;
-			}
-
-			\System::loadLanguageFile('tl_member');
-
-			// Adjust the label
-			/** @noinspection HtmlUnknownTarget */
-			$args[$strParentColName] = sprintf('<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
-				$objModel->getItem()->get($strParentColName)['id'], // Member ID
-				'<i class="fa fa-external-link tl_gray"></i> ' . $args[$strParentColName], // Link
-				sprintf($GLOBALS['TL_LANG']['tl_member']['edit'][1], $objModel->getItem()->get($strParentColName)['id']), // Member edit description
-				REQUEST_TOKEN
-			);
-
-			$objEvent->setArgs($args);
-		}
-	}
+        foreach ($status as $data) {
+            $objStatus = new AttendanceStatus();
+            $objStatus->setRow($data);
+            $objStatus->save();
+        }
+    }
 
 
-	public function triggerSyncForOffer(PostPersistModelEvent $objEvent)
-	{
-		$objModel = $objEvent->getModel();
+    public function addMemberEditLinkForParticipantListView(ModelToLabelEvent $event)
+    {
+        $model = $event->getModel();
 
-		if ($objModel instanceof Model && $objModel->getProviderName() == FerienpassConfig::get(FerienpassConfig::OFFER_MODEL))
-		{
-			/** @type \Model\Collection|DataProcessing $objProcesings */
-			$objProcesings = DataProcessing::findBy('sync', '1');
+        if ($model instanceof Model
+            && FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL) === $model->getProviderName()
+        ) {
+            $args = $event->getArgs();
 
-			while (null !== $objProcesings && $objProcesings->next())
-			{
-				$objProcesings->current()->run(array($objModel->getId()));
-				
-				\System::log(sprintf
-				(
-					'Synchronisation for offer ID %u via data processing "%s" (ID %u) was processed.',
-					$objModel->getId(),
-					$objProcesings->current()->name,
-					$objProcesings->current()->id
-				), __METHOD__, TL_GENERAL);
-			}
-		}
-	}
+            $metaModel = $model->getItem()->getMetaModel();
+            $parentColName = $metaModel->getAttributeById($metaModel->get('owner_attribute'))->getColName();
+
+            // No parent referenced
+            if (!$args[$parentColName]) {
+                return;
+            }
+
+            \System::loadLanguageFile('tl_member');
+
+            // Adjust the label
+            /** @noinspection HtmlUnknownTarget */
+            $args[$parentColName] = sprintf(
+                '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
+                $model->getItem()->get($parentColName)['id'],
+                // Member ID
+                '<i class="fa fa-external-link tl_gray"></i> '.$args[$parentColName],
+                // Link
+                sprintf($GLOBALS['TL_LANG']['tl_member']['edit'][1], $model->getItem()->get($parentColName)['id']),
+                // Member edit description
+                REQUEST_TOKEN
+            );
+
+            $event->setArgs($args);
+        }
+    }
 
 
-	public function triggerAttendanceStatusChange(EncodePropertyValueFromWidgetEvent $event)
-	{
-		if (($event->getEnvironment()->getDataDefinition()->getName() !== FerienpassConfig::get(FerienpassConfig::OFFER_MODEL))
-			|| ($event->getProperty() !== FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX))
-		)
-		{
-			return;
-		}
-		
-		// Trigger attendance status update
-		Attendance::updateStatusByOffer($event->getModel()->getProperty('id'));
-	}
+    public function triggerSyncForOffer(PostPersistModelEvent $event)
+    {
+        $model = $event->getModel();
+
+        if ($model instanceof Model
+            && FerienpassConfig::get(FerienpassConfig::OFFER_MODEL) === $model->getProviderName()
+        ) {
+            /** @type \Model\Collection|DataProcessing $processsings */
+            $processsings = DataProcessing::findBy('sync', '1');
+
+            while (null !== $processsings && $processsings->next()) {
+                $processsings->current()->run([$model->getId()]);
+
+                \System::log(
+                    sprintf
+                    (
+                        'Synchronisation for offer ID %u via data processing "%s" (ID %u) was processed.',
+                        $model->getId(),
+                        $processsings->current()->name,
+                        $processsings->current()->id
+                    ),
+                    __METHOD__,
+                    TL_GENERAL
+                );
+            }
+        }
+    }
+
+
+    public function triggerAttendanceStatusChange(EncodePropertyValueFromWidgetEvent $event)
+    {
+        if (($event->getEnvironment()->getDataDefinition()->getName() !== FerienpassConfig::get(
+                    FerienpassConfig::OFFER_MODEL
+                ))
+            || ($event->getProperty() !== FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX))
+        ) {
+            return;
+        }
+
+        // Trigger attendance status update
+        Attendance::updateStatusByOffer($event->getModel()->getProperty('id'));
+    }
 }

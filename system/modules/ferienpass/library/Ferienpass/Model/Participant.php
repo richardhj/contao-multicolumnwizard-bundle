@@ -28,94 +28,94 @@ class Participant extends MetaModelBridge
 	 *
 	 * @var Participant
 	 */
-	protected static $objInstance;
+	protected static $instance;
 	
 
 	/**
 	 * Find multiple participants by its parent (member) id
 	 *
-	 * @param integer $intParentId
+	 * @param integer $parentId
 	 *
 	 * @return \MetaModels\IItem[]|\MetaModels\IItems
 	 */
-	public function findByParent($intParentId)
+	public function findByParent($parentId)
 	{
-		return $this->objMetaModel->findByFilter($this->byParentFilter($intParentId));
+		return $this->metaModel->findByFilter($this->byParentFilter($parentId));
 	}
 
 
 	/**
 	 * Find multiple participants by its parent and offer id
 	 *
-	 * @param integer $intParentId
-	 * @param integer $intOfferId
+	 * @param integer $parentId
+	 * @param integer $offerId
 	 *
 	 * @return \MetaModels\IItem[]|\MetaModels\IItems
 	 */
-	public function findByParentAndOffer($intParentId, $intOfferId)
+	public function findByParentAndOffer($parentId, $offerId)
 	{
-		return $this->objMetaModel->findByFilter($this->byParentAndOfferFilter($intParentId, $intOfferId));
+		return $this->metaModel->findByFilter($this->byParentAndOfferFilter($parentId, $offerId));
 	}
 
 
 	/**
 	 * Return the filter
 	 *
-	 * @param integer $intParentId
+	 * @param integer $parentId
 	 *
 	 * @return IFilter
 	 */
-	public function byParentFilter($intParentId)
+	public function byParentFilter($parentId)
 	{
-		$objFilter = new Filter($this->objMetaModel);
-		$objFilter->addFilterRule($this->byParentFilterRule($intParentId));
+		$filter = new Filter($this->metaModel);
+		$filter->addFilterRule($this->byParentFilterRule($parentId));
 
-		return $objFilter;
+		return $filter;
 	}
 
 
 	/**
 	 * Return the filter
 	 *
-	 * @param integer $intParentId
-	 * @param integer $intOfferId
+	 * @param integer $parentId
+	 * @param integer $offerId
 	 *
 	 * @return IFilter
 	 */
-	public function byParentAndOfferFilter($intParentId, $intOfferId)
+	public function byParentAndOfferFilter($parentId, $offerId)
 	{
-		$objFilter = new Filter($this->objMetaModel);
-		$objFilter->addFilterRule($this->byParentFilterRule($intParentId));
-		$objFilter->addFilterRule($this->byOfferFilterRule($intOfferId));
+		$filter = new Filter($this->metaModel);
+		$filter->addFilterRule($this->byParentFilterRule($parentId));
+		$filter->addFilterRule($this->byOfferFilterRule($offerId));
 
-		return $objFilter;
+		return $filter;
 	}
 
 
 	/**
 	 * Return the filter rule
 	 *
-	 * @param integer $intParentId
+	 * @param integer $parentId
 	 *
 	 * @return IFilterRule
 	 * @throws \LogicException
 	 */
-	protected function byParentFilterRule($intParentId)
+	protected function byParentFilterRule($parentId)
 	{
-		$objOwnerAttribute = $this->objMetaModel->getAttributeById($this->objMetaModel->get('owner_attribute'));
+		$ownerAttribute = $this->metaModel->getAttributeById($this->metaModel->get('owner_attribute'));
 
-		if (null === $objOwnerAttribute)
+		if (null === $ownerAttribute)
 		{
-			throw new \LogicException(sprintf('No owner attribute for MetaModel ID %u defined', $this->objMetaModel->get('id')));
+			throw new \LogicException(sprintf('No owner attribute for MetaModel ID %u defined', $this->metaModel->get('id')));
 		}
 
 		return new SimpleQuery(sprintf
 		(
 			'SELECT id FROM %1$s WHERE %2$s=?',
-			$this->strTable,
-			$objOwnerAttribute->getColName()
+			$this->table,
+			$ownerAttribute->getColName()
 		),
-			array($intParentId)
+			[$parentId]
 		);
 	}
 
@@ -123,47 +123,47 @@ class Participant extends MetaModelBridge
 	/**
 	 * Return the filter rule
 	 *
-	 * @param integer $intOfferId
+	 * @param integer $offerId
 	 *
 	 * @return IFilterRule
 	 */
-	protected function byOfferFilterRule($intOfferId)
+	protected function byOfferFilterRule($offerId)
 	{
-		$objAttendances = Attendance::findByOffer($intOfferId);
+		$attendances = Attendance::findByOffer($offerId);
 
-		if (null !== $objAttendances)
+		if (null !== $attendances)
 		{
-			return new StaticIdList(array_values($objAttendances->fetchEach('participant_id')));
+			return new StaticIdList(array_values($attendances->fetchEach('participant_id')));
 		}
 
-		return new StaticIdList(array());
+		return new StaticIdList([]);
 	}
 
 
 	/**
 	 * Check whether the participant is a member's child
 	 *
-	 * @param integer $intChildId
-	 * @param integer $intParentId
+	 * @param integer $childId
+	 * @param integer $parentId
 	 *
 	 * @return bool
 	 * @throws \LogicException
 	 */
-	public function isProperChild($intChildId, $intParentId)
+	public function isProperChild($childId, $parentId)
 	{
-		/** @var Item|null $objChild */
-		$objChild = $this->objMetaModel->findById($intChildId);
-		$objOwnerAttribute = $this->objMetaModel->getAttributeById($this->objMetaModel->get('owner_attribute'));
+		/** @var Item|null $child */
+		$child = $this->metaModel->findById($childId);
+		$ownerAttribute = $this->metaModel->getAttributeById($this->metaModel->get('owner_attribute'));
 
-		if (null === $objChild)
+		if (null === $child)
 		{
 			return false;
 		}
-		if (null === $objOwnerAttribute)
+		if (null === $ownerAttribute)
 		{
-			throw new \LogicException(sprintf('No owner attribute for MetaModel ID %u defined', $this->objMetaModel->get('id')));
+			throw new \LogicException(sprintf('No owner attribute for MetaModel ID %u defined', $this->metaModel->get('id')));
 		}
 
-		return ($objChild->get($objOwnerAttribute->getColName())['id'] == $intParentId);
+		return ($child->get($ownerAttribute->getColName())['id'] == $parentId);
 	}
 }

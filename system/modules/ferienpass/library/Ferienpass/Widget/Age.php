@@ -93,7 +93,7 @@ class Age extends Widget
 	 *
 	 * @param string $strKey
 	 *
-	 * @return array
+	 * @return mixed
 	 */
 	public function __get($strKey)
 	{

@@ -7,32 +7,35 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\Model
 use MetaModels\DcGeneral\Data\Model;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+
 class Subscriber implements EventSubscriberInterface
 {
-	/**
-	 * {@inheritdoc}
-	 */
-	public static function getSubscribedEvents()
-	{
-		return array(
-			ModelToLabelEvent::NAME => 'modelToLabel'
-		);
-	}
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
+    {
+        return [
+            ModelToLabelEvent::NAME => 'modelToLabel',
+        ];
+    }
 
 
-	/**
-	 * @param ModelToLabelEvent $objEvent
-	 */
-	public function modelToLabel(ModelToLabelEvent $objEvent)
-	{
-		$objModel = $objEvent->getModel();
+    /**
+     * @param ModelToLabelEvent $event
+     */
+    public function modelToLabel(ModelToLabelEvent $event)
+    {
+        $objModel = $event->getModel();
 
-		if ($objModel instanceof Model && $objModel->getProviderName() == FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL))
-		{
-			$args = $objEvent->getArgs();
-			$args['firstname'] = 'Asdf';
-			$objEvent->setArgs($args);
-			dump($objEvent->getArgs());
-		}
-	}
+        if ($objModel instanceof Model
+            && FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL) === $objModel->getProviderName()
+        ) {
+            $args = $event->getArgs();
+            $args['firstname'] = 'Asdf';
+            $event->setArgs($args);
+            dump($event->getArgs());
+        }
+    }
 }

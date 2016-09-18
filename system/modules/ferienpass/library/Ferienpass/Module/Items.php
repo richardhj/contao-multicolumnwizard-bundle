@@ -19,231 +19,230 @@ use MetaModels\IMetaModel;
 /**
  * Class Items
  * @package  Ferienpass\Module
- * @property integer       $metamodel
+ * @property integer $metamodel
  * @property \FrontendUser $User
- * @property string        $aliasColName
+ * @property string $aliasColName
  */
 abstract class Items extends Module
 {
 
-	/**
-	 * The MetaModel object
-	 *
-	 * @type \MetaModels\IMetaModel
-	 */
-	protected $objMetaModel;
+    /**
+     * The MetaModel object
+     *
+     * @type \MetaModels\IMetaModel
+     */
+    protected $metaModel;
 
 
-	/**
-	 * The MetaModel item
-	 *
-	 * @type \MetaModels\IItem
-	 */
-	protected $objItem;
+    /**
+     * The MetaModel item
+     *
+     * @type \MetaModels\IItem
+     */
+    protected $item;
 
 
-	/**
-	 * The database instance
-	 *
-	 * @var \Database
-	 */
-	protected $objDatabase;
+    /**
+     * The database instance
+     *
+     * @var \Database
+     */
+    protected $database;
 
 
-	/**
-	 * The auto item
-	 *
-	 * @var string
-	 */
-	protected $strAutoItem;
+    /**
+     * The auto item
+     *
+     * @var string
+     */
+    protected $autoItem;
 
 
-	/**
-	 * The owner attribute
-	 *
-	 * @type \MetaModels\Attribute\IAttribute|null
-	 */
-	protected $objOwnerAttribute;
+    /**
+     * The owner attribute
+     *
+     * @type \MetaModels\Attribute\IAttribute|null
+     */
+    protected $ownerAttribute;
 
 
-	/**
-	 * Return a wildcard in the back end
-	 *
-	 * @return string
-	 */
-	public function generate()
-	{
-		if (TL_MODE == 'BE')
-		{
-			$objTemplate = new \BackendTemplate('be_wildcard');
+    /**
+     * Return a wildcard in the back end
+     *
+     * @return string
+     */
+    public function generate()
+    {
+        if ('BE' === TL_MODE) {
+            $template = new \BackendTemplate('be_wildcard');
 
-			$objTemplate->wildcard = '### ' . utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
-			$objTemplate->title = $this->headline;
-			$objTemplate->id = $this->id;
-			$objTemplate->link = $this->name;
-			$objTemplate->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
+            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->title = $this->headline;
+            $template->id = $this->id;
+            $template->link = $this->name;
+            $template->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
 
-			return $objTemplate->parse();
-		}
+            return $template->parse();
+        }
 
-		// Set a custom template
-		if ($this->customTpl != '')
-		{
-			$this->strTemplate = $this->customTpl;
-		}
+        // Set a custom template
+        if ($this->customTpl != '') {
+            $this->strTemplate = $this->customTpl;
+        }
 
-		return parent::generate();
-	}
+        return parent::generate();
+    }
 
 
-	/**
-	 * Provide MetaModel in object
-	 *
-	 * @param \ModuleModel $objModule
-	 * @param string       $strColumn
-	 */
-	public function __construct($objModule, $strColumn = 'main')
-	{
-		parent::__construct($objModule, $strColumn);
+    /**
+     * Provide MetaModel in object
+     *
+     * @param \ModuleModel $module
+     * @param string       $column
+     */
+    public function __construct($module, $column = 'main')
+    {
+        parent::__construct($module, $column);
 
-		// Get MetaModel object
-		$objFactory = Factory::getDefaultFactory();
-		$this->objMetaModel = $objFactory->getMetaModel($objFactory->translateIdToMetaModelName($this->metamodel));
+        // Get MetaModel object
+        $factory = Factory::getDefaultFactory();
+        $this->metaModel = $factory->getMetaModel($factory->translateIdToMetaModelName($this->metamodel));
 
-		// Throw exception if MetaModel not found
-		if ($this->objMetaModel === null)
-		{
-			throw new \RuntimeException(sprintf('MetaModel ID %u not found', $this->metamodel));
-		}
+        // Throw exception if MetaModel not found
+        if (null === $this->metaModel) {
+            throw new \RuntimeException(sprintf('MetaModel ID %u not found', $this->metamodel));
+        }
 
-		// Get database
-		$this->objDatabase = $this->objMetaModel->getServiceContainer()->getDatabase();
+        // Get database
+        $this->database = $this->metaModel->getServiceContainer()->getDatabase();
 
-		// Import frontend user
-		/** @noinspection PhpUndefinedMethodInspection */
-		$this->import('FrontendUser', 'User');
-	}
-
-
-	/**
-	 * Fetch item by Id or auto_item
-	 *
-	 * @param int $intId The item id
-	 *
-	 * @return bool True if item was found
-	 */
-	protected function fetchItem($intId = 0)
-	{
-		if (!$intId)
-		{
-			$this->strAutoItem = Input::getAutoItem('items');
-
-			// Fetch alias attribute
-			foreach ($this->objMetaModel->getAttributes() as $attribute)
-			{
-				if ($attribute->get('type') == 'alias')
-				{
-					$this->aliasColName = $attribute->getColName();
-				}
-			}
-
-			// Fetch current item by its auto_item
-			$objDatabaseItem = $this->objDatabase
-				->prepare(sprintf
-				(
-					'SELECT * FROM %1$s WHERE (id=? OR %2$s=?)',
-					$this->objMetaModel->getTableName(),
-					$this->aliasColName
-				))
-				->execute(is_int($this->strAutoItem) ? $this->strAutoItem : 0, $this->strAutoItem);
-
-			$intId = $objDatabaseItem->id;
-		}
-
-		$this->objItem = $this->objMetaModel->findById($intId);
-
-		return ($this->objItem !== null);
-	}
+        // Import frontend user
+        /** @noinspection PhpUndefinedMethodInspection */
+        $this->import('FrontendUser', 'User');
+    }
 
 
-	/**
-	 * Set MetaModel's owner attribute
-	 *
-	 * @param IMetaModel $objMetaModel The MetaModel that will be taken to find the owner attribute
-	 */
-	protected function fetchOwnerAttribute($objMetaModel = null)
-	{
-		if ($this->objOwnerAttribute !== null && $objMetaModel === null)
-		{
-			return;
-		}
+    /**
+     * Fetch item by Id or auto_item
+     *
+     * @param int $id The item id
+     *
+     * @return bool True if item was found
+     */
+    protected function fetchItem($id = 0)
+    {
+        if (0 === $id) {
+            $this->autoItem = Input::getAutoItem('items');
 
-		$objMetaModel = ($objMetaModel === null) ? $this->objMetaModel : $objMetaModel;
+            // Fetch alias attribute
+            foreach ($this->metaModel->getAttributes() as $attribute) {
+                if ($attribute->get('type') == 'alias') {
+                    $this->aliasColName = $attribute->getColName();
+                }
+            }
 
-		$this->objOwnerAttribute = $objMetaModel->getAttributeById($objMetaModel->get('owner_attribute'));
+            // Fetch current item by its auto_item
+            $itemDatabase = $this->database
+                ->prepare(
+                    sprintf
+                    (
+                        'SELECT * FROM %1$s WHERE (id=? OR %2$s=?)',
+                        $this->metaModel->getTableName(),
+                        $this->aliasColName
+                    )
+                )
+                ->execute(is_int($this->autoItem) ? $this->autoItem : 0, $this->autoItem);
 
-		if (null === $this->objOwnerAttribute)
-		{
-			throw new \RuntimeException('No owner attribute in the MetaModel was found');
-		}
-	}
+            $id = $itemDatabase->id;
+        }
 
+        $this->item = $this->metaModel->findById($id);
 
-	/**
-	 * Check permission by MetaModel's owner attribute and exit with 403 optionally
-	 */
-	protected function checkPermission()
-	{
-		$this->fetchOwnerAttribute();
-
-		$blnCallback = false;
-
-		// HOOK: add custom permission check
-		if (isset($GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck']) && is_array($GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck']))
-		{
-			foreach ($GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck'] as $callback)
-			{
-				if (\Controller::importStatic($callback[0])->$callback[1]($this->objMetaModel, $this->objItem, $this->objOwnerAttribute, $this->strAutoItem) === true)
-				{
-					$blnCallback = true;
-					break;
-				}
-			}
-		}
-
-		if (!$blnCallback && $this->User->id != $this->objItem->get($this->objOwnerAttribute->getColName())['id'])
-		{
-			$this->exitWith403();
-		}
-	}
+        return (null !== $this->item);
+    }
 
 
-	/**
-	 * Output a 404 page and stop further execution
-	 */
-	protected function exitWith404()
-	{
-		global $objPage;
+    /**
+     * Set MetaModel's owner attribute
+     *
+     * @param IMetaModel $metaModel The MetaModel that will be taken to find the owner attribute
+     */
+    protected function fetchOwnerAttribute($metaModel = null)
+    {
+        if (null !== $this->ownerAttribute && null === $metaModel) {
+            return;
+        }
 
-		/** @var \PageError404 $objHandler */
-		$objHandler = new $GLOBALS['TL_PTY']['error_404']();
-		$objHandler->generate($objPage->id);
+        $metaModel = (null === $metaModel) ? $this->metaModel : $metaModel;
 
-		exit;
-	}
+        $this->ownerAttribute = $metaModel->getAttributeById($metaModel->get('owner_attribute'));
+
+        if (null === $this->ownerAttribute) {
+            throw new \RuntimeException('No owner attribute in the MetaModel was found');
+        }
+    }
 
 
-	/**
-	 * Output a 403 page and stop further execution
-	 */
-	protected function exitWith403()
-	{
-		global $objPage;
+    /**
+     * Check permission by MetaModel's owner attribute and exit with 403 optionally
+     */
+    protected function checkPermission()
+    {
+        $this->fetchOwnerAttribute();
 
-		/** @var \PageError403 $objHandler */
-		$objHandler = new $GLOBALS['TL_PTY']['error_403']();
-		$objHandler->generate($objPage->id);
+        $callback = false;
 
-		exit;
-	}
+        // HOOK: add custom permission check
+        if (isset($GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck']) && is_array(
+                $GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck']
+            )
+        ) {
+            foreach ($GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck'] as $callback) {
+                if (true === \Controller::importStatic($callback[0])->{$callback[1]}(
+                        $this->metaModel,
+                        $this->item,
+                        $this->ownerAttribute,
+                        $this->autoItem
+                    )
+                ) {
+                    $callback = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$callback && $this->User->id != $this->item->get($this->ownerAttribute->getColName())['id']) {
+            $this->exitWith403();
+        }
+    }
+
+
+    /**
+     * Output a 404 page and stop further execution
+     */
+    protected function exitWith404()
+    {
+        global $objPage;
+
+        /** @var \PageError404 $pageHandler */
+        $pageHandler = new $GLOBALS['TL_PTY']['error_404']();
+        $pageHandler->generate($objPage->id);
+
+        exit;
+    }
+
+
+    /**
+     * Output a 403 page and stop further execution
+     */
+    protected function exitWith403()
+    {
+        global $objPage;
+
+        /** @var \PageError403 $pageHandler */
+        $pageHandler = new $GLOBALS['TL_PTY']['error_403']();
+        $pageHandler->generate($objPage->id);
+
+        exit;
+    }
 }

@@ -12,34 +12,31 @@ namespace Ferienpass\Helper;
 
 use Ferienpass\Model\DataProcessing;
 
+
 class Ajax
 {
 
-	public function handleDropboxWebhook()
-	{
-		if (!\Environment::get('isAjaxRequest') || \Input::get('action') != 'dropbox-webhook')
-		{
-			return;
-		}
+    public function handleDropboxWebhook()
+    {
+        if (!\Environment::get('isAjaxRequest') || 'dropbox-webhook' !== \Input::get('action')) {
+            return;
+        }
 
-		/** @type \Model\Collection $objProcessings */
-		$objProcessings = DataProcessing::findBy
-		(
-			array
-			(
-				'dropbox_uid=?',
-				'sync=1'
-			),
-			array
-			(
-				\Input::get('uid')
-			)
-		);
+        /** @type \Model\Collection $processings */
+        $processings = DataProcessing::findBy
+        (
+            [
+                'dropbox_uid=?',
+                'sync=1',
+            ],
+            [
+                \Input::get('uid'),
+            ]
+        );
 
-		while ($objProcessings->next())
-		{
-			/** @var DataProcessing $objProcessings ->current() */
-			$objProcessings->current()->syncFromRemoteDropbox();
-		}
-	}
+        /** @var DataProcessing $processing */
+        foreach ($processings as $processing) {
+            $processing->syncFromRemoteDropbox();
+        }
+    }
 }

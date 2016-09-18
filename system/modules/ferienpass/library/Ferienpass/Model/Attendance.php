@@ -40,29 +40,28 @@ class Attendance extends Model
 	 *
 	 * @var Participant
 	 */
-	protected static $objParticipant;
+	protected static $participant;
 
 
 	/**
 	 * Find attendances by offer
 	 *
-	 * @param integer $intOfferId
-	 * @param array   $arrOptions
+	 * @param integer $offerId
+	 * @param array   $options
 	 *
 	 * @return \Model\Collection|null
 	 */
-	public static function findByOffer($intOfferId, array $arrOptions = array())
+	public static function findByOffer($offerId, array $options = [])
 	{
 		return static::findBy(
 			'offer_id',
-			$intOfferId,
+			$offerId,
 			array_merge
 			(
-				array
-				(
+				[
 					'order' => 'tstamp,id'
-				),
-				$arrOptions
+                ],
+				$options
 			)
 		);
 	}
@@ -71,133 +70,132 @@ class Attendance extends Model
 	/**
 	 * Find attendances by participant's parent
 	 *
-	 * @param  integer $intParentId
+	 * @param  integer $parentId
 	 *
 	 * @return Attendance|\Model\Collection|null
 	 */
-	public static function findByParent($intParentId)
+	public static function findByParent($parentId)
 	{
 		//@todo this could be better with an associate db table
 
-		/** @var \MetaModels\Filter\Filter $objFilter */
-		$objFilter = Participant::getInstance()->byParentFilter($intParentId);
+		/** @var \MetaModels\Filter\Filter $filter */
+		$filter = Participant::getInstance()->byParentFilter($parentId);
 
-		$arrParticipantIds = $objFilter->getMatchingIds();
+		$participantIds = $filter->getMatchingIds();
 
-		if (empty($arrParticipantIds))
+		if (empty($participantIds))
 		{
 			return null;
 		}
 
-		/** @var \Database\Result $objResult */
-		$objResult = \Database::getInstance()->query("SELECT * FROM " . static::$strTable . " WHERE participant_id IN(" . implode(',', $arrParticipantIds) . ") ORDER BY tstamp,id");
+		/** @var \Database\Result $result */
+		$result = \Database::getInstance()->query("SELECT * FROM " . static::$strTable . " WHERE participant_id IN(" . implode(',', $participantIds) . ") ORDER BY tstamp,id");
 
-		return static::createCollectionFromDbResult($objResult, static::$strTable);
+		return static::createCollectionFromDbResult($result, static::$strTable);
 	}
 
 
 	/**
 	 * Find attendance by its position
 	 *
-	 * @param integer $intPosition
-	 * @param integer $intOfferId
+	 * @param integer $position
+	 * @param integer $offerId
 	 *
 	 * @return Attendance|\Model\Collection|null
 	 */
-	public static function findByPosition($intPosition, $intOfferId)
+	public static function findByPosition($position, $offerId)
 	{
-		return static::findByOffer($intOfferId, array
-		(
+		return static::findByOffer($offerId,            [
 			'limit'  => 1,
-			'offset' => $intPosition - 1
-		));
+			'offset' => $position - 1
+            ]
+        );
 	}
 
 
 	/**
 	 * Count participants in application list
 	 *
-	 * @param int $intOfferId
+	 * @param int $offerId
 	 *
 	 * @return int
 	 */
-	public static function countParticipants($intOfferId)
+	public static function countParticipants($offerId)
 	{
-		return static::countByOffer($intOfferId);
+		return static::countByOffer($offerId);
 	}
 
 
 	/**
 	 * Count participants for one particular offer
 	 *
-	 * @param int $intOfferId
+	 * @param int $offerId
 	 *
 	 * @return int
 	 */
-	public static function countByOffer($intOfferId)
+	public static function countByOffer($offerId)
 	{
-		return static::countBy('offer_id', $intOfferId);
+		return static::countBy('offer_id', $offerId);
 	}
 
 
 	/**
 	 * Count attendances for one particular participant
 	 *
-	 * @param int $intParticipantId
+	 * @param int $participantId
 	 *
 	 * @return int
 	 */
-	public static function countByParticipant($intParticipantId)
+	public static function countByParticipant($participantId)
 	{
-		return static::countBy('participant_id', $intParticipantId);
+		return static::countBy('participant_id', $participantId);
 	}
 
 
 	/**
 	 * Count the attendances of a participant made on a particular day and optionally with a particular status
 	 *
-	 * @param integer $intParticipantId
-	 * @param integer $intTimestamp
-	 * @param integer $intStatus
+	 * @param integer $participantId
+	 * @param integer $timestamp
+	 * @param integer $status
 	 *
 	 * @return int
 	 */
-	public static function countByParticipantAndDay($intParticipantId, $intTimestamp = null, $intStatus = 0)
+	public static function countByParticipantAndDay($participantId, $timestamp = null, $status = 0)
 	{
-		if (null === $intTimestamp)
+		if (null === $timestamp)
 		{
-			$intTimestamp = time();
+			$timestamp = time();
 		}
 
-		$objDate = new \Date($intTimestamp);
+		$date = new \Date($timestamp);
 
-		$arrOptions = array
-		(
-			'column' => array('participant_id=?', 'tstamp>=?', 'tstamp<=?'),
-			'value'  => array($intParticipantId, $objDate->dayBegin, $objDate->dayEnd)
-		);
+		$options =            [
+			'column' => ['participant_id=?', 'tstamp>=?', 'tstamp<=?'],
+			'value'  => [$participantId, $date->dayBegin, $date->dayEnd]
+            ];
 
-		if ($intStatus)
+		if ($status)
 		{
-			$arrOptions['column'][] = 'status=?';
-			$arrOptions['value'][] = $intStatus;
+			$options['column'][] = 'status=?';
+			$options['value'][] = $status;
 		}
 
-		return static::countBy(null, null, $arrOptions);
+		return static::countBy(null, null, $options);
 	}
 
 
 	/**
-	 * @param integer $intParticipantId
-	 * @param integer $intOfferId
+	 * @param integer $participantId
+	 * @param integer $offerId
 	 *
 	 * @return bool
 	 */
-	public static function isNotExistent($intParticipantId, $intOfferId)
+	public static function isNotExistent($participantId, $offerId)
 	{
 		return !(\Database::getInstance()
 			->prepare("SELECT id FROM " . static::$strTable . " WHERE participant_id=? AND offer_id=?")
-			->execute($intParticipantId, $intOfferId)
+			->execute($participantId, $offerId)
 			->numRows);
 	}
 
@@ -208,28 +206,28 @@ class Attendance extends Model
 	 */
 	public function save()
 	{
-		$blnNewAttendance = (!Registry::getInstance()->isRegistered($this));
+		$newAttendance = (!Registry::getInstance()->isRegistered($this));
 
 		// Save model
 		parent::save();
 
-		if ($blnNewAttendance)
+		if ($newAttendance)
 		{
 			// Trigger notification
 			/**
 			 * @var AttendanceStatus $this ->getStatus()
-			 * @var Notification     $objNotification
+			 * @var Notification     $notification
 			 */
 			/** @noinspection PhpUndefinedMethodInspection */
-			$objNotification = Notification::findByPk($this->getStatus()->notification_new);
+			$notification = Notification::findByPk($this->getStatus()->notification_new);
 
-			$objParticipant = Participant::getInstance()->findById($this->participant_id);
-			$objOffer = Offer::getInstance()->findById($this->offer_id);
+			$participant = Participant::getInstance()->findById($this->participant_id);
+			$offer = Offer::getInstance()->findById($this->offer_id);
 
 			// Send the notification if one is set
-			if (null !== $objNotification)
+			if (null !== $notification)
 			{
-				$objNotification->send(static::getNotificationTokens($objParticipant, $objOffer));
+				$notification->send(static::getNotificationTokens($participant, $offer));
 			}
 		}
 	}
@@ -242,11 +240,11 @@ class Attendance extends Model
 	 */
 	public function delete()
 	{
-		$intOfferId = $this->offer_id;
+		$offer = $this->offer_id;
 
 		if (parent::delete())
 		{
-			$this->updateStatusByOffer($intOfferId);
+			$this->updateStatusByOffer($offer);
 		}
 	}
 
@@ -257,24 +255,24 @@ class Attendance extends Model
 	 */
 	public function getPosition()
 	{
-		$objAttendances = static::findByOffer($this->offer_id); # collection ordered by tstamp,id
+		$attendances = static::findByOffer($this->offer_id); # collection ordered by tstamp,id
 
-		if (null === $objAttendances)
+		if (null === $attendances)
 		{
 			return null;
 		}
 
-		for ($i = 1; $objAttendances->next(); $i++)
+		for ($i = 1; $attendances->next(); $i++)
 		{
 			// Attendances with error do not increase the index
-			/** @var Attendance $objAttendances ->current() */
-			if ($objAttendances->current()->status == AttendanceStatus::findError()->id)
+			/** @var Attendance $attendances ->current() */
+			if ($attendances->current()->status == AttendanceStatus::findError()->id)
 			{
 				--$i;
 				continue;
 			}
 
-			if ($objAttendances->current()->participant_id == $this->participant_id)
+			if ($attendances->current()->participant_id == $this->participant_id)
 			{
 				return $i;
 			}
@@ -291,8 +289,8 @@ class Attendance extends Model
 	 */
 	public function getStatus()
 	{
-		/** @type IItem $objOffer */
-		$objOffer = Offer::getInstance()->findById($this->offer_id);
+		/** @type IItem $offer */
+		$offer = Offer::getInstance()->findById($this->offer_id);
 
 		// An error status is persistent
 		if ($this->status == AttendanceStatus::findError()->id)
@@ -301,8 +299,8 @@ class Attendance extends Model
 		}
 
 		// Offers without usage of application list or without limit
-		if (!$objOffer->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))
-			|| !($max = $objOffer->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX)))
+		if (!$offer->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))
+			|| !($max = $offer->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX)))
 		)
 		{
 			return AttendanceStatus::findConfirmed();
@@ -324,7 +322,7 @@ class Attendance extends Model
 		// Attendance not saved yet
 		else
 		{
-			if (static::countParticipants($objOffer->get('id')) < $max) # use '<' here because the count will be increased after saving the new attendance
+			if (static::countParticipants($offer->get('id')) < $max) # use '<' here because the count will be increased after saving the new attendance
 			{
 				return AttendanceStatus::findConfirmed();
 			}
@@ -339,29 +337,29 @@ class Attendance extends Model
 	/**
 	 * Update all attendance statuses for one offer
 	 *
-	 * @param integer $intOfferId
+	 * @param integer $offerId
 	 */
-	public static function updateStatusByOffer($intOfferId)
+	public static function updateStatusByOffer($offerId)
 	{
-		$objAttendances = static::findByOffer($intOfferId);
+		$attendances = static::findByOffer($offerId);
 
 		// Stop if the last attendance was deleted
-		if (null === $objAttendances)
+		if (null === $attendances)
 		{
 			return;
 		}
 
-		while ($objAttendances->next())
+		while ($attendances->next())
 		{
 			/**
-			 * @var Attendance       $objAttendances ->current()
-			 * @var AttendanceStatus $objStatus
+			 * @var Attendance       $attendances ->current()
+			 * @var AttendanceStatus $status
 			 */
-			$objStatus = $objAttendances->current()->getStatus();
+			$status = $attendances->current()->getStatus();
 
-			if ($objAttendances->status != $objStatus->id)
+			if ($attendances->status != $status->id)
 			{
-				static::processStatusChange($objAttendances->current(), $objStatus);
+				static::processStatusChange($attendances->current(), $status);
 			}
 		}
 	}
@@ -370,56 +368,56 @@ class Attendance extends Model
 	/**
 	 * Process status change and trigger notifications for one attendance
 	 *
-	 * @param Attendance|Model $objAttendance
-	 * @param AttendanceStatus $objNewStatus
+	 * @param Attendance|Model $attendance
+	 * @param AttendanceStatus $newStatus
 	 */
-	protected static function processStatusChange($objAttendance, $objNewStatus)
+	protected static function processStatusChange($attendance, $newStatus)
 	{
-		$objParticipant = Participant::getInstance()->findById($objAttendance->participant_id);
-		$objOffer = Offer::getInstance()->findById($objAttendance->offer_id);
+		$participant = Participant::getInstance()->findById($attendance->participant_id);
+		$offer = Offer::getInstance()->findById($attendance->offer_id);
 
-		/** @var AttendanceStatus $objOldStatus */
-		$objOldStatus = $objAttendance->getRelated('status');
+		/** @var AttendanceStatus $oldStatus */
+		$oldStatus = $attendance->getRelated('status');
 
 		// Set status
-		$objAttendance->status = $objNewStatus->id;
+		$attendance->status = $newStatus->id;
 
 		// Attendances are not up to date because participant or offer might be deleted
-		if (null === $objOffer || null === $objParticipant)
+		if (null === $offer || null === $participant)
 		{
 			// Set status
-			$objAttendance->status = AttendanceStatus::findError()->id;
+			$attendance->status = AttendanceStatus::findError()->id;
 
 			\System::log(sprintf(
 				'Status "%s" was added to attendance ID %u as the %s is not existent',
 				AttendanceStatus::findError()->type,
-				$objAttendance->id,
-				(null === $objOffer) ? 'offer' : 'participant'
+				$attendance->id,
+				(null === $offer) ? 'offer' : 'participant'
 			), __METHOD__, TL_ERROR);
 		}
 
 		// Save attendance
-		$objAttendance->save();
+		$attendance->save();
 
-		/** @var AttendanceStatus $objNewStatus */
-		$objNewStatus = $objAttendance->getRelated('status');
+		/** @var AttendanceStatus $newStatus */
+		$newStatus = $attendance->getRelated('status');
 
 		\System::log(sprintf(
 			'Status for attendance ID %u and participant ID %u was changed from "%s" to "%s"',
-			$objAttendance->id,
-			$objParticipant->get('id'),
-			$objOldStatus->type,
-			$objNewStatus->type
+			$attendance->id,
+			$participant->get('id'),
+			$oldStatus->type,
+			$newStatus->type
 		), __METHOD__, TL_GENERAL);
 
-		/** @var Notification $objNotification */
+		/** @var Notification $notification */
 		/** @noinspection PhpUndefinedMethodInspection */
-		$objNotification = Notification::findByPk($objNewStatus->notification_onChange);
+		$notification = Notification::findByPk($newStatus->notification_onChange);
 
 		// Send the notification if one is set
-		if (null !== $objNotification)
+		if (null !== $notification)
 		{
-			$objNotification->send(static::getNotificationTokens($objParticipant, $objOffer));
+			$notification->send(static::getNotificationTokens($participant, $offer));
 //			// Log sent mails
 //			foreach ($objNotification->send(static::getNotificationTokens($objParticipant, $objOffer)) as $message => $success)
 //			{
@@ -438,43 +436,43 @@ class Attendance extends Model
 	/**
 	 * Get notification tokens
 	 *
-	 * @param IItem $objParticipant
-	 * @param IItem $objOffer
+	 * @param IItem $participant
+	 * @param IItem $offer
 	 *
 	 * @return array
 	 */
-	public static function getNotificationTokens($objParticipant, $objOffer)
+	public static function getNotificationTokens($participant, $offer)
 	{
-		$arrTokens = array();
+		$tokens = [];
 
 		// Add all offer fields
-		foreach ($objOffer->getMetaModel()->getAttributes() as $name => $attribute)
+		foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute)
 		{
-			$arrTokens['offer_' . $name] = $objOffer->get($name);
+			$tokens['offer_' . $name] = $offer->get($name);
 		}
 
 		// Add all the participant fields
-		foreach ($objParticipant->getMetaModel()->getAttributes() as $name => $attribute)
+		foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute)
 		{
-			$arrTokens['participant_' . $name] = $objParticipant->get($name);
+			$tokens['participant_' . $name] = $participant->get($name);
 		}
 
 		// Add all the parent's member fields
-		$objOwnerAttribute = $objParticipant->getMetaModel()->getAttributeById($objParticipant->getMetaModel()->get('owner_attribute'));
-		foreach ($objParticipant->get($objOwnerAttribute->getColName()) as $k => $v)
+		$objOwnerAttribute = $participant->getMetaModel()->getAttributeById($participant->getMetaModel()->get('owner_attribute'));
+		foreach ($participant->get($objOwnerAttribute->getColName()) as $k => $v)
 		{
-			$arrTokens['member_' . $k] = $v;
+			$tokens['member_' . $k] = $v;
 		}
 
 		// Add the participant's email
-		$arrTokens['participant_email'] = $arrTokens['participant_email'] ?: $arrTokens['member_email'];
+		$tokens['participant_email'] = $tokens['participant_email'] ?: $tokens['member_email'];
 
 		// Add the host's email
-		$arrTokens['host_email'] = $objOffer->get($objOffer->getMetaModel()->get('owner_attribute'))['email'];
+		$tokens['host_email'] = $offer->get($offer->getMetaModel()->get('owner_attribute'))['email'];
 
 		// Add the admin's email
-		$arrTokens['admin_email'] = $GLOBALS['TL_ADMIN_EMAIL'];
+		$tokens['admin_email'] = $GLOBALS['TL_ADMIN_EMAIL'];
 
-		return $arrTokens;
+		return $tokens;
 	}
 }

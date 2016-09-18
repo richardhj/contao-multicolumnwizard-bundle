@@ -14,11 +14,11 @@ class InsertTags
 	 */
 	public function replaceInsertTags($tag)
 	{
-		$arrElements = trimsplit('::', $tag);
+		$elements = trimsplit('::', $tag);
 
-		if ($arrElements[0] == 'ferienpass')
+		if ($elements[0] == 'ferienpass')
 		{
-			switch ($arrElements[1])
+			switch ($elements[1])
 			{
 				case 'max_applications_per_day':
 					return FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MAX_APPLICATIONS_PER_DAY);

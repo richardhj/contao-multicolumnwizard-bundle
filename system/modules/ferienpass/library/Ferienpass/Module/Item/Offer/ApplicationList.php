@@ -26,219 +26,227 @@ use Haste\Form\Form;
 class ApplicationList extends Item
 {
 
-	/**
-	 * @var string
-	 */
-	protected $strTemplate = 'mod_offer_applicationlist';
+    /**
+     * @var string
+     */
+    protected $strTemplate = 'mod_offer_applicationlist';
 
 
-	/**
-	 * Generate the module
-	 */
-	protected function compile()
-	{
+    /**
+     * Generate the module
+     */
+    protected function compile()
+    {
 //		$state = $this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE)) ? 'active' : 'inactive';
 //		$this->Template->al_state = $state;
 
-		// Stop if the procedure is not used
-		if (!$this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE)))
-		{
-			$this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'];
+        // Stop if the procedure is not used
+        if (!$this->item->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))) {
+            $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'];
 
-			return;
-		}
+            return;
+        }
 
-		// Stop if the offer is in the past
-		if (time() >= $this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE)))
-		{
-			$this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['past'];
+        // Stop if the offer is in the past
+        if (time() >= $this->item->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE))) {
+            $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['past'];
 
-			return;
-		}
+            return;
+        }
 
 //		$this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList'][$state];
 
-		$intParticipants = Attendance::countParticipants($this->objItem->get('id'));
-		$intMaxParticipants = $this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX));
+        $countParticipants = Attendance::countParticipants($this->item->get('id'));
+        $maxParticipants = $this->item->get(
+            FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX)
+        );
 
-		$intAvailableParticipants = $intMaxParticipants - $intParticipants;
+        $availableParticipants = $maxParticipants - $countParticipants;
 
-		if ($intMaxParticipants)
-		{
-			if ($intAvailableParticipants < -10)
-			{
-				$this->Template->booking_state_code = 4;
-				$this->Template->booking_state_text = 'Es sind keine Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls voll.';
-			}
-			elseif ($intAvailableParticipants < 1)
-			{
-				$this->Template->booking_state_code = 3;
-				$this->Template->booking_state_text = 'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
-			}
-			elseif ($intAvailableParticipants < 4)
-			{
-				$this->Template->booking_state_code = 2;
-				$this->Template->booking_state_text = 'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
-			}
-			else
-			{
-				$this->Template->booking_state_code = 1;
-				$this->Template->booking_state_text = 'Es sind noch Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
-			}
-		}
-		else
-		{
-			$this->Template->booking_state_code = 0;
-			$this->Template->booking_state_text = 'Das Angebot hat keine Teilnehmer-Beschränkung.<br>Sie können sich jetzt für das Angebot anmelden.';
-		}
+        if ($maxParticipants) {
+            if ($availableParticipants < -10) {
+                $this->Template->booking_state_code = 4;
+                $this->Template->booking_state_text = 'Es sind keine Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls voll.';
+            } elseif ($availableParticipants < 1) {
+                $this->Template->booking_state_code = 3;
+                $this->Template->booking_state_text = 'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
+            } elseif ($availableParticipants < 4) {
+                $this->Template->booking_state_code = 2;
+                $this->Template->booking_state_text = 'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
+            } else {
+                $this->Template->booking_state_code = 1;
+                $this->Template->booking_state_text = 'Es sind noch Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
+            }
+        } else {
+            $this->Template->booking_state_code = 0;
+            $this->Template->booking_state_text = 'Das Angebot hat keine Teilnehmer-Beschränkung.<br>Sie können sich jetzt für das Angebot anmelden.';
+        }
 
 
-		if (FE_USER_LOGGED_IN && $this->User->id)
-		{
-			$objParticipants = Participant::getInstance()->findByParent($this->User->id);
+        if (FE_USER_LOGGED_IN && $this->User->id) {
+            $participants = Participant::getInstance()->findByParent($this->User->id);
 
-			if (0 === $objParticipants->getCount())
-			{
-				Message::addWarning($GLOBALS['TL_LANG']['MSC']['noParticipants']);
-			}
+            if (0 === $participants->getCount()) {
+                Message::addWarning($GLOBALS['TL_LANG']['MSC']['noParticipants']);
+            }
 
-			// Build options
-			$arrOptions = array();
-			$arrParticipantIds = Participant::getInstance()->byParentAndOfferFilter($this->User->id, $this->objItem->get('id'))->getMatchingIds();
-			$arrParticipantIdsAllowed = array();
-			$intMaxApplicationsPerDay = FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MAX_APPLICATIONS_PER_DAY);
+            // Build options
+            $options = [];
+            $participantIds = Participant::getInstance()->byParentAndOfferFilter(
+                $this->User->id,
+                $this->item->get('id')
+            )->getMatchingIds();
+            $allowedParticipantsIds = [];
+            $maxApplicationsPerDay = FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MAX_APPLICATIONS_PER_DAY);
 
-			while ($objParticipants->next())
-			{
-				$objDateOfBirth = new DateTime(
-					'@' . $objParticipants
-						->getItem()
-						->get(FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_DATEOFBIRTH))
-				);
-				$objDateOffer = new DateTime(
-					'@' . $this->objItem
-						->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE))
-				);
+            while ($participants->next()) {
+                $dateOfBirth = new DateTime(
+                    '@'.$participants
+                        ->getItem()
+                        ->get(FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_DATEOFBIRTH))
+                );
+                $dateOffer = new DateTime(
+                    '@'.$this->item
+                        ->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE))
+                );
 
-				$intAge = $objDateOfBirth
-					->getAge($objDateOffer); # Use offer's date for diff check
+                $age = $dateOfBirth
+                    ->getAge($dateOffer); # Use offer's date for diff check
 
-				$blnLimitReached = ($intMaxApplicationsPerDay && Attendance::countByParticipantAndDay($objParticipants->getItem()->get('id')) >= $intMaxApplicationsPerDay) ? true : false;
-				$blnAttend = (in_array($objParticipants->getItem()->get('id'), $arrParticipantIds));
-				$blnAgeAllowed = in_array($this->objItem->get('id'), $this->objItem->getAttribute(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_AGE))->searchFor($intAge));
+                $isLimitReached = ($maxApplicationsPerDay && Attendance::countByParticipantAndDay(
+                        $participants->getItem()->get('id')
+                    ) >= $maxApplicationsPerDay) ? true : false;
+                $isAttending = (in_array($participants->getItem()->get('id'), $participantIds));
+                $isAgeAllowed = in_array(
+                    $this->item->get('id'),
+                    $this->item->getAttribute(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_AGE))->searchFor(
+                        $age
+                    )
+                );
 
-				// Check if a participant is allowed for this offer and set the corresponding language key
-				if ($blnAttend)
-				{
-					$languageKey = 'already_attending';
-				}
-				elseif (!$blnAgeAllowed)
-				{
-					$languageKey = 'age_not_allowed';
-				}
-				elseif ($blnLimitReached)
-				{
-					$languageKey = 'limit_reached';
-				}
-				else
-				{
-					$languageKey = 'ok';
-					$arrParticipantIdsAllowed[] = $objParticipants->getItem()->get('id');
-				}
+                // Check if a participant is allowed for this offer and set the corresponding language key
+                if ($isAttending) {
+                    $languageKey = 'already_attending';
+                } elseif (!$isAgeAllowed) {
+                    $languageKey = 'age_not_allowed';
+                } elseif ($isLimitReached) {
+                    $languageKey = 'limit_reached';
+                } else {
+                    $languageKey = 'ok';
+                    $allowedParticipantsIds[] = $participants->getItem()->get('id');
+                }
 
-				$arrOptions[] = array
-				(
-					'value'    => $objParticipants->getItem()->get('id'),
-					'label'    => sprintf(
-						$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label'][$languageKey],
-						$objParticipants->getItem()->parseAttribute(FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_NAME))['text'] # = parsed participant name
-					),
-					'disabled' => ($languageKey != 'ok')
-				);
-			}
+                $options[] = [
+                    'value'    => $participants->getItem()->get('id'),
+                    'label'    => sprintf(
+                        $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label'][$languageKey],
+                        $participants->getItem()->parseAttribute(
+                            FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_NAME)
+                        )['text'] # = parsed participant name
+                    ),
+                    'disabled' => ($languageKey != 'ok'),
+                ];
+            }
 
-			// Create form instance
-			$objForm = new Form('al' . $this->id, 'POST', function ($objHaste)
-			{
-				/** @noinspection PhpUndefinedMethodInspection */
-				return \Input::post('FORM_SUBMIT') === $objHaste->getFormId();
-			});
+            // Create form instance
+            $form = new Form(
+                'al'.$this->id, 'POST', function ($haste) {
+                /** @noinspection PhpUndefinedMethodInspection */
+                return $haste->getFormId() === \Input::post('FORM_SUBMIT');
+            }
+            );
 
-			$objForm->addFormField('participant', array
-			(
-				'label'     => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['label'],
-				'inputType' => 'select_disabled_options',
-				'eval'      => array
-				(
-					'options'     => $arrOptions,
-					'addSubmit'   => true,
-					'slabel'      => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'],
-					'multiple'    => true,
-					'mandatory'   => true,
-					'chosen'      => true,
-					'placeholder' => 'Hier klicken und Teilnehmer auswählen' //@todo lang
-				)
-			));
+            $form->addFormField(
+                'participant',
+                [
+                    'label'     => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['label'],
+                    'inputType' => 'select_disabled_options',
+                    'eval'      =>
+                        [
+                            'options'     => $options,
+                            'addSubmit'   => true,
+                            'slabel'      => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'],
+                            'multiple'    => true,
+                            'mandatory'   => true,
+                            'chosen'      => true,
+                            'placeholder' => 'Hier klicken und Teilnehmer auswählen' //@todo lang
+                        ],
+                ]
+            );
 
 
-			// Validate the form
-			if ($objForm->validate())
-			{
-				// Process new applications
-				foreach ((array)$objForm->fetch('participant') as $participant)
-				{
-					// Check if participant id allowed here and attendance not existent yet
-					if (in_array($participant, $arrParticipantIdsAllowed) && Attendance::isNotExistent($participant, $this->objItem->get('id')))
-					{
-						// Set new attendance
-						$objAttendance = new Attendance();
-						$objAttendance->tstamp = time();
-						$objAttendance->offer_id = $this->objItem->get('id');
-						$objAttendance->participant_id = $participant;
+            // Validate the form
+            if ($form->validate()) {
+                // Process new applications
+                foreach ((array)$form->fetch('participant') as $participant) {
+                    // Check if participant id allowed here and attendance not existent yet
+                    if (in_array($participant, $allowedParticipantsIds) && Attendance::isNotExistent(
+                            $participant,
+                            $this->item->get('id')
+                        )
+                    ) {
+                        // Set new attendance
+                        $attendance = new Attendance();
+                        $attendance->tstamp = time();
+                        $attendance->offer_id = $this->item->get('id');
+                        $attendance->participant_id = $participant;
 
-						// Fetch status
-						$objStatus = $objAttendance->getStatus();
-						$objAttendance->status = $objStatus->id;
+                        // Fetch status
+                        $status = $attendance->getStatus();
+                        $attendance->status = $status->id;
 
-						// Save attendance
-						$objAttendance->save();
+                        // Save attendance
+                        $attendance->save();
 
-						$strParticipantName = Participant::getInstance()->findById($participant)->parseAttribute(FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_NAME))['text'];
+                        $participantName = Participant::getInstance()->findById($participant)->parseAttribute(
+                            FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_NAME)
+                        )['text'];
 
-						// Add message corresponding to attendance's status
-						switch ($objStatus->type)
-						{
-							case 'confirmed':
-								Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$objStatus->type], $strParticipantName));
-								break;
+                        // Add message corresponding to attendance's status
+                        switch ($status->type) {
+                            case 'confirmed':
+                                Message::addConfirmation(
+                                    sprintf(
+                                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                                        $participantName
+                                    )
+                                );
+                                break;
 
-							case 'waiting':
-								Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$objStatus->type], $strParticipantName));
-								break;
+                            case 'waiting':
+                                Message::addWarning(
+                                    sprintf(
+                                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                                        $participantName
+                                    )
+                                );
+                                break;
 
-							case 'error':
-								Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$objStatus->type], $strParticipantName));
-								break;
-						}
-					}
+                            case 'error':
+                                Message::addError(
+                                    sprintf(
+                                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                                        $participantName
+                                    )
+                                );
+                                break;
+                        }
+                    } // Attendance already exists
+                    else {
+                        Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['error']);
 
-					// Attendance already exists
-					else
-					{
-						Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['error']);
+                        return;
+                    }
+                }
 
-						return;
-					}
-				}
+                // Reload page to show confirmation message
+                \Controller::reload();
+            }
 
-				// Reload page to show confirmation message
-				\Controller::reload();
-			}
+            // Get the form as string
+            $this->Template->form = $form->generate();
+        }
 
-			// Get the form as string
-			$this->Template->form = $objForm->generate();
-		}
-
-		$this->Template->message = Message::generate();
-	}
+        $this->Template->message = Message::generate();
+    }
 }

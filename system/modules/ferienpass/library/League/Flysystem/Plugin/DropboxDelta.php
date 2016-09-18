@@ -46,20 +46,20 @@ class DropboxDelta implements PluginInterface
 
 		$prefix = $this->adapter->getPathPrefix() ? '/' . rtrim($this->adapter->getPathPrefix(), '/') : null;
 
-		$arrDelta = $client->getDelta($cursor, $prefix);
+		$delta = $client->getDelta($cursor, $prefix);
 
 		/**
 		 * @var int   $i
 		 * @var array $entry [0] => <path>
 		 *                   [1] => <metadata>|null if entry was deleted
 		 */
-		foreach ($arrDelta['entries'] as $i => $entry)
+		foreach ($delta['entries'] as $i => $entry)
 		{
-			$arrDelta['entries'][$i][0] = ltrim($this->adapter->removePathPrefix($arrDelta['entries'][$i][0]), '/');
-			$arrDelta['entries'][$i][1] = $this->normalizeResponse($arrDelta['entries'][$i][1]);
+			$delta['entries'][$i][0] = ltrim($this->adapter->removePathPrefix($delta['entries'][$i][0]), '/');
+			$delta['entries'][$i][1] = $this->normalizeResponse($delta['entries'][$i][1]);
 		}
 
-		return $arrDelta;
+		return $delta;
 	}
 
 	/**

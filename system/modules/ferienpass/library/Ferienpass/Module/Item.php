@@ -21,24 +21,24 @@ abstract class Item extends Items
 	/**
 	 * Provide MetaModel item in object
 	 *
-	 * @param bool $blnIsProtected Do permission check if true
+	 * @param bool $isProtected Do permission check if true
 	 *
 	 * @return string
 	 */
-	public function generate($blnIsProtected=false)
+	public function generate($isProtected=false)
 	{
 		$this->fetchItem();
 
-		if (TL_MODE == 'FE')
+		if ('FE' === TL_MODE)
 		{
 			// Generate 404 if item not found
-			if ($this->objItem === null)
+			if (null === $this->item)
 			{
 				$this->exitWith404();
 			}
 
 			// Check permission
-			if ($blnIsProtected)
+			if ($isProtected)
 			{
 				$this->checkPermission();
 			}

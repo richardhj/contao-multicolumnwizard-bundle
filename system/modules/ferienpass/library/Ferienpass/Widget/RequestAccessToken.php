@@ -7,8 +7,10 @@ use Contao\FormHidden;
 use Contao\TextField;
 use Contao\Widget;
 use Ferienpass\Model\DataProcessing;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Pixelfear\OAuth2\Client\Provider\Dropbox;
+use Pixelfear\OAuth2\Client\Provider\DropboxResourceOwner;
 
 
 class RequestAccessToken extends Widget

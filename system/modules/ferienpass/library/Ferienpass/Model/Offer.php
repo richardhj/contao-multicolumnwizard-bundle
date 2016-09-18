@@ -19,6 +19,6 @@ class Offer extends MetaModelBridge
 	 *
 	 * @var Offer
 	 */
-	protected static $objInstance;
+	protected static $instance;
 
 }

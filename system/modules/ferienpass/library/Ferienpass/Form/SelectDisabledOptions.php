@@ -25,20 +25,20 @@ class SelectDisabledOptions extends FormSelectMenu
 	/**
 	 * Allow the placeholder attribute
 	 *
-	 * @param string $strKey   The attribute key
-	 * @param mixed  $varValue The attribute value
+	 * @param string $key   The attribute key
+	 * @param mixed  $value The attribute value
 	 */
-	public function __set($strKey, $varValue)
+	public function __set($key, $value)
 	{
-		switch ($strKey)
+		switch ($key)
 		{
 			case 'placeholder':
-				$strKey = 'data-placeholder'; // for chosen
-				$this->arrAttributes[$strKey] = $varValue;
+				$key = 'data-placeholder'; // for chosen
+				$this->arrAttributes[$key] = $value;
 				break;
 
 			default:
-				parent::__set($strKey, $varValue);
+				parent::__set($key, $value);
 				break;
 		}
 	}
@@ -47,19 +47,19 @@ class SelectDisabledOptions extends FormSelectMenu
 	/**
 	 * Check for disabled attribute in option otherwise process default selected procedure
 	 *
-	 * @param  array $arrOption
+	 * @param  array $option
 	 *
 	 * @return string
 	 */
-	protected function isSelected($arrOption)
+	protected function isSelected($option)
 	{
-		if ($arrOption['disabled'] === true)
+		if ($option['disabled'] === true)
 		{
 			return static::optionDisabled();
 		}
 
 		/** @noinspection PhpUndefinedMethodInspection */
-		return parent::isSelected($arrOption);
+		return parent::isSelected($option);
 	}
 
 
@@ -72,12 +72,12 @@ class SelectDisabledOptions extends FormSelectMenu
 	{
 		$attribute = ' disabled';
 
-		if (TL_MODE == 'FE')
+		if ('FE' === TL_MODE)
 		{
 			/** @var \Contao\PageModel $objPage */
 			global $objPage;
 
-			if ($objPage->outputFormat == 'xhtml')
+			if ('xhtml' === $objPage->outputFormat)
 			{
 				$attribute = ' disabled="disabled"';
 			}

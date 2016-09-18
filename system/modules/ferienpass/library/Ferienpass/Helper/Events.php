@@ -12,185 +12,184 @@ namespace Ferienpass\Helper;
 use Haste\Util\Format;
 use MetaModels\Factory;
 
+
 class Events extends \Controller
 {
 
-	/**
-	 * All attributes possible for one event
-	 *
-	 * @var array
-	 */
-	protected static $arrEventAttributes;
+    /**
+     * All attributes possible for one event
+     *
+     * @var array
+     */
+    protected static $eventAttributes;
 
 
-	/**
-	 * Define event attributes
-	 */
-	public function __construct()
-	{
-		static::$arrEventAttributes = array_keys
-		(
-			\DcaExtractor::getInstance('tl_calendar_events')
-				->getFields()
-		);
+    /**
+     * Define event attributes
+     */
+    public function __construct()
+    {
+        static::$eventAttributes = array_keys
+        (
+            \DcaExtractor::getInstance('tl_calendar_events')
+                ->getFields()
+        );
 
-		parent::__construct();
-	}
-
-
-	/**
-	 * Get the event attributes array
-	 *
-	 * @return array
-	 */
-	public static function getEventAttributes()
-	{
-		return static::$arrEventAttributes;
-	}
+        parent::__construct();
+    }
 
 
-	/**
-	 * Get the event attributes array with name=>translatedName
-	 *
-	 * @return array
-	 */
-	public static function getEventAttributesTranslated()
-	{
-		return array_combine
-		(
-			static::getEventAttributes(),
-			array_map
-			(
-				function ($field)
-				{
-					return Format::dcaLabel('tl_calendar_events', $field) ?: $field;
-				}
-				, static::getEventAttributes()
-			)
-		);
-	}
+    /**
+     * Get the event attributes array
+     *
+     * @return array
+     */
+    public static function getEventAttributes()
+    {
+        return static::$eventAttributes;
+    }
 
 
-	/**
-	 * Add a MetaModel's items as events
-	 *
-	 * @param array   $arrEvents
-	 * @param array   $arrCalendars
-	 * @param integer $intCalendarRangeStart
-	 * @param integer $intCalendarRangeEnd
-	 * @param \Events $objModule
-	 *
-	 * @return array
-	 */
-	public function getMetaModelAsEvents($arrEvents, $arrCalendars, $intCalendarRangeStart, $intCalendarRangeEnd, $objModule)
-	{
-		/** @type \Model $objPage */
-		global $objPage;
+    /**
+     * Get the event attributes array with name=>translatedName
+     *
+     * @return array
+     */
+    public static function getEventAttributesTranslated()
+    {
+        return array_combine
+        (
+            static::getEventAttributes(),
+            array_map
+            (
+                function ($field) {
+                    return Format::dcaLabel('tl_calendar_events', $field) ?: $field;
+                }
+                ,
+                static::getEventAttributes()
+            )
+        );
+    }
 
-		// Walk each calendar selected in module
-		foreach ($arrCalendars as $intCalendarId)
-		{
-			/** @type \Model $objCalendar */
-			$objCalendar = \CalendarModel::findById($intCalendarId);
 
-			if (!$objCalendar->addMetamodel)
-			{
-				continue;
-			}
+    /**
+     * Add a MetaModel's items as events
+     *
+     * @param array $events
+     * @param array $calendars
+     * @param integer $calendarRangeStart
+     * @param integer $calendarRangeEnd
+     * @param \Events $module
+     *
+     * @return array
+     */
+    public function getMetaModelAsEvents($events, $calendars, $calendarRangeStart, $calendarRangeEnd, $module)
+    {
+        /** @type \Model $objPage */
+        global $objPage;
 
-			// Get MetaModel object
-			$objMetaModel = Factory::getDefaultFactory()->getMetaModel($objCalendar->metamodel);
+        // Walk each calendar selected in module
+        foreach ($calendars as $calendarId) {
+            /** @type \Model $calendar */
+            $calendar = \CalendarModel::findById($calendarId);
 
-			// Skip if MetaModel not found
-			if (null === $objMetaModel)
-			{
-				continue;
-			}
+            if (!$calendar->addMetamodel) {
+                continue;
+            }
 
-			$objItems = $objMetaModel->findByFilter(null); //@todo a filter should be configurable in dca
+            // Get MetaModel object
+            $metaModel = Factory::getDefaultFactory()->getMetaModel($calendar->metamodel);
 
-			// Walk each item in MetaModel
-			while ($objItems->next())
-			{
-				$arrEvent = array();
-				$blnAddTime = false;
-				$intStart = 0;
-				$intEnd = 0;
+            // Skip if MetaModel not found
+            if (null === $metaModel) {
+                continue;
+            }
 
-				// Walk each associated attribute
-				foreach (deserialize($objCalendar->metamodelFields, true) as $attribute)
-				{
-					$arrEvent[$attribute['calendar_field']] = $objItems->getItem()->get($attribute['metamodel_field']);
+            $items = $metaModel->findByFilter(null); //@todo a filter should be configurable in dca
 
-					switch ($attribute['calendar_field'])
-					{
-						case 'startDate':
-							$intStart = $arrEvent[$attribute['calendar_field']];
-							$blnAddTime = in_array($objItems->getItem()->getAttribute($attribute['metamodel_field'])->get('timetype'), ['datim', 'time']);
-							break;
+            // Walk each item in MetaModel
+            while ($items->next()) {
+                $event = [];
+                $addTime = false;
+                $start = 0;
+                $end = 0;
 
-						case 'endDate':
-							$intEnd = $arrEvent[$attribute['calendar_field']];
-							break;
-					}
-				}
+                // Walk each associated attribute
+                foreach (deserialize($calendar->metamodelFields, true) as $attribute) {
+                    $event[$attribute['calendar_field']] = $items->getItem()->get($attribute['metamodel_field']);
 
-				$intKey = date('Ymd', $intStart);
-				$strDate = \Date::parse($objPage->dateFormat, $intStart);
-				$strDay = $GLOBALS['TL_LANG']['DAYS'][date('w', $intStart)];
-				$strMonth = $GLOBALS['TL_LANG']['MONTHS'][(date('n', $intStart)-1)];
+                    switch ($attribute['calendar_field']) {
+                        case 'startDate':
+                            $start = $event[$attribute['calendar_field']];
+                            $addTime = in_array(
+                                $items->getItem()->getAttribute($attribute['metamodel_field'])->get('timetype'),
+                                ['datim', 'time']
+                            );
+                            break;
 
-				$span = \Calendar::calculateSpan($intStart, $intEnd);
+                        case 'endDate':
+                            $end = $event[$attribute['calendar_field']];
+                            break;
+                    }
+                }
 
-				if ($span > 0)
-				{
-					$strDate = \Date::parse($objPage->dateFormat, $intStart) . ' – ' . \Date::parse($objPage->dateFormat, $intEnd);
-					$strDay = '';
-				}
+                $key = date('Ymd', $start);
+                $date = \Date::parse($objPage->dateFormat, $start);
+                $day = $GLOBALS['TL_LANG']['DAYS'][date('w', $start)];
+                $month = $GLOBALS['TL_LANG']['MONTHS'][(date('n', $start) - 1)];
 
-				$strTime = '';
+                $span = \Calendar::calculateSpan($start, $end);
 
-				if ($blnAddTime)
-				{
-					if ($span > 0)
-					{
-						$strDate = \Date::parse($objPage->datimFormat, $intStart) . ' – ' . \Date::parse($objPage->datimFormat, $intEnd);
-					}
-					elseif ($intStart == $intEnd)
-					{
-						$strTime = \Date::parse($objPage->timeFormat, $intStart);
-					}
-					else
-					{
-						$strTime = \Date::parse($objPage->timeFormat, $intStart) . ' – ' . \Date::parse($objPage->timeFormat, $intEnd);
-					}
-				}
+                if ($span > 0) {
+                    $date = \Date::parse($objPage->dateFormat, $start).' – '.\Date::parse($objPage->dateFormat, $end);
+                    $day = '';
+                }
 
-				// Overwrite some settings
-				$arrEvent['date'] = $strDate;
-				$arrEvent['time'] = $strTime;
-				$arrEvent['datetime'] = $blnAddTime ? date('Y-m-d\TH:i:sP', $intStart) : date('Y-m-d', $intStart);
-				$arrEvent['day'] = $strDay;
-				$arrEvent['month'] = $strMonth;
-				$arrEvent['calendar'] = $objCalendar;
-				$arrEvent['link'] = $arrEvent['title'];
-				$arrEvent['target'] = '';
-				$arrEvent['title'] = specialchars($arrEvent['title'], true);
+                $time = '';
+
+                if ($addTime) {
+                    if ($span > 0) {
+                        $date = sprintf(
+                            '%s – %s',
+                            \Date::parse($objPage->datimFormat, $start),
+                            \Date::parse($objPage->datimFormat, $end)
+                        );
+                    } elseif ($start == $end) {
+                        $time = \Date::parse($objPage->timeFormat, $start);
+                    } else {
+                        $time = sprintf(
+                            '%s – %s',
+                            \Date::parse($objPage->timeFormat, $start),
+                            \Date::parse($objPage->timeFormat, $end)
+                        );
+                    }
+                }
+
+                // Overwrite some settings
+                $event['date'] = $date;
+                $event['time'] = $time;
+                $event['datetime'] = $addTime ? date('Y-m-d\TH:i:sP', $start) : date('Y-m-d', $start);
+                $event['day'] = $day;
+                $event['month'] = $month;
+                $event['calendar'] = $calendar;
+                $event['link'] = $event['title'];
+                $event['target'] = '';
+                $event['title'] = specialchars($event['title'], true);
 //				$arrEvent['href'] = $this->generateEventUrl($objEvents, $strUrl);
-				$arrEvent['class'] = ($arrEvent['cssClass'] != '') ? ' ' . $arrEvent['cssClass'] : '';
+                $event['class'] = ($event['cssClass'] != '') ? ' '.$event['cssClass'] : '';
 //				$arrEvent['recurring'] = $recurring;
 //				$arrEvent['until'] = $until;
-				$arrEvent['begin'] = $intStart;
-				$arrEvent['end'] = $intEnd;
-				$arrEvent['details'] = '';
-				$arrEvent['hasDetails'] = false;
-				$arrEvent['hasTeaser'] = false;
+                $event['begin'] = $start;
+                $event['end'] = $end;
+                $event['details'] = '';
+                $event['hasDetails'] = false;
+                $event['hasTeaser'] = false;
 
-				// Add event to global array
-				$arrEvents[$intKey][$intStart][] = $arrEvent;
-			}
-		}
+                // Add event to global array
+                $events[$key][$start][] = $event;
+            }
+        }
 
-		return $arrEvents;
-	}
+        return $events;
+    }
 }

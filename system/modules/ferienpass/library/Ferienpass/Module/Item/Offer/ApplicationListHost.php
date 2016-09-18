@@ -27,150 +27,134 @@ use MetaModels\ItemList;
  */
 class ApplicationListHost extends Item
 {
-	/**
-	 * Template
-	 * @var string
-	 */
-	protected $strTemplate = 'mod_offer_applicationlisthost';
+
+    /**
+     * Template
+     * @var string
+     */
+    protected $strTemplate = 'mod_offer_applicationlisthost';
 
 
-	/**
-	 * {@inheritdoc}
-	 * Include permission check
-	 */
-	public function generate()
-	{
-		return parent::generate(true);
-	}
+    /**
+     * {@inheritdoc}
+     * Include permission check
+     */
+    public function generate()
+    {
+        return parent::generate(true);
+    }
 
 
-	/**
-	 * Generate the module
-	 */
-	protected function compile()
-	{
-		if (!$this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE)))
-		{
-			Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['inactive']);
-			$this->Template->message = Message::generate();
+    /**
+     * Generate the module
+     */
+    protected function compile()
+    {
+        if (!$this->item->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))) {
+            Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['inactive']);
+            $this->Template->message = Message::generate();
 
-			return;
-		}
+            return;
+        }
 
-		$intMaxParticipants = $this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX));
+        $maxParticipants = $this->item->get(
+            FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX)
+        );
+        $attendances = Attendance::findByOffer($this->item->get('id'));
+        $view = Participant::getInstance()->getMetaModel()->getView($this->metamodel_child_list_view);
+        $fields = $view->getSettingNames();
+        $rows = [];
 
-		$objAttendees = Attendance::findByOffer($this->objItem->get('id'));
-		$objView = Participant::getInstance()->getMetaModel()->getView($this->metamodel_child_list_view);
-		$arrFields = $objView->getSettingNames();
-		$arrRows = array();
+        if (null !== $attendances) {
+            // Create table head
+            foreach ($fields as $field) {
+                $rows[0][] = Participant::getInstance()->getMetaModel()->getAttribute($field)->get('name');
+            }
 
-		if (null !== $objAttendees)
-		{
-			// Create table head
-			foreach ($arrFields as $field)
-			{
-				$arrRows[0][] = Participant::getInstance()->getMetaModel()->getAttribute($field)->get('name');
-			}
+            $this->fetchOwnerAttribute(Participant::getInstance()->getMetaModel());
 
-			$this->fetchOwnerAttribute(Participant::getInstance()->getMetaModel());
+            // Walk each attendee
+            while ($attendances->next()) {
+                $participant = Participant::getInstance()->findById($attendances->participant_id);
+                $values = [];
 
-			// Walk each attendee
-			while ($objAttendees->next())
-			{
-				$objParticipant = Participant::getInstance()->findById($objAttendees->participant_id);
-				$arrValues = array();
+                // Participant is not existent
+                if (null === $participant) {
+                    // Delete attendance too
+                    $attendances->current()->delete(); # this will sync the entire list
 
-				// Participant is not existent
-				if (null === $objParticipant)
-				{
-					// Delete attendance too
-					$objAttendees->current()->delete(); # this will sync the entire list
+                    continue;
+                }
 
-					continue;
-				}
+                foreach ($fields as $field) {
+                    $value = $participant->parseAttribute($field, null, $view)['text'];
 
-				foreach ($arrFields as $field)
-				{
-					$value = $objParticipant->parseAttribute($field, null, $objView)['text'];
+                    // Inherit parent's data
+                    if (!strlen($value)) {
+                        $value = $participant->get($this->ownerAttribute->getColName())[$field];
+                    }
 
-					// Inherit parent's data
-					if (!strlen($value))
-					{
-						$value = $objParticipant->get($this->objOwnerAttribute->getColName())[$field];
-					}
+                    $values[] = $value;
+                }
 
-					$arrValues[] = $value;
-				}
+                $rows[] = $values;
+            }
+        }
 
-				$arrRows[] = $arrValues;
-			}
-		}
+        if (empty($rows)) {
+            Message::addWarning($GLOBALS['TL_LANG']['MSC']['noAttendances']);
+        } else {
+            $this->useHeader = true;
+            $this->max_participants = $maxParticipants;
 
-		if (empty($arrRows))
-		{
-			Message::addWarning($GLOBALS['TL_LANG']['MSC']['noAttendances']);
-		}
-		else
-		{
-			$this->useHeader = true;
-			$this->max_participants = $intMaxParticipants;
+            // Define row class callback
+            $rowClassCallback = function ($j, $arrRows, $objModule) {
+                if ($j == ($objModule->max_participants - 1) && $j != count($arrRows) - 1) {
+                    return 'last_attendee';
+                } elseif ($j >= $objModule->max_participants) {
+                    return 'waiting_list';
+                }
 
-			// Define row class callback
-			$rowClassCallback = function ($j, $arrRows, $objModule)
-			{
-				if ($j == ($objModule->max_participants - 1) && $j != count($arrRows) - 1)
-				{
-					return 'last_attendee';
-				}
-				elseif ($j >= $objModule->max_participants)
-				{
-					return 'waiting_list';
-				}
+                return '';
+            };
 
-				return '';
-			};
+            $this->Template->dataTable = Table::getDataArray($rows, 'application-list', $this, $rowClassCallback);
 
-			$this->Template->dataTable = Table::getDataArray($arrRows, 'application-list', $this, $rowClassCallback);
+            // Add download button
+            $this->Template->download = $this->document ? sprintf
+            (
+                '<a href="%1$s" title="%3$s" class="download_list">%2$s</a>',
+                $this->addToUrl('action=download_list'),
+                $GLOBALS['TL_LANG']['MSC']['downloadList'][0],
+                $GLOBALS['TL_LANG']['MSC']['downloadList'][1]
+            ) : '';
 
-			// Add download button
-			$this->Template->download = $this->document ? sprintf
-			(
-				'<a href="%1$s" title="%3$s" class="download_list">%2$s</a>',
-				$this->addToUrl('action=download_list'),
-				$GLOBALS['TL_LANG']['MSC']['downloadList'][0],
-				$GLOBALS['TL_LANG']['MSC']['downloadList'][1]
-			) : '';
+            if (\Input::get('action') == 'download_list') {
+                if (($objDocument = Document::findByPk($this->document)) === null) {
+                    Message::addError($GLOBALS['TL_LANG']['MSC']['document']['export_error']);
+                } else {
+                    $objDocument->outputToBrowser($attendances);
+                }
+            }
+        }
 
-			if (\Input::get('action') == 'download_list')
-			{
-				if (($objDocument = Document::findByPk($this->document)) === null)
-				{
-					Message::addError($GLOBALS['TL_LANG']['MSC']['document']['export_error']);
-				}
-				else
-				{
-					$objDocument->outputToBrowser($objAttendees);
-				}
-			}
-		}
+        $this->addRenderedMetaModelToTemplate();
 
-		$this->addRenderedMetaModelToTemplate();
-
-		$this->Template->message = Message::generate();
-	}
+        $this->Template->message = Message::generate();
+    }
 
 
-	/**
-	 * Add the rendered meta model of this offer to the template
-	 */
-	protected function addRenderedMetaModelToTemplate()
-	{
-		$objItemRenderer = new ItemList();
+    /**
+     * Add the rendered meta model of this offer to the template
+     */
+    protected function addRenderedMetaModelToTemplate()
+    {
+        $itemRenderer = new ItemList();
 
-		$objItemRenderer
-			->setMetaModel($this->metamodel, $this->metamodel_rendersettings)
-			->addFilterRule(new StaticIdList(array($this->objItem->get('id'))));
+        $itemRenderer
+            ->setMetaModel($this->metamodel, $this->metamodel_rendersettings)
+            ->addFilterRule(new StaticIdList([$this->item->get('id')]));
 
-		$this->Template->metamodel = $objItemRenderer->render($this->metamodel_noparsing, $this);
-	}
+        $this->Template->metamodel = $itemRenderer->render($this->metamodel_noparsing, $this);
+    }
 }

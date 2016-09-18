@@ -19,161 +19,150 @@ use Contao\Controller;
  */
 class Message extends Controller
 {
-	/**
-	 * Add an error message
-	 *
-	 * @param string $strMessage The error message
-	 */
-	public static function addError($strMessage)
-	{
-		static::add($strMessage, 'FP_ERROR');
-	}
+
+    /**
+     * Add an error message
+     *
+     * @param string $message The error message
+     */
+    public static function addError($message)
+    {
+        static::add($message, 'FP_ERROR');
+    }
 
 
-	/**
-	 * Add a confirmation message
-	 *
-	 * @param string $strMessage The confirmation message
-	 */
-	public static function addConfirmation($strMessage)
-	{
-		static::add($strMessage, 'FP_CONFIRMATION');
-	}
+    /**
+     * Add a confirmation message
+     *
+     * @param string $message The confirmation message
+     */
+    public static function addConfirmation($message)
+    {
+        static::add($message, 'FP_CONFIRMATION');
+    }
 
 
-	/**
-	 * Add a warning message
-	 *
-	 * @param string $strMessage The warning message
-	 */
-	public static function addWarning($strMessage)
-	{
-		static::add($strMessage, 'FP_WARNING');
-	}
+    /**
+     * Add a warning message
+     *
+     * @param string $message The warning message
+     */
+    public static function addWarning($message)
+    {
+        static::add($message, 'FP_WARNING');
+    }
 
 
-	/**
-	 * Add an info message
-	 *
-	 * @param string $strMessage The info message
-	 */
-	public static function addInformation($strMessage)
-	{
-		static::add($strMessage, 'FP_INFORMATION');
-	}
+    /**
+     * Add an info message
+     *
+     * @param string $message The info message
+     */
+    public static function addInformation($message)
+    {
+        static::add($message, 'FP_INFORMATION');
+    }
 
 
-	/**
-	 * Add a preformatted message
-	 *
-	 * @param string $strMessage The preformatted message
-	 */
-	public static function addRaw($strMessage)
-	{
-		static::add($strMessage, 'FP_RAW');
-	}
+    /**
+     * Add a preformatted message
+     *
+     * @param string $message The preformatted message
+     */
+    public static function addRaw($message)
+    {
+        static::add($message, 'FP_RAW');
+    }
 
 
-	/**
-	 * Add a message
-	 *
-	 * @param string $strMessage The message text
-	 * @param string $strType    The message type
-	 *
-	 * @throws \Exception If $strType is not a valid message type
-	 */
-	public static function add($strMessage, $strType)
-	{
-		if ($strMessage == '')
-		{
-			return;
-		}
+    /**
+     * Add a message
+     *
+     * @param string $message The message text
+     * @param string $type    The message type
+     *
+     * @throws \Exception If $strType is not a valid message type
+     */
+    public static function add($message, $type)
+    {
+        if ('' === $message) {
+            return;
+        }
 
-		if (!in_array($strType, static::getTypes()))
-		{
-			throw new \Exception("Invalid message type $strType");
-		}
+        if (!in_array($type, static::getTypes())) {
+            throw new \Exception("Invalid message type $type");
+        }
 
-		if (!is_array($_SESSION[$strType]))
-		{
-			$_SESSION[$strType] = array();
-		}
+        if (!is_array($_SESSION[$type])) {
+            $_SESSION[$type] = [];
+        }
 
-		$_SESSION[$strType][] = $strMessage;
-	}
+        $_SESSION[$type][] = $message;
+    }
 
 
-	/**
-	 * Return all messages as HTML
-	 *
-	 * @param boolean $blnNoWrapper If true, there will be no wrapping DIV
-	 *
-	 * @return string The messages HTML markup
-	 */
-	public static function generate($blnNoWrapper=false)
-	{
-		$strMessages = '';
+    /**
+     * Return all messages as HTML
+     *
+     * @param boolean $noWrapper If true, there will be no wrapping DIV
+     *
+     * @return string The messages HTML markup
+     */
+    public static function generate($noWrapper = false)
+    {
+        $return = '';
 
-		// Regular messages
-		foreach (static::getTypes() as $strType)
-		{
-			if (!is_array($_SESSION[$strType]))
-			{
-				continue;
-			}
+        // Regular messages
+        foreach (static::getTypes() as $type) {
+            if (!is_array($_SESSION[$type])) {
+                continue;
+            }
 
-			$strClass = strtolower(substr($strType, 3)); // Remove prefix
-			$_SESSION[$strType] = array_unique($_SESSION[$strType]);
+            $class = strtolower(substr($type, 3)); // Remove prefix
+            $_SESSION[$type] = array_unique($_SESSION[$type]);
 
-			foreach ($_SESSION[$strType] as $strMessage)
-			{
-				if ($strType == 'TL_RAW')
-				{
-					$strMessages .= $strMessage;
-				}
-				else
-				{
-					$strMessages .= sprintf('<p class="%s">%s</p>%s', $strClass, $strMessage, "\n");
-				}
-			}
+            foreach ($_SESSION[$type] as $message) {
+                if ('TL_RAW' === $type) {
+                    $return .= $message;
+                } else {
+                    $return .= sprintf('<p class="%s">%s</p>%s', $class, $message, "\n");
+                }
+            }
 
-			if (!$_POST)
-			{
-				$_SESSION[$strType] = array();
-			}
-		}
+            if (!$_POST) {
+                $_SESSION[$type] = [];
+            }
+        }
 
-		$strMessages = trim($strMessages);
+        $return = trim($return);
 
-		// Wrapping container
-		if (!$blnNoWrapper && $strMessages != '')
-		{
-			$strMessages = sprintf('<div class="messages">%s%s%s</div>', "\n", $strMessages, "\n");
-		}
+        // Wrapping container
+        if (!$noWrapper && $return != '') {
+            $return = sprintf('<div class="messages">%s%s%s</div>', "\n", $return, "\n");
+        }
 
-		return $strMessages;
-	}
+        return $return;
+    }
 
 
-	/**
-	 * Reset the message system
-	 */
-	public static function reset()
-	{
-		foreach (static::getTypes() as $strType)
-		{
-			$_SESSION[$strType] = array();
-		}
-	}
+    /**
+     * Reset the message system
+     */
+    public static function reset()
+    {
+        foreach (static::getTypes() as $type) {
+            $_SESSION[$type] = [];
+        }
+    }
 
 
-	/**
-	 * Return all available message types
-	 *
-	 * @return array An array of message types
-	 */
-	public static function getTypes()
-	{
-		return array('FP_ERROR', 'FP_CONFIRMATION', 'FP_WARNING', 'FP_INFORMATION', 'FP_RAW');
-	}
+    /**
+     * Return all available message types
+     *
+     * @return array An array of message types
+     */
+    public static function getTypes()
+    {
+        return ['FP_ERROR', 'FP_CONFIRMATION', 'FP_WARNING', 'FP_INFORMATION', 'FP_RAW'];
+    }
 }

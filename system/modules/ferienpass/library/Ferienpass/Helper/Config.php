@@ -48,24 +48,24 @@ class Config
 	/**
 	 * Return a configuration value
 	 *
-	 * @param string $strKey
+	 * @param string $key
 	 *
 	 * @return mixed|null
 	 */
-	public static function get($strKey)
+	public static function get($key)
 	{
-		return \Contao\Config::get(static::CONFIG_PREFIX . $strKey);
+		return \Contao\Config::get(static::CONFIG_PREFIX . $key);
 	}
 
 
 	/**
 	 * Set and save a configuration value
 	 *
-	 * @param $strKey
-	 * @param $strValue
+	 * @param $key
+	 * @param $value
 	 */
-	public static function set($strKey, $strValue)
+	public static function set($key, $value)
 	{
-		\Contao\Config::persist(static::CONFIG_PREFIX . $strKey, $strValue);
+		\Contao\Config::persist(static::CONFIG_PREFIX . $key, $value);
 	}
 }
