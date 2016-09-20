@@ -121,7 +121,7 @@ $GLOBALS['FERIENPASS_STATUS'] = array
  * Back end styles
  */
 if (TL_MODE == 'BE') {
-    $GLOBALS['TL_CSS'][] = 'system/modules/ferienpass/assets/css/backend.min.css';
+    $GLOBALS['TL_CSS'][] = 'system/modules/ferienpass/assets/css/backend.css';
 
 }
 
