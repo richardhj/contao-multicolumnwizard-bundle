@@ -273,11 +273,11 @@ class Dca extends Backend
                             // Member ID
                             $parentRaw['id'],
                             // Link
-                            '<i class="fa fa-external-link tl_gray"></i> '.$args[$parentColName],
+                            '<i class="fa fa-external-link tl_gray"></i> '.$args[$k],
                             // Member edit description
                             sprintf(
                                 $GLOBALS['TL_LANG']['tl_member']['edit'][1],
-                                $$parentRaw['id']
+                                $parentRaw['id']
                             ),
                             REQUEST_TOKEN
                         );
