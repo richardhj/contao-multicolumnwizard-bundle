@@ -261,18 +261,34 @@ class Dca extends Backend
 
             \System::loadLanguageFile('tl_member');
 
+            $parentRaw = $model->getItem()->get($parentColName);
+
             // Adjust the label
-            /** @noinspection HtmlUnknownTarget */
-            $args[$parentColName] = sprintf(
-                '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
-                $model->getItem()->get($parentColName)['id'],
-                // Member ID
-                '<i class="fa fa-external-link tl_gray"></i> '.$args[$parentColName],
-                // Link
-                sprintf($GLOBALS['TL_LANG']['tl_member']['edit'][1], $model->getItem()->get($parentColName)['id']),
-                // Member edit description
-                REQUEST_TOKEN
-            );
+            foreach ($args as $k => $v) {
+                switch ($k) {
+                    case $parentColName:
+                        /** @noinspection HtmlUnknownTarget */
+                        $args[$k] = sprintf(
+                            '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
+                            // Member ID
+                            $parentRaw['id'],
+                            // Link
+                            '<i class="fa fa-external-link tl_gray"></i> '.$args[$parentColName],
+                            // Member edit description
+                            sprintf(
+                                $GLOBALS['TL_LANG']['tl_member']['edit'][1],
+                                $$parentRaw['id']
+                            ),
+                            REQUEST_TOKEN
+                        );
+                        break;
+
+                    default:
+                        if ('' === $model->getItem()->get($k) && '' !== ($parentData = $parentRaw[$k])) {
+                            $args[$k] = sprintf('<span class="tl_gray">%s</span>', $parentData);
+                        }
+                }
+            }
 
             $event->setArgs($args);
         }
