@@ -68,7 +68,12 @@ class EraseMemberData extends \BackendModule
 
         /** @var \CheckBox|\Widget $confirmCheckbox */
         $confirmCheckbox = new \CheckBox(null);
-        $confirmCheckbox->options = ['Ich bin mir bewusst, dass die Daten unwiderruflich gelöscht werden.'];
+        $confirmCheckbox->options = [
+            [
+                'value' => 1,
+                'label' => 'Ich bin mir bewusst, dass die Daten unwiderruflich gelöscht werden.',
+            ],
+        ];
         $confirmCheckbox->name = 'confirm';
         $confirmCheckbox->mandatory = true;
 
@@ -150,7 +155,7 @@ HTML
         $this->Template->editButtons = $buttons;
         $this->Template->fieldsets = [
             [
-                'class'   => 'tl_box',
+                'class' => 'tl_box',
                 'palette' => $output,
             ],
         ];
