@@ -15,6 +15,7 @@ use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
 use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\SimpleQuery;
+use MetaModels\IItem;
 
 
 class EraseMemberData extends \BackendModule
@@ -45,7 +46,7 @@ class EraseMemberData extends \BackendModule
         $output = '';
         $formSubmit = 'erase_member_data';
         $memberGroup = \MemberGroupModel::findByPk('2'); // @todo
-        $members = \MemberModel::findByGroups(serialize([$memberGroup->id]));
+        $members = \MemberModel::findBy(['groups=?', 'persist<>1'], [serialize([$memberGroup->id])]);
         $attendances = Attendance::findAll();
         $getParticipantsFilter = function () use ($members) {
             $filter = new Filter(Participant::getInstance()->getMetaModel());
@@ -82,20 +83,55 @@ class EraseMemberData extends \BackendModule
             $confirmCheckbox->validate();
 
             if (!$confirmCheckbox->hasErrors()) {
-                // Truncate attendances
-                while (null !== $attendances && $attendances->next()) {
-                    $attendances->delete();
+                if (null !== $attendances) {
+                    // Truncate attendances
+                    \Database::getInstance()->query(
+                        sprintf(
+                            'DELETE FROM %s WHERE id IN (%s)',
+                            Attendance::getTable(),
+                            implode(',', $attendances->fetchEach('id'))
+                        )
+                    );
                 }
 
-                // Truncate participants
-                while ($participants->next()) {
-                    Participant::getInstance()->getMetaModel()->delete($participants->getItem());
+                if (0 !== $participants->getCount()) {
+                    // Truncate participants
+                    \Database::getInstance()->query(
+                        sprintf(
+                            'DELETE FROM %s WHERE id IN (%s)',
+                            Participant::getInstance()->getMetaModel()->getTableName(),
+                            implode(
+                                ',',
+                                array_map(
+                                    function (IItem $item) {
+                                        return $item->get('id');
+                                    },
+                                    iterator_to_array($participants)
+                                )
+                            )
+                        )
+                    );
                 }
 
                 // Truncate members
-                while (null !== $members && $members->next()) {
-                    $members->delete();
+                if (null !== $members) {
+                    /** @noinspection PhpUndefinedMethodInspection */
+                    \Database::getInstance()->query(
+                        sprintf(
+                            'DELETE FROM %s WHERE id IN (%s)',
+                            \MemberModel::getTable(),
+                            implode(',', $members->fetchEach('id'))
+                        )
+                    );
                 }
+
+//                // Revoke persist status
+//                /** @noinspection PhpUndefinedMethodInspection */
+//                \Database::getInstance()
+//                    ->prepare(
+//                        sprintf("UPDATE %s SET persist='' WHERE persist=1 AND groups=?", \MemberModel::getTable())
+//                    )
+//                    ->execute(serialize([$memberGroup->id]));
 
                 \Message::addConfirmation('Löschung wurde erfolgreich ausgeführt');
             }
@@ -108,7 +144,6 @@ class EraseMemberData extends \BackendModule
 
         /** @noinspection PhpUndefinedMethodInspection */
         $output .= '<p>Dieses Tool steht Ihnen zur Verfügung, um alle personenbezogenen Daten der registrierten Eltern zu löschen.</p><h2>Gelöscht werden:</h2>';
-
 
         /** @noinspection PhpUndefinedMethodInspection */
         $output .= sprintf(
