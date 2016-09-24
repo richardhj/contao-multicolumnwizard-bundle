@@ -52,7 +52,7 @@ class EraseMemberData extends \BackendModule
             if (null !== $members) {
                 $rule = new SimpleQuery(
                     sprintf(
-                        '%1$s WHERE %2$s IN (%3$s) OR %2$s=0',
+                        'SELECT id FROM %1$s WHERE %2$s IN (%3$s) OR %2$s=0',
                         Participant::getInstance()->getMetaModel()->getTableName(),
                         Participant::getInstance()->getOwnerAttribute()->getColName(),
                         implode(',', $members->fetchEach('id'))
