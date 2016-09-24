@@ -51,6 +51,13 @@ $GLOBALS['TL_CONFIG']['dropbox_ferienpass_appSecret'] = '9gn0gckd2yr0fy9';
  */
 $GLOBALS['FERIENPASS_MOD'] = array
 (
+    'tools' => array(
+        'erase_member_data' => array
+        (
+            'callback' => 'Ferienpass\BackendModule\EraseMemberData',
+            'icon'   => 'eraser',
+        ),
+    ),
     'data_processing' => array
     (),
     'setup'           => array
