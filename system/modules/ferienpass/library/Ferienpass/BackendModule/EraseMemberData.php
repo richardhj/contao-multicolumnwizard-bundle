@@ -78,7 +78,6 @@ class EraseMemberData extends \BackendModule
         $confirmCheckbox->name = 'confirm';
         $confirmCheckbox->mandatory = true;
 
-
         if ($formSubmit === \Input::post('FORM_SUBMIT')) {
             $confirmCheckbox->validate();
 
