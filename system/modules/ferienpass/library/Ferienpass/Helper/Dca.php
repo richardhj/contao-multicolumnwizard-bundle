@@ -14,9 +14,9 @@ use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
+use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\Offer;
 use MetaModels\DcGeneral\Data\Model;
@@ -269,7 +269,7 @@ class Dca extends Backend
                     case $parentColName:
                         /** @noinspection HtmlUnknownTarget */
                         $args[$k] = sprintf(
-                            '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
+                            '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_parent" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
                             // Member ID
                             $parentRaw['id'],
                             // Link
