@@ -13,6 +13,7 @@ namespace Ferienpass\BackendModule;
 
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
+use Haste\Util\Format;
 use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
@@ -70,21 +71,36 @@ class EraseMemberData extends \BackendModule
         };
         $participants = Participant::getInstance()->getMetaModel()->findByFilter($getParticipantsFilter());
 
-        /** @var \CheckBox|\Widget $confirmCheckbox */
-        $confirmCheckbox = new \CheckBox(null);
-        $confirmCheckbox->options = [
+        /** @var \CheckBox|\Widget $checkboxConfirm */
+        $checkboxConfirm = new \CheckBox(null);
+        $checkboxConfirm->options = [
             [
                 'value' => 1,
                 'label' => 'Ich bin mir bewusst, dass die Daten unwiderruflich gelöscht werden.',
             ],
         ];
-        $confirmCheckbox->name = 'confirm';
-        $confirmCheckbox->mandatory = true;
+        $checkboxConfirm->name = 'confirm';
+        $checkboxConfirm->mandatory = true;
+
+        /** @var \CheckBox|\Widget $checkboxResetPersist */
+        $checkboxResetPersist = new \CheckBox(null);
+        /** @noinspection PhpUndefinedMethodInspection */
+        $checkboxResetPersist->options = [
+            [
+                'value' => 1,
+                'label' => sprintf(
+                    'Den Status "%s" bei diesen Mitglieder zurücksetzen',
+                    Format::dcaLabel(\MemberModel::getTable(), 'persist')
+                ),
+            ],
+        ];
+        $checkboxResetPersist->name = 'resetPersist';
 
         if ($formSubmit === \Input::post('FORM_SUBMIT')) {
-            $confirmCheckbox->validate();
+            $checkboxConfirm->validate();
+            $checkboxResetPersist->validate();
 
-            if (!$confirmCheckbox->hasErrors()) {
+            if (!$checkboxConfirm->hasErrors()) {
                 if (null !== $attendances) {
                     // Truncate attendances
                     \Database::getInstance()->query(
@@ -127,13 +143,15 @@ class EraseMemberData extends \BackendModule
                     );
                 }
 
-//                // Revoke persist status
-//                /** @noinspection PhpUndefinedMethodInspection */
-//                \Database::getInstance()
-//                    ->prepare(
-//                        sprintf("UPDATE %s SET persist='' WHERE persist=1 AND groups=?", \MemberModel::getTable())
-//                    )
-//                    ->execute(serialize([$memberGroup->id]));
+                // Reset persist status
+                if ('1' === $checkboxResetPersist) {
+                    /** @noinspection PhpUndefinedMethodInspection */
+                    \Database::getInstance()
+                        ->prepare(
+                            sprintf("UPDATE %s SET persist='' WHERE persist=1 AND groups=?", \MemberModel::getTable())
+                        )
+                        ->execute(serialize([$memberGroup->id]));
+                }
 
                 \Message::addConfirmation('Löschung wurde erfolgreich ausgeführt');
             }
@@ -185,7 +203,8 @@ HTML
             $memberGroup->name
         );
 
-        $output .= $confirmCheckbox->generateWithError();
+        $output .= $checkboxResetPersist->generateWithError();
+        $output .= $checkboxConfirm->generateWithError();
 
         $this->Template->subHeadline = 'Personenbezogene Daten löschen';
         $this->Template->table = $formSubmit;
@@ -196,6 +215,5 @@ HTML
                 'palette' => $output,
             ],
         ];
-
     }
 }
