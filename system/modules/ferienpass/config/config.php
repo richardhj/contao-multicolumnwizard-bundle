@@ -16,15 +16,13 @@ array_insert(
     $GLOBALS['BE_MOD'],
     1,
     [
-        'ferienpass' =>
-            [
-                'ferienpass_management' =>
-                    [
-                        'callback' => 'Ferienpass\BackendModule\Management',
-                        'tables'   => [],
-                        'icon'     => 'system/modules/ferienpass/assets/img/equalizer.png',
-                    ],
+        'ferienpass' => [
+            'ferienpass_management' => [
+                'callback' => 'Ferienpass\BackendModule\Management',
+                'tables'   => [],
+                'icon'     => 'system/modules/ferienpass/assets/img/equalizer.png',
             ],
+        ],
     ]
 );
 
