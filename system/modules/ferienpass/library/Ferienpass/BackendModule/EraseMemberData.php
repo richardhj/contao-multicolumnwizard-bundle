@@ -15,6 +15,7 @@ use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
 use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\SimpleQuery;
+use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
 
 
@@ -50,7 +51,9 @@ class EraseMemberData extends \BackendModule
         $attendances = Attendance::findAll();
         $getParticipantsFilter = function () use ($members) {
             $filter = new Filter(Participant::getInstance()->getMetaModel());
-            if (null !== $members) {
+            if (null === $members) {
+                $rule = new StaticIdList([]);
+            } else {
                 $rule = new SimpleQuery(
                     sprintf(
                         'SELECT id FROM %1$s WHERE %2$s IN (%3$s) OR %2$s=0',
@@ -59,9 +62,9 @@ class EraseMemberData extends \BackendModule
                         implode(',', $members->fetchEach('id'))
                     )
                 );
-
-                $filter->addFilterRule($rule);
             }
+
+            $filter->addFilterRule($rule);
 
             return $filter;
         };
@@ -189,7 +192,7 @@ HTML
         $this->Template->editButtons = $buttons;
         $this->Template->fieldsets = [
             [
-                'class' => 'tl_box',
+                'class'   => 'tl_box',
                 'palette' => $output,
             ],
         ];
