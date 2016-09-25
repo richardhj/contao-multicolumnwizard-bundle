@@ -15,18 +15,17 @@
 array_insert(
     $GLOBALS['BE_MOD'],
     1,
-    array
-    (
-        'ferienpass' => array
-        (
-            'ferienpass_management' => array
-            (
-                'callback' => 'Ferienpass\BackendModule\Management',
-                'tables'   => array(),
-                'icon'     => 'system/modules/ferienpass/assets/img/equalizer.png',
-            ),
-        ),
-    )
+    [
+        'ferienpass' =>
+            [
+                'ferienpass_management' =>
+                    [
+                        'callback' => 'Ferienpass\BackendModule\Management',
+                        'tables'   => [],
+                        'icon'     => 'system/modules/ferienpass/assets/img/equalizer.png',
+                    ],
+            ],
+    ]
 );
 
 
@@ -49,63 +48,55 @@ $GLOBALS['TL_CONFIG']['dropbox_ferienpass_appSecret'] = '9gn0gckd2yr0fy9';
 /**
  * Ferienpass Modules
  */
-$GLOBALS['FERIENPASS_MOD'] = array
-(
-    'tools' => array(
-        'erase_member_data' => array
-        (
-            'callback' => 'Ferienpass\BackendModule\EraseMemberData',
-            'icon'   => 'eraser',
-        ),
-    ),
-    'data_processing' => array
-    (),
-    'setup'           => array
-    (
-        'data_processings'  => array
-        (
-            'tables' => array(\Ferienpass\Model\DataProcessing::getTable()),
+$GLOBALS['FERIENPASS_MOD'] = [
+    'tools'           => [
+        'erase_member_data' =>
+            [
+                'callback' => 'Ferienpass\BackendModule\EraseMemberData',
+                'icon'     => 'eraser',
+            ],
+    ],
+    'data_processing' => [],
+    'setup'           => [
+        'data_processings'  => [
+            'tables' => [\Ferienpass\Model\DataProcessing::getTable()],
             'icon'   => 'folder-open',
-        ),
-        'documents'         => array
-        (
-            'tables' => array(\Ferienpass\Model\Document::getTable()),
+        ],
+        'documents'         => [
+            'tables' => [\Ferienpass\Model\Document::getTable()],
             'icon'   => 'file-text-o',
-        ),
-        'attendance_status' => array
-        (
-            'tables' => array(\Ferienpass\Model\AttendanceStatus::getTable()),
+        ],
+        'attendance_status' => [
+            'tables' => [\Ferienpass\Model\AttendanceStatus::getTable()],
             'icon'   => 'th-list',
-        ),
-        'ferienpass_config' => array
-        (
-            'tables' => array('tl_ferienpass_config'),
+        ],
+        'ferienpass_config' => [
+            'tables' => ['tl_ferienpass_config'],
             'icon'   => 'cogs',
-        ),
-    ),
-);
+        ],
+    ],
+];
 
 if ($_GET['do'] == 'ferienpass_management') {
-    foreach ($GLOBALS['FERIENPASS_MOD'] as $strGroup => $arrModules) {
-        if ($strGroup == 'data_processing') {
-            $objProcessings = \Ferienpass\Model\DataProcessing::findAll();
+    foreach ($GLOBALS['FERIENPASS_MOD'] as $group => $modules) {
+        if ('data_processing' === $group) {
+            $processings = \Ferienpass\Model\DataProcessing::findAll();
 
-            while (null !== $objProcessings && $objProcessings->next()) {
-                $GLOBALS['FERIENPASS_MOD'][$strGroup]['data_processing_'.$objProcessings->id] = array
-                (
+            while (null !== $processings && $processings->next()) {
+                $GLOBALS['FERIENPASS_MOD'][$group]['data_processing_'.$processings->id] = [
                     'callback' => 'Ferienpass\BackendModule\DataProcessing',
                     'icon'     => 'file-archive-o',
-                );
+                ];
             }
         }
 
 
-        foreach ($arrModules as $strModule => $arrConfig) {
+        foreach ($modules as $module => $config) {
             // Enable tables in ferienpass_setup
-            if (is_array($arrConfig['tables'])) {
+            if (is_array($config['tables'])) {
                 $GLOBALS['BE_MOD']['ferienpass']['ferienpass_management']['tables'] = array_merge(
                     $GLOBALS['BE_MOD']['ferienpass']['ferienpass_management']['tables'],
-                    $arrConfig['tables']
+                    $config['tables']
                 );
             }
         }
@@ -116,12 +107,11 @@ if ($_GET['do'] == 'ferienpass_management') {
 /**
  * Ferienpass status
  */
-$GLOBALS['FERIENPASS_STATUS'] = array
-(
+$GLOBALS['FERIENPASS_STATUS'] = [
     'confirmed',
     'waiting',
     'error',
-);
+];
 
 
 /**
@@ -129,7 +119,6 @@ $GLOBALS['FERIENPASS_STATUS'] = array
  */
 if (TL_MODE == 'BE') {
     $GLOBALS['TL_CSS'][] = 'system/modules/ferienpass/assets/css/backend.css';
-
 }
 
 
@@ -160,71 +149,58 @@ $GLOBALS['FE_MOD']['application']['ferienpass_messages'] = 'Ferienpass\Module\Me
  */
 $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
     (array)$GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'],
-    array(
-        'ferienpass' => array
-        (
-            'offer_al_status_change' => array
-            (
-                'recipients'            => array
-                (
+    [
+        'ferienpass' => [
+            'offer_al_status_change' => [
+                'recipients'            => [
                     'participant_email',
                     'host_email',
                     'admin_email',
                     'member_email',
-                ),
-                'sms_recipients'        => array
-                (
+                ],
+                'sms_recipients'        => [
                     'member_mobile',
                     'member_phone',
                     'participant_mobile',
                     'participant_phone',
-                ),
-                'email_text'            => array
-                (
+                ],
+                'email_text'            => [
                     'offer_*',
                     'participant_*',
                     'member_*',
-                ),
-                'email_html'            => array
-                (
+                ],
+                'email_html'            => [
                     'offer_*',
                     'participant_*',
                     'member_*',
-                ),
-                'email_sender_name'     => array
-                (
+                ],
+                'email_sender_name'     => [
                     'admin_email',
-                ),
-                'email_sender_address'  => array
-                (
-                    'admin_email'
-                ),
-                'email_recipient_cc'    => array
-                (
-                    'admin_email'
-                ),
-                'email_recipient_bcc'   => array
-                (
-                    'admin_email'
-                ),
-                'email_replyTo'         => array
-                (
-                    'admin_email'
-                ),
-                'sms_text'              => array
-                (
+                ],
+                'email_sender_address'  => [
+                    'admin_email',
+                ],
+                'email_recipient_cc'    => [
+                    'admin_email',
+                ],
+                'email_recipient_bcc'   => [
+                    'admin_email',
+                ],
+                'email_replyTo'         => [
+                    'admin_email',
+                ],
+                'sms_text'              => [
                     'offer_*',
                     'participant_*',
                     'member_*',
-                ),
-                'sms_recipients_region' => array
-                (
+                ],
+                'sms_recipients_region' => [
                     'participant_country',
                     'member_country',
-                ),
-            ),
-        ),
-    )
+                ],
+            ],
+        ],
+    ]
 );
 
 
@@ -246,11 +222,11 @@ $GLOBALS['TL_FFL']['multiColumnWizard'] = 'Ferienpass\Form\MultiColumnWizard';
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = array('Ferienpass\Helper\InsertTags', 'replaceInsertTags');
-$GLOBALS['TL_HOOKS']['createNewUser'][] = array('Ferienpass\Helper\UserAccount', 'createNewUser');
-$GLOBALS['TL_HOOKS']['closeAccount'][] = array('Ferienpass\Helper\UserAccount', 'closeAccount');
-$GLOBALS['TL_HOOKS']['getAllEvents'][] = array('Ferienpass\Helper\Events', 'getMetaModelAsEvents');
-$GLOBALS['TL_HOOKS']['simpleAjax'][] = array('Ferienpass\Helper\Ajax', 'handleDropboxWebhook');
+$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = ['Ferienpass\Helper\InsertTags', 'replaceInsertTags'];
+$GLOBALS['TL_HOOKS']['createNewUser'][] = ['Ferienpass\Helper\UserAccount', 'createNewUser'];
+$GLOBALS['TL_HOOKS']['closeAccount'][] = ['Ferienpass\Helper\UserAccount', 'closeAccount'];
+$GLOBALS['TL_HOOKS']['getAllEvents'][] = ['Ferienpass\Helper\Events', 'getMetaModelAsEvents'];
+$GLOBALS['TL_HOOKS']['simpleAjax'][] = ['Ferienpass\Helper\Ajax', 'handleDropboxWebhook'];
 
 //$GLOBALS['TL_DCA'][FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL)]['list']['label']['label_callback'] = array('Ferienpass\Helper\Dca', 'test');
 
