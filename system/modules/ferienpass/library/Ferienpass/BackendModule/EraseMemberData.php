@@ -79,7 +79,7 @@ class EraseMemberData extends \BackendModule
                 'label' => 'Ich bin mir bewusst, dass die Daten unwiderruflich gelöscht werden.',
             ],
         ];
-        $checkboxConfirm->name = 'confirm';
+        $checkboxConfirm->id = $checkboxConfirm->name = 'confirm';
         $checkboxConfirm->mandatory = true;
 
         /** @var \CheckBox|\Widget $checkboxResetPersist */
@@ -94,7 +94,7 @@ class EraseMemberData extends \BackendModule
                 ),
             ],
         ];
-        $checkboxResetPersist->name = 'resetPersist';
+        $checkboxResetPersist->id = $checkboxResetPersist->name = 'resetPersist';
 
         if ($formSubmit === \Input::post('FORM_SUBMIT')) {
             $checkboxConfirm->validate();

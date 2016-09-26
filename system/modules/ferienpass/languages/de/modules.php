@@ -41,6 +41,10 @@ $GLOBALS['TL_LANG']['FPMD']['management_module'] = 'Ferienpass-Verwaltung';
 
 $GLOBALS['TL_LANG']['FPMD']['data_processing'] = 'Datenverarbeitung';
 
+$GLOBALS['TL_LANG']['FPMD']['tools'] = 'Tools';
+$GLOBALS['TL_LANG']['FPMD']['erase_member_data'][0] = 'Personenbezogene Daten löschen';
+$GLOBALS['TL_LANG']['FPMD']['erase_member_data'][1] = 'Die personenenbezogenen Daten der Eltern löschen';
+
 $GLOBALS['TL_LANG']['FPMD']['setup'] = 'Einstellungen';
 $GLOBALS['TL_LANG']['FPMD']['data_processings'][0] = 'Datenverarbeitungen';
 $GLOBALS['TL_LANG']['FPMD']['data_processings'][1] = 'Die Datenverabeitungen (z.B. Export der Angebote) konfigurieren';
