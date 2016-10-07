@@ -116,6 +116,8 @@ $GLOBALS['FERIENPASS_STATUS'] = [
  */
 if (TL_MODE == 'BE') {
     $GLOBALS['TL_CSS'][] = 'assets/ferienpass/backend/css/backend.css';
+    $GLOBALS['TL_CSS'][] = 'assets/ferienpass/backend/css/be_mm_ferienpass.css';
+    $GLOBALS['TL_JAVASCRIPT'][] = 'assets/ferienpass/backend/js/be_mm_ferienpass.css';
 }
 
 
