@@ -63,8 +63,8 @@ class Management extends ModelList
 
         //@todo configurable in the backend
         // Disable buttons if ferienpass is live
-        unset($buttons[array_search('edit', $buttons)]);
-        unset($buttons[array_search('delete', $buttons)]);
+//        unset($buttons[array_search('edit', $buttons)]);
+//        unset($buttons[array_search('delete', $buttons)]);
 
         foreach ($buttons as $button) {
             $buttonData = [];

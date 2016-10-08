@@ -420,7 +420,8 @@ HTML;
                             (
                                 'items=%s&vargroup=',
                                 $this->item->get($this->aliasColName)
-                            )
+                            ),
+                            true
                         )
                     );
                 }

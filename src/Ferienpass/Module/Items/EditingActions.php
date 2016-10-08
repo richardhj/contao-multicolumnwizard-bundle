@@ -96,11 +96,11 @@ class EditingActions extends Items
 
         $this->linkTitle = $this->linkTitle ?: $url;
 
-        $this->Template->attribute = $this->rel ? ' data-lightbox="'.substr(
-                $this->rel,
-                9,
-                -1
-            ).'" data-lightbox-reload="" data-lightbox-iframe=""' : ''; //@todo
+//        $this->Template->attribute = $this->rel ? ' data-lightbox="'.substr(
+//                $this->rel,
+//                9,
+//                -1
+//            ).'" data-lightbox-reload="" data-lightbox-iframe=""' : ''; //@todo
         $this->Template->href = $url;
         $this->Template->link = $this->linkTitle;
         $this->Template->linkTitle = specialchars($this->titleText ?: $this->linkTitle);
