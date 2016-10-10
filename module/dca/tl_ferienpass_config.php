@@ -67,9 +67,10 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModels'),
 			'eval'             => array
 			(
-				'mandatory' => true,
-				'chosen'    => true,
-				'tl_class'  => 'w50'
+                'mandatory'          => true,
+                'includeBlankOption' => true,
+                'chosen'             => true,
+                'tl_class'           => 'w50'
 			),
 		),
 		Config::CONFIG_PREFIX . Config::PARTICIPANT_MODEL                        => array
@@ -79,9 +80,10 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModels'),
 			'eval'             => array
 			(
-				'mandatory' => true,
-				'chosen'    => true,
-				'tl_class'  => 'w50'
+                'mandatory'          => true,
+                'includeBlankOption' => true,
+                'chosen'             => true,
+                'tl_class'           => 'w50'
 			),
 		),
 		Config::CONFIG_PREFIX . Config::OFFER_ATTRIBUTE_NAME                     => array
@@ -91,9 +93,10 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'      => true,
-				'conditionField' => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
-				'tl_class'       => 'w50'
+                'mandatory'          => true,
+                'includeBlankOption' => true,
+                'conditionField'     => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
+                'tl_class'           => 'w50'
 			)
 		),
 		Config::CONFIG_PREFIX . Config::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE   => array
@@ -103,10 +106,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'                => true,
-				'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
-				'tl_class'                 => 'w50',
-				'metamodel_attribute_type' => 'checkbox'
+                'mandatory'                => true,
+                'includeBlankOption'       => true,
+                'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
+                'tl_class'                 => 'w50',
+                'metamodel_attribute_type' => 'checkbox'
 			),
 			'save_callback'    => array(array('Ferienpass\Helper\Dca', 'checkMetaModelAttributeType'))
 		),
@@ -117,10 +121,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'                => true,
-				'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
-				'tl_class'                 => 'w50',
-				'metamodel_attribute_type' => 'numeric'
+                'mandatory'                => true,
+                'includeBlankOption'       => true,
+                'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
+                'tl_class'                 => 'w50',
+                'metamodel_attribute_type' => 'numeric'
 			),
 			'save_callback'    => array(array('Ferienpass\Helper\Dca', 'checkMetaModelAttributeType'))
 		),
@@ -131,9 +136,10 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'      => true,
-				'conditionField' => Config::CONFIG_PREFIX . Config::PARTICIPANT_MODEL,
-				'tl_class'       => 'w50'
+                'mandatory'          => true,
+                'includeBlankOption' => true,
+                'conditionField'     => Config::CONFIG_PREFIX . Config::PARTICIPANT_MODEL,
+                'tl_class'           => 'w50'
 			)
 		),
 		Config::CONFIG_PREFIX . Config::PARTICIPANT_ATTRIBUTE_DATEOFBIRTH        => array
@@ -143,10 +149,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'                => true,
-				'conditionField'           => Config::CONFIG_PREFIX . Config::PARTICIPANT_MODEL,
-				'tl_class'                 => 'w50',
-				'metamodel_attribute_type' => 'timestamp'
+                'mandatory'                => true,
+                'includeBlankOption'       => true,
+                'conditionField'           => Config::CONFIG_PREFIX . Config::PARTICIPANT_MODEL,
+                'tl_class'                 => 'w50',
+                'metamodel_attribute_type' => 'timestamp'
 			),
 			'save_callback'    => array(array('Ferienpass\Helper\Dca', 'checkMetaModelAttributeType'))
 		),
@@ -157,10 +164,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'                => true,
-				'conditionField'           => Config::CONFIG_PREFIX . Config::PARTICIPANT_MODEL,
-				'tl_class'                 => 'w50',
-				'metamodel_attribute_type' => 'checkbox'
+                'mandatory'                => true,
+                'includeBlankOption'       => true,
+                'conditionField'           => Config::CONFIG_PREFIX . Config::PARTICIPANT_MODEL,
+                'tl_class'                 => 'w50',
+                'metamodel_attribute_type' => 'checkbox'
 			),
 			'save_callback'    => array(array('Ferienpass\Helper\Dca', 'checkMetaModelAttributeType'))
 		),
@@ -171,10 +179,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'                => true,
-				'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
-				'tl_class'                 => 'w50',
-				'metamodel_attribute_type' => 'age'
+                'mandatory'                => true,
+                'includeBlankOption'       => true,
+                'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
+                'tl_class'                 => 'w50',
+                'metamodel_attribute_type' => 'age'
 			),
 			'save_callback'    => array(array('Ferienpass\Helper\Dca', 'checkMetaModelAttributeType'))
 		),
@@ -185,10 +194,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 			'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
 			'eval'             => array
 			(
-				'mandatory'                => true,
-				'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
-				'tl_class'                 => 'w50',
-				'metamodel_attribute_type' => 'timestamp'
+                'mandatory'                => true,
+                'includeBlankOption'       => true,
+                'conditionField'           => Config::CONFIG_PREFIX . Config::OFFER_MODEL,
+                'tl_class'                 => 'w50',
+                'metamodel_attribute_type' => 'timestamp'
 			),
 			'save_callback'    => array(array('Ferienpass\Helper\Dca', 'checkMetaModelAttributeType'))
 		),
