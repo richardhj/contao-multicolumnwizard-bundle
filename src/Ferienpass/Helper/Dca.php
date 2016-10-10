@@ -183,11 +183,11 @@ class Dca extends Backend
     public function getOffersMetaModelRenderSettings()
     {
         $renderSettings = \Database::getInstance()
-            ->prepare('SELECT * FROM tl_metamodel_rendersettings WHERE pid=?')
+            ->prepare('SELECT * FROM tl_metamodel_rendersettings WHERE pid=? ORDER BY name')
             ->execute(Offer::getInstance()->getMetaModel()->get('id'));
 
         // Sort the render settings.
-        return asort($renderSettings->fetchEach('name'));
+        return $renderSettings->fetchEach('name');
     }
 
 
