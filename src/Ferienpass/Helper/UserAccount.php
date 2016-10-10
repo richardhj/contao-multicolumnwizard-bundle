@@ -11,8 +11,8 @@
 
 namespace Ferienpass\Helper;
 
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 
 
@@ -33,7 +33,7 @@ class UserAccount extends \Frontend
 	 */
 	public function createNewUser($intId, $arrData, $objModule)
 	{
-		$arrAllowedZipCodes = trimsplit(',', FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ALLOWED_ZIP_CODES));
+        $arrAllowedZipCodes = trimsplit(',', FerienpassConfig::getInstance()->registration_allowed_zip_codes);
 
 		if (empty($arrAllowedZipCodes))
 		{
@@ -119,7 +119,7 @@ class UserAccount extends \Frontend
 		// It is a front end call without a dc
 		if (0 === func_num_args())
 		{
-			foreach (deserialize(FerienpassConfig::get(FerienpassConfig::PARTICIPANT_REGISTRATION_REQUIRED_FIELDS)) as $field)
+            foreach (trimsplit(',', FerienpassConfig::getInstance()->registration_required_fields) as $field)
 			{
 				$GLOBALS['TL_DCA']['tl_member']['fields'][$field]['eval']['mandatory'] = true;
 			}

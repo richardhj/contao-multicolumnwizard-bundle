@@ -2,7 +2,7 @@
 
 namespace Ferienpass\Helper;
 
-use Ferienpass\Helper\Config as FerienpassConfig;
+use Ferienpass\Model\Config as FerienpassConfig;
 
 
 class InsertTags
@@ -21,7 +21,7 @@ class InsertTags
 			switch ($elements[1])
 			{
 				case 'max_applications_per_day':
-					return FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MAX_APPLICATIONS_PER_DAY);
+                    return FerienpassConfig::getInstance()->max_applications_per_day;
 				break;
 			}
 		}

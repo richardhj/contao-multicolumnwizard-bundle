@@ -14,9 +14,9 @@ use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
+use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\Offer;
 use MetaModels\DcGeneral\Data\Model;
@@ -76,11 +76,15 @@ class Dca extends Backend
     public function checkMetaModelAttributeType($value, $dc)
     {
         $attributeType = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['metamodel_attribute_type'];
-        $metaModelTableName = \Config::get(
-            $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']
-        );
+        $metaModelTableName = FerienpassConfig::getInstance()
+            ->{$GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']};
 
         $metaModel = Factory::getDefaultFactory()->getMetaModel($metaModelTableName);
+
+        if (null === $metaModel) {
+            return '';
+        }
+
         $attribute = $metaModel->getAttribute($value);
 
         if (null !== $attribute && $attributeType != $attribute->get('type')) {
@@ -247,7 +251,7 @@ class Dca extends Backend
         $model = $event->getModel();
 
         if ($model instanceof Model
-            && FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL) === $model->getProviderName()
+            && FerienpassConfig::getInstance()->participant_model === $model->getProviderName()
         ) {
             $args = $event->getArgs();
 
@@ -300,7 +304,7 @@ class Dca extends Backend
         $model = $event->getModel();
 
         if ($model instanceof Model
-            && FerienpassConfig::get(FerienpassConfig::OFFER_MODEL) === $model->getProviderName()
+            && FerienpassConfig::getInstance()->offer_model === $model->getProviderName()
         ) {
             /** @type \Model\Collection|DataProcessing $processsings */
             $processsings = DataProcessing::findBy('sync', '1');
@@ -326,10 +330,8 @@ class Dca extends Backend
 
     public function triggerAttendanceStatusChange(EncodePropertyValueFromWidgetEvent $event)
     {
-        if (($event->getEnvironment()->getDataDefinition()->getName() !== FerienpassConfig::get(
-                    FerienpassConfig::OFFER_MODEL
-                ))
-            || ($event->getProperty() !== FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX))
+        if (($event->getEnvironment()->getDataDefinition()->getName() !== FerienpassConfig::getInstance()->offer_model)
+            || ($event->getProperty() !== FerienpassConfig::getInstance()->offer_attribute_applicationlist_max)
         ) {
             return;
         }

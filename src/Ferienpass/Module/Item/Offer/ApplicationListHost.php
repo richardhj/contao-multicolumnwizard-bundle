@@ -10,10 +10,10 @@
 
 namespace Ferienpass\Module\Item\Offer;
 
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\Table;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Document;
 use Ferienpass\Model\Participant;
 use Ferienpass\Module\Item;
@@ -50,7 +50,7 @@ class ApplicationListHost extends Item
      */
     protected function compile()
     {
-        if (!$this->item->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))) {
+        if (!$this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)) {
             Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['inactive']);
             $this->Template->message = Message::generate();
 
@@ -58,7 +58,7 @@ class ApplicationListHost extends Item
         }
 
         $maxParticipants = $this->item->get(
-            FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX)
+            FerienpassConfig::getInstance()->offer_attribute_applicationlist_max
         );
         $attendances = Attendance::findByOffer($this->item->get('id'));
         $view = Participant::getInstance()->getMetaModel()->getView($this->metamodel_child_list_view);

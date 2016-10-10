@@ -7,7 +7,7 @@
  * @package Ferienpass
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
-use Ferienpass\Helper\Config as FerienpassConfig;
+use Ferienpass\Model\Config as FerienpassConfig;
 
 
 /**

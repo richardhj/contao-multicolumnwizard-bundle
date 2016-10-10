@@ -22,8 +22,8 @@
 
 namespace MetaModels\Filter\Setting;
 
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\Config as FerienpassConfig;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
@@ -79,9 +79,9 @@ SQL
 				,
 				$objMetaModel->getTableName(),
 				Attendance::getTable(),
-				FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE),
+                FerienpassConfig::getInstance()->offer_attribute_applicationlist_active,
 				$objAttribute->getColName(),
-				FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE),
+                FerienpassConfig::getInstance()->offer_attribute_date_check_age,
 			    time()
             );
 

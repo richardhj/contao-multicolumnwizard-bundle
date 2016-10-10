@@ -10,9 +10,9 @@
 
 namespace Ferienpass\Module\Items;
 
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Module\Items;
 use Haste\Form\Form;
 use MetaModels\FrontendEditingItem as Item;
@@ -232,10 +232,7 @@ class Editing extends Items
                 case 'timestamp':
 
                     // @todo this should be done with a setting in the dca and not hardcoded
-                    if ($this->metaModel->get('tableName') == FerienpassConfig::get(
-                            FerienpassConfig::PARTICIPANT_MODEL
-                        )
-                    ) {
+                    if ($this->metaModel->get('tableName') == FerienpassConfig::getInstance()->participant_model) {
                         continue;
                     }
 
@@ -329,11 +326,11 @@ HTML;
         }
 
         //@todo refactor: move
-        if ($this->metaModel->getTableName() == FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL)) {
+        if ($this->metaModel->getTableName() == FerienpassConfig::getInstance()->participant_model) {
             // Add validator for participant's dateOfBirth
             // It must not be changed afterwards
             $form->addValidator(
-                FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_DATEOFBIRTH),
+                FerienpassConfig::getInstance()->participant_attribute_dateofbirth,
                 function ($varValue, $objWidget, $objForm) {
                     if ($varValue != $this->item->get($objWidget->name)) {
                         if (Attendance::countByParticipant($this->item->get('id'))) {
@@ -346,7 +343,7 @@ HTML;
             // Add validator for participant's agreement for photos
             // It must not be revoked afterwards
             $form->addValidator(
-                FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_AGREEMENT_PHOTOS),
+                FerienpassConfig::getInstance()->participant_attribute_agreement_photos,
                 function ($varValue, $objWidget, $objForm) {
                     // Allow to grant but not to revoke
                     if ($varValue != $this->item->get($objWidget->name) && !$varValue) {

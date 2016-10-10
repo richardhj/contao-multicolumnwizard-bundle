@@ -3,7 +3,7 @@
 namespace Ferienpass\Helper;
 
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
-use Ferienpass\Helper\Config as FerienpassConfig;
+use Ferienpass\Model\Config as FerienpassConfig;
 use MetaModels\DcGeneral\Data\Model;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -30,7 +30,7 @@ class Subscriber implements EventSubscriberInterface
         $objModel = $event->getModel();
 
         if ($objModel instanceof Model
-            && FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL) === $objModel->getProviderName()
+            && FerienpassConfig::getInstance()->participant_model === $objModel->getProviderName()
         ) {
             $args = $event->getArgs();
             $args['firstname'] = 'Asdf';

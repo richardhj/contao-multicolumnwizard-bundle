@@ -10,7 +10,7 @@ namespace Ferienpass\Module\Items\Offers;
 
 use Contao\Environment;
 use Contao\PageModel;
-use Ferienpass\Helper\Config;
+use Ferienpass\Model\Config;
 use MetaModels\FrontendIntegration\Module\ModelList;
 
 
@@ -57,7 +57,7 @@ class Management extends ModelList
         }
 
         // Disable application list if not active
-        if (!$item->get(Config::get(Config::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))) {
+        if (!$item->get(Config::getInstance()->offer_attribute_applicationlist_active)) {
             unset($buttons[array_search('applicationlist', $buttons)]);
         }
 
