@@ -27,6 +27,7 @@
     "pixelfear/oauth2-dropbox": "dev-master",
     "richardhj/contao-member_logo": "*",
     "richardhj/contao-upload_preview_field": "*",
+      "richardhj/dc-general-single-model": "*",
     "terminal42/contao-conditionalselectmenu": "~3.0",
     "terminal42/notification_center": "~1.3"
   },

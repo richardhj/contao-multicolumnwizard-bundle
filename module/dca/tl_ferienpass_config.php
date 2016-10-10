@@ -17,14 +17,26 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 (
 
 	// Config
-	'config'       => array
+    'config'       => array
 	(
-		'dataContainer' => 'File',
-		'closed'        => true
+        'dataContainer' => 'General',
+        'forceEdit'     => true,
 	),
 
-	// Metapalettes
-	'metapalettes' => array
+    'dca_config'   => array
+    (
+        'data_provider' => array
+        (
+            'default' => array
+            (
+                'class' => 'DcGeneral\Data\SingleModelDataProvider',
+            ),
+        ),
+        'view'          => 'DcGeneral\Contao\View\Contao2BackendView\SingleModelView',
+    ),
+
+    // Metapalettes
+    'metapalettes' => array
 	(
 		'default' => array
 		(
@@ -58,7 +70,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_config'] = array
 	),
 
 	// Fields
-	'fields'       => array
+    'fields'       => array
 	(
 		Config::CONFIG_PREFIX . Config::OFFER_MODEL                              => array
 		(
