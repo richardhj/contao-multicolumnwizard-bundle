@@ -10,9 +10,9 @@
 
 namespace Ferienpass\Module\Item\Offer;
 
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 use Ferienpass\Module\Item;
 use Haste\DateTime\DateTime;
@@ -41,14 +41,14 @@ class ApplicationList extends Item
 //		$this->Template->al_state = $state;
 
         // Stop if the procedure is not used
-        if (!$this->item->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))) {
+        if (!$this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)) {
             $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'];
 
             return;
         }
 
         // Stop if the offer is in the past
-        if (time() >= $this->item->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE))) {
+        if (time() >= $this->item->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age)) {
             $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['past'];
 
             return;
@@ -57,9 +57,7 @@ class ApplicationList extends Item
 //		$this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList'][$state];
 
         $countParticipants = Attendance::countParticipants($this->item->get('id'));
-        $maxParticipants = $this->item->get(
-            FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX)
-        );
+        $maxParticipants = $this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_max);
 
         $availableParticipants = $maxParticipants - $countParticipants;
 
@@ -97,17 +95,17 @@ class ApplicationList extends Item
                 $this->item->get('id')
             )->getMatchingIds();
             $allowedParticipantsIds = [];
-            $maxApplicationsPerDay = FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MAX_APPLICATIONS_PER_DAY);
+            $maxApplicationsPerDay = FerienpassConfig::getInstance()->max_applications_per_day;
 
             while ($participants->next()) {
                 $dateOfBirth = new DateTime(
                     '@'.$participants
                         ->getItem()
-                        ->get(FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_DATEOFBIRTH))
+                        ->get(FerienpassConfig::getInstance()->participant_attribute_dateofbirth)
                 );
                 $dateOffer = new DateTime(
                     '@'.$this->item
-                        ->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE))
+                        ->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age)
                 );
 
                 $age = $dateOfBirth
@@ -119,9 +117,7 @@ class ApplicationList extends Item
                 $isAttending = (in_array($participants->getItem()->get('id'), $participantIds));
                 $isAgeAllowed = in_array(
                     $this->item->get('id'),
-                    $this->item->getAttribute(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_AGE))->searchFor(
-                        $age
-                    )
+                    $this->item->getAttribute(FerienpassConfig::getInstance()->offer_attribute_age)->searchFor($age)
                 );
 
                 // Check if a participant is allowed for this offer and set the corresponding language key
@@ -141,7 +137,7 @@ class ApplicationList extends Item
                     'label'    => sprintf(
                         $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label'][$languageKey],
                         $participants->getItem()->parseAttribute(
-                            FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_NAME)
+                            FerienpassConfig::getInstance()->participant_attribute_name
                         )['text'] # = parsed participant name
                     ),
                     'disabled' => ($languageKey != 'ok'),
@@ -199,7 +195,7 @@ class ApplicationList extends Item
                         $attendance->save();
 
                         $participantName = Participant::getInstance()->findById($participant)->parseAttribute(
-                            FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_NAME)
+                            FerienpassConfig::getInstance()->participant_attribute_name
                         )['text'];
 
                         // Add message corresponding to attendance's status

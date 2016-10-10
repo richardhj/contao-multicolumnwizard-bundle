@@ -10,7 +10,7 @@
 
 namespace Ferienpass\Model;
 
-use Ferienpass\Helper\Config as FerienpassConfig;
+use Ferienpass\Model\Config as FerienpassConfig;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\Factory;
 use MetaModels\Filter\Filter;
@@ -70,7 +70,7 @@ abstract class MetaModelBridge
 
         // Get MetaModel object
         $factory = Factory::getDefaultFactory();
-        $this->metaModel = $factory->getMetaModel(FerienpassConfig::get($configKey.':model'));
+        $this->metaModel = $factory->getMetaModel(FerienpassConfig::getInstance()->{$configKey.'_model'});
 
         // Exit if MetaModel object could not be created
         if (null === $this->metaModel) {

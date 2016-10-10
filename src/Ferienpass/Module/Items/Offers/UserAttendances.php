@@ -13,11 +13,11 @@ namespace Ferienpass\Module\Items\Offers;
 use Contao\Controller;
 use Contao\Input;
 use Contao\RequestToken;
-use Ferienpass\Helper\Config as FerienpassConfig;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\Table;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
+use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 use Ferienpass\Module\Items;
 
@@ -75,9 +75,8 @@ class UserAttendances extends Items
                     TL_ERROR
                 );
             } // Check for offer's date
-            elseif ($this->metaModel->findById($attendanceToDelete->offer_id)->get(
-                    FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE)
-                ) <= time()
+            elseif ($this->metaModel->findById($attendanceToDelete->offer_id)
+                    ->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age) <= time()
             ) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteOfferInPast']);
             } // Delete
@@ -165,22 +164,22 @@ class UserAttendances extends Items
                             break;
 
                         case 'recall':
-                            if ($item->get(
-                                    FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE)
-                                ) >= time()
+                            if ($item
+                                    ->get(
+                                        FerienpassConfig::getInstance()->offer_attribute_date_check_age
+                                    ) >= time()
                             ) {
                                 $url = $this->addToUrl('action=delete::'.$attendances->id.'::'.REQUEST_TOKEN);
                                 $attribute = ' onclick="return confirm(\''.htmlspecialchars(
                                         sprintf(
                                             $GLOBALS['TL_LANG']['MSC']['attendanceConfirmDeleteLink'],
                                             $item->parseAttribute(
-                                                FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_NAME)
+                                                FerienpassConfig::getInstance()->offer_attribute_name
                                             )['text'],
-                                            Participant::getInstance()->findById(
-                                                $attendances->participant_id
-                                            )->parseAttribute(
-                                                FerienpassConfig::get(FerienpassConfig::PARTICIPANT_ATTRIBUTE_NAME)
-                                            )['text']
+                                            Participant::getInstance()->findById($attendances->participant_id)
+                                                ->parseAttribute(
+                                                    FerienpassConfig::getInstance()->participant_attribute_name
+                                                )['text']
                                         )
                                     )
                                     .'\')"';

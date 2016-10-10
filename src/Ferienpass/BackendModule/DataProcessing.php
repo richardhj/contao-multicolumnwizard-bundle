@@ -11,7 +11,7 @@
 namespace Ferienpass\BackendModule;
 
 
-use Ferienpass\Helper\Config;
+use Ferienpass\Model\Config;
 use Ferienpass\Model\Offer;
 
 
@@ -67,8 +67,8 @@ class DataProcessing extends \BackendModule
 				{
 					$arrOffers[] = array
 					(
-						'value' => $objOffers->getItem()->get('id'),
-						'label' => $objOffers->getItem()->get(Config::get(Config::OFFER_ATTRIBUTE_NAME))
+                        'value' => $objOffers->getItem()->get('id'),
+                        'label' => $objOffers->getItem()->get(Config::getInstance()->offer_attribute_name),
 					);
 				}
 

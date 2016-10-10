@@ -9,7 +9,7 @@
 namespace Ferienpass\Model;
 
 use Contao\Model;
-use Ferienpass\Helper\Config as FerienpassConfig;
+use Ferienpass\Model\Config as FerienpassConfig;
 use MetaModels\IItem;
 use Model\Registry;
 use NotificationCenter\Model\Notification;
@@ -299,8 +299,8 @@ class Attendance extends Model
 		}
 
 		// Offers without usage of application list or without limit
-		if (!$offer->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE))
-			|| !($max = $offer->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX)))
+        if (!$offer->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)
+            || !($max = $offer->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_max))
 		)
 		{
 			return AttendanceStatus::findConfirmed();

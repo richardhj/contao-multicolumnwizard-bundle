@@ -1,12 +1,14 @@
 <?php
 
-use Ferienpass\Helper\Config;
+use Ferienpass\Model\Config;
 use Ferienpass\Model\Participant;
 use Haste\Util\Format;
 
 
 $countParticipants = count($this->items);
-$maxParticipants = \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer_id)->get(Config::get(Config::OFFER_ATTRIBUTE_APPLICATIONLIST_MAX));
+$maxParticipants = \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer_id)->get(
+	Config::getInstance()->offer_attribute_applicationlist_max
+);
 $countParticipantsConfirmed = min($countParticipants, $maxParticipants);
 
 $strParticipantParentColName = Participant::getInstance()->getOwnerAttribute()->getColName();
