@@ -76,8 +76,8 @@ class Dca extends Backend
     public function checkMetaModelAttributeType($value, $dc)
     {
         $attributeType = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['metamodel_attribute_type'];
-        $metaModelTableName = FerienpassConfig::getInstance(
-        )->{$GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']};
+        $metaModelTableName = FerienpassConfig::getInstance()
+            ->{$GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']};
 
         $metaModel = Factory::getDefaultFactory()->getMetaModel($metaModelTableName);
 
