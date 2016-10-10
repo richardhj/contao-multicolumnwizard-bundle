@@ -486,7 +486,7 @@ class DataProcessing extends Model
 		$objRoot->setAttribute('id', $intId);
 
 		// Add variant ids (order will be important for following processings)
-		if ($objVariants->getCount())
+        if (null !== $objVariants && $objVariants->getCount())
 		{
 			$arrVariantIds = array();
 
