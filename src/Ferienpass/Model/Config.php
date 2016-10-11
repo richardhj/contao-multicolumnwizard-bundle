@@ -8,6 +8,8 @@
 
 namespace Ferienpass\Model;
 
+use DcGeneral\Contao\Model\AbstractSingleModel;
+
 
 /**
  * Class Config
