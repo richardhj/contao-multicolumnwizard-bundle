@@ -39,7 +39,7 @@ abstract class AbstractSingleModel
     protected $arrModified = [];
 
 
-    protected static $objInstance;
+    private static $objInstance;
 
 
     /**
@@ -52,7 +52,7 @@ abstract class AbstractSingleModel
 
         if (null !== $result) {
             while ($result->next()) {
-                $this->arrData[$result->name] = $result->value;
+                $this->arrData[$result->field] = $result->value;
             }
         }
     }
@@ -151,7 +151,7 @@ abstract class AbstractSingleModel
         $query = 'INSERT INTO '.static::$strTable.' %s';
         $queryUpdate = 'UPDATE %s';
 
-        foreach ($this->arrModified as $key) {
+        foreach ($this->arrModified as $field) {
 
             \Database::getInstance()
                 ->prepare
@@ -164,11 +164,11 @@ abstract class AbstractSingleModel
                         '',
                         \Database::getInstance()
                             ->prepare($queryUpdate)
-                            ->set(['value' => $this->$key])
+                            ->set(['value' => $this->$field])
                             ->query
                     )
                 )
-                ->set(['name' => $key, 'value' => $this->$key])
+                ->set(['field' => $field, 'value' => $this->$field])
                 ->execute();
         }
 

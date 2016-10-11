@@ -36,6 +36,9 @@ class Config extends AbstractSingleModel
     protected static $strTable = 'tl_ferienpass_config';
 
 
+    protected static $objInstance;
+
+
     /**
      * MetaModels
      */
