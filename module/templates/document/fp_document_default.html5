@@ -15,11 +15,16 @@
 			</tr>
 			<tr>
 				<td style="font-weight:bold;">Veranstaltung:</td>
-				<td colspan="3"><?php echo \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer_id)->get('name'); ?></td>
+                <td colspan="3"><?php echo \Ferienpass\Model\Offer::getInstance()->findById(
+                        $this->collection->offer
+                    )->get('name'); ?></td>
 			</tr>
 			<tr>
 				<td style="font-weight:bold;">Veranstaltung am:</td>
-				<td colspan="4"><?php echo \Date::parse($this->datimFormat, \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer_id)->get('date')); ?></td>
+                <td colspan="4"><?php echo \Date::parse(
+                        $this->datimFormat,
+                        \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer)->get('date')
+                    ); ?></td>
 			</tr>
 			<tr>
 				<td style="font-weight:bold;">Dokument erstellt am:</td>

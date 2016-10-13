@@ -63,7 +63,7 @@ class UserAttendances extends Items
             elseif (null === $attendanceToDelete) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteNotFound']);
             } // Check for permission
-            elseif (!Participant::getInstance()->isProperChild($attendanceToDelete->participant_id, $this->User->id)) {
+            elseif (!Participant::getInstance()->isProperChild($attendanceToDelete->participant, $this->User->id)) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteMissingPermission']);
                 \System::log(
                     sprintf(
@@ -75,7 +75,7 @@ class UserAttendances extends Items
                     TL_ERROR
                 );
             } // Check for offer's date
-            elseif ($this->metaModel->findById($attendanceToDelete->offer_id)
+            elseif ($this->metaModel->findById($attendanceToDelete->offer)
                     ->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age) <= time()
             ) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteOfferInPast']);
@@ -129,7 +129,7 @@ class UserAttendances extends Items
                 foreach ($fields as $field) {
                     $f = trimsplit('.', $field);
                     /** @var \MetaModels\Item $item */
-                    $item = $this->metaModel->findById($attendances->offer_id);
+                    $item = $this->metaModel->findById($attendances->offer);
 
                     switch ($f[0]) {
                         case 'offer':
@@ -137,7 +137,7 @@ class UserAttendances extends Items
                             break;
 
                         case 'participant':
-                            $value = Participant::getInstance()->findById($attendances->participant_id)->get($f[1]);
+                            $value = Participant::getInstance()->findById($attendances->participant)->get($f[1]);
                             break;
 
                         case 'state':
@@ -176,7 +176,7 @@ class UserAttendances extends Items
                                             $item->parseAttribute(
                                                 FerienpassConfig::getInstance()->offer_attribute_name
                                             )['text'],
-                                            Participant::getInstance()->findById($attendances->participant_id)
+                                            Participant::getInstance()->findById($attendances->participant)
                                                 ->parseAttribute(
                                                     FerienpassConfig::getInstance()->participant_attribute_name
                                                 )['text']

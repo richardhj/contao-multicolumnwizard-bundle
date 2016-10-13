@@ -184,8 +184,8 @@ class ApplicationList extends Item
                         // Set new attendance
                         $attendance = new Attendance();
                         $attendance->tstamp = time();
-                        $attendance->offer_id = $this->item->get('id');
-                        $attendance->participant_id = $participant;
+                        $attendance->offer = $this->item->get('id');
+                        $attendance->participant = $participant;
 
                         // Fetch status
                         $status = $attendance->fetchStatus();

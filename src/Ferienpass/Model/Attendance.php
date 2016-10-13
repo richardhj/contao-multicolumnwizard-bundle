@@ -18,8 +18,8 @@ use NotificationCenter\Model\Notification;
 /**
  * Class Attendance
  * @property integer $tstamp
- * @property integer $offer_id
- * @property integer $participant_id
+ * @property integer $offer
+ * @property integer $participant
  * @property integer $status
  *
  * @package Ferienpass
@@ -54,7 +54,7 @@ class Attendance extends Model
 	public static function findByOffer($offerId, array $options = [])
 	{
 		return static::findBy(
-			'offer_id',
+            'offer',
 			$offerId,
 			array_merge
 			(
@@ -89,7 +89,12 @@ class Attendance extends Model
 		}
 
 		/** @var \Database\Result $result */
-		$result = \Database::getInstance()->query("SELECT * FROM " . static::$strTable . " WHERE participant_id IN(" . implode(',', $participantIds) . ") ORDER BY tstamp,id");
+        $result = \Database::getInstance()->query(
+            "SELECT * FROM ".static::$strTable." WHERE participant IN(".implode(
+                ',',
+                $participantIds
+            ).") ORDER BY tstamp,id"
+        );
 
 		return static::createCollectionFromDbResult($result, static::$strTable);
 	}
@@ -135,7 +140,7 @@ class Attendance extends Model
 	 */
 	public static function countByOffer($offerId)
 	{
-		return static::countBy('offer_id', $offerId);
+        return static::countBy('offer', $offerId);
 	}
 
 
@@ -148,7 +153,7 @@ class Attendance extends Model
 	 */
 	public static function countByParticipant($participantId)
 	{
-		return static::countBy('participant_id', $participantId);
+        return static::countBy('participant', $participantId);
 	}
 
 
@@ -171,8 +176,8 @@ class Attendance extends Model
 		$date = new \Date($timestamp);
 
 		$options =            [
-			'column' => ['participant_id=?', 'tstamp>=?', 'tstamp<=?'],
-			'value'  => [$participantId, $date->dayBegin, $date->dayEnd]
+            'column' => ['participant=?', 'tstamp>=?', 'tstamp<=?'],
+            'value'  => [$participantId, $date->dayBegin, $date->dayEnd]
             ];
 
 		if ($status)
@@ -194,7 +199,7 @@ class Attendance extends Model
 	public static function isNotExistent($participantId, $offerId)
 	{
 		return !(\Database::getInstance()
-			->prepare("SELECT id FROM " . static::$strTable . " WHERE participant_id=? AND offer_id=?")
+            ->prepare("SELECT id FROM ".static::$strTable." WHERE participant=? AND offer=?")
 			->execute($participantId, $offerId)
 			->numRows);
 	}
@@ -221,8 +226,8 @@ class Attendance extends Model
 			/** @noinspection PhpUndefinedMethodInspection */
             $notification = Notification::findByPk($this->fetchStatus()->notification_new);
 
-			$participant = Participant::getInstance()->findById($this->participant_id);
-			$offer = Offer::getInstance()->findById($this->offer_id);
+            $participant = Participant::getInstance()->findById($this->participant);
+            $offer = Offer::getInstance()->findById($this->offer);
 
 			// Send the notification if one is set
 			if (null !== $notification)
@@ -240,7 +245,7 @@ class Attendance extends Model
 	 */
 	public function delete()
 	{
-		$offer = $this->offer_id;
+        $offer = $this->offer;
 
 		if (parent::delete())
 		{
@@ -255,7 +260,7 @@ class Attendance extends Model
 	 */
 	public function getPosition()
 	{
-		$attendances = static::findByOffer($this->offer_id); # collection ordered by tstamp,id
+        $attendances = static::findByOffer($this->offer); # collection ordered by tstamp,id
 
 		if (null === $attendances)
 		{
@@ -270,7 +275,7 @@ class Attendance extends Model
 				continue;
 			}
 
-			if ($attendances->current()->participant_id == $this->participant_id)
+            if ($attendances->current()->participant == $this->participant)
 			{
 				return $i;
 			}
@@ -285,11 +290,11 @@ class Attendance extends Model
 	 *
 	 * @return AttendanceStatus
 	 */
-    public function fetchStatus() //todo rename to fetchStatus() as it is no "getter"
+    public function fetchStatus()
 	{
         $applicationSystem = new Lot();
 
-        return $applicationSystem->findAttendanceStatus($this, Offer::getInstance()->findById($this->offer_id));
+        return $applicationSystem->findAttendanceStatus($this, Offer::getInstance()->findById($this->offer));
     }
 
 
@@ -342,8 +347,8 @@ class Attendance extends Model
 	 */
 	protected static function processStatusChange($attendance, $newStatus)
 	{
-		$participant = Participant::getInstance()->findById($attendance->participant_id);
-		$offer = Offer::getInstance()->findById($attendance->offer_id);
+        $participant = Participant::getInstance()->findById($attendance->participant);
+        $offer = Offer::getInstance()->findById($attendance->offer);
 
 		/** @var AttendanceStatus $oldStatus */
 		$oldStatus = $attendance->getRelated('status');

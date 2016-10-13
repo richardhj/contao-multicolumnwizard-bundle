@@ -66,10 +66,10 @@ class AttendanceAvailable extends Checkbox
 SELECT item.id
 FROM %1$s AS item
 LEFT JOIN (
-	SELECT offer_id, COUNT(id) as current_participants
+	SELECT offer, COUNT(id) as current_participants
 	FROM %2$s
-	GROUP BY %2$s.offer_id
-) as attendance ON attendance.offer_id = item.id
+	GROUP BY %2$s.offer
+) as attendance ON attendance.offer = item.id
 WHERE (
 	item.%3$s <> 1
 	OR (item.%3$s = 1 AND (item.%4$s > current_participants OR ISNULL(current_participants)))

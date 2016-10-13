@@ -75,7 +75,7 @@ class ApplicationListHost extends Item
 
             // Walk each attendee
             while ($attendances->next()) {
-                $participant = Participant::getInstance()->findById($attendances->participant_id);
+                $participant = Participant::getInstance()->findById($attendances->participant);
                 $values = [];
 
                 // Participant is not existent

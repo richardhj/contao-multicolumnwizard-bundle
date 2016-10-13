@@ -11,10 +11,13 @@
 use Ferienpass\Model\AttendanceStatus;
 
 
+$table = Ferienpass\Model\Attendance::getTable();
+
+
 /**
  * Table tl_ferienpass_attendance
  */
-$GLOBALS['TL_DCA']['tl_ferienpass_attendance'] = array
+$GLOBALS['TL_DCA'][$table] = array
 (
 
 	// Config
@@ -32,23 +35,23 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendance'] = array
 	// Fields
 	'fields' => array
 	(
-		'id' => array
+        'id'          => array
 		(
 			'sql'               =>  "int(10) unsigned NOT NULL auto_increment",
 		),
-		'tstamp' => array
+        'tstamp'      => array
 		(
 			'sql'               =>  "int(10) unsigned NOT NULL default '0'",
 		),
-		'offer_id' => array
+        'offer'       => array
 		(
 			'sql'               =>  "int(10) unsigned NOT NULL default '0'",
 		),
-		'participant_id' => array
+        'participant' => array
 		(
 			'sql'               =>  "int(10) unsigned NOT NULL default '0'",
 		),
-		'status' => array
+        'status'      => array
 		(
 			'sql'               =>  "int(10) unsigned NOT NULL default '0'",
 			'relation'          => array('type' => 'hasOne', 'table' => AttendanceStatus::getTable())

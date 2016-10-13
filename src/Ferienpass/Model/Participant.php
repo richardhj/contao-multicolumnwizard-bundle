@@ -131,7 +131,7 @@ class Participant extends MetaModelBridge
 
 		if (null !== $attendances)
 		{
-			return new StaticIdList(array_values($attendances->fetchEach('participant_id')));
+            return new StaticIdList(array_values($attendances->fetchEach('participant')));
 		}
 
 		return new StaticIdList([]);

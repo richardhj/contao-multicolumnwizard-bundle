@@ -6,7 +6,7 @@ use Haste\Util\Format;
 
 
 $countParticipants = count($this->items);
-$maxParticipants = \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer_id)->get(
+$maxParticipants = \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer)->get(
 	Config::getInstance()->offer_attribute_applicationlist_max
 );
 $countParticipantsConfirmed = min($countParticipants, $maxParticipants);
