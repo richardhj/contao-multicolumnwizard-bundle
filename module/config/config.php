@@ -106,6 +106,7 @@ if ($_GET['do'] == 'ferienpass_management') {
  */
 $GLOBALS['FERIENPASS_STATUS'] = [
     'confirmed',
+    'waitlisted',
     'waiting',
     'error',
 ];

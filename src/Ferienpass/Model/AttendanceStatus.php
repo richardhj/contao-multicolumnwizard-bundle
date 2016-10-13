@@ -47,7 +47,7 @@ class AttendanceStatus extends Model
 
 
 	/**
-	 * Find the status whose type is "waiting-list"
+     * Find the status whose type is "waiting"
 	 *
 	 * @return AttendanceStatus
 	 */
@@ -55,6 +55,17 @@ class AttendanceStatus extends Model
 	{
 		return static::findByType('waiting');
 	}
+
+
+    /**
+     * Find the status whose type is "on waiting-list"
+     *
+     * @return AttendanceStatus
+     */
+    public static function findWaitlisted()
+    {
+        return static::findByType('waitlisted');
+    }
 
 
 	/**

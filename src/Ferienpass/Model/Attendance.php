@@ -316,7 +316,7 @@ class Attendance extends Model
 			}
 			else
 			{
-				return AttendanceStatus::findWaiting();
+                return AttendanceStatus::findWaitlisted();
 			}
 		}
 		// Attendance not saved yet
@@ -328,7 +328,7 @@ class Attendance extends Model
 			}
 			else
 			{
-				return AttendanceStatus::findWaiting();
+                return AttendanceStatus::findWaitlisted();
 			}
 		}
 	}

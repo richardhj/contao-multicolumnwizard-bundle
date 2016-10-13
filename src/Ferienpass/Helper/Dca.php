@@ -224,7 +224,7 @@ class Dca extends Backend
      */
     public function addDefaultStatus()
     {
-        if ('' !== Input::get('act') || AttendanceStatus::countAll() > 0) {
+        if ('' !== Input::get('act') || AttendanceStatus::countAll() === count($GLOBALS['FERIENPASS_STATUS'])) {
             return;
         }
 
@@ -239,6 +239,10 @@ class Dca extends Backend
         }
 
         foreach ($status as $data) {
+            if (null !== AttendanceStatus::findByType($data['type'])) {
+                continue;
+            }
+
             $objStatus = new AttendanceStatus();
             $objStatus->setRow($data);
             $objStatus->save();
