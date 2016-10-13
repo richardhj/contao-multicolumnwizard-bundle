@@ -188,7 +188,7 @@ class ApplicationList extends Item
                         $attendance->participant_id = $participant;
 
                         // Fetch status
-                        $status = $attendance->getStatus();
+                        $status = $attendance->fetchStatus();
                         $attendance->status = $status->id;
 
                         // Save attendance

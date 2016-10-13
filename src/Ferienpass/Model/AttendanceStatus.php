@@ -19,6 +19,8 @@ use Contao\Model;
  * @property string  $cssClass
  * @property string  $type
  * @property string  $title
+ * @property bool    $increasesCount
+ * @property bool    $locked
  * @property integer $notification_new
  * @property integer $notification_onChange
  *

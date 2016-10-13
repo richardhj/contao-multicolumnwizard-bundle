@@ -9,7 +9,7 @@
 namespace Ferienpass\Model;
 
 use Contao\Model;
-use Ferienpass\Model\Config as FerienpassConfig;
+use Ferienpass\ApplicationSystem\Lot;
 use MetaModels\IItem;
 use Model\Registry;
 use NotificationCenter\Model\Notification;
@@ -219,7 +219,7 @@ class Attendance extends Model
 			 * @var Notification     $notification
 			 */
 			/** @noinspection PhpUndefinedMethodInspection */
-			$notification = Notification::findByPk($this->getStatus()->notification_new);
+            $notification = Notification::findByPk($this->fetchStatus()->notification_new);
 
 			$participant = Participant::getInstance()->findById($this->participant_id);
 			$offer = Offer::getInstance()->findById($this->offer_id);
@@ -251,7 +251,7 @@ class Attendance extends Model
 
 	/**
 	 * Get attendance's current position
-	 * @return integer|null if participant not in attendance list (yet) or has error status
+     * @return integer|null if participant not in attendance list (yet) or has error status. Index starting from 1
 	 */
 	public function getPosition()
 	{
@@ -264,9 +264,7 @@ class Attendance extends Model
 
 		for ($i = 1; $attendances->next(); $i++)
 		{
-			// Attendances with error do not increase the index
-			/** @var Attendance $attendances ->current() */
-			if ($attendances->current()->status == AttendanceStatus::findError()->id)
+            if (!$attendances->current()->getRelated('status')->increasesCount)
 			{
 				--$i;
 				continue;
@@ -287,50 +285,21 @@ class Attendance extends Model
 	 *
 	 * @return AttendanceStatus
 	 */
-	public function getStatus()
+    public function fetchStatus() //todo rename to fetchStatus() as it is no "getter"
 	{
-		/** @type IItem $offer */
-		$offer = Offer::getInstance()->findById($this->offer_id);
+        $applicationSystem = new Lot();
 
-		// An error status is persistent
-		if ($this->status == AttendanceStatus::findError()->id)
-		{
-			return AttendanceStatus::findError();
-		}
+        return $applicationSystem->findAttendanceStatus($this, Offer::getInstance()->findById($this->offer_id));
+    }
 
-		// Offers without usage of application list or without limit
-        if (!$offer->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)
-            || !($max = $offer->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_max))
-		)
-		{
-			return AttendanceStatus::findConfirmed();
-		}
 
-		$position = $this->getPosition();
-
-		if (null !== $position)
-		{
-			if ($position <= $max)
-			{
-				return AttendanceStatus::findConfirmed();
-			}
-			else
-			{
-                return AttendanceStatus::findWaitlisted();
-			}
-		}
-		// Attendance not saved yet
-		else
-		{
-			if (static::countParticipants($offer->get('id')) < $max) # use '<' here because the count will be increased after saving the new attendance
-			{
-				return AttendanceStatus::findConfirmed();
-			}
-			else
-			{
-                return AttendanceStatus::findWaitlisted();
-			}
-		}
+    /**
+     * @return AttendanceStatus
+     */
+    public function getStatus()
+    {
+        /** @var AttendanceStatus $this ->getRelated('status') */
+        return $this->getRelated('status');
 	}
 
 
@@ -355,7 +324,7 @@ class Attendance extends Model
 			 * @var Attendance       $attendances ->current()
 			 * @var AttendanceStatus $status
 			 */
-			$status = $attendances->current()->getStatus();
+            $status = $attendances->current()->fetchStatus();
 
 			if ($attendances->status != $status->id)
 			{

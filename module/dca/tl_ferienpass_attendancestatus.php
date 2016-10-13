@@ -88,15 +88,15 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 	// Fields
 	'fields' => array
 	(
-		'id' => array
+        'id' => array
 		(
 			'sql'                 =>  "int(10) unsigned NOT NULL auto_increment",
 		),
-		'tstamp' => array
+        'tstamp' => array
 		(
 			'sql'                 =>  "int(10) unsigned NOT NULL default '0'",
 		),
-		'name' => array
+        'name' => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['name'],
 			'exclude'               => true,
@@ -104,7 +104,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 			'eval'                  => array('mandatory'=>true, 'maxlength'=>255, 'tl_class'=>'w50'),
 			'sql'                   => "varchar(255) NOT NULL default ''",
 		),
-		'type' => array
+        'type'             => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['type'],
 			'exclude'               => true,
@@ -113,7 +113,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 			'eval'                  => array('tl_class'=>'w50', 'unique'=>true),
 			'sql'                   => "varchar(64) NOT NULL default ''"
 		),
-		'title' => array
+        'title'            => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['title'],
 			'exclude'               => true,
@@ -121,7 +121,23 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 			'eval'                  => array('maxlength'=>255, 'tl_class'=>'w50'),
 			'sql'                   => "varchar(255) NOT NULL default ''",
 		),
-		'notification_new' => array
+        'increasesCount'   => array
+        (
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['increasesCount'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => array('tl_class' => 'w50'),
+            'sql'       => "char(1) NOT NULL default ''",
+        ),
+        'locked'           => array
+        (
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['locked'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => array('tl_class' => 'w50'),
+            'sql'       => "char(1) NOT NULL default ''",
+        ),
+        'notification_new' => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['notification_new'],
 			'exclude'               => true,
@@ -131,7 +147,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 			'sql'                   => "int(10) unsigned NOT NULL default '0'",
 			'relation'              => array('type' => 'hasOne', 'table' => Notification::getTable())
 		),
-		'notification_onChange' => array
+        'notification_onChange' => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['notification_onChange'],
 			'exclude'               => true,
@@ -141,7 +157,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 			'sql'                   => "int(10) unsigned NOT NULL default '0'",
 			'relation'              => array('type' => 'hasOne', 'table' => Notification::getTable())
 		),
-		'cssClass' => array
+        'cssClass' => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['cssClass'],
 			'exclude'               => true,
