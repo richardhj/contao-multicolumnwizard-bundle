@@ -17,10 +17,17 @@ array_insert(
     1,
     [
         'ferienpass' => [
-            'ferienpass_management' => [
+            'ferienpass_management'  => [
                 'callback' => 'Ferienpass\BackendModule\Management',
                 'tables'   => [],
                 'icon'     => 'assets/ferienpass/backend/img/equalizer.png',
+            ],
+            'ferienpass_attendances' => [
+                'tables' => [
+                    Ferienpass\Model\Attendance::getTable(),
+                    'mm_ferienpass',
+                ],
+                'icon'   => 'assets/ferienpass/backend/img/equalizer.png',
             ],
         ],
     ]
