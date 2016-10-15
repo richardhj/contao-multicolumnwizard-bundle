@@ -10,13 +10,15 @@
 
 namespace Ferienpass\Module\Item\Offer;
 
+use Ferienpass\Event\ApplicationListSubscriber;
+use Ferienpass\Event\CreateParticipantOptionsForApplicationListEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 use Ferienpass\Module\Item;
-use Haste\DateTime\DateTime;
 use Haste\Form\Form;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 /**
@@ -37,6 +39,10 @@ class ApplicationList extends Item
      */
     protected function compile()
     {
+        global $container;
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $container['event-dispatcher'];
+
 //		$state = $this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE)) ? 'active' : 'inactive';
 //		$this->Template->al_state = $state;
 
@@ -90,59 +96,23 @@ class ApplicationList extends Item
 
             // Build options
             $options = [];
-            $participantIds = Participant::getInstance()->byParentAndOfferFilter(
-                $this->User->id,
-                $this->item->get('id')
-            )->getMatchingIds();
-            $allowedParticipantsIds = [];
-            $maxApplicationsPerDay = FerienpassConfig::getInstance()->max_applications_per_day;
 
             while ($participants->next()) {
-                $dateOfBirth = new DateTime(
-                    '@'.$participants
-                        ->getItem()
-                        ->get(FerienpassConfig::getInstance()->participant_attribute_dateofbirth)
-                );
-                $dateOffer = new DateTime(
-                    '@'.$this->item
-                        ->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age)
-                );
-
-                $age = $dateOfBirth
-                    ->getAge($dateOffer); # Use offer's date for diff check
-
-                $isLimitReached = ($maxApplicationsPerDay && Attendance::countByParticipantAndDay(
-                        $participants->getItem()->get('id')
-                    ) >= $maxApplicationsPerDay) ? true : false;
-                $isAttending = (in_array($participants->getItem()->get('id'), $participantIds));
-                $isAgeAllowed = in_array(
-                    $this->item->get('id'),
-                    $this->item->getAttribute(FerienpassConfig::getInstance()->offer_attribute_age)->searchFor($age)
-                );
-
-                // Check if a participant is allowed for this offer and set the corresponding language key
-                if ($isAttending) {
-                    $languageKey = 'already_attending';
-                } elseif (!$isAgeAllowed) {
-                    $languageKey = 'age_not_allowed';
-                } elseif ($isLimitReached) {
-                    $languageKey = 'limit_reached';
-                } else {
-                    $languageKey = 'ok';
-                    $allowedParticipantsIds[] = $participants->getItem()->get('id');
-                }
-
                 $options[] = [
-                    'value'    => $participants->getItem()->get('id'),
-                    'label'    => sprintf(
-                        $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label'][$languageKey],
-                        $participants->getItem()->parseAttribute(
-                            FerienpassConfig::getInstance()->participant_attribute_name
-                        )['text'] # = parsed participant name
-                    ),
-                    'disabled' => ($languageKey != 'ok'),
+                    'value' => $participants->getItem()->get('id'),
+                    'label' => $participants
+                        ->getItem()
+                        ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)['text'],
                 ];
             }
+
+            // Subscriber will disable participants if they are not allowed for this offer
+            $dispatcher->addSubscriber(new ApplicationListSubscriber());
+
+            $event = new CreateParticipantOptionsForApplicationListEvent($participants, $this->item, $options);
+            $dispatcher->dispatch(CreateParticipantOptionsForApplicationListEvent::NAME, $event);
+
+            $options = $event->getResult();
 
             // Create form instance
             $form = new Form(
@@ -176,11 +146,7 @@ class ApplicationList extends Item
                 // Process new applications
                 foreach ((array)$form->fetch('participant') as $participant) {
                     // Check if participant id allowed here and attendance not existent yet
-                    if (in_array($participant, $allowedParticipantsIds) && Attendance::isNotExistent(
-                            $participant,
-                            $this->item->get('id')
-                        )
-                    ) {
+                    if (Attendance::isNotExistent($participant, $this->item->get('id'))) {
                         // Set new attendance
                         $attendance = new Attendance();
                         $attendance->tstamp = time();

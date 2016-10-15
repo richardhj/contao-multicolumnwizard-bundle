@@ -63,6 +63,46 @@ class SelectDisabledOptions extends FormSelectMenu
 	}
 
 
+    /**
+     * Check whether an input is one of the given options
+     *
+     * @param mixed $input The input string or array
+     *
+     * @return boolean True if the selected option exists
+     */
+    protected function isValidOption($input)
+    {
+        if (false === parent::isValidOption($input)) {
+            return false;
+        }
+
+        if (!is_array($input)) {
+            $input = [$input];
+        }
+
+        // Check each option
+        foreach ($input as $strInput) {
+            foreach ($this->arrOptions as $v) {
+                // Single dimensional array
+                if (array_key_exists('value', $v)) {
+                    if ($strInput == $v['value'] && $v['disabled']) {
+                        return false;
+                    }
+                } // Multi-dimensional array
+                else {
+                    foreach ($v as $vv) {
+                        if ($strInput == $vv['value'] && $vv['disabled']) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+
 	/**
 	 * Return a "disabled" attribute
 	 *
