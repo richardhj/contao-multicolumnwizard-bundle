@@ -19,6 +19,8 @@ $GLOBALS['TL_DCA'][$table] = [
     // Config
     'config'       => [
         'dataContainer'   => 'General',
+        'notCreatable'    => true,
+        'notDeletable'    => true,
         'onload_callback' => [
             ['Ferienpass\Helper\Dca', 'addDefaultStatus'],
         ],
@@ -54,8 +56,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 ],
         ],
         'operations'        => [
-            'edit' =>
-                [
+            'edit' => [
                     'label' => &$GLOBALS['TL_LANG'][$table]['edit'],
                     'href'  => 'act=edit',
                     'icon'  => 'edit.gif',
@@ -188,7 +189,6 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'select',
             'options'   => Ferienpass\Helper\Message::getTypes(),
             'eval'      => [
-                'chosen'    => true,
                 'mandatory' => true,
                 'tl_class'  => 'w50',
             ],
