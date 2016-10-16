@@ -163,6 +163,6 @@ class Message extends Controller
      */
     public static function getTypes()
     {
-        return ['FP_ERROR', 'FP_CONFIRMATION', 'FP_WARNING', 'FP_INFORMATION', 'FP_RAW'];
+        return ['FP_INFORMATION', 'FP_ERROR', 'FP_CONFIRMATION', 'FP_WARNING', 'FP_RAW'];
     }
 }

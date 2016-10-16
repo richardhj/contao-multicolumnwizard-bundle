@@ -23,6 +23,7 @@ use Contao\Model;
  * @property bool    $locked
  * @property integer $notification_new
  * @property integer $notification_onChange
+ * @property string  $messageType
  *
  * @package Ferienpass
  */

@@ -154,34 +154,12 @@ class ApplicationListSubscriber implements EventSubscriberInterface
 
         $status = $event->getAttendance()->getStatus();
 
-        // Add message corresponding to attendance's status
-        switch ($status->type) {
-            case 'confirmed':
-                Message::addConfirmation(
-                    sprintf(
-                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
-                        $participantName
-                    )
-                );
-                break;
-
-            case 'waiting':
-                Message::addWarning(
-                    sprintf(
-                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
-                        $participantName
-                    )
-                );
-                break;
-
-            case 'error':
-                Message::addError(
-                    sprintf(
-                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
-                        $participantName
-                    )
-                );
-                break;
-        }
+        Message::add(
+            sprintf(
+                $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                $participantName
+            ),
+            $status->messageType
+        );
     }
 }

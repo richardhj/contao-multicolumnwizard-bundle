@@ -82,21 +82,21 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 	// Palettes
 	'palettes' => array
 	(
-		'default'                   => '{name_legend},name,type,title;{config_legend},notification_new,notification_onChange,cssClass',
+        'default' => '{name_legend},name,type,title;{config_legend},notification_new,notification_onChange,cssClass,messageType',
 	),
 
 	// Fields
 	'fields' => array
 	(
-        'id' => array
+        'id'                    => array
 		(
 			'sql'                 =>  "int(10) unsigned NOT NULL auto_increment",
 		),
-        'tstamp' => array
+        'tstamp'                => array
 		(
 			'sql'                 =>  "int(10) unsigned NOT NULL default '0'",
 		),
-        'name' => array
+        'name'                  => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['name'],
 			'exclude'               => true,
@@ -157,7 +157,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 			'sql'                   => "int(10) unsigned NOT NULL default '0'",
 			'relation'              => array('type' => 'hasOne', 'table' => Notification::getTable())
 		),
-        'cssClass' => array
+        'cssClass'              => array
 		(
 			'label'                 => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['cssClass'],
 			'exclude'               => true,
@@ -165,5 +165,18 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendancestatus'] = array
 			'eval'                  => array('tl_class'=>'w50', 'mandatory'=>true),
 			'sql'                   => "varchar(255) NOT NULL default ''"
 		),
+        'messageType'           => array
+        (
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['messageType'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'options'   => Ferienpass\Helper\Message::getTypes(),
+            'eval'      => array(
+                'chosen'    => true,
+                'mandatory' => true,
+                'tl_class'  => 'w50',
+            ),
+            'sql'       => "varchar(64) NOT NULL default ''",
+        ),
 	)
 );
