@@ -40,17 +40,6 @@ class Events extends \Controller
 
 
     /**
-     * Get the event attributes array
-     *
-     * @return array
-     */
-    public static function getEventAttributes()
-    {
-        return static::$eventAttributes;
-    }
-
-
-    /**
      * Get the event attributes array with name=>translatedName
      *
      * @return array
@@ -73,10 +62,21 @@ class Events extends \Controller
 
 
     /**
+     * Get the event attributes array
+     *
+     * @return array
+     */
+    public static function getEventAttributes()
+    {
+        return static::$eventAttributes;
+    }
+
+
+    /**
      * Add a MetaModel's items as events
      *
-     * @param array $events
-     * @param array $calendars
+     * @param array   $events
+     * @param array   $calendars
      * @param integer $calendarRangeStart
      * @param integer $calendarRangeEnd
      * @param \Events $module

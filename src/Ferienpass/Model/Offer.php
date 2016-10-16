@@ -14,11 +14,11 @@ namespace Ferienpass\Model;
 class Offer extends MetaModelBridge
 {
 
-	/**
-	 * The object instance
-	 *
-	 * @var Offer
-	 */
-	protected static $instance;
+    /**
+     * The object instance
+     *
+     * @var Offer
+     */
+    protected static $instance;
 
 }

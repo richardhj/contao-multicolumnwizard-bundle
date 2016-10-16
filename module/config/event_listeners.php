@@ -24,50 +24,41 @@ use MetaModels\Filter\Setting\Events\CreateFilterSettingFactoryEvent;
 use MetaModels\MetaModelsEvents;
 
 
-return array
-(
-	// MetaModel Attributes
-	MetaModelsEvents::ATTRIBUTE_FACTORY_CREATE      => array
-	(
-		// Age attribute
-		function (CreateAttributeFactoryEvent $event)
-		{
-			$factory = $event->getFactory();
-			$factory->addTypeFactory(new AttributeTypeFactory());
-		}
-	),
+return [
+    // MetaModel Attributes
+    MetaModelsEvents::ATTRIBUTE_FACTORY_CREATE      => [
+        // Age attribute
+        function (CreateAttributeFactoryEvent $event) {
+            $factory = $event->getFactory();
+            $factory->addTypeFactory(new AttributeTypeFactory());
+        },
+    ],
 
-	// MetaModel Filters
-	MetaModelsEvents::FILTER_SETTING_FACTORY_CREATE => array
-	(
-		// Age filter
-		function (CreateFilterSettingFactoryEvent $event)
-		{
-			$event->getFactory()->addTypeFactory(new AgeFilterSettingTypeFactory());
-		},
+    // MetaModel Filters
+    MetaModelsEvents::FILTER_SETTING_FACTORY_CREATE => [
+        // Age filter
+        function (CreateFilterSettingFactoryEvent $event) {
+            $event->getFactory()->addTypeFactory(new AgeFilterSettingTypeFactory());
+        },
 
-		// Attendance available filter
-		function (CreateFilterSettingFactoryEvent $event)
-		{
-			$event->getFactory()->addTypeFactory(new AttendanceAvailableFilterSettingTypeFactory());
-		}
-	),
+        // Attendance available filter
+        function (CreateFilterSettingFactoryEvent $event) {
+            $event->getFactory()->addTypeFactory(new AttendanceAvailableFilterSettingTypeFactory());
+        },
+    ],
 
-	// List View Label
-	ModelToLabelEvent::NAME => array
-	(
-		array(array('Ferienpass\Helper\Dca', 'addMemberEditLinkForParticipantListView'), -10)
-	),
-	
-	// On Submit Offer Sync
-	PostPersistModelEvent::NAME => array
-	(
-		array('Ferienpass\Helper\Dca', 'triggerSyncForOffer')
-	),
+    // List View Label
+    ModelToLabelEvent::NAME                         => [
+        [['Ferienpass\Helper\Dca', 'addMemberEditLinkForParticipantListView'], -10],
+    ],
 
-	// Trigger attendance status change
-	EncodePropertyValueFromWidgetEvent::NAME => array
-	(
-		array('Ferienpass\Helper\Dca', 'triggerAttendanceStatusChange')
-	),
-);
+    // On Submit Offer Sync
+    PostPersistModelEvent::NAME                     => [
+        ['Ferienpass\Helper\Dca', 'triggerSyncForOffer'],
+    ],
+
+    // Trigger attendance status change
+    EncodePropertyValueFromWidgetEvent::NAME        => [
+        ['Ferienpass\Helper\Dca', 'triggerAttendanceStatusChange'],
+    ],
+];

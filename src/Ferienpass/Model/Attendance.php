@@ -27,44 +27,43 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class Attendance extends Model
 {
 
-	/**
-	 * Table name
-	 *
-	 * @var string
-	 */
-	protected static $strTable = 'tl_ferienpass_attendance';
+    /**
+     * Table name
+     *
+     * @var string
+     */
+    protected static $strTable = 'tl_ferienpass_attendance';
 
 
-	/**
-	 * The participant model
-	 *
-	 * @var Participant
-	 */
-	protected static $participant;
+    /**
+     * The participant model
+     *
+     * @var Participant
+     */
+    protected static $participant;
 
 
-	/**
-	 * Find attendances by participant's parent
-	 *
-	 * @param  integer $parentId
-	 *
-	 * @return Attendance|\Model\Collection|null
-	 */
-	public static function findByParent($parentId)
-	{
-		//@todo this could be better with an associate db table
+    /**
+     * Find attendances by participant's parent
+     *
+     * @param  integer $parentId
+     *
+     * @return Attendance|\Model\Collection|null
+     */
+    public static function findByParent($parentId)
+    {
+        //@todo this could be better with an associate db table
 
-		/** @var \MetaModels\Filter\Filter $filter */
-		$filter = Participant::getInstance()->byParentFilter($parentId);
+        /** @var \MetaModels\Filter\Filter $filter */
+        $filter = Participant::getInstance()->byParentFilter($parentId);
 
-		$participantIds = $filter->getMatchingIds();
+        $participantIds = $filter->getMatchingIds();
 
-		if (empty($participantIds))
-		{
-			return null;
-		}
+        if (empty($participantIds)) {
+            return null;
+        }
 
-		/** @var \Database\Result $result */
+        /** @var \Database\Result $result */
         $result = \Database::getInstance()->query(
             "SELECT * FROM ".static::$strTable." WHERE participant IN(".implode(
                 ',',
@@ -72,29 +71,31 @@ class Attendance extends Model
             ).") ORDER BY tstamp,id"
         );
 
-		return static::createCollectionFromDbResult($result, static::$strTable);
-	}
+        return static::createCollectionFromDbResult($result, static::$strTable);
+    }
 
 
-	/**
-	 * Find attendance by its position
-	 *
-	 * @param integer $position
-	 * @param integer $offerId
-	 *
-	 * @return Attendance|\Model\Collection|null
-	 */
-	public static function findByPosition($position, $offerId)
-	{
-		return static::findByOffer($offerId,            [
-			'limit'  => 1,
-			'offset' => $position - 1
+    /**
+     * Find attendance by its position
+     *
+     * @param integer $position
+     * @param integer $offerId
+     *
+     * @return Attendance|\Model\Collection|null
+     */
+    public static function findByPosition($position, $offerId)
+    {
+        return static::findByOffer(
+            $offerId,
+            [
+                'limit'  => 1,
+                'offset' => $position - 1,
             ]
         );
-	}
+    }
 
 
-	/**
+    /**
      * Find attendances by offer
      *
      * @param integer $offerId
@@ -119,98 +120,96 @@ class Attendance extends Model
 
 
     /**
-	 * Count participants in application list
-	 *
-	 * @param int $offerId
-	 *
-	 * @return int
-	 */
-	public static function countParticipants($offerId)
-	{
-		return static::countByOffer($offerId);
-	}
+     * Count participants in application list
+     *
+     * @param int $offerId
+     *
+     * @return int
+     */
+    public static function countParticipants($offerId)
+    {
+        return static::countByOffer($offerId);
+    }
 
 
-	/**
-	 * Count participants for one particular offer
-	 *
-	 * @param int $offerId
-	 *
-	 * @return int
-	 */
-	public static function countByOffer($offerId)
-	{
+    /**
+     * Count participants for one particular offer
+     *
+     * @param int $offerId
+     *
+     * @return int
+     */
+    public static function countByOffer($offerId)
+    {
         return static::countBy('offer', $offerId);
-	}
+    }
 
 
-	/**
-	 * Count attendances for one particular participant
-	 *
-	 * @param int $participantId
-	 *
-	 * @return int
-	 */
-	public static function countByParticipant($participantId)
-	{
+    /**
+     * Count attendances for one particular participant
+     *
+     * @param int $participantId
+     *
+     * @return int
+     */
+    public static function countByParticipant($participantId)
+    {
         return static::countBy('participant', $participantId);
-	}
+    }
 
 
-	/**
-	 * Count the attendances of a participant made on a particular day and optionally with a particular status
-	 *
-	 * @param integer $participantId
-	 * @param integer $timestamp
-	 * @param integer $status
-	 *
-	 * @return int
-	 */
-	public static function countByParticipantAndDay($participantId, $timestamp = null, $status = 0)
-	{
-		if (null === $timestamp)
-		{
-			$timestamp = time();
-		}
+    /**
+     * Count the attendances of a participant made on a particular day and optionally with a particular status
+     *
+     * @param integer $participantId
+     * @param integer $timestamp
+     * @param integer $status
+     *
+     * @return int
+     */
+    public static function countByParticipantAndDay($participantId, $timestamp = null, $status = 0)
+    {
+        if (null === $timestamp) {
+            $timestamp = time();
+        }
 
-		$date = new \Date($timestamp);
+        $date = new \Date($timestamp);
 
-		$options =            [
+        $options = [
             'column' => ['participant=?', 'tstamp>=?', 'tstamp<=?'],
-            'value'  => [$participantId, $date->dayBegin, $date->dayEnd]
-            ];
+            'value'  => [$participantId, $date->dayBegin, $date->dayEnd],
+        ];
 
-		if ($status)
-		{
-			$options['column'][] = 'status=?';
-			$options['value'][] = $status;
-		}
+        if (0 !== $status) {
+            $options['column'][] = 'status=?';
+            $options['value'][] = $status;
+        }
 
-		return static::countBy(null, null, $options);
-	}
+        return static::countBy(null, null, $options);
+    }
 
 
-	/**
-	 * @param integer $participantId
-	 * @param integer $offerId
-	 *
-	 * @return bool
-	 */
-	public static function isNotExistent($participantId, $offerId)
-	{
-		return !(\Database::getInstance()
+    /**
+     * @param integer $participantId
+     * @param integer $offerId
+     *
+     * @return bool
+     */
+    public static function isNotExistent($participantId, $offerId)
+    {
+        return !(\Database::getInstance()
             ->prepare("SELECT id FROM ".static::$strTable." WHERE participant=? AND offer=?")
-			->execute($participantId, $offerId)
-			->numRows);
-	}
+            ->execute($participantId, $offerId)
+            ->numRows);
+    }
 
 
-	/**
-	 * Trigger notification if attendance is new created
-	 * {@inheritdoc}
-	 */
-	public function save()
-	{
+    /**
+     * Trigger notification if attendance is new created
+     * {@inheritdoc}
+     */
+    public function save()
+    {
         global $container;
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
@@ -219,16 +218,16 @@ class Attendance extends Model
         parent::save();
 
         $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this));
-	}
+    }
 
 
-	/**
-	 * Delete attendance and trigger status update actions
-	 *
-	 * @return void
-	 */
-	public function delete()
-	{
+    /**
+     * Delete attendance and trigger status update actions
+     *
+     * @return void
+     */
+    public function delete()
+    {
         if (parent::delete()) {
             global $container;
             /** @var EventDispatcher $dispatcher */
@@ -239,36 +238,32 @@ class Attendance extends Model
     }
 
 
-	/**
-	 * Get attendance's current position
+    /**
+     * Get attendance's current position
      * @return integer|null if participant not in attendance list (yet) or has error status. Index starting from 1
-	 */
-	public function getPosition()
-	{
+     */
+    public function getPosition()
+    {
         /** @var Attendance|\Model\Collection $attendances */
         $attendances = static::findByOffer($this->offer); // Collection is ordered by tstamp,id
 
-		if (null === $attendances)
-		{
-			return null;
-		}
+        if (null === $attendances) {
+            return null;
+        }
 
-		for ($i = 1; $attendances->next(); $i++)
-		{
-            if (!$attendances->current()->getStatus()->increasesCount)
-			{
-				--$i;
-				continue;
-			}
+        for ($i = 1; $attendances->next(); $i++) {
+            if (!$attendances->current()->getStatus()->increasesCount) {
+                --$i;
+                continue;
+            }
 
-            if ($attendances->current()->participant == $this->participant)
-			{
-				return $i;
-			}
-		}
+            if ($attendances->current()->participant == $this->participant) {
+                return $i;
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
 
     /**

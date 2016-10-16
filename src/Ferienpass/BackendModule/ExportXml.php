@@ -17,41 +17,45 @@ use Contao\System;
 class ExportXml extends \BackendModule
 {
 
-	/**
-	 * Template
-	 * @var string
-	 */
-	protected $strTemplate = 'be_fp_exportXml';
+    /**
+     * Template
+     * @var string
+     */
+    protected $strTemplate = 'be_fp_exportXml';
 
 
-	/**
-	 * Generate the module
-	 * @return string
-	 */
-	public function generate()
-	{
-		System::loadLanguageFile('tl_ferienpass_exportXml');
+    /**
+     * Generate the module
+     * @return string
+     */
+    public function generate()
+    {
+        System::loadLanguageFile('tl_ferienpass_exportXml');
 
-		if (!\BackendUser::getInstance()->isAdmin) //@todo
-		{
-			return '<p class="tl_gerror">' . $GLOBALS['TL_LANG']['tl_ferienpass_exportXml']['permission'] . '</p>';
-		}
+        if (!\BackendUser::getInstance()->isAdmin) //@todo
+        {
+            return '<p class="tl_gerror">'.$GLOBALS['TL_LANG']['tl_ferienpass_exportXml']['permission'].'</p>';
+        }
 
-		return parent::generate();
-	}
-
-
-	/**
-	 * Generate the module
-	 */
-	protected function compile()
-	{
-		//@todo select menu with order labels (red, blue, green) as options
-		$objWidget = new SelectMenu($this->prepareForWidget($GLOBALS['TL_DCA']['tl_iso_orders']['fields']['recipient_select'], 'recipient_select'));
+        return parent::generate();
+    }
 
 
+    /**
+     * Generate the module
+     */
+    protected function compile()
+    {
+        //@todo select menu with order labels (red, blue, green) as options
+        $objWidget = new SelectMenu(
+            $this->prepareForWidget(
+                $GLOBALS['TL_DCA']['tl_iso_orders']['fields']['recipient_select'],
+                'recipient_select'
+            )
+        );
 
-		$this->Template->action = \Environment::get('request');
-		$this->Template->back = str_replace('&mod=exportXml', '', \Environment::get('request'));
-	}
+
+        $this->Template->action = \Environment::get('request');
+        $this->Template->back = str_replace('&mod=exportXml', '', \Environment::get('request'));
+    }
 }

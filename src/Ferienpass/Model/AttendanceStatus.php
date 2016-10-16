@@ -30,34 +30,47 @@ use Contao\Model;
 class AttendanceStatus extends Model
 {
 
-	/**
-	 * The table name
-	 *
-	 * @var string
-	 */
-	protected static $strTable = 'tl_ferienpass_attendancestatus';
+    /**
+     * The table name
+     *
+     * @var string
+     */
+    protected static $strTable = 'tl_ferienpass_attendancestatus';
 
 
-	/**
-	 * Find the status whose type is "confirmed"
-	 *
-	 * @return AttendanceStatus
-	 */
-	public static function findConfirmed()
-	{
-		return static::findByType('confirmed');
-	}
+    /**
+     * Find the status whose type is "confirmed"
+     *
+     * @return AttendanceStatus
+     */
+    public static function findConfirmed()
+    {
+        return static::findByType('confirmed');
+    }
 
 
-	/**
+    /**
+     * Fine one message by its type
+     *
+     * @param string $type
+     *
+     * @return AttendanceStatus
+     */
+    public static function findByType($type)
+    {
+        return static::findOneBy('type', $type);
+    }
+
+
+    /**
      * Find the status whose type is "waiting"
-	 *
-	 * @return AttendanceStatus
-	 */
-	public static function findWaiting()
-	{
-		return static::findByType('waiting');
-	}
+     *
+     * @return AttendanceStatus
+     */
+    public static function findWaiting()
+    {
+        return static::findByType('waiting');
+    }
 
 
     /**
@@ -71,26 +84,13 @@ class AttendanceStatus extends Model
     }
 
 
-	/**
-	 * Find the status whose type is "error"
-	 *
-	 * @return AttendanceStatus
-	 */
-	public static function findError()
-	{
-		return static::findByType('error');
-	}
-
-
-	/**
-	 * Fine one message by its type
-	 *
-	 * @param string $type
-	 *
-	 * @return AttendanceStatus
-	 */
-	public static function findByType($type)
-	{
-		return static::findOneBy('type', $type);
-	}
+    /**
+     * Find the status whose type is "error"
+     *
+     * @return AttendanceStatus
+     */
+    public static function findError()
+    {
+        return static::findByType('error');
+    }
 }

@@ -160,8 +160,7 @@ class Editing extends Items
         );
 
         // Create variant changer for variant base
-        if ($this->enableVariants && !$this->item->isVariant(
-            )
+        if ($this->enableVariants && !$this->item->isVariant()
         ) # do not use isVariantBase() because it returns false if the item is new
         {
             $this->addSubmitOnChangeForInput('#ctrl_variants .radio');
@@ -449,78 +448,6 @@ HTML;
     }
 
 
-    protected function newVariantLink()
-    {
-        $template = new \FrontendTemplate('ce_hyperlink');
-        $template->class = 'create_new_variant';
-
-        //@todo IF lightbox
-        $template->attribute = ' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
-
-        $template->href = sprintf
-        (
-            '%s?vargroup=%u',
-            rtrim(str_replace($this->autoItem, '', \Environment::get('request')), '/').'-variante',
-            //@todo be configurable
-            $this->item->get('id')
-        );
-
-        $template->link = 'Variante erstellen';
-        $template->linkTitle = specialchars(
-            sprintf('Eine neue Variante zum Element "%s" erstellen', $this->item->get('name'))
-        ); //@todo lang
-
-        return $template->parse();
-    }
-
-
-    /**
-     * @param IItem[]|IItems $objVariants
-     *
-     * @return string
-     */
-    protected function variantsMenu($objVariants)
-    {
-        $objTemplate = new \FrontendTemplate('nav_default');
-        $objTemplate->level = 'variants';
-
-        $arrItems = [];
-
-        while ($objVariants->next()) {
-            $arrItems[] = [
-                'class' => 'edit-variant',
-                'href' => str_replace(
-                    $this->item->get($this->aliasColName),
-                    $objVariants->getItem()->get($this->aliasColName),
-                    \Environment::get('request')
-                ),
-                'title' => sprintf(specialchars('Die Variante "%s" bearbeiten'), $objVariants->getItem()->get('name')),
-                //@todo lang
-                'target' => ' data-lightbox=""',
-                'link' => $objVariants->getItem()->get('name'),
-            ];
-        }
-
-        $objTemplate->items = $arrItems;
-
-        return $objTemplate->parse();
-    }
-
-
-    /**
-     * @param IItem[]|IItems $variants
-     *
-     * @return string
-     */
-    protected function variantsCount($variants)
-    {
-        return sprintf(
-            '<p class="count_variants">Es existieren aktuell %u Varianten zu diesem Angebot.</p>',
-            $variants->getCount()
-        ); //@todo lang
-    }
-
-
     /**
      * Add a submitOnChange handler for a specific input
      *
@@ -552,5 +479,77 @@ HTML;
 </script>
 HTML;
 
+    }
+
+
+    protected function newVariantLink()
+    {
+        $template = new \FrontendTemplate('ce_hyperlink');
+        $template->class = 'create_new_variant';
+
+        //@todo IF lightbox
+        $template->attribute = ' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
+
+        $template->href = sprintf
+        (
+            '%s?vargroup=%u',
+            rtrim(str_replace($this->autoItem, '', \Environment::get('request')), '/').'-variante',
+            //@todo be configurable
+            $this->item->get('id')
+        );
+
+        $template->link = 'Variante erstellen';
+        $template->linkTitle = specialchars(
+            sprintf('Eine neue Variante zum Element "%s" erstellen', $this->item->get('name'))
+        ); //@todo lang
+
+        return $template->parse();
+    }
+
+
+    /**
+     * @param IItem[]|IItems $variants
+     *
+     * @return string
+     */
+    protected function variantsCount($variants)
+    {
+        return sprintf(
+            '<p class="count_variants">Es existieren aktuell %u Varianten zu diesem Angebot.</p>',
+            $variants->getCount()
+        ); //@todo lang
+    }
+
+
+    /**
+     * @param IItem[]|IItems $objVariants
+     *
+     * @return string
+     */
+    protected function variantsMenu($objVariants)
+    {
+        $objTemplate = new \FrontendTemplate('nav_default');
+        $objTemplate->level = 'variants';
+
+        $arrItems = [];
+
+        while ($objVariants->next()) {
+            $arrItems[] = [
+                'class'  => 'edit-variant',
+                'href'   => str_replace(
+                    $this->item->get($this->aliasColName),
+                    $objVariants->getItem()->get($this->aliasColName),
+                    \Environment::get('request')
+                ),
+                'title'  => sprintf(specialchars('Die Variante "%s" bearbeiten'), $objVariants->getItem()->get('name')),
+                //@todo lang
+                'target' => ' data-lightbox=""',
+                'link'   => $objVariants->getItem()->get('name'),
+            ];
+        }
+
+        $objTemplate->items = $arrItems;
+
+        return $objTemplate->parse();
     }
 }

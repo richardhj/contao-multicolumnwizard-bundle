@@ -14,27 +14,27 @@ namespace Ferienpass\Form;
 class Age extends \Ferienpass\Widget\Age
 {
 
-	/**
-	 * Template
-	 *
-	 * @var string
-	 */
-	protected $strTemplate = 'form_fpage';
+    /**
+     * Template
+     *
+     * @var string
+     */
+    protected $strTemplate = 'form_fpage';
 
 
-	/**
-	 * Error message
-	 *
-	 * @var string
-	 */
-	protected $strError = '';
+    /**
+     * Error message
+     *
+     * @var string
+     */
+    protected $strError = '';
 
 
-	/**
-	 * The CSS class prefix
-	 *
-	 * @var string
-	 */
-	protected $strPrefix = 'widget widget-age';
+    /**
+     * The CSS class prefix
+     *
+     * @var string
+     */
+    protected $strPrefix = 'widget widget-age';
 
 }

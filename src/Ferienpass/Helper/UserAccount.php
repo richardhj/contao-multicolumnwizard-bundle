@@ -23,106 +23,106 @@ use Ferienpass\Model\Participant;
 class UserAccount extends \Frontend
 {
 
-	/**
-	 * Check the postal code on user registration
-	 * @category HOOK: createNewUser
-	 *
-	 * @param integer             $intId
-	 * @param array               $arrData
-	 * @param \ModuleRegistration $objModule
-	 */
-	public function createNewUser($intId, $arrData, $objModule)
-	{
+    /**
+     * Check the postal code on user registration
+     * @category HOOK: createNewUser
+     *
+     * @param integer             $intId
+     * @param array               $arrData
+     * @param \ModuleRegistration $objModule
+     */
+    public function createNewUser($intId, $arrData, $objModule)
+    {
         $arrAllowedZipCodes = trimsplit(',', FerienpassConfig::getInstance()->registration_allowed_zip_codes);
 
-		if (empty($arrAllowedZipCodes))
-		{
-			return;
-		}
+        if (empty($arrAllowedZipCodes)) {
+            return;
+        }
 
-		// Check for allowed zip code
-		if (!in_array($arrData['postal'], $arrAllowedZipCodes))
-		{
-			// Add error as message
-			// !!! You have to include the message in registration template (member_…)
-			Message::addError('Ihre Postleitzahl ist für die Registrierung nicht zulässig. Wenn Sie meinen, dass das ein Fehler ist, kontaktieren Sie uns bitte.'); //@todo lang
+        // Check for allowed zip code
+        if (!in_array($arrData['postal'], $arrAllowedZipCodes)) {
+            // Add error as message
+            // !!! You have to include the message in registration template (member_…)
+            Message::addError(
+                'Ihre Postleitzahl ist für die Registrierung nicht zulässig. Wenn Sie meinen, dass das ein Fehler ist, kontaktieren Sie uns bitte.'
+            ); //@todo lang
 
-			$this->deleteUser($intId);
-			\Controller::reload();
+            $this->deleteUser($intId);
+            \Controller::reload();
 
-			return;
-		}
-	}
-
-
-	/**
-	 * Delete a member's participants and attendances
-	 * @category HOOK: closeAccount
-	 *
-	 * @param integer             $intUserId
-	 * @param string              $strRegClose
-	 * @param \ModuleCloseAccount $objModule
-	 */
-	public function closeAccount($intUserId, $strRegClose, $objModule)
-	{
-		if ($strRegClose != 'close_delete')
-		{
-			return;
-		}
-
-		// Delete attendances
-		$objAttendances = Attendance::findByParent($intUserId);
-		$intCountAttendances = (null !== $objAttendances) ? $objAttendances->count() : 0;
-
-		while (null !== $objAttendances && $objAttendances->next())
-		{
-			$objAttendances->delete();
-		}
-
-		// Delete participants
-		$objParticipants = Participant::getInstance()->findByParent($intUserId);
-		$intCountParticipants = $objParticipants->getCount();
-
-		while ($objParticipants->next())
-		{
-			Participant::getInstance()->getMetaModel()->delete($objParticipants->getItem());
-		}
-		
-		\System::log(sprintf('%u participants and %u attendances for member ID %u has been deleted',
-			$intCountParticipants,
-			$intCountAttendances,
-			$intUserId
-		), __METHOD__, TL_GENERAL);
-	}
+            return;
+        }
+    }
 
 
-	/**
-	 * Delete a user by id
-	 *
-	 * @param integer $intId
-	 */
-	protected function deleteUser($intId)
-	{
-		@\FrontendUser::getInstance()->logout();
-		@define('FE_USER_LOGGED_IN', $this->getLoginStatus('FE_USER_AUTH'));
-		/** @noinspection PhpUndefinedMethodInspection */
-		@\MemberModel::findByPk($intId)->delete();
-	}
+    /**
+     * Delete a user by id
+     *
+     * @param integer $intId
+     */
+    protected function deleteUser($intId)
+    {
+        @\FrontendUser::getInstance()->logout();
+        @define('FE_USER_LOGGED_IN', $this->getLoginStatus('FE_USER_AUTH'));
+        /** @noinspection PhpUndefinedMethodInspection */
+        @\MemberModel::findByPk($intId)->delete();
+    }
 
 
-	/**
-	 * Set fields configured in the ferienpass config as mandatory in the dca
-	 * @category onload_callback
-	 */
-	public function setRequiredFields()
-	{
-		// It is a front end call without a dc
-		if (0 === func_num_args())
-		{
-            foreach (trimsplit(',', FerienpassConfig::getInstance()->registration_required_fields) as $field)
-			{
-				$GLOBALS['TL_DCA']['tl_member']['fields'][$field]['eval']['mandatory'] = true;
-			}
-		}
-	}
+    /**
+     * Delete a member's participants and attendances
+     * @category HOOK: closeAccount
+     *
+     * @param integer             $intUserId
+     * @param string              $strRegClose
+     * @param \ModuleCloseAccount $objModule
+     */
+    public function closeAccount($intUserId, $strRegClose, $objModule)
+    {
+        if ($strRegClose != 'close_delete') {
+            return;
+        }
+
+        // Delete attendances
+        $objAttendances = Attendance::findByParent($intUserId);
+        $intCountAttendances = (null !== $objAttendances) ? $objAttendances->count() : 0;
+
+        while (null !== $objAttendances && $objAttendances->next()) {
+            $objAttendances->delete();
+        }
+
+        // Delete participants
+        $objParticipants = Participant::getInstance()->findByParent($intUserId);
+        $intCountParticipants = $objParticipants->getCount();
+
+        while ($objParticipants->next()) {
+            Participant::getInstance()->getMetaModel()->delete($objParticipants->getItem());
+        }
+
+        \System::log(
+            sprintf(
+                '%u participants and %u attendances for member ID %u has been deleted',
+                $intCountParticipants,
+                $intCountAttendances,
+                $intUserId
+            ),
+            __METHOD__,
+            TL_GENERAL
+        );
+    }
+
+
+    /**
+     * Set fields configured in the ferienpass config as mandatory in the dca
+     * @category onload_callback
+     */
+    public function setRequiredFields()
+    {
+        // It is a front end call without a dc
+        if (0 === func_num_args()) {
+            foreach (trimsplit(',', FerienpassConfig::getInstance()->registration_required_fields) as $field) {
+                $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['eval']['mandatory'] = true;
+            }
+        }
+    }
 }

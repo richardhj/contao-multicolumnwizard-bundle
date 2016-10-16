@@ -19,32 +19,31 @@ use Ferienpass\Helper\DataProcessing;
 class ExportXmlAll extends \BackendModule
 {
 
-	/**
-	 * Generate the module
-	 * @return string
-	 */
-	public function generate()
-	{
-		System::loadLanguageFile('tl_ferienpass_exportXml');
+    /**
+     * Generate the module
+     * @return string
+     */
+    public function generate()
+    {
+        System::loadLanguageFile('tl_ferienpass_exportXml');
 
-		if (!\BackendUser::getInstance()->isAdmin)
-		{
-			return '<p class="tl_gerror">' . $GLOBALS['TL_LANG']['tl_ferienpass_exportXml']['permission'] . '</p>';
-		}
+        if (!\BackendUser::getInstance()->isAdmin) {
+            return '<p class="tl_gerror">'.$GLOBALS['TL_LANG']['tl_ferienpass_exportXml']['permission'].'</p>';
+        }
 
-		return parent::generate();
-	}
+        return parent::generate();
+    }
 
 
-	/**
-	 * Generate the module
-	 */
-	protected function compile()
-	{
-		// Output zip
-		DataProcessing::exportXmlAll();
+    /**
+     * Generate the module
+     */
+    protected function compile()
+    {
+        // Output zip
+        DataProcessing::exportXmlAll();
 
-		// Redirect back
-		Controller::redirect(str_replace('&mod=exportXmlAll', '', Environment::get('request')));
-	}
+        // Redirect back
+        Controller::redirect(str_replace('&mod=exportXmlAll', '', Environment::get('request')));
+    }
 }

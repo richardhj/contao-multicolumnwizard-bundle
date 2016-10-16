@@ -18,94 +18,90 @@ use Ferienpass\Model\Offer;
 class DataProcessing extends \BackendModule
 {
 
-	protected $strTemplate = 'dcbe_general_edit';
-
-	/**
-	 * Generate the module
-	 * @return string
-	 */
-	public function generate()
-	{
-		\System::loadLanguageFile('tl_ferienpass_exportXml');
-
-		if (!\BackendUser::getInstance()->isAdmin)
-		{
-			return '<p class="tl_gerror">' . $GLOBALS['TL_LANG']['tl_ferienpass_exportXml']['permission'] . '</p>';
-		}
-
-		return parent::generate();
-	}
+    protected $strTemplate = 'dcbe_general_edit';
 
 
-	/**
-	 * Generate the module
-	 */
-	protected function compile()
-	{
-		$strModule = \Input::get('mod');
-		$intModuleId = (int)str_replace('data_processing_', '', $strModule);
+    /**
+     * Generate the module
+     * @return string
+     */
+    public function generate()
+    {
+        \System::loadLanguageFile('tl_ferienpass_exportXml');
 
-		$objModel = \Ferienpass\Model\DataProcessing::findByPk($intModuleId);
+        if (!\BackendUser::getInstance()->isAdmin) {
+            return '<p class="tl_gerror">'.$GLOBALS['TL_LANG']['tl_ferienpass_exportXml']['permission'].'</p>';
+        }
 
-		$arrIds = array();
+        return parent::generate();
+    }
 
-		if ($objModel->scope == 'single')
-		{
-			$strFormSubmit = 'select_items';
 
-			if (\Input::post('FORM_SUBMIT') != $strFormSubmit)
-			{
-				$objOffers = Offer::getInstance()->findAll();
-				$arrOffers = array();
+    /**
+     * Generate the module
+     */
+    protected function compile()
+    {
+        $strModule = \Input::get('mod');
+        $intModuleId = (int)str_replace('data_processing_', '', $strModule);
 
-				
+        $objModel = \Ferienpass\Model\DataProcessing::findByPk($intModuleId);
 
-				/*
-				 * Single checkbox
-				 */
-				while ($objOffers->next())
-				{
-					$arrOffers[] = array
-					(
+        $arrIds = array();
+
+        if ($objModel->scope == 'single') {
+            $strFormSubmit = 'select_items';
+
+            if (\Input::post('FORM_SUBMIT') != $strFormSubmit) {
+                $objOffers = Offer::getInstance()->findAll();
+                $arrOffers = array();
+
+
+                /*
+                 * Single checkbox
+                 */
+                while ($objOffers->next()) {
+                    $arrOffers[] = array
+                    (
                         'value' => $objOffers->getItem()->get('id'),
                         'label' => $objOffers->getItem()->get(Config::getInstance()->offer_attribute_name),
-					);
-				}
+                    );
+                }
 
-				$buttons[] = sprintf(
-					'<input type="submit" name="start" id="start" class="tl_submit" accesskey="s" value="%s" />',
-					'Export starten'
-				);
+                $buttons[] = sprintf(
+                    '<input type="submit" name="start" id="start" class="tl_submit" accesskey="s" value="%s" />',
+                    'Export starten'
+                );
 
-				/** @noinspection PhpParamsInspection */
-				$objWidget = new \CheckBoxWizard();
-				$objWidget->name = 'items';
-				$objWidget->options = $arrOffers;
-				$objWidget->multiple = true;
+                /** @noinspection PhpParamsInspection */
+                $objWidget = new \CheckBoxWizard();
+                $objWidget->name = 'items';
+                $objWidget->options = $arrOffers;
+                $objWidget->multiple = true;
 
-				$this->Template->subHeadline = 'Angebote zum Export auswählen';
-				$this->Template->table = $strFormSubmit;
-				$this->Template->editButtons = $buttons;
-				$this->Template->fieldsets = array
-				(
-					array
-					(
-						'class'   => 'tl_box',
-						'palette' => $objWidget->generate()
-					)
-				);
+                $this->Template->subHeadline = 'Angebote zum Export auswählen';
+                $this->Template->table = $strFormSubmit;
+                $this->Template->editButtons = $buttons;
+                $this->Template->fieldsets = array
+                (
+                    array
+                    (
+                        'class'   => 'tl_box',
+                        'palette' => $objWidget->generate(),
+                    ),
+                );
 
-				return;
-			}
+                return;
+            }
 
-			$arrIds = \Input::post('items');
-		}
+            $arrIds = \Input::post('items');
+        }
 
-		$objModel->run($arrIds);
+        $objModel->run($arrIds);
 
-		\Message::addConfirmation(sprintf('Datenverarbeitung "%s" wurde ausgeführt', $objModel->name));
+        \Message::addConfirmation(sprintf('Datenverarbeitung "%s" wurde ausgeführt', $objModel->name));
 
-		// Redirect back
-		\Controller::redirect(str_replace('&mod=' . $strModule, '', \Environment::get('request')));
-	}
+        // Redirect back
+        \Controller::redirect(str_replace('&mod='.$strModule, '', \Environment::get('request')));
+    }
 }

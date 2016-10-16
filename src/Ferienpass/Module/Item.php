@@ -18,32 +18,29 @@ namespace Ferienpass\Module;
 abstract class Item extends Items
 {
 
-	/**
-	 * Provide MetaModel item in object
-	 *
-	 * @param bool $isProtected Do permission check if true
-	 *
-	 * @return string
-	 */
-	public function generate($isProtected=false)
-	{
-		$this->fetchItem();
+    /**
+     * Provide MetaModel item in object
+     *
+     * @param bool $isProtected Do permission check if true
+     *
+     * @return string
+     */
+    public function generate($isProtected = false)
+    {
+        $this->fetchItem();
 
-		if ('FE' === TL_MODE)
-		{
-			// Generate 404 if item not found
-			if (null === $this->item)
-			{
-				$this->exitWith404();
-			}
+        if ('FE' === TL_MODE) {
+            // Generate 404 if item not found
+            if (null === $this->item) {
+                $this->exitWith404();
+            }
 
-			// Check permission
-			if ($isProtected)
-			{
-				$this->checkPermission();
-			}
-		}
+            // Check permission
+            if ($isProtected) {
+                $this->checkPermission();
+            }
+        }
 
-		return parent::generate();
-	}
+        return parent::generate();
+    }
 }

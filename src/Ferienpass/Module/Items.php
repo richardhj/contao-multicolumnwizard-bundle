@@ -19,9 +19,9 @@ use MetaModels\IMetaModel;
 /**
  * Class Items
  * @package  Ferienpass\Module
- * @property integer $metamodel
+ * @property integer       $metamodel
  * @property \FrontendUser $User
- * @property string $aliasColName
+ * @property string        $aliasColName
  */
 abstract class Items extends Module
 {
@@ -67,34 +67,6 @@ abstract class Items extends Module
 
 
     /**
-     * Return a wildcard in the back end
-     *
-     * @return string
-     */
-    public function generate()
-    {
-        if ('BE' === TL_MODE) {
-            $template = new \BackendTemplate('be_wildcard');
-
-            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
-            $template->title = $this->headline;
-            $template->id = $this->id;
-            $template->link = $this->name;
-            $template->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
-
-            return $template->parse();
-        }
-
-        // Set a custom template
-        if ($this->customTpl != '') {
-            $this->strTemplate = $this->customTpl;
-        }
-
-        return parent::generate();
-    }
-
-
-    /**
      * Provide MetaModel in object
      *
      * @param \ModuleModel $module
@@ -119,6 +91,34 @@ abstract class Items extends Module
         // Import frontend user
         /** @noinspection PhpUndefinedMethodInspection */
         $this->import('FrontendUser', 'User');
+    }
+
+
+    /**
+     * Return a wildcard in the back end
+     *
+     * @return string
+     */
+    public function generate()
+    {
+        if ('BE' === TL_MODE) {
+            $template = new \BackendTemplate('be_wildcard');
+
+            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->title = $this->headline;
+            $template->id = $this->id;
+            $template->link = $this->name;
+            $template->href = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+
+            return $template->parse();
+        }
+
+        // Set a custom template
+        if ($this->customTpl != '') {
+            $this->strTemplate = $this->customTpl;
+        }
+
+        return parent::generate();
     }
 
 
@@ -163,27 +163,6 @@ abstract class Items extends Module
 
 
     /**
-     * Set MetaModel's owner attribute
-     *
-     * @param IMetaModel $metaModel The MetaModel that will be taken to find the owner attribute
-     */
-    protected function fetchOwnerAttribute($metaModel = null)
-    {
-        if (null !== $this->ownerAttribute && null === $metaModel) {
-            return;
-        }
-
-        $metaModel = (null === $metaModel) ? $this->metaModel : $metaModel;
-
-        $this->ownerAttribute = $metaModel->getAttributeById($metaModel->get('owner_attribute'));
-
-        if (null === $this->ownerAttribute) {
-            throw new \RuntimeException('No owner attribute in the MetaModel was found');
-        }
-    }
-
-
-    /**
      * Check permission by MetaModel's owner attribute and exit with 403 optionally
      */
     protected function checkPermission()
@@ -218,17 +197,23 @@ abstract class Items extends Module
 
 
     /**
-     * Output a 404 page and stop further execution
+     * Set MetaModel's owner attribute
+     *
+     * @param IMetaModel $metaModel The MetaModel that will be taken to find the owner attribute
      */
-    protected function exitWith404()
+    protected function fetchOwnerAttribute($metaModel = null)
     {
-        global $objPage;
+        if (null !== $this->ownerAttribute && null === $metaModel) {
+            return;
+        }
 
-        /** @var \PageError404 $pageHandler */
-        $pageHandler = new $GLOBALS['TL_PTY']['error_404']();
-        $pageHandler->generate($objPage->id);
+        $metaModel = (null === $metaModel) ? $this->metaModel : $metaModel;
 
-        exit;
+        $this->ownerAttribute = $metaModel->getAttributeById($metaModel->get('owner_attribute'));
+
+        if (null === $this->ownerAttribute) {
+            throw new \RuntimeException('No owner attribute in the MetaModel was found');
+        }
     }
 
 
@@ -241,6 +226,21 @@ abstract class Items extends Module
 
         /** @var \PageError403 $pageHandler */
         $pageHandler = new $GLOBALS['TL_PTY']['error_403']();
+        $pageHandler->generate($objPage->id);
+
+        exit;
+    }
+
+
+    /**
+     * Output a 404 page and stop further execution
+     */
+    protected function exitWith404()
+    {
+        global $objPage;
+
+        /** @var \PageError404 $pageHandler */
+        $pageHandler = new $GLOBALS['TL_PTY']['error_404']();
         $pageHandler->generate($objPage->id);
 
         exit;
