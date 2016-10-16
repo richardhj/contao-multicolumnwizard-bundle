@@ -17,9 +17,8 @@ use Ferienpass\Model\Config as FerienpassConfig;
 use MetaModels\IItem;
 
 
-class FirstCome implements ApplicationSystemInterface
+class FirstCome extends AbstractApplicationSystem
 {
-
 
     /**
      * {@inheritdoc}
@@ -56,5 +55,4 @@ class FirstCome implements ApplicationSystemInterface
             }
         }
     }
-
 }

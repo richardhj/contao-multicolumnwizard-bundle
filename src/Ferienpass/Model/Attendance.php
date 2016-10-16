@@ -9,7 +9,7 @@
 namespace Ferienpass\Model;
 
 use Contao\Model;
-use Ferienpass\ApplicationSystem\ApplicationSystemInterface;
+use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
 use Ferienpass\Event\ChangeAttendanceStatusEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
 use MetaModels\IItem;
@@ -283,7 +283,7 @@ class Attendance extends Model
 	{
         global $container;
 
-        /** @var ApplicationSystemInterface $applicationSystem */
+        /** @var AbstractApplicationSystem $applicationSystem */
         $applicationSystem = $container['ferienpass.applicationsystem'];
 
         return $applicationSystem->findAttendanceStatus($this, Offer::getInstance()->findById($this->offer));

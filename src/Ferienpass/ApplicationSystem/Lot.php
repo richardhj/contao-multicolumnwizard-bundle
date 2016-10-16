@@ -16,7 +16,7 @@ use Ferienpass\Model\AttendanceStatus;
 use MetaModels\IItem;
 
 
-class Lot implements ApplicationSystemInterface
+class Lot extends AbstractApplicationSystem
 {
 
     /**
