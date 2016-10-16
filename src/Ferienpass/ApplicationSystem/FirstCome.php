@@ -11,29 +11,99 @@
 namespace Ferienpass\ApplicationSystem;
 
 
+use Ferienpass\Event\ChangeAttendanceStatusEvent;
+use Ferienpass\Event\DeleteAttendanceEvent;
+use Ferienpass\Event\SaveAttendanceEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
-use MetaModels\IItem;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 class FirstCome extends AbstractApplicationSystem
 {
 
     /**
-     * {@inheritdoc}
+     * Returns an array of event names this subscriber wants to listen to.
+     *
+     * The array keys are event names and the value can be:
+     *
+     *  * The method name to call (priority defaults to 0)
+     *  * An array composed of the method name to call and the priority
+     *  * An array of arrays composed of the method names to call and respective
+     *    priorities, or 0 if unset
+     *
+     * For instance:
+     *
+     *  * array('eventName' => 'methodName')
+     *  * array('eventName' => array('methodName', $priority))
+     *  * array('eventName' => array(array('methodName1', $priority), array('methodName2')))
+     *
+     * @return array The event names to listen to
      */
-    public function findAttendanceStatus(Attendance $attendance, IItem $offer)
+    public static function getSubscribedEvents()
+    {
+        return [
+            SaveAttendanceEvent::NAME   => [
+                'updateAttendanceStatus',
+            ],
+            DeleteAttendanceEvent::NAME => [
+                'updateStatusByOffer',
+            ],
+        ];
+    }
+
+
+    public function updateAttendanceStatus(SaveAttendanceEvent $event)
+    {
+        global $container;
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $container['event-dispatcher'];
+
+        $attendance = $event->getAttendance();
+        $oldStatus = $attendance->getStatus();
+        $newStatus = self::findStatusForAttendance($attendance);
+
+        if ($newStatus->id === $oldStatus->id) {
+            return;
+        }
+
+        $attendance->status = $newStatus->id;
+        $attendance->save();
+
+        $event = new ChangeAttendanceStatusEvent($attendance, $oldStatus, $newStatus);
+        $dispatcher->dispatch(ChangeAttendanceStatusEvent::NAME, $event);
+
+        \System::log(
+            sprintf(
+                'Status for attendance ID %u was changed from "%s" to "%s"',
+                $attendance->id,
+                $oldStatus->type,
+                $attendance->getStatus()->type
+            ),
+            __METHOD__,
+            TL_GENERAL
+        );
+    }
+
+
+    protected static function findStatusForAttendance(Attendance $attendance)
     {
         // Is current status locked?
-        /** @var AttendanceStatus $status */
-        if ($attendance->getStatus()->locked) {
+        if (null !== $attendance->getStatus() && $attendance->getStatus()->locked) {
             return $attendance->getStatus();
         }
 
+        // Attendances are not up to date because participant or offer might be deleted
+        if (null === $attendance->getOffer() || null === $attendance->getParticipant()) {
+            return AttendanceStatus::findError();
+        }
+
         // Offers without usage of application list or without limit
-        if (!$offer->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)
-            || !($max = $offer->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_max))
+        if (!$attendance->getOffer()->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)
+            || !($max = $attendance->getOffer()->get(
+                FerienpassConfig::getInstance()->offer_attribute_applicationlist_max
+            ))
         ) {
             return AttendanceStatus::findConfirmed();
         }
@@ -43,16 +113,38 @@ class FirstCome extends AbstractApplicationSystem
         if (null !== $position) {
             if ($position <= $max) {
                 return AttendanceStatus::findConfirmed();
+
             } else {
                 return AttendanceStatus::findWaitlisted();
             }
         } // Attendance not saved yet
         else {
-            if (Attendance::countParticipants($offer->get('id')) < $max) {
+            if (Attendance::countParticipants($attendance->getOffer()->get('id')) < $max) {
                 return AttendanceStatus::findConfirmed();
+
             } else {
                 return AttendanceStatus::findWaitlisted();
             }
+        }
+    }
+
+
+    /**
+     * Update all attendance statuses for one offer
+     *
+     * @param DeleteAttendanceEvent $event
+     */
+    public function updateStatusByOffer(DeleteAttendanceEvent $event)
+    {
+        $attendances = Attendance::findByOffer($event->getAttendance()->getOffer()->get('id'));
+
+        // Stop if the last attendance was deleted
+        if (null === $attendances) {
+            return;
+        }
+
+        while ($attendances->next()) {
+            $attendances->save();
         }
     }
 }

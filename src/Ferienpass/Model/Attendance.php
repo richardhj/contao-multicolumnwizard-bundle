@@ -9,8 +9,7 @@
 namespace Ferienpass\Model;
 
 use Contao\Model;
-use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
-use Ferienpass\Event\ChangeAttendanceStatusEvent;
+use Ferienpass\Event\DeleteAttendanceEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
 use MetaModels\IItem;
 use Model\Registry;
@@ -43,30 +42,6 @@ class Attendance extends Model
 	 * @var Participant
 	 */
 	protected static $participant;
-
-
-	/**
-	 * Find attendances by offer
-	 *
-	 * @param integer $offerId
-	 * @param array   $options
-	 *
-	 * @return \Model\Collection|null
-	 */
-	public static function findByOffer($offerId, array $options = [])
-	{
-		return static::findBy(
-            'offer',
-			$offerId,
-			array_merge
-			(
-				[
-					'order' => 'tstamp,id'
-                ],
-				$options
-			)
-		);
-	}
 
 
 	/**
@@ -121,6 +96,30 @@ class Attendance extends Model
 
 
 	/**
+     * Find attendances by offer
+     *
+     * @param integer $offerId
+     * @param array   $options
+     *
+     * @return \Model\Collection|null
+     */
+    public static function findByOffer($offerId, array $options = [])
+    {
+        return static::findBy(
+            'offer',
+            $offerId,
+            array_merge
+            (
+                [
+                    'order' => 'tstamp,id',
+                ],
+                $options
+            )
+        );
+    }
+
+
+    /**
 	 * Count participants in application list
 	 *
 	 * @param int $offerId
@@ -222,8 +221,7 @@ class Attendance extends Model
 		// Save model
 		parent::save();
 
-        $event = new SaveAttendanceEvent($this, $newModel);
-        $dispatcher->dispatch(SaveAttendanceEvent::NAME, $event);
+        $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this, $newModel));
 	}
 
 
@@ -234,13 +232,14 @@ class Attendance extends Model
 	 */
 	public function delete()
 	{
-        $offer = $this->offer;
+        if (parent::delete()) {
+            global $container;
+            /** @var EventDispatcher $dispatcher */
+            $dispatcher = $container['event-dispatcher'];
 
-		if (parent::delete())
-		{
-			$this->updateStatusByOffer($offer);
-		}
-	}
+            $dispatcher->dispatch(DeleteAttendanceEvent::NAME, new DeleteAttendanceEvent($this));
+        }
+    }
 
 
 	/**
@@ -249,7 +248,8 @@ class Attendance extends Model
 	 */
 	public function getPosition()
 	{
-        $attendances = static::findByOffer($this->offer); # collection ordered by tstamp,id
+        /** @var Attendance|\Model\Collection $attendances */
+        $attendances = static::findByOffer($this->offer); // Collection is ordered by tstamp,id
 
 		if (null === $attendances)
 		{
@@ -258,7 +258,7 @@ class Attendance extends Model
 
 		for ($i = 1; $attendances->next(); $i++)
 		{
-            if (!$attendances->current()->getRelated('status')->increasesCount)
+            if (!$attendances->current()->getStatus()->increasesCount)
 			{
 				--$i;
 				continue;
@@ -274,19 +274,13 @@ class Attendance extends Model
 	}
 
 
-	/**
-	 * Get attendance's status object
-	 *
-	 * @return AttendanceStatus
-	 */
-    public function fetchStatus()
-	{
-        global $container;
-
-        /** @var AbstractApplicationSystem $applicationSystem */
-        $applicationSystem = $container['ferienpass.applicationsystem'];
-
-        return $applicationSystem->findAttendanceStatus($this, Offer::getInstance()->findById($this->offer));
+    /**
+     * @return AttendanceStatus
+     */
+    public function getStatus()
+    {
+        /** @var AttendanceStatus $this ->getRelated('status') */
+        return $this->getRelated('status');
     }
 
 
@@ -306,140 +300,4 @@ class Attendance extends Model
     {
         return Participant::getInstance()->findById($this->participant);
     }
-
-
-    /**
-     * @return AttendanceStatus
-     */
-    public function getStatus()
-    {
-        /** @var AttendanceStatus $this ->getRelated('status') */
-        return $this->getRelated('status');
-	}
-
-
-	/**
-	 * Update all attendance statuses for one offer
-	 *
-	 * @param integer $offerId
-	 */
-	public static function updateStatusByOffer($offerId)
-	{
-		$attendances = static::findByOffer($offerId);
-
-		// Stop if the last attendance was deleted
-		if (null === $attendances)
-		{
-			return;
-		}
-
-		while ($attendances->next())
-		{
-			/**
-			 * @var Attendance       $attendances ->current()
-			 * @var AttendanceStatus $status
-			 */
-            $status = $attendances->current()->fetchStatus();
-
-			if ($attendances->status != $status->id)
-			{
-				static::processStatusChange($attendances->current(), $status);
-			}
-		}
-	}
-
-
-	/**
-	 * Process status change and trigger notifications for one attendance
-	 *
-	 * @param Attendance|Model $attendance
-	 * @param AttendanceStatus $newStatus
-	 */
-	protected static function processStatusChange($attendance, $newStatus)
-	{
-        global $container;
-        /** @var EventDispatcher $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
-
-        $participant = Participant::getInstance()->findById($attendance->participant);
-        $offer = Offer::getInstance()->findById($attendance->offer);
-
-		/** @var AttendanceStatus $oldStatus */
-		$oldStatus = $attendance->getRelated('status');
-
-		// Set status
-		$attendance->status = $newStatus->id;
-
-		// Attendances are not up to date because participant or offer might be deleted
-		if (null === $offer || null === $participant)
-		{
-			// Set status
-			$attendance->status = AttendanceStatus::findError()->id;
-
-			\System::log(sprintf(
-				'Status "%s" was added to attendance ID %u as the %s is not existent',
-				AttendanceStatus::findError()->type,
-				$attendance->id,
-				(null === $offer) ? 'offer' : 'participant'
-			), __METHOD__, TL_ERROR);
-		}
-
-		// Save attendance
-		$attendance->save();
-
-        $event = new ChangeAttendanceStatusEvent($attendance);
-        $dispatcher->dispatch(ChangeAttendanceStatusEvent::NAME, $event);
-
-		\System::log(sprintf(
-			'Status for attendance ID %u and participant ID %u was changed from "%s" to "%s"',
-			$attendance->id,
-			$participant->get('id'),
-			$oldStatus->type,
-            $attendance->getStatus()->type
-		), __METHOD__, TL_GENERAL);
-	}
-
-
-	/**
-	 * Get notification tokens
-	 *
-	 * @param IItem $participant
-	 * @param IItem $offer
-	 *
-	 * @return array
-	 */
-	public static function getNotificationTokens($participant, $offer)
-	{
-		$tokens = [];
-
-		// Add all offer fields
-		foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute)
-		{
-			$tokens['offer_' . $name] = $offer->get($name);
-		}
-
-		// Add all the participant fields
-		foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute)
-		{
-			$tokens['participant_' . $name] = $participant->get($name);
-		}
-
-		// Add all the parent's member fields
-		$objOwnerAttribute = $participant->getMetaModel()->getAttributeById($participant->getMetaModel()->get('owner_attribute'));
-		foreach ($participant->get($objOwnerAttribute->getColName()) as $k => $v)
-		{
-			$tokens['member_' . $k] = $v;
-		}
-
-		// Add the participant's email
-		$tokens['participant_email'] = $tokens['participant_email'] ?: $tokens['member_email'];
-
-		// Add the host's email
-		$tokens['host_email'] = $offer->get($offer->getMetaModel()->get('owner_attribute'))['email'];
-
-		// Add the admin's email
-		$tokens['admin_email'] = $GLOBALS['TL_ADMIN_EMAIL'];
-
-		return $tokens;
-	}
 }

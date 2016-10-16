@@ -145,12 +145,6 @@ class ApplicationList extends Item
                         $attendance->tstamp = time();
                         $attendance->offer = $this->item->get('id');
                         $attendance->participant = $participant;
-
-                        // Fetch status
-                        $status = $attendance->fetchStatus();
-                        $attendance->status = $status->id;
-
-                        // Save attendance
                         $attendance->save();
 
                     } // Attendance already exists

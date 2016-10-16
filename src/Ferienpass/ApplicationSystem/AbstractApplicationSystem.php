@@ -11,12 +11,52 @@
 namespace Ferienpass\ApplicationSystem;
 
 
-use Ferienpass\Model\Attendance;
 use MetaModels\IItem;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
-abstract class AbstractApplicationSystem
+abstract class AbstractApplicationSystem implements EventSubscriberInterface
 {
 
-    abstract public function findAttendanceStatus(Attendance $attendance, IItem $offer);
+    /**
+     * Get notification tokens
+     *
+     * @param IItem $participant
+     * @param IItem $offer
+     *
+     * @return array
+     */
+    public static function getNotificationTokens($participant, $offer)
+    {
+        $tokens = [];
+
+        // Add all offer fields
+        foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute) {
+            $tokens['offer_'.$name] = $offer->get($name);
+        }
+
+        // Add all the participant fields
+        foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute) {
+            $tokens['participant_'.$name] = $participant->get($name);
+        }
+
+        // Add all the parent's member fields
+        $objOwnerAttribute = $participant->getMetaModel()->getAttributeById(
+            $participant->getMetaModel()->get('owner_attribute')
+        );
+        foreach ($participant->get($objOwnerAttribute->getColName()) as $k => $v) {
+            $tokens['member_'.$k] = $v;
+        }
+
+        // Add the participant's email
+        $tokens['participant_email'] = $tokens['participant_email'] ?: $tokens['member_email'];
+
+        // Add the host's email
+        $tokens['host_email'] = $offer->get($offer->getMetaModel()->get('owner_attribute'))['email'];
+
+        // Add the admin's email
+        $tokens['admin_email'] = $GLOBALS['TL_ADMIN_EMAIL'];
+
+        return $tokens;
+    }
 }

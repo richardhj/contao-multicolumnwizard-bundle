@@ -12,6 +12,7 @@ namespace Ferienpass\Event;
 
 
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\AttendanceStatus;
 use Symfony\Component\EventDispatcher\Event;
 
 
@@ -28,14 +29,30 @@ class ChangeAttendanceStatusEvent extends Event
 
 
     /**
+     * @var AttendanceStatus
+     */
+    protected $oldStatus;
+
+
+    /**
+     * @var AttendanceStatus
+     */
+    protected $newStatus;
+
+
+    /**
      * ChangeAttendanceStatusEvent constructor.
      *
-     * @param Attendance $attendance
+     * @param Attendance            $attendance
+     * @param AttendanceStatus|null $oldStatus
+     * @param AttendanceStatus      $newStatus
      */
-    public function __construct(Attendance $attendance)
+    public function __construct(Attendance $attendance, $oldStatus, AttendanceStatus $newStatus)
     {
 
         $this->attendance = $attendance;
+        $this->oldStatus = $oldStatus;
+        $this->newStatus = $newStatus;
     }
 
 
@@ -45,5 +62,23 @@ class ChangeAttendanceStatusEvent extends Event
     public function getAttendance()
     {
         return $this->attendance;
+    }
+
+
+    /**
+     * @return AttendanceStatus
+     */
+    public function getOldStatus()
+    {
+        return $this->oldStatus;
+    }
+
+
+    /**
+     * @return AttendanceStatus
+     */
+    public function getNewStatus()
+    {
+        return $this->newStatus;
     }
 }

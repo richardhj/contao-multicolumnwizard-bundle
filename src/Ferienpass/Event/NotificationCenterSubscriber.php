@@ -11,6 +11,7 @@
 namespace Ferienpass\Event;
 
 
+use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
 use NotificationCenter\Model\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -63,7 +64,11 @@ class NotificationCenterSubscriber implements EventSubscriberInterface
             $participant = $event->getAttendance()->getParticipant();
             $offer = $event->getAttendance()->getOffer();
 
-            $notification->send($event->getAttendance()->getNotificationTokens($participant, $offer));
+            global $container;
+            /** @var AbstractApplicationSystem $applicationSystem */
+            $applicationSystem = $container['ferienpass.applicationsystem'];
+
+            $notification->send($applicationSystem->getNotificationTokens($participant, $offer));
         }
     }
 
@@ -76,8 +81,13 @@ class NotificationCenterSubscriber implements EventSubscriberInterface
 
         // Send the notification if one is set
         if (null !== $notification) {
+
+            global $container;
+            /** @var AbstractApplicationSystem $applicationSystem */
+            $applicationSystem = $container['ferienpass.applicationsystem'];
+
             $notification->send(
-                $event->getAttendance()->getNotificationTokens(
+                $applicationSystem->getNotificationTokens(
                     $event->getAttendance()->getParticipant(),
                     $event->getAttendance()->getOffer()
                 )
