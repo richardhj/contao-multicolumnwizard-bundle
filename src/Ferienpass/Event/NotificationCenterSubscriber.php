@@ -40,19 +40,17 @@ class NotificationCenterSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            SaveAttendanceEvent::NAME         => [
-                ['sendNewAttendanceStatusNotification'],
-            ],
             ChangeAttendanceStatusEvent::NAME => [
+                ['sendNewAttendanceStatusNotification'],
                 ['sendChangedAttendanceStatusNotification'],
             ],
         ];
     }
 
 
-    public function sendNewAttendanceStatusNotification(SaveAttendanceEvent $event)
+    public function sendNewAttendanceStatusNotification(ChangeAttendanceStatusEvent $event)
     {
-        if (!$event->isNewModel()) {
+        if (null !== $event->getOldStatus()) {
             return;
         }
 
@@ -75,6 +73,10 @@ class NotificationCenterSubscriber implements EventSubscriberInterface
 
     public function sendChangedAttendanceStatusNotification(ChangeAttendanceStatusEvent $event)
     {
+        if (null === $event->getOldStatus()) {
+            return;
+        }
+
         /** @var Notification $notification */
         /** @noinspection PhpUndefinedMethodInspection */
         $notification = Notification::findByPk($event->getAttendance()->getStatus()->notification_onChange);

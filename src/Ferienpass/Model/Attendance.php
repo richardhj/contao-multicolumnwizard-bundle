@@ -12,7 +12,6 @@ use Contao\Model;
 use Ferienpass\Event\DeleteAttendanceEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
 use MetaModels\IItem;
-use Model\Registry;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
@@ -216,12 +215,10 @@ class Attendance extends Model
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
 
-        $newModel = !Registry::getInstance()->isRegistered($this);
+        // Save model
+        parent::save();
 
-		// Save model
-		parent::save();
-
-        $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this, $newModel));
+        $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this));
 	}
 
 

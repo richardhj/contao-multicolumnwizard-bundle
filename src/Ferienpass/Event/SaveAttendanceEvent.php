@@ -20,21 +20,13 @@ class SaveAttendanceEvent extends Event
 
 
     /**
-     * @var bool
-     */
-    protected $newModel;
-
-
-    /**
      * SaveAttendanceEvent constructor.
      *
      * @param Attendance $attendance
-     * @param bool       $newModel
      */
-    public function __construct(Attendance $attendance, $newModel)
+    public function __construct(Attendance $attendance)
     {
         $this->attendance = $attendance;
-        $this->newModel = $newModel;
     }
 
 
@@ -44,14 +36,5 @@ class SaveAttendanceEvent extends Event
     public function getAttendance()
     {
         return $this->attendance;
-    }
-
-
-    /**
-     * @return boolean
-     */
-    public function isNewModel()
-    {
-        return $this->newModel;
     }
 }

@@ -57,10 +57,10 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'operations'        => [
             'edit' => [
-                    'label' => &$GLOBALS['TL_LANG'][$table]['edit'],
-                    'href'  => 'act=edit',
-                    'icon'  => 'edit.gif',
-                ],
+                'label' => &$GLOBALS['TL_LANG'][$table]['edit'],
+                'href'  => 'act=edit',
+                'icon'  => 'edit.gif',
+            ],
             'show' => [
                 'label' => &$GLOBALS['TL_LANG'][$table]['show'],
                 'href'  => 'act=show',
@@ -82,6 +82,8 @@ $GLOBALS['TL_DCA'][$table] = [
                 'notification_onChange',
                 'cssClass',
                 'messageType',
+                'locked',
+                'increasesCount',
             ],
         ],
     ],
