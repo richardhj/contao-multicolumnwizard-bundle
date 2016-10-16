@@ -44,9 +44,9 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     {
         return [
             BuildParticipantOptionsForApplicationListEvent::NAME => [
-                'disableAlreadyAttendingParticipants',
-                'disableWrongAgeParticipants',
-                'disableLimitReachedParticipants',
+                ['disableAlreadyAttendingParticipants'],
+                ['disableWrongAgeParticipants'],
+                ['disableLimitReachedParticipants'],
             ],
             SaveAttendanceForApplicationListEvent::NAME          => [
                 'addAttendanceStatusMessage',
