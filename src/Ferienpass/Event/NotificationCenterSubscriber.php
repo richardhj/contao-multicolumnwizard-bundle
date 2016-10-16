@@ -40,10 +40,10 @@ class NotificationCenterSubscriber implements EventSubscriberInterface
     {
         return [
             SaveAttendanceEvent::NAME         => [
-                'sendNewAttendanceStatusNotification',
+                ['sendNewAttendanceStatusNotification'],
             ],
             ChangeAttendanceStatusEvent::NAME => [
-                'sendChangedAttendanceStatusNotification',
+                ['sendChangedAttendanceStatusNotification'],
             ],
         ];
     }

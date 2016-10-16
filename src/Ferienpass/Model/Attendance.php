@@ -9,7 +9,7 @@
 namespace Ferienpass\Model;
 
 use Contao\Model;
-use Ferienpass\ApplicationSystem\Lot;
+use Ferienpass\ApplicationSystem\ApplicationSystemInterface;
 use Ferienpass\Event\ChangeAttendanceStatusEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
 use MetaModels\IItem;
@@ -281,7 +281,10 @@ class Attendance extends Model
 	 */
     public function fetchStatus()
 	{
-        $applicationSystem = new Lot();
+        global $container;
+
+        /** @var ApplicationSystemInterface $applicationSystem */
+        $applicationSystem = $container['ferienpass.applicationsystem'];
 
         return $applicationSystem->findAttendanceStatus($this, Offer::getInstance()->findById($this->offer));
     }
@@ -385,7 +388,7 @@ class Attendance extends Model
 		$attendance->save();
 
         $event = new ChangeAttendanceStatusEvent($attendance);
-        $dispatcher->dispatch(SaveAttendanceEvent::NAME, $event);
+        $dispatcher->dispatch(ChangeAttendanceStatusEvent::NAME, $event);
 
 		\System::log(sprintf(
 			'Status for attendance ID %u and participant ID %u was changed from "%s" to "%s"',
