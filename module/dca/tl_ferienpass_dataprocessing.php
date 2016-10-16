@@ -9,353 +9,294 @@
  */
 
 
-/**
- * Table tl_ferienpass_dataprocessing
- */
-$GLOBALS['TL_DCA']['tl_ferienpass_dataprocessing'] = array
-(
-	// Config
-	'config'                => array
-	(
-		'dataContainer' => 'General',
-		'sql'           => array
-		(
-			'keys' => array
-			(
-				'id' => 'primary'
-			)
-		)
-	),
+$table = Ferienpass\Model\DataProcessing::getTable();
 
-	// List
-	'list'                  => array
-	(
-		'sorting'           => array
-		(
-			'mode'        => 1,
-			'fields'      => array('name'),
-			'flag'        => 1,
-			'panelLayout' => 'filter;search,limit',
-		),
-		'label'             => array
-		(
-			'fields' => array('name', 'filesystem'),
-			'format' => '%s <span class="tl_gray">[%s]</span>',
-		),
-		'global_operations' => array
-		(
-			'back' => array
-			(
-				'label'      => &$GLOBALS['TL_LANG']['MSC']['backBT'],
-				'href'       => 'mod=&table=',
-				'class'      => 'header_back',
-				'attributes' => 'onclick="Backend.getScrollOffset();"',
-			),
-			'all'  => array
-			(
-				'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
-				'href'       => 'act=select',
-				'class'      => 'header_edit_all',
-				'attributes' => 'onclick="Backend.getScrollOffset();"'
-			),
-		),
-		'operations'        => array
-		(
-			'edit'   => array
-			(
-				'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['edit'],
-				'href'  => 'act=edit',
-				'icon'  => 'edit.gif',
-			),
-			'copy'   => array
-			(
-				'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['copy'],
-				'href'  => 'act=copy',
-				'icon'  => 'copy.gif'
-			),
-			'delete' => array
-			(
-				'label'      => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['delete'],
-				'href'       => 'act=delete',
-				'icon'       => 'delete.gif',
-				'attributes' => 'onclick="if (!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\')) return false; Backend.getScrollOffset();"'
-			),
-			'show'   => array
-			(
-				'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['show'],
-				'href'  => 'act=show',
-				'icon'  => 'show.gif'
-			)
-		)
-	),
 
-	// Meta Palettes
-	'metapalettes'          => array
-	(
-		'default' => array
-		(
-			'title'      => array
-			(
-				'name',
-			),
-			'processing' => array
-			(
-				'type',
-				'scope',
-				'filesystem'
-			)
-		)
-	),
-	// Meta SubSelect Palettes
-	'metasubselectpalettes' => array
-	(
-		'type'       => array
-		(
-			'xml'  => array
-			(
-				'metamodel_view',
-				'combine_variants'
-			),
-			'ical' => array
-			(
-				'ical_fields',
-			)
-		),
-		'scope'      => array
-		(
-			'single' => array(),
-			'full'   => array
-			(
-				'offer_image_path',
-				'host_logo_path'
-			),
-		),
-		'filesystem' => array
-		(
-			'local'         => array
-			(
-				'export_file_name',
-				'path_prefix',
-				'sync'
-			),
-			'sendToBrowser' => array
-			(
-				'export_file_name'
-			),
-			'dropbox'       => array
-			(
-				'dropbox_access_token',
-				'path_prefix',
-				'sync'
-			),
-		)
-	),
+$GLOBALS['TL_DCA'][$table] = [
+    // Config
+    'config'                => [
+        'dataContainer' => 'General',
+        'sql'           =>
+            [
+                'keys' => [
+                    'id' => 'primary',
+                ],
+            ],
+    ],
 
-	// Fields
-	'fields'                => array
-	(
-		'id'                   => array
-		(
-			'sql' => "int(10) unsigned NOT NULL auto_increment"
-		),
-		'tstamp'               => array
-		(
-			'sql' => "int(10) unsigned NOT NULL default '0'"
-		),
-		'name'                 => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['name'],
-			'inputType' => 'text',
-			'eval'      => array
-			(
-				'mandatory' => true,
-				'maxlength' => 255,
-				'tl_class'  => 'w50'
-			),
-			'sql'       => "varchar(255) NOT NULL default ''"
-		),
-		'type'                 => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['type'],
-			'inputType' => 'select',
-			'default'   => 'xml',
-			'options'   => array
-			(
-				'xml',
-				'ical'
-			),
-			'reference' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['type_options'],
-			'eval'      => array
-			(
-				'submitOnChange' => true,
-				'tl_class'       => 'w50'
-			),
-			'sql'       => "varchar(64) NOT NULL default ''"
-		),
-		'metamodel_view'       => array
-		(
-			'label'            => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_view'],
-			'inputType'        => 'select',
-			'options_callback' => array('Ferienpass\Helper\Dca', 'getOffersMetaModelRenderSettings'),
-			'eval'             => array
-			(
-				'inlcudeBlankOption' => true,
-				'tl_class'           => 'w50'
-			),
-			'sql'              => "int(10) NOT NULL default '0'"
-		),
-		'scope'                => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['scope'],
-			'inputType' => 'select',
-			'options'   => array
-			(
-				'single',
-				'full',
-			),
-			'eval'      => array
-			(
-				'submitOnChange' => true,
-				'tl_class'       => 'w50'
-			),
-			'sql'       => "varchar(64) NOT NULL default ''"
-		),
-		'filesystem'           => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['filesystem'],
-			'inputType' => 'select',
-			'options'   => array
-			(
-				'local',
-				'sendToBrowser',
-				'dropbox'
-			),
-			'reference' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['filesystem_options'],
-			'eval'      => array
-			(
-				'submitOnChange' => true,
-				'tl_class'       => 'w50 clr'
-			),
-			'sql'       => "varchar(64) NOT NULL default ''"
-		),
-		'offer_image_path'     => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['offer_image_path'],
-			'inputType' => 'fileTree',
-			'eval'      => array
-			(
-				'fieldType' => 'radio',
-				'files'     => false,
-				'tl_class'  => 'w50 clr'
-			),
-			'sql'       => "binary(16) NULL"
-		),
-		'host_logo_path'       => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['host_logo_path'],
-			'inputType' => 'fileTree',
-			'eval'      => array
-			(
-				'fieldType' => 'radio',
-				'files'     => false,
-				'tl_class'  => 'w50'
-			),
-			'sql'       => "binary(16) NULL"
-		),
-		'combine_variants'     => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['combine_variants'],
-			'inputType' => 'checkbox',
-			'eval'      => array
-			(
-				'tl_class'       => 'w50 m12'
-			),
-			'sql'       => "char(1) NOT NULL default ''"
-		),
-		'export_file_name'     => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['export_file_name'],
-			'inputType' => 'text',
-			'eval'      => array
-			(
-				'mandatory' => true,
-				'tl_class'  => 'w50'
-			),
-			'sql'       => "varchar(255) NOT NULL default ''"
-		),
-		'dropbox_access_token' => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['dropbox_access_token'],
-			'inputType' => 'request_access_token',
-			'eval'      => array
-			(
-				'tl_class' => 'long clr'
-			),
-			'sql'       => "varchar(255) NOT NULL default ''"
-		),
-		'dropbox_uid'          => array
-		(
-			'sql' => "int(10) NOT NULL default '0'"
-		),
-		'dropbox_cursor'       => array
-		(
-			'sql' => "varchar(255) NOT NULL default ''"
-		),
-		'path_prefix'          => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['path_prefix'],
-			'inputType' => 'text',
-			'eval'      => array
-			(
-				'trailingSlash' => false,
-				'tl_class'      => 'w50'
-			),
-			'sql'       => "varchar(255) NOT NULL default ''"
-		),
-		'sync'                 => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['sync'],
-			'inputType' => 'checkbox',
-			'eval'      => array
-			(
-				'submitOnChange' => 'true',
-				'tl_class'       => 'w50 m12'
-			),
-			'sql'       => "char(1) NOT NULL default ''"
-		),
-		'ical_fields'          => array
-		(
-			'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['ical_fields'],
-			'inputType' => 'multiColumnWizard',
-			'eval'      => array
-			(
-				'columnFields' => array
-				(
-					'ical_field'          => array
-					(
-						'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['ical_field'],
-						'inputType' => 'select',
-						'options'   => array
-						(
-							'dtStart',
-							'dtEnd',
-							'summary',
-							'description',
-							'location'
-						),
-						'eval'      => array('style' => 'width:250px', 'chosen' => true)
-					),
-					'metamodel_attribute' => array
-					(
-						'label'            => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_attribute'],
-						'inputType'        => 'conditionalselect',
-						'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
-						'eval'             => array('condition' => 'mm_ferienpass', 'chosen' => true, 'style' => 'width:250px')
-					),
-				),
-				'tl_class'     => 'clr'
-			),
-			'sql'       => "text NULL"
-		),
-	),
-);
+    // List
+    'list'                  => [
+        'sorting'           => [
+            'mode'        => 1,
+            'fields'      => ['name'],
+            'flag'        => 1,
+            'panelLayout' => 'filter;search,limit',
+        ],
+        'label'             => [
+            'fields' => [
+                'name',
+                'filesystem',
+            ],
+            'format' => '%s <span class="tl_gray">[%s]</span>',
+        ],
+        'global_operations' => [
+            'back' => [
+                'label'      => &$GLOBALS['TL_LANG']['MSC']['backBT'],
+                'href'       => 'mod=&table=',
+                'class'      => 'header_back',
+                'attributes' => 'onclick="Backend.getScrollOffset();"',
+            ],
+            'all'  => [
+                'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
+                'href'       => 'act=select',
+                'class'      => 'header_edit_all',
+                'attributes' => 'onclick="Backend.getScrollOffset();"',
+            ],
+        ],
+        'operations'        => [
+            'edit'   => [
+                'label' => &$GLOBALS['TL_LANG'][$table]['edit'],
+                'href'  => 'act=edit',
+                'icon'  => 'edit.gif',
+            ],
+            'copy'   => [
+                'label' => &$GLOBALS['TL_LANG'][$table]['copy'],
+                'href'  => 'act=copy',
+                'icon'  => 'copy.gif',
+            ],
+            'delete' => [
+                'label'      => &$GLOBALS['TL_LANG'][$table]['delete'],
+                'href'       => 'act=delete',
+                'icon'       => 'delete.gif',
+                'attributes' => 'onclick="if (!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm'].'\')) return false; Backend.getScrollOffset();"',
+            ],
+            'show'   => [
+                'label' => &$GLOBALS['TL_LANG'][$table]['show'],
+                'href'  => 'act=show',
+                'icon'  => 'show.gif',
+            ],
+        ],
+    ],
+
+    // Meta Palettes
+    'metapalettes'          => [
+        'default' => [
+            'title'      => [
+                'name',
+            ],
+            'processing' => [
+                'type',
+                'scope',
+                'filesystem',
+            ],
+        ],
+    ],
+    // Meta SubSelect Palettes
+    'metasubselectpalettes' => [
+        'type'       => [
+            'xml'  => [
+                'metamodel_view',
+                'combine_variants',
+            ],
+            'ical' => [
+                'ical_fields',
+            ],
+        ],
+        'scope'      => [
+            'single' => [],
+            'full'   => [
+                'offer_image_path',
+                'host_logo_path',
+            ],
+        ],
+        'filesystem' => [
+            'local'         => [
+                'export_file_name',
+                'path_prefix',
+                'sync',
+            ],
+            'sendToBrowser' => [
+                'export_file_name',
+            ],
+            'dropbox'       => [
+                'dropbox_access_token',
+                'path_prefix',
+                'sync',
+            ],
+        ],
+    ],
+
+    // Fields
+    'fields'                => [
+        'id'                   => [
+            'sql' => "int(10) unsigned NOT NULL auto_increment",
+        ],
+        'tstamp'               => [
+            'sql' => "int(10) unsigned NOT NULL default '0'",
+        ],
+        'name'                 => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['name'],
+            'inputType' => 'text',
+            'eval'      => [
+                'mandatory' => true,
+                'maxlength' => 255,
+                'tl_class'  => 'w50',
+            ],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'type'                 => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
+            'inputType' => 'select',
+            'default'   => 'xml',
+            'options'   => [
+                'xml',
+                'ical',
+            ],
+            'reference' => &$GLOBALS['TL_LANG'][$table]['type_options'],
+            'eval'      => [
+                'submitOnChange' => true,
+                'tl_class'       => 'w50',
+            ],
+            'sql'       => "varchar(64) NOT NULL default ''",
+        ],
+        'metamodel_view'       => [
+            'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_view'],
+            'inputType'        => 'select',
+            'options_callback' => ['Ferienpass\Helper\Dca', 'getOffersMetaModelRenderSettings'],
+            'eval'             => [
+                'inlcudeBlankOption' => true,
+                'tl_class'           => 'w50',
+            ],
+            'sql'              => "int(10) NOT NULL default '0'",
+        ],
+        'scope'                => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['scope'],
+            'inputType' => 'select',
+            'options'   => [
+                'single',
+                'full',
+            ],
+            'eval'      => [
+                'submitOnChange' => true,
+                'tl_class'       => 'w50',
+            ],
+            'sql'       => "varchar(64) NOT NULL default ''",
+        ],
+        'filesystem'           => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['filesystem'],
+            'inputType' => 'select',
+            'options'   => [
+                'local',
+                'sendToBrowser',
+                'dropbox',
+            ],
+            'reference' => &$GLOBALS['TL_LANG'][$table]['filesystem_options'],
+            'eval'      => [
+                'submitOnChange' => true,
+                'tl_class'       => 'w50 clr',
+            ],
+            'sql'       => "varchar(64) NOT NULL default ''",
+        ],
+        'offer_image_path'     => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['offer_image_path'],
+            'inputType' => 'fileTree',
+            'eval'      => [
+                'fieldType' => 'radio',
+                'files'     => false,
+                'tl_class'  => 'w50 clr',
+            ],
+            'sql'       => "binary(16) NULL",
+        ],
+        'host_logo_path'       => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['host_logo_path'],
+            'inputType' => 'fileTree',
+            'eval'      => [
+                'fieldType' => 'radio',
+                'files'     => false,
+                'tl_class'  => 'w50',
+            ],
+            'sql'       => "binary(16) NULL",
+        ],
+        'combine_variants'     => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['combine_variants'],
+            'inputType' => 'checkbox',
+            'eval'      => [
+                'tl_class' => 'w50 m12',
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'export_file_name'     => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['export_file_name'],
+            'inputType' => 'text',
+            'eval'      => [
+                'mandatory' => true,
+                'tl_class'  => 'w50',
+            ],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'dropbox_access_token' => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['dropbox_access_token'],
+            'inputType' => 'request_access_token',
+            'eval'      => [
+                'tl_class' => 'long clr',
+            ],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'dropbox_uid'          => [
+            'sql' => "int(10) NOT NULL default '0'",
+        ],
+        'dropbox_cursor'       => [
+            'sql' => "varchar(255) NOT NULL default ''",
+        ],
+        'path_prefix'          => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['path_prefix'],
+            'inputType' => 'text',
+            'eval'      => [
+                'trailingSlash' => false,
+                'tl_class'      => 'w50',
+            ],
+            'sql'       => "varchar(255) NOT NULL default ''",
+        ],
+        'sync'                 => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['sync'],
+            'inputType' => 'checkbox',
+            'eval'      => [
+                'submitOnChange' => 'true',
+                'tl_class'       => 'w50 m12',
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'ical_fields'          => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['ical_fields'],
+            'inputType' => 'multiColumnWizard',
+            'eval'      => [
+                'columnFields' => [
+                    'ical_field'          => [
+                        'label'     => &$GLOBALS['TL_LANG'][$table]['ical_field'],
+                        'inputType' => 'select',
+                        'options'   => [
+                            'dtStart',
+                            'dtEnd',
+                            'summary',
+                            'description',
+                            'location',
+                        ],
+                        'eval'      => ['style' => 'width:250px', 'chosen' => true],
+                    ],
+                    'metamodel_attribute' => [
+                        'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_attribute'],
+                        'inputType'        => 'conditionalselect',
+                        'options_callback' => ['Ferienpass\Helper\Dca', 'getMetaModelsAttributes'],
+                        'eval'             => [
+                            'condition' => 'mm_ferienpass',
+                            'chosen'    => true,
+                            'style'     => 'width:250px',
+                        ],
+                    ],
+                ],
+                'tl_class'     => 'clr',
+            ],
+            'sql'       => "text NULL",
+        ],
+    ],
+];
