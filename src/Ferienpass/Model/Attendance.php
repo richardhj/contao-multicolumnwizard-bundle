@@ -217,12 +217,12 @@ class Attendance extends Model
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
 
-        $isRegistered = (!Registry::getInstance()->isRegistered($this));
+        $newModel = !Registry::getInstance()->isRegistered($this);
 
 		// Save model
 		parent::save();
 
-        $event = new SaveAttendanceEvent($this, $isRegistered);
+        $event = new SaveAttendanceEvent($this, $newModel);
         $dispatcher->dispatch(SaveAttendanceEvent::NAME, $event);
 	}
 
