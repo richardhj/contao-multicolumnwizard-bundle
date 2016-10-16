@@ -48,7 +48,7 @@ class ApplicationListSubscriber implements EventSubscriberInterface
                 ['disableWrongAgeParticipants'],
                 ['disableLimitReachedParticipants'],
             ],
-            SaveAttendanceForApplicationListEvent::NAME          => [
+            SaveAttendanceEvent::NAME                            => [
                 'addAttendanceStatusMessage',
             ],
         ];
@@ -131,7 +131,6 @@ class ApplicationListSubscriber implements EventSubscriberInterface
                 ? true
                 : false;
 
-
             if ($isLimitReached) {
                 $options[$k]['label'] = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'],
@@ -145,9 +144,10 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
-    public function addAttendanceStatusMessage(SaveAttendanceForApplicationListEvent $event)
+    public function addAttendanceStatusMessage(SaveAttendanceEvent $event)
     {
         $participantName = $event
+            ->getAttendance()
             ->getParticipant()
             ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)
         ['text'];

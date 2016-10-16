@@ -10,9 +10,11 @@ namespace Ferienpass\Model;
 
 use Contao\Model;
 use Ferienpass\ApplicationSystem\Lot;
+use Ferienpass\Event\ChangeAttendanceStatusEvent;
+use Ferienpass\Event\SaveAttendanceEvent;
 use MetaModels\IItem;
 use Model\Registry;
-use NotificationCenter\Model\Notification;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 /**
@@ -211,30 +213,17 @@ class Attendance extends Model
 	 */
 	public function save()
 	{
-		$newAttendance = (!Registry::getInstance()->isRegistered($this));
+        global $container;
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $container['event-dispatcher'];
+
+        $isRegistered = (!Registry::getInstance()->isRegistered($this));
 
 		// Save model
 		parent::save();
 
-		if ($newAttendance)
-		{
-			// Trigger notification
-			/**
-			 * @var AttendanceStatus $this ->getStatus()
-			 * @var Notification     $notification
-			 */
-			/** @noinspection PhpUndefinedMethodInspection */
-            $notification = Notification::findByPk($this->fetchStatus()->notification_new);
-
-            $participant = Participant::getInstance()->findById($this->participant);
-            $offer = Offer::getInstance()->findById($this->offer);
-
-			// Send the notification if one is set
-			if (null !== $notification)
-			{
-				$notification->send(static::getNotificationTokens($participant, $offer));
-			}
-		}
+        $event = new SaveAttendanceEvent($this, $isRegistered);
+        $dispatcher->dispatch(SaveAttendanceEvent::NAME, $event);
 	}
 
 
@@ -299,6 +288,24 @@ class Attendance extends Model
 
 
     /**
+     * @return IItem
+     */
+    public function getOffer()
+    {
+        return Offer::getInstance()->findById($this->offer);
+    }
+
+
+    /**
+     * @return IItem|null
+     */
+    public function getParticipant()
+    {
+        return Participant::getInstance()->findById($this->participant);
+    }
+
+
+    /**
      * @return AttendanceStatus
      */
     public function getStatus()
@@ -347,6 +354,10 @@ class Attendance extends Model
 	 */
 	protected static function processStatusChange($attendance, $newStatus)
 	{
+        global $container;
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $container['event-dispatcher'];
+
         $participant = Participant::getInstance()->findById($attendance->participant);
         $offer = Offer::getInstance()->findById($attendance->offer);
 
@@ -373,37 +384,16 @@ class Attendance extends Model
 		// Save attendance
 		$attendance->save();
 
-		/** @var AttendanceStatus $newStatus */
-		$newStatus = $attendance->getRelated('status');
+        $event = new ChangeAttendanceStatusEvent($attendance);
+        $dispatcher->dispatch(SaveAttendanceEvent::NAME, $event);
 
 		\System::log(sprintf(
 			'Status for attendance ID %u and participant ID %u was changed from "%s" to "%s"',
 			$attendance->id,
 			$participant->get('id'),
 			$oldStatus->type,
-			$newStatus->type
+            $attendance->getStatus()->type
 		), __METHOD__, TL_GENERAL);
-
-		/** @var Notification $notification */
-		/** @noinspection PhpUndefinedMethodInspection */
-		$notification = Notification::findByPk($newStatus->notification_onChange);
-
-		// Send the notification if one is set
-		if (null !== $notification)
-		{
-			$notification->send(static::getNotificationTokens($participant, $offer));
-//			// Log sent mails
-//			foreach ($objNotification->send(static::getNotificationTokens($objParticipant, $objOffer)) as $message => $success)
-//			{
-//				\System::log(sprintf(
-//					'Message ID %u for participant ID %u and offer ID %u %s sent.',
-//					$message,
-//					$objParticipant->get('id'),
-//					$objOffer->get('id'),
-//					!$success ? 'failed to' : 'was'
-//				), __METHOD__, TL_GENERAL);
-//			}
-		}
 	}
 
 

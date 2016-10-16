@@ -12,7 +12,6 @@ namespace Ferienpass\Module\Item\Offer;
 
 use Ferienpass\Event\ApplicationListSubscriber;
 use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
-use Ferienpass\Event\SaveAttendanceForApplicationListEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -153,13 +152,6 @@ class ApplicationList extends Item
 
                         // Save attendance
                         $attendance->save();
-
-                        $event = new SaveAttendanceForApplicationListEvent(
-                            Participant::getInstance()->findById($participant),
-                            $this->item,
-                            $attendance
-                        );
-                        $dispatcher->dispatch(SaveAttendanceForApplicationListEvent::NAME, $event);
 
                     } // Attendance already exists
                     else {
