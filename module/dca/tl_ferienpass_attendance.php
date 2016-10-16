@@ -29,7 +29,8 @@ $GLOBALS['TL_DCA'][$table] = [
         'notDeletable'  => true,
         'sql'           => [
             'keys' => [
-                'id' => 'primary',
+                'id'                => 'primary',
+                'offer,participant' => 'unique',
             ],
         ],
     ],
