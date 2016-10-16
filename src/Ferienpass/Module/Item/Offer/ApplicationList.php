@@ -11,7 +11,8 @@
 namespace Ferienpass\Module\Item\Offer;
 
 use Ferienpass\Event\ApplicationListSubscriber;
-use Ferienpass\Event\CreateParticipantOptionsForApplicationListEvent;
+use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
+use Ferienpass\Event\SaveAttendanceForApplicationListEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -42,6 +43,8 @@ class ApplicationList extends Item
         global $container;
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
+
+        $dispatcher->addSubscriber(new ApplicationListSubscriber());
 
         // Stop if the procedure is not used
         if (!$this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)) {
@@ -101,11 +104,8 @@ class ApplicationList extends Item
                 ];
             }
 
-            // Subscriber will disable participants if they are not allowed for this offer
-            $dispatcher->addSubscriber(new ApplicationListSubscriber());
-
-            $event = new CreateParticipantOptionsForApplicationListEvent($participants, $this->item, $options);
-            $dispatcher->dispatch(CreateParticipantOptionsForApplicationListEvent::NAME, $event);
+            $event = new BuildParticipantOptionsForApplicationListEvent($participants, $this->item, $options);
+            $dispatcher->dispatch(BuildParticipantOptionsForApplicationListEvent::NAME, $event);
 
             $options = $event->getResult();
 
@@ -154,40 +154,13 @@ class ApplicationList extends Item
                         // Save attendance
                         $attendance->save();
 
-                        $participantName = Participant::getInstance()
-                            ->findById($participant)
-                            ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)
-                        ['text'];
+                        $event = new SaveAttendanceForApplicationListEvent(
+                            Participant::getInstance()->findById($participant),
+                            $this->item,
+                            $attendance
+                        );
+                        $dispatcher->dispatch(SaveAttendanceForApplicationListEvent::NAME, $event);
 
-                        // Add message corresponding to attendance's status
-                        switch ($status->type) {
-                            case 'confirmed':
-                                Message::addConfirmation(
-                                    sprintf(
-                                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
-                                        $participantName
-                                    )
-                                );
-                                break;
-
-                            case 'waiting':
-                                Message::addWarning(
-                                    sprintf(
-                                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
-                                        $participantName
-                                    )
-                                );
-                                break;
-
-                            case 'error':
-                                Message::addError(
-                                    sprintf(
-                                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
-                                        $participantName
-                                    )
-                                );
-                                break;
-                        }
                     } // Attendance already exists
                     else {
                         Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['error']);

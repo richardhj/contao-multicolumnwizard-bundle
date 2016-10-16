@@ -8,10 +8,10 @@ use MetaModels\IItems;
 use Symfony\Component\EventDispatcher\Event;
 
 
-class CreateParticipantOptionsForApplicationListEvent extends Event
+class BuildParticipantOptionsForApplicationListEvent extends Event
 {
 
-    const NAME = 'ferienpass.application-list.create-participant-options';
+    const NAME = 'ferienpass.application-list.build-participant-options';
 
 
     /**
@@ -33,7 +33,7 @@ class CreateParticipantOptionsForApplicationListEvent extends Event
 
 
     /**
-     * CreateParticipantOptionsForApplicationListEvent constructor.
+     * BuildParticipantOptionsForApplicationListEvent constructor.
      *
      * @param IItems $participants
      * @param IItem  $offer

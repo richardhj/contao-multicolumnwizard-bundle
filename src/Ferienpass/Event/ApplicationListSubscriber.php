@@ -11,6 +11,7 @@
 namespace Ferienpass\Event;
 
 
+use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
@@ -42,16 +43,19 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            CreateParticipantOptionsForApplicationListEvent::NAME => [
+            BuildParticipantOptionsForApplicationListEvent::NAME => [
                 'disableAlreadyAttendingParticipants',
                 'disableWrongAgeParticipants',
                 'disableLimitReachedParticipants',
+            ],
+            SaveAttendanceForApplicationListEvent::NAME          => [
+                'addAttendanceStatusMessage',
             ],
         ];
     }
 
 
-    public function disableAlreadyAttendingParticipants(CreateParticipantOptionsForApplicationListEvent $event)
+    public function disableAlreadyAttendingParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
         $options = $event->getResult();
 
@@ -73,7 +77,7 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
-    public function disableWrongAgeParticipants(CreateParticipantOptionsForApplicationListEvent $event)
+    public function disableWrongAgeParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
         $options = $event->getResult();
         $dateOffer = new DateTime(
@@ -109,7 +113,7 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
-    public function disableLimitReachedParticipants(CreateParticipantOptionsForApplicationListEvent $event)
+    public function disableLimitReachedParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
         $options = $event->getResult();
         $maxApplicationsPerDay = FerienpassConfig::getInstance()->max_applications_per_day;
@@ -138,5 +142,46 @@ class ApplicationListSubscriber implements EventSubscriberInterface
         }
 
         $event->setResult($options);
+    }
+
+
+    public function addAttendanceStatusMessage(SaveAttendanceForApplicationListEvent $event)
+    {
+        $participantName = $event
+            ->getParticipant()
+            ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)
+        ['text'];
+
+        $status = $event->getAttendance()->getStatus();
+
+        // Add message corresponding to attendance's status
+        switch ($status->type) {
+            case 'confirmed':
+                Message::addConfirmation(
+                    sprintf(
+                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                        $participantName
+                    )
+                );
+                break;
+
+            case 'waiting':
+                Message::addWarning(
+                    sprintf(
+                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                        $participantName
+                    )
+                );
+                break;
+
+            case 'error':
+                Message::addError(
+                    sprintf(
+                        $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                        $participantName
+                    )
+                );
+                break;
+        }
     }
 }
