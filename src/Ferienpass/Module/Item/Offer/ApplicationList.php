@@ -43,9 +43,6 @@ class ApplicationList extends Item
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
 
-//		$state = $this->objItem->get(FerienpassConfig::get(FerienpassConfig::OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE)) ? 'active' : 'inactive';
-//		$this->Template->al_state = $state;
-
         // Stop if the procedure is not used
         if (!$this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)) {
             $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'];
@@ -59,8 +56,6 @@ class ApplicationList extends Item
 
             return;
         }
-
-//		$this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList'][$state];
 
         $countParticipants = Attendance::countParticipants($this->item->get('id'));
         $maxParticipants = $this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_max);
@@ -127,16 +122,15 @@ class ApplicationList extends Item
                 [
                     'label'     => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['label'],
                     'inputType' => 'select_disabled_options',
-                    'eval'      =>
-                        [
-                            'options'     => $options,
-                            'addSubmit'   => true,
-                            'slabel'      => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'],
-                            'multiple'    => true,
-                            'mandatory'   => true,
-                            'chosen'      => true,
-                            'placeholder' => 'Hier klicken und Teilnehmer auswählen' //@todo lang
-                        ],
+                    'eval'      => [
+                        'options'     => $options,
+                        'addSubmit'   => true,
+                        'slabel'      => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'],
+                        'multiple'    => true,
+                        'mandatory'   => true,
+                        'chosen'      => true,
+                        'placeholder' => 'Hier klicken und Teilnehmer auswählen' //@todo lang
+                    ],
                 ]
             );
 
@@ -160,9 +154,10 @@ class ApplicationList extends Item
                         // Save attendance
                         $attendance->save();
 
-                        $participantName = Participant::getInstance()->findById($participant)->parseAttribute(
-                            FerienpassConfig::getInstance()->participant_attribute_name
-                        )['text'];
+                        $participantName = Participant::getInstance()
+                            ->findById($participant)
+                            ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)
+                        ['text'];
 
                         // Add message corresponding to attendance's status
                         switch ($status->type) {
