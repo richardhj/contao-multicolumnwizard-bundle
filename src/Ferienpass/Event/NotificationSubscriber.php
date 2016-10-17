@@ -16,7 +16,7 @@ use NotificationCenter\Model\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
-class NotificationCenterSubscriber implements EventSubscriberInterface
+class NotificationSubscriber implements EventSubscriberInterface
 {
 
     /**

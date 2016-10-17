@@ -133,7 +133,6 @@ class ApplicationList extends Item
                 ]
             );
 
-
             // Validate the form
             if ($form->validate()) {
                 // Process new applications

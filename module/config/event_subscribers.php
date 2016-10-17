@@ -1,10 +1,10 @@
 <?php
-use Ferienpass\Event\NotificationCenterSubscriber;
+use Ferienpass\Event\NotificationSubscriber;
 
 
 global $container;
 
 return [
-    new NotificationCenterSubscriber(),
+    new NotificationSubscriber(),
     $container['ferienpass.applicationsystem'],
 ];

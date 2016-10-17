@@ -48,7 +48,7 @@ class FirstCome extends AbstractApplicationSystem
                 'updateAttendanceStatus',
             ],
             DeleteAttendanceEvent::NAME => [
-                'updateStatusByOffer',
+                'updateAllStatusByOffer',
             ],
         ];
     }
@@ -134,7 +134,7 @@ class FirstCome extends AbstractApplicationSystem
      *
      * @param DeleteAttendanceEvent $event
      */
-    public function updateStatusByOffer(DeleteAttendanceEvent $event)
+    public function updateAllStatusByOffer(DeleteAttendanceEvent $event)
     {
         $attendances = Attendance::findByOffer($event->getAttendance()->getOffer()->get('id'));
 
