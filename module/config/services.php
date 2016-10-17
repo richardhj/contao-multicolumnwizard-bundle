@@ -10,6 +10,6 @@ $container['ferienpass.applicationsystem.lot'] = function ($container) {
 
 $container['ferienpass.applicationsystem'] = $container->share(
     function ($container) {
-        return $container['ferienpass.applicationsystem.firstcome'];
+        return $container['ferienpass.applicationsystem.lot'];
     }
 );

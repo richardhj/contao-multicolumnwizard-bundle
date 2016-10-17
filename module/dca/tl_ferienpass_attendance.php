@@ -25,7 +25,6 @@ $GLOBALS['TL_DCA'][$table] = [
     // Config
     'config' => [
         'dataContainer' => 'General',
-//        'closed'        => true,
         'notDeletable'  => true,
         'sql'           => [
             'keys' => [
@@ -36,29 +35,25 @@ $GLOBALS['TL_DCA'][$table] = [
     ],
 
     'dca_config'   => [
-        'data_provider'  =>
-            [
-                'default' =>
-                    [
-                        'source' => $table,
-                    ],
-//            'tl_metamodel_dca_sortgroup' =>
-//                [
-//                'source' => 'tl_metamodel_dca_sortgroup'
-//                ],
-//            'tl_metamodel_dcasetting'    =>
-//                [
-//                'source' => 'tl_metamodel_dcasetting'
-//                ],
+        'data_provider'  => [
+            'parent'  => [
+                'source' => Offer::getInstance()->getMetaModel()->getTableName(),
             ],
+            'default' => [
+                'source' => $table,
+            ],
+//                Offer::getInstance()->getMetaModel()->getTableName() => [
+//                    'source' => Offer::getInstance()->getMetaModel()->getTableName(),
+//                ],
+        ],
         'childCondition' => [
             [
-                'from'   => $table,
-                'to'     => Offer::getInstance()->getMetaModel()->getTableName(),
+                'from'   => Offer::getInstance()->getMetaModel()->getTableName(),
+                'to'     => $table,
                 'setOn'  => [
                     [
-                        'to_field'   => 'id',
-                        'from_field' => 'offer',
+                        'to_field'   => 'offer',
+                        'from_field' => 'id',
                     ],
                 ],
                 'filter' => [
@@ -70,12 +65,12 @@ $GLOBALS['TL_DCA'][$table] = [
                 ],
             ],
             [
-                'from'   => $table,
-                'to'     => Participant::getInstance()->getMetaModel()->getTableName(),
+                'from'   => Participant::getInstance()->getMetaModel()->getTableName(),
+                'to'     => $table,
                 'setOn'  => [
                     [
-                        'to_field'   => 'id',
-                        'from_field' => 'participant',
+                        'to_field'   => 'participant',
+                        'from_field' => 'id',
                     ],
                 ],
                 'filter' => [
@@ -92,16 +87,18 @@ $GLOBALS['TL_DCA'][$table] = [
     // List
     'list'         => [
         'sorting'           => [
-            'mode'        => 0,
-            'fields'      => [
+            'mode'         => 4,
+            'fields'       => [
                 'tstamp',
                 'offer',
                 'participant',
                 'status',
             ],
-//            'flag'        => 0,
-//            'filter'                => [['participant', \Input::get('participant')]],
-            'panelLayout' => 'filter',
+            'headerFields' => [
+                'id',
+//                Offer::getInstance()->getMetaModel()->getAttribute(Ferienpass\Model\Config::getInstance()->offer_attribute_name)->getColName(),
+            ],
+            'panelLayout'  => 'filter',
         ],
         'label'             =>
             [
@@ -112,7 +109,6 @@ $GLOBALS['TL_DCA'][$table] = [
                     'status',
                 ],
                 'showColumns' => true,
-//                'format' => '%s <span class="tl_gray">[%s]</span>',
             ],
         'global_operations' =>
             [
@@ -131,8 +127,7 @@ $GLOBALS['TL_DCA'][$table] = [
                         'attributes' => 'onclick="Backend.getScrollOffset();"',
                     ],
             ],
-        'operations'        =>
-            [
+        'operations'        => [
 //                'edit'          =>
 //                    [
 //                        'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['edit'],
@@ -152,45 +147,42 @@ $GLOBALS['TL_DCA'][$table] = [
 //                        'icon'       => 'delete.gif',
 //                        'attributes' => 'onclick="if (!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm'].'\')) return false; Backend.getScrollOffset();"',
 //                    ],
-                'show'          =>
-                    [
-                        'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['show'],
-                        'href'  => 'act=show',
-                        'icon'  => 'show.gif',
-                    ],
-                'toggle_status' => [
-                    'label'                => &$GLOBALS['TL_LANG'][$table]['toggle_status'],
-                    'attributes'           => 'onclick="Backend.getScrollOffset();"',
-                    'haste_ajax_operation' => [
-                        'field'   => 'status',
-                        'options' => [
-                            [
-                                'value' => '1',
-                                'icon'  => 'assets/ferienpass/backend/img/equalizer.png',
-                            ],
-                            [
-                                'value' => '2',
-                                'icon'  => 'visible.gif',
-                            ],
+            'show'          =>
+                [
+                    'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['show'],
+                    'href'  => 'act=show',
+                    'icon'  => 'show.gif',
+                ],
+            'toggle_status' => [
+                'label'                => &$GLOBALS['TL_LANG'][$table]['toggle_status'],
+                'attributes'           => 'onclick="Backend.getScrollOffset();"',
+                'haste_ajax_operation' => [
+                    'field'   => 'status',
+                    'options' => [
+                        [
+                            'value' => '1',
+                            'icon'  => 'assets/ferienpass/backend/img/equalizer.png',
+                        ],
+                        [
+                            'value' => '2',
+                            'icon'  => 'visible.gif',
                         ],
                     ],
                 ],
             ],
+        ],
     ],
 
 //    // Meta Palettes
-    'metapalettes' => array
-    (
-        'default' => array
-        (
-            'title' => array
-            (
+    'metapalettes' => [
+        'default' => [
+            'title' => [
                 'offer',
                 'participant',
                 'status',
-            ),
-        ),
-    ),
+            ],
+        ],
+    ],
 
     // Fields
     'fields'       => [
@@ -199,70 +191,27 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'tstamp'      => [
             'sql'  => "int(10) unsigned NOT NULL default '0'",
-            'eval' => ['rgxp' => 'datim']
+            'eval' => ['rgxp' => 'datim'],
 //            'flag' => 5,
         ],
         'offer'       => [
             'inputType' => 'tableLookup',
             'eval'      => [
-                // The foreign table you want to search in
                 'foreignTable'     => Offer::getInstance()->getMetaModel()->getTableName(),
-
-                // Define "checkbox" for multi selects and "radio" for single selects
                 'fieldType'        => 'radio',
-
-                // A list of fields to be displayed in the table
                 'listFields'       => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
                     Ferienpass\Model\Config::getInstance()->offer_attribute_date_check_age,
                 ],
-
-//                // Custom labels to be displayed in the table header
-//                'customLabels'        => ['Label 1', 'Label 2', 'Label 3'],
-
-                // Fields that can be searched for the keyword
                 'searchFields'     => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
-//                    'tl_my_superb_join_table.field1',
                 ],
-
-//                // Adds multiple left joins to the sql statement (optional)
-//                'joins'            =>
-//                    [
-//                        // Defines the join table
-//                        'tl_my_superb_join_table' =>
-//                            [
-//                                // Join type (e.g. INNER JOIN, LEFT JOIN, RIGHT JOIN)
-//                                'type' => 'LEFT JOIN',
-//
-//                                // Key of the join table
-//                                'jkey' => 'pid',
-//
-//                                // Key of the foreign table
-//                                'fkey' => 'id',
-//                            ],
-//                    ],
-
-                // Find every given keyword
                 'matchAllKeywords' => true,
-
-                // Exclude varbases if they have childs
+                // Exclude varbases if they have children
                 'sqlWhere'         => sprintf(
                     '%1$s.varbase=0 OR (%1$s.varbase=1 AND (SELECT COUNT(*) FROM %1$s c WHERE c.varbase=0 AND c.vargroup=%1$s.id)=0)',
                     Offer::getInstance()->getMetaModel()->getTableName()
                 ),
-
-//                // Custom ORDER BY - note that when you use "enableSorting" you cannot set this value!
-//                'sqlOrderBy'       => 'someColumn',
-
-//                // Adds a "GROUP BY" to the sql statement (optional)
-//                'sqlGroupBy'       => 'tl_my_superb_join_table.fid',
-
-//                // The search button label
-//                'searchLabel'      => 'Search my table now!',
-
-//                // Enables drag n drop sorting of chosen values
-//                'enableSorting'    => true,
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
@@ -281,32 +230,18 @@ $GLOBALS['TL_DCA'][$table] = [
         'participant' => [
             'inputType' => 'tableLookup',
             'eval'      => [
-                // The foreign table you want to search in
                 'foreignTable'     => Participant::getInstance()->getMetaModel()->getTableName(),
-
-                // Define "checkbox" for multi selects and "radio" for single selects
                 'fieldType'        => 'radio',
-
-                // A list of fields to be displayed in the table
                 'listFields'       => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,
                     Ferienpass\Model\Config::getInstance()->participant_attribute_dateofbirth,
-//                    sprintf('CONCAT (%1$s.firstname, \' \', %1$s.lastname', \MemberModel::getTable()),
                     \MemberModel::getTable().'.firstname',
                     \MemberModel::getTable().'.lastname',
 
                 ],
-
-//                // Custom labels to be displayed in the table header
-//                'customLabels'        => ['Label 1', 'Label 2', 'Label 3'],
-
-                // Fields that can be searched for the keyword
                 'searchFields'     => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,
-//                    \MemberModel::getTable().'.*',
                 ],
-
-                // Adds multiple left joins to the sql statement (optional)
                 'joins'            => [
                     \MemberModel::getTable() => [
                         'type' => 'INNER JOIN',
@@ -316,24 +251,7 @@ $GLOBALS['TL_DCA'][$table] = [
                         )->getColName(),
                     ],
                 ],
-
-                // Find every given keyword
                 'matchAllKeywords' => true,
-
-//                // Exclude varbases if they have childs
-//                'sqlWhere'         => sprintf('%1$s.varbase=0 OR (%1$s.varbase=1 AND (SELECT COUNT(*) FROM %1$s c WHERE c.varbase=0 AND c.vargroup=%1$s.id)=0)', Offer::getInstance()->getMetaModel()->getTableName()),
-
-//                // Custom ORDER BY - note that when you use "enableSorting" you cannot set this value!
-//                'sqlOrderBy'       => 'someColumn',
-
-//                // Adds a "GROUP BY" to the sql statement (optional)
-//                'sqlGroupBy'       => 'tl_my_superb_join_table.fid',
-
-//                // The search button label
-//                'searchLabel'      => 'Search my table now!',
-
-//                // Enables drag n drop sorting of chosen values
-//                'enableSorting'    => true,
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
@@ -352,7 +270,6 @@ $GLOBALS['TL_DCA'][$table] = [
         'status'      => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['status'],
             'inputType' => 'select',
-//            'options'   => [1, 2],
             'reference' => AttendanceStatus::findAll()->fetchEach('name'),
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'relation'  => [
