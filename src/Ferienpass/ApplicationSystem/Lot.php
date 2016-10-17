@@ -29,22 +29,7 @@ class Lot extends AbstractApplicationSystem
 {
 
     /**
-     * Returns an array of event names this subscriber wants to listen to.
-     *
-     * The array keys are event names and the value can be:
-     *
-     *  * The method name to call (priority defaults to 0)
-     *  * An array composed of the method name to call and the priority
-     *  * An array of arrays composed of the method names to call and respective
-     *    priorities, or 0 if unset
-     *
-     * For instance:
-     *
-     *  * array('eventName' => 'methodName')
-     *  * array('eventName' => array('methodName', $priority))
-     *  * array('eventName' => array(array('methodName1', $priority), array('methodName2')))
-     *
-     * @return array The event names to listen to
+     * {@inheritdoc}
      */
     public static function getSubscribedEvents()
     {
@@ -65,6 +50,11 @@ class Lot extends AbstractApplicationSystem
     }
 
 
+    /**
+     * Save the "waiting" status for one attendance per default
+     *
+     * @param SaveAttendanceEvent $event
+     */
     public function updateAttendanceStatus(SaveAttendanceEvent $event)
     {
         $attendance = $event->getAttendance();
@@ -78,6 +68,11 @@ class Lot extends AbstractApplicationSystem
     }
 
 
+    /**
+     * Add the Attendances table name to the MetaModel back end module tables, to make them editable
+     *
+     * @param MetaModelsBootEvent $event
+     */
     public function addAttendancesToMetaModelModuleTables(MetaModelsBootEvent $event)
     {
         $metaModelName = FerienpassConfig::getInstance()->offer_model;
@@ -92,6 +87,11 @@ class Lot extends AbstractApplicationSystem
     }
 
 
+    /**
+     * Add the "edit attendances" operation to the MetaModel back end view
+     *
+     * @param BuildMetaModelOperationsEvent $event
+     */
     public function addAttendancesOperationToMetaModelView(BuildMetaModelOperationsEvent $event)
     {
         if ($event->getMetaModel()->getTableName() != FerienpassConfig::getInstance()->offer_model) {
@@ -131,6 +131,11 @@ class Lot extends AbstractApplicationSystem
     }
 
 
+    /**
+     * Remove the "edit attendances" operation for variant bases
+     *
+     * @param GetOperationButtonEvent $event
+     */
     public function createAttendancesButtonInOfferView(GetOperationButtonEvent $event)
     {
         if ($event->getCommand()->getName() != 'edit_attendances') {

@@ -22,13 +22,13 @@ array_insert(
                 'tables'   => [],
                 'icon'     => 'assets/ferienpass/backend/img/equalizer.png',
             ],
-            'ferienpass_attendances' => [
-                'tables' => [
-                    Ferienpass\Model\Attendance::getTable(),
-                    'mm_ferienpass',
-                ],
-                'icon'   => 'assets/ferienpass/backend/img/equalizer.png',
-            ],
+//            'ferienpass_attendances' => [
+//                'tables' => [
+//                    Ferienpass\Model\Attendance::getTable(),
+//                    'mm_ferienpass',
+//                ],
+//                'icon'   => 'assets/ferienpass/backend/img/equalizer.png',
+//            ],
         ],
     ]
 );

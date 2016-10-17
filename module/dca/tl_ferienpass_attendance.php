@@ -128,48 +128,29 @@ $GLOBALS['TL_DCA'][$table] = [
                     ],
             ],
         'operations'        => [
-//                'edit'          =>
-//                    [
-//                        'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['edit'],
-//                        'href'  => 'act=edit',
-//                        'icon'  => 'edit.gif',
-//                    ],
-//                'copy'          =>
-//                    [
-//                        'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['copy'],
-//                        'href'  => 'act=copy',
-//                        'icon'  => 'copy.gif',
-//                    ],
-//                'delete'        =>
-//                    [
-//                        'label'      => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['delete'],
-//                        'href'       => 'act=delete',
-//                        'icon'       => 'delete.gif',
-//                        'attributes' => 'onclick="if (!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm'].'\')) return false; Backend.getScrollOffset();"',
-//                    ],
             'show'          =>
                 [
                     'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['show'],
                     'href'  => 'act=show',
                     'icon'  => 'show.gif',
                 ],
-            'toggle_status' => [
-                'label'                => &$GLOBALS['TL_LANG'][$table]['toggle_status'],
-                'attributes'           => 'onclick="Backend.getScrollOffset();"',
-                'haste_ajax_operation' => [
-                    'field'   => 'status',
-                    'options' => [
-                        [
-                            'value' => '1',
-                            'icon'  => 'assets/ferienpass/backend/img/equalizer.png',
-                        ],
-                        [
-                            'value' => '2',
-                            'icon'  => 'visible.gif',
-                        ],
-                    ],
-                ],
-            ],
+//            'toggle_status' => [
+//                'label'                => &$GLOBALS['TL_LANG'][$table]['toggle_status'],
+//                'attributes'           => 'onclick="Backend.getScrollOffset();"',
+//                'haste_ajax_operation' => [
+//                    'field'   => 'status',
+//                    'options' => [
+//                        [
+//                            'value' => '1',
+//                            'icon'  => 'assets/ferienpass/backend/img/equalizer.png',
+//                        ],
+//                        [
+//                            'value' => '2',
+//                            'icon'  => 'visible.gif',
+//                        ],
+//                    ],
+//                ],
+//            ],
         ],
     ],
 
