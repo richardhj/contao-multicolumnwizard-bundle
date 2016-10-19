@@ -11,6 +11,7 @@
 namespace Ferienpass\ApplicationSystem;
 
 
+use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
@@ -82,18 +83,21 @@ class Lot extends AbstractApplicationSystem
             return;
         }
 
+        // Alter view
         $view = new OfferAttendancesView();
-
         $view->setEnvironment($environment);
         $environment->setView($view);
 
 
-//        /** @var Contao2BackendViewDefinitionInterface $viewDefinition */
-//        $viewDefinition = $definition->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
-//
-//        $listingConfig = $viewDefinition->getListingConfig();
-//
-//        $listingConfig->setShowColumns(false);
+        // Add "attendances" property
+        /** @var Contao2BackendViewDefinitionInterface $viewSection */
+        $viewSection = $definition->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
+        $listing = $viewSection->getListingConfig();
+        $formatter = $listing->getLabelFormatter($definition->getName());
+
+        $propertyNames = $formatter->getPropertyNames();
+        $propertyNames[] = 'attendances';
+        $formatter->setPropertyNames($propertyNames);
     }
 
 
@@ -113,37 +117,27 @@ class Lot extends AbstractApplicationSystem
         }
 
         $args = $event->getArgs();
-//
-//        \System::loadLanguageFile('tl_member');
-//
-//        $parentRaw = $model->getItem()->get($parentColName);
 
-//        unset($args['offer']);
-//
         // Adjust the label
         foreach ($args as $k => $v) {
             switch ($k) {
-//                case $parentColName:
-//                    /** @noinspection HtmlUnknownTarget */
-//                    $args[$k] = sprintf(
-//                        '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_parent" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
-//                        // Member ID
-//                        $parentRaw['id'],
-//                        // Link
-//                        '<i class="fa fa-external-link tl_gray"></i> '.$args[$k],
-//                        // Member edit description
-//                        sprintf(
-//                            $GLOBALS['TL_LANG']['tl_member']['edit'][1],
-//                            $parentRaw['id']
-//                        ),
-//                        REQUEST_TOKEN
-//                    );
-//                    break;
-
-//                default:
-//                    if ('' === $model->getItem()->get($k) && '' !== ($parentData = $parentRaw[$k])) {
-//                        $args[$k] = sprintf('<span class="tl_gray">%s</span>', $parentData);
-//                    }
+                case 'attendances':
+                    $args[$k] = sprintf(
+                        '<a href="contao/main.php?do=metamodel_mm_participants&amp;table=tl_ferienpass_attendance&amp;pid=mm_participants::%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_participant_attendances" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
+                        // Member ID
+                        $model->getProperty('participant'),
+                        // Link
+                        '<i class="fa fa-external-link tl_gray"></i> '.Attendance::countByParticipant(
+                            $model->getProperty('participant')
+                        ).' Anmeldungen gesamt',
+                        // Member edit description
+                        sprintf(
+                            $GLOBALS['TL_LANG']['tl_member']['edit'][1],
+                            ''
+                        ),
+                        REQUEST_TOKEN
+                    );
+                    break;
             }
         }
 

@@ -16,7 +16,9 @@ use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\RedirectEvent;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ParentView;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ViewHelpers;
+use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
+use Ferienpass\Model\Config as FerienpassConfig;
 
 
 class OfferAttendancesView extends ParentView
@@ -51,8 +53,23 @@ class OfferAttendancesView extends ParentView
 
         $objTemplate = $this->getTemplate('dcbe_general_offerAttendancesView');
 
+        $status = AttendanceStatus::findBy('enableManualSort', 1);
+        $statusCount = [];
+
+        while (null !== $status && $status->next()) {
+            $statusCount[$status->id]['current'] = Attendance::countByOfferAndStatus(
+                $parentModel->getProperty('id'),
+                $status->id
+            );
+            $statusCount[$status->id]['max'] = ($status->id === AttendanceStatus::findConfirmed()->id)
+                ? $parentModel->getProperty(
+                    FerienpassConfig::getInstance()->offer_attribute_applicationlist_max
+                ) : '-';
+        }
+
         $this
-            ->addToTemplate('status', AttendanceStatus::findBy('enableManualSort', 1), $objTemplate)
+            ->addToTemplate('status', $status, $objTemplate)
+            ->addToTemplate('statusCount', $statusCount, $objTemplate)
             ->addToTemplate('tableName', strlen($definition->getName()) ? $definition->getName() : 'none', $objTemplate)
             ->addToTemplate('collection', $collection, $objTemplate)
 //            ->addToTemplate('select', $this->isSelectModeActive(), $objTemplate)

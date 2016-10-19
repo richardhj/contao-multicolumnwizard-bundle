@@ -65,7 +65,7 @@ class Ajax
         if (0 === ($newStatusId = (int)\Input::post('newStatusId'))) {
             $response = [
                 'success' => false,
-                'error'   => "Error with newStatusId",
+                'error'   => 'Error with newStatusId',
             ];
             $response = new JsonResponse($response);
             $response->send();
@@ -86,7 +86,9 @@ class Ajax
         $versions->create();
 
         $response = [
-            'success' => true,
+            'success'    => true,
+            'startCount' => Attendance::countByOfferAndStatus($attendance->offer, (int)\Input::post('oldStatusId')),
+            'endCount'   => Attendance::countByOfferAndStatus($attendance->offer, $attendance->status),
         ];
         $response = new JsonResponse($response);
         $response->send();

@@ -30,9 +30,13 @@
         <div id="table_<?php echo $this->tableName; ?>" class="status-assignment">
 
             <?php foreach ($this->status as $status): ?>
-                <div class="attendance-status -<?php echo $status->cssClass ?>">
+                <div id="status-<?php echo $status->id ?>" class="attendance-status -<?php echo $status->cssClass ?>">
                     <h2><?php echo $status->name ?></h2>
-                    <ul id="status-<?php echo $status->id ?>">
+                    <div class="count">
+                        <span
+                            class="current"><?php echo $this->statusCount[$status->id]['current'] ?></span> / <span
+                            class="max"><?php echo $this->statusCount[$status->id]['max'] ?></span></div>
+                    <ul>
 
                         <?php foreach ($this->collection as $objModel): ?>
                             <?php /** @var \ContaoCommunityAlliance\DcGeneral\Data\ModelInterface $objModel */ ?>
@@ -71,22 +75,30 @@
                 forcePlaceholderSize: true,
                 placeholderClass: 'sortable-placeholder'
             })[0].addEventListener('sortupdate', function (e) {
+                // Ajax save new status
                 var request = new Request.JSON({
                     url: location.href,
                     method: 'post',
                     data: {
                         action: 'offerAttendancesSorting',
                         model: e.detail.item.getAttribute('data-model-id'),
-                        newStatusId: e.detail.endparent.id.substr(7)
+                        oldStatusId: e.detail.startparent.getParent().id.substr(7),
+                        newStatusId: e.detail.endparent.getParent().id.substr(7)
+                    },
+                    onRequest: function () {
+                        e.detail.endparent.getParent().getElement('.count').addClass('ajax-waiting');
                     },
                     onSuccess: function (responseJSON, responseText) {
                         console.log(responseJSON, responseText);
+                        e.detail.startparent.getParent().getElement('.count .current').textContent = responseJSON.startCount;
+                        e.detail.endparent.getParent().getElement('.count .current').textContent = responseJSON.endCount;
+                        e.detail.endparent.getParent().getElement('.count').removeClass('ajax-waiting');
                     },
                     onError: function (text, error) {
+                        console.log(text, error);
                         alert('TODO');
                     }
                 });
-
                 request.send();
             });
         </script>

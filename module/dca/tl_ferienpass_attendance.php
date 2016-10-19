@@ -49,6 +49,19 @@ $GLOBALS['TL_DCA'][$table] = [
                 'source' => Participant::getInstance()->getMetaModel()->getTableName(),
             ],
         ],
+        'child_list'     => [
+            Offer::getInstance()->getMetaModel()->getTableName() => [
+                'fields' => ['tstamp'],
+            ],
+            $table                                               => [
+                'fields' => [
+                    'tstamp',
+                    'offer',
+                    'participant',
+                    'status',
+                ],
+            ],
+        ],
         'childCondition' => [
             [
                 'from'   => Offer::getInstance()->getMetaModel()->getTableName(),
@@ -108,12 +121,7 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'label'             =>
             [
-                'fields'      => [
-                    'tstamp',
-                    'offer',
-                    'participant',
-                    'status',
-                ],
+
                 'showColumns' => true,
             ],
         'global_operations' =>

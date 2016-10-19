@@ -159,6 +159,20 @@ class Attendance extends Model
 
 
     /**
+     * Count the attendances of a offer with a particular status
+     *
+     * @param integer $offerId
+     * @param integer $statusId
+     *
+     * @return int
+     */
+    public static function countByOfferAndStatus($offerId, $statusId)
+    {
+        return static::countBy(['offer=?', 'status=?'], [$offerId, $statusId]);
+    }
+
+
+    /**
      * Count the attendances of a participant made on a particular day and optionally with a particular status
      *
      * @param integer $participantId
