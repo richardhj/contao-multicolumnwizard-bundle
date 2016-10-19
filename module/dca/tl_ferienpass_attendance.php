@@ -121,7 +121,6 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'label'             =>
             [
-
                 'showColumns' => true,
             ],
         'global_operations' =>

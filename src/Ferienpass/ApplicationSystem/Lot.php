@@ -16,10 +16,12 @@ use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\DcGeneral\View\OfferAttendancesView;
+use Ferienpass\Event\ChangeAttendanceStatusEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 class Lot extends AbstractApplicationSystem
@@ -51,14 +53,23 @@ class Lot extends AbstractApplicationSystem
      */
     public function updateAttendanceStatus(SaveAttendanceEvent $event)
     {
+        global $container;
+        /** @var EventDispatcher $dispatcher */
+        $dispatcher = $container['event-dispatcher'];
+
         $attendance = $event->getAttendance();
 
-        if (null !== $attendance->getStatus()) {
+        if (null !== ($oldStatus = $attendance->getStatus())) {
             return;
         }
 
-        $attendance->status = AttendanceStatus::findWaiting()->id;
+        $newStatus = AttendanceStatus::findWaiting();
+
+        $attendance->status = $newStatus->id;
         $attendance->save();
+
+        $event = new ChangeAttendanceStatusEvent($attendance, $oldStatus, $newStatus);
+        $dispatcher->dispatch(ChangeAttendanceStatusEvent::NAME, $event);
     }
 
 

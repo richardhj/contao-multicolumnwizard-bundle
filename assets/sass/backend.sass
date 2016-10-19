@@ -41,11 +41,11 @@ $fa-font-path: "../../../components/font-awesome/fonts"
 .attendances_offer_view
   .tl_header
     margin-bottom: 2em
-  div.status-assignment
+  .status-assignment
     +display-flex()
     +justify-content(space-between)
   //+align-items(stretch)
-  div.attendance-status
+  .attendance-status
     border: 1px solid #dddddd
     +border-radius(2px)
     //padding: 2px
@@ -54,6 +54,15 @@ $fa-font-path: "../../../components/font-awesome/fonts"
       background: #f9f9f9
       margin: 0
       padding: 1em
+      &:before
+        +fa-icon
+        content: $fa-var-circle
+        padding-right: .5em
+        font-size: 1.2em
+    &.-confirmed h2:before
+      color: #8caf23
+    &.-waiting-list h2:before
+      color: #c09205
     div.count
       display: block
       background: #f9f9f9

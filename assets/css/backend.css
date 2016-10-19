@@ -110,7 +110,7 @@
     margin-left: .3em;
 }
 
-.fa-spin, .attendances_offer_view div.attendance-status div.count.ajax-waiting:after {
+.fa-spin, .attendances_offer_view .attendance-status div.count.ajax-waiting:after {
     -webkit-animation: fa-spin 2s infinite linear;
     animation: fa-spin 2s infinite linear;
 }
@@ -2819,14 +2819,14 @@
     margin-bottom: 2em;
 }
 
-.attendances_offer_view div.status-assignment {
+.attendances_offer_view .status-assignment {
     display: -webkit-flex;
     display: flex;
     -webkit-justify-content: space-between;
     justify-content: space-between;
 }
 
-.attendances_offer_view div.attendance-status {
+.attendances_offer_view .attendance-status {
     border: 1px solid #dddddd;
     -moz-border-radius: 2px;
     -webkit-border-radius: 2px;
@@ -2834,13 +2834,33 @@
     width: 30%;
 }
 
-.attendances_offer_view div.attendance-status h2 {
+.attendances_offer_view .attendance-status h2 {
     background: #f9f9f9;
     margin: 0;
     padding: 1em;
 }
 
-.attendances_offer_view div.attendance-status div.count {
+.attendances_offer_view .attendance-status h2:before {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    content: "";
+    padding-right: 0.5em;
+    font-size: 1.2em;
+}
+
+.attendances_offer_view .attendance-status.-confirmed h2:before {
+    color: #8caf23;
+}
+
+.attendances_offer_view .attendance-status.-waiting-list h2:before {
+    color: #c09205;
+}
+
+.attendances_offer_view .attendance-status div.count {
     display: block;
     background: #f9f9f9;
     border-color: #f4f4f4;
@@ -2851,7 +2871,7 @@
     position: relative;
 }
 
-.attendances_offer_view div.attendance-status div.count.ajax-waiting:before, .attendances_offer_view div.attendance-status div.count.ajax-waiting:after {
+.attendances_offer_view .attendance-status div.count.ajax-waiting:before, .attendances_offer_view .attendance-status div.count.ajax-waiting:after {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -2859,12 +2879,12 @@
     top: 0;
 }
 
-.attendances_offer_view div.attendance-status div.count.ajax-waiting:before {
+.attendances_offer_view .attendance-status div.count.ajax-waiting:before {
     background: rgba(249, 249, 249, 0.95);
     content: "";
 }
 
-.attendances_offer_view div.attendance-status div.count.ajax-waiting:after {
+.attendances_offer_view .attendance-status div.count.ajax-waiting:after {
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;
     font-size: inherit;
@@ -2876,11 +2896,11 @@
     font-size: 2em;
 }
 
-.attendances_offer_view div.attendance-status ul {
+.attendances_offer_view .attendance-status ul {
     height: 100%;
 }
 
-.attendances_offer_view div.attendance-status li {
+.attendances_offer_view .attendance-status li {
     background: #fcfcfc;
     margin: 0.75em;
     padding: 0.5em;
@@ -2891,29 +2911,29 @@
     cursor: move;
 }
 
-.attendances_offer_view div.attendance-status li span {
+.attendances_offer_view .attendance-status li span {
     background: none;
     border: 0;
     display: block;
 }
 
-.attendances_offer_view div.attendance-status li span.col_0 {
+.attendances_offer_view .attendance-status li span.col_0 {
     font-size: 10px;
 }
 
-.attendances_offer_view div.attendance-status li span.col_1, .attendances_offer_view div.attendance-status li span.col_3 {
+.attendances_offer_view .attendance-status li span.col_1, .attendances_offer_view .attendance-status li span.col_3 {
     display: none;
 }
 
-.attendances_offer_view div.attendance-status li span.col_2 {
+.attendances_offer_view .attendance-status li span.col_2 {
     font-size: 14px;
     font-weight: bold;
 }
 
-.attendances_offer_view div.attendance-status li span.tl_right_nowrap {
+.attendances_offer_view .attendance-status li span.tl_right_nowrap {
     display: none;
 }
 
-.attendances_offer_view div.attendance-status li + li {
+.attendances_offer_view .attendance-status li + li {
     margin-top: 2px;
 }

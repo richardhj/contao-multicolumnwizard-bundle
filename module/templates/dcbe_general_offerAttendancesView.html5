@@ -87,16 +87,19 @@
                     },
                     onRequest: function () {
                         e.detail.endparent.getParent().getElement('.count').addClass('ajax-waiting');
+                        e.detail.startparent.getParent().getElement('.count').addClass('ajax-waiting');
                     },
                     onSuccess: function (responseJSON, responseText) {
                         console.log(responseJSON, responseText);
                         e.detail.startparent.getParent().getElement('.count .current').textContent = responseJSON.startCount;
                         e.detail.endparent.getParent().getElement('.count .current').textContent = responseJSON.endCount;
                         e.detail.endparent.getParent().getElement('.count').removeClass('ajax-waiting');
+                        e.detail.startparent.getParent().getElement('.count').removeClass('ajax-waiting');
                     },
-                    onError: function (text, error) {
-                        console.log(text, error);
-                        alert('TODO');
+                    onFailure: function (xhr) {
+                        if (204 == xhr.status) {
+                            location.reload();
+                        }
                     }
                 });
                 request.send();
