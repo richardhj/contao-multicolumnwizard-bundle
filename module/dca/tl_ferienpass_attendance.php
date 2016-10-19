@@ -36,15 +36,18 @@ $GLOBALS['TL_DCA'][$table] = [
 
     'dca_config'   => [
         'data_provider'  => [
-            'parent'  => [
-                'source' => Offer::getInstance()->getMetaModel()->getTableName(),
-            ],
-            'default' => [
+//            'parent'  => [
+//                'source' => Offer::getInstance()->getMetaModel()->getTableName(),
+//            ],
+            'default'                                                  => [
                 'source' => $table,
             ],
-//                Offer::getInstance()->getMetaModel()->getTableName() => [
-//                    'source' => Offer::getInstance()->getMetaModel()->getTableName(),
-//                ],
+            Offer::getInstance()->getMetaModel()->getTableName()       => [
+                'source' => Offer::getInstance()->getMetaModel()->getTableName(),
+            ],
+            Participant::getInstance()->getMetaModel()->getTableName() => [
+                'source' => Participant::getInstance()->getMetaModel()->getTableName(),
+            ],
         ],
         'childCondition' => [
             [
@@ -87,13 +90,16 @@ $GLOBALS['TL_DCA'][$table] = [
     // List
     'list'         => [
         'sorting'           => [
-            'mode'         => 4,
-            'fields'       => [
-                'tstamp',
-                'offer',
-                'participant',
-                'status',
-            ],
+//            'mode'         => 1,
+//            'flag'                  => 6,
+//            'mode'         => 0,
+//            'fields'       => [
+//                'sorting'
+////                'tstamp',
+////                'offer',
+////                'participant',
+////                'status',
+//            ],
             'headerFields' => [
                 'id',
 //                Offer::getInstance()->getMetaModel()->getAttribute(Ferienpass\Model\Config::getInstance()->offer_attribute_name)->getColName(),
@@ -128,7 +134,7 @@ $GLOBALS['TL_DCA'][$table] = [
                     ],
             ],
         'operations'        => [
-            'show'          =>
+            'show' =>
                 [
                     'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['show'],
                     'href'  => 'act=show',
@@ -174,6 +180,9 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'  => "int(10) unsigned NOT NULL default '0'",
             'eval' => ['rgxp' => 'datim'],
 //            'flag' => 5,
+        ],
+        'sorting'     => [
+            'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         'offer'       => [
             'inputType' => 'tableLookup',

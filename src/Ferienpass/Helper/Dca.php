@@ -8,40 +8,199 @@
 
 namespace Ferienpass\Helper;
 
-use Contao\Backend;
 use Contao\Input;
 use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
+use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
+use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
+use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionInterface;
+use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
+use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\Offer;
+use MetaModels\BackendIntegration\ViewCombinations;
 use MetaModels\DcGeneral\Data\Model;
+use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
+use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Factory;
+use MetaModels\MetaModelsEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
-class Dca extends Backend
+class Dca implements EventSubscriberInterface
 {
 
     /**
-     * Get MetaModels
-     * @category options_callback
-     * @return array
+     * {@inheritdoc}
      */
-    public function getMetaModels()
+    public static function getSubscribedEvents()
     {
-        $factory = Factory::getDefaultFactory();
-        $return = [];
+        return [
+            GetOperationButtonEvent::NAME            => [
+                'createAttendancesButtonInOfferView',
+            ],
+            BuildMetaModelOperationsEvent::NAME      => [
+                'addAttendancesOperationToMetaModelView',
+            ],
+            MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND => [
+                'addAttendancesToMetaModelModuleTables',
+            ],
+//            DcGeneralEvents::ACTION                  => [
+//                ['setParentedListModeWhenPidParameterPresent', 100],
+//            ],
+            PopulateEnvironmentEvent::NAME           => [
+                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 2],
+            ],
+            ModelToLabelEvent::NAME                  => [
+                ['addMemberEditLinkForParticipantListView', -10],
+            ],
+            PostPersistModelEvent::NAME              => [
+                'triggerSyncForOffer',
+            ],
+            EncodePropertyValueFromWidgetEvent::NAME => [
+                'triggerAttendanceStatusChange',
+            ],
+        ];
+    }
 
-        foreach ($factory->collectNames() as $table) {
-            $return[$table] = $factory->getMetaModel($table)->getName();
+
+    /**
+     * Remove the "edit attendances" operation for variant bases
+     *
+     * @param GetOperationButtonEvent $event
+     */
+    public function createAttendancesButtonInOfferView(GetOperationButtonEvent $event)
+    {
+        if ($event->getCommand()->getName() != 'edit_attendances') {
+            return;
+        }
+        /** @var Model $model */
+        $model = $event->getModel();
+        $metaModel = $model->getItem()->getMetaModel();
+
+        if ($metaModel->hasVariants() && $model->getProperty('varbase') === '1') {
+            $event->setHtml('');
+        }
+    }
+
+
+    /**
+     * Add the "edit attendances" operation to the MetaModel back end view
+     *
+     * @param BuildMetaModelOperationsEvent $event
+     */
+    public function addAttendancesOperationToMetaModelView(BuildMetaModelOperationsEvent $event)
+    {
+        if (!in_array(
+            $event->getMetaModel()->getTableName(),
+            [FerienpassConfig::getInstance()->offer_model, FerienpassConfig::getInstance()->participant_model]
+        )
+        ) {
+            return;
         }
 
-        return $return;
+        /** @var Contao2BackendViewDefinitionInterface $view */
+        $view = $event->getContainer()->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
+        $collection = $view->getModelCommands();
+
+        $command = new Command();
+        $command->setName('edit_attendances');
+
+        $parameters = $command->getParameters();
+        $parameters['table'] = Attendance::getTable();
+
+//        if (!$command->getLabel()) {
+//            $command->setLabel($operationName . '.0');
+//            if (isset($extraValues['label'])) {
+//                $command->setLabel($extraValues['label']);
+//            }
+//        }
+//
+//        if (!$command->getDescription()) {
+//            $command->setDescription($operationName . '.1');
+//            if (isset($extraValues['description'])) {
+//                $command->setDescription($extraValues['description']);
+//            }
+//        }
+
+        $extra = $command->getExtra();
+        $extra['icon'] = 'edit.gif';
+        $extra['attributes'] = 'onclick="Backend.getScrollOffset();"';
+        $extra['idparam'] = 'pid';
+
+        $collection->addCommand($command);
     }
+
+
+    /**
+     * Add the Attendances table name to the MetaModel back end module tables, to make them editable
+     *
+     * @param MetaModelsBootEvent $event
+     */
+    public function addAttendancesToMetaModelModuleTables(MetaModelsBootEvent $event)
+    {
+        foreach ([
+                     FerienpassConfig::getInstance()->offer_model,
+                     FerienpassConfig::getInstance()->participant_model,
+                 ] as $metaModelName) {
+            /** @var ViewCombinations $viewCombinations */
+            $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
+            $inputScreen = $viewCombinations->getInputScreenDetails($metaModelName);
+            \Controller::loadDataContainer($metaModelName);
+
+            // Add table name to back end module tables
+            $GLOBALS['BE_MOD'][$inputScreen->getBackendSection()]['metamodel_'.$metaModelName]['tables']
+            [] = Attendance::getTable();
+        }
+    }
+
+
+    public function populateEnvironmentForAttendancesChildTable(PopulateEnvironmentEvent $event)
+    {
+        $environment = $event->getEnvironment();
+        $definition = $environment->getDataDefinition();
+
+        if ($definition->getName() !== Attendance::getTable()
+            || null === ($pid = $environment->getInputProvider()->getParameter('pid'))
+        ) {
+            return;
+        };
+
+        // Set parented list mode
+        $environment->getDataDefinition()->getBasicDefinition()->setMode(BasicDefinitionInterface::MODE_PARENTEDLIST);
+        // Set parent data provider corresponding to pid
+        $definition->getBasicDefinition()->setParentDataProvider(ModelId::fromSerialized($pid)->getDataProviderName());
+    }
+
+
+//    /**
+//     * Set parented list mode and parent data provider, so that the attendances are editable as child modules too
+//     *
+//     * @param ActionEvent $event
+//     */
+//    public function setParentedListModeWhenPidParameterPresent(ActionEvent $event)
+//    {
+//        $environment = $event->getEnvironment();
+//        $definition = $environment->getDataDefinition();
+//
+//        if ($definition->getName() !== Attendance::getTable()
+//            || null === ($pid = $environment->getInputProvider()->getParameter('pid'))
+//        ) {
+//            return;
+//        };
+//
+//        // Set parented list mode
+//        $environment->getDataDefinition()->getBasicDefinition()->setMode(BasicDefinitionInterface::MODE_PARENTEDLIST);
+//        // Set parent data provider corresponding to pid
+//        $definition->getBasicDefinition()->setParentDataProvider(ModelId::fromSerialized($pid)->getDataProviderName());
+//    }
 
 
     /**
@@ -58,6 +217,24 @@ class Dca extends Backend
             ) as $attributeName => $attribute) {
                 $return[$table][$attributeName] = $attribute->getName();
             }
+        }
+
+        return $return;
+    }
+
+
+    /**
+     * Get MetaModels
+     * @category options_callback
+     * @return array
+     */
+    public function getMetaModels()
+    {
+        $factory = Factory::getDefaultFactory();
+        $return = [];
+
+        foreach ($factory->collectNames() as $table) {
+            $return[$table] = $factory->getMetaModel($table)->getName();
         }
 
         return $return;

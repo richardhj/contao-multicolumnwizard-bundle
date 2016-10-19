@@ -10,7 +10,10 @@
 
 namespace Ferienpass\Helper;
 
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
+use Ferienpass\Model\Attendance;
 use Ferienpass\Model\DataProcessing;
+use Haste\Http\Response\JsonResponse;
 
 
 class Ajax
@@ -38,5 +41,54 @@ class Ajax
         foreach ($processings as $processing) {
             $processing->syncFromRemoteDropbox();
         }
+    }
+
+
+    public function handleOfferAttendancesView($action)
+    {
+        if ($action !== 'offerAttendancesSorting') {
+            return;
+        }
+
+        try {
+            $modelId = ModelId::fromSerialized(\Input::post('model'));
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'error'   => $e->getMessage(),
+            ];
+            $response = new JsonResponse($response);
+            $response->send();
+            exit;
+        }
+
+        if (0 === ($newStatusId = (int)\Input::post('newStatusId'))) {
+            $response = [
+                'success' => false,
+                'error'   => "Error with newStatusId",
+            ];
+            $response = new JsonResponse($response);
+            $response->send();
+            exit;
+        }
+
+        // Check permissions
+        //@todo
+
+        // Initialize versioning
+        $versions = new \Versions($modelId->getDataProviderName(), $modelId->getId());
+        $versions->initialize();
+
+        $attendance = Attendance::findByPk($modelId->getId());
+        $attendance->status = $newStatusId;
+        $attendance->save();
+
+        $versions->create();
+
+        $response = [
+            'success' => true,
+        ];
+        $response = new JsonResponse($response);
+        $response->send();
     }
 }

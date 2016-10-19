@@ -2814,3 +2814,66 @@
 .tl_listing_container a.open_parent {
     white-space: nowrap;
 }
+
+.attendances_offer_view .tl_header {
+    margin-bottom: 2em;
+}
+
+.attendances_offer_view div.status-assignment {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+}
+
+.attendances_offer_view div.attendance-status {
+    border: 1px solid #dddddd;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    width: 30%;
+}
+
+.attendances_offer_view div.attendance-status h2 {
+    background: #f9f9f9;
+    margin: 0;
+    padding: 1em;
+}
+
+.attendances_offer_view div.attendance-status ul {
+    height: 100%;
+}
+
+.attendances_offer_view div.attendance-status li {
+    background: #fcfcfc;
+    margin: 0.75em;
+    padding: 0.5em;
+    border: 1px solid #f3f3f3;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    cursor: move;
+}
+
+.attendances_offer_view div.attendance-status li span {
+    background: none;
+    border: 0;
+    display: block;
+}
+
+.attendances_offer_view div.attendance-status li span.col_0 {
+    font-size: 10px;
+}
+
+.attendances_offer_view div.attendance-status li span.col_1, .attendances_offer_view div.attendance-status li span.col_3 {
+    display: none;
+}
+
+.attendances_offer_view div.attendance-status li span.col_2 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.attendances_offer_view div.attendance-status li + li {
+    margin-top: 2px;
+}

@@ -22,13 +22,13 @@ array_insert(
                 'tables'   => [],
                 'icon'     => 'assets/ferienpass/backend/img/equalizer.png',
             ],
-//            'ferienpass_attendances' => [
-//                'tables' => [
-//                    Ferienpass\Model\Attendance::getTable(),
-//                    'mm_ferienpass',
-//                ],
-//                'icon'   => 'assets/ferienpass/backend/img/equalizer.png',
-//            ],
+            'ferienpass_attendances' => [
+                'tables' => [
+                    Ferienpass\Model\Attendance::getTable(),
+                    'mm_ferienpass',
+                ],
+                'icon'   => 'assets/ferienpass/backend/img/equalizer.png',
+            ],
         ],
     ]
 );
@@ -234,6 +234,7 @@ $GLOBALS['TL_HOOKS']['createNewUser'][] = ['Ferienpass\Helper\UserAccount', 'cre
 $GLOBALS['TL_HOOKS']['closeAccount'][] = ['Ferienpass\Helper\UserAccount', 'closeAccount'];
 $GLOBALS['TL_HOOKS']['getAllEvents'][] = ['Ferienpass\Helper\Events', 'getMetaModelAsEvents'];
 $GLOBALS['TL_HOOKS']['simpleAjax'][] = ['Ferienpass\Helper\Ajax', 'handleDropboxWebhook'];
+$GLOBALS['TL_HOOKS']['executePostActions'][] = ['Ferienpass\Helper\Ajax', 'handleOfferAttendancesView'];
 
 //$GLOBALS['TL_DCA'][FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL)]['list']['label']['label_callback'] = array('Ferienpass\Helper\Dca', 'test');
 

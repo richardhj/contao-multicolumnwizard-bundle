@@ -1,4 +1,4 @@
-@import "compass/css3/border-radius"
+@import "compass/css3"
 $fa-font-path: "../../../components/font-awesome/fonts"
 @import "../../../../components/font-awesome/scss/font-awesome"
 
@@ -37,3 +37,43 @@ $fa-font-path: "../../../components/font-awesome/fonts"
 .tl_listing_container
   a.open_parent
     white-space: nowrap
+
+.attendances_offer_view
+  .tl_header
+    margin-bottom: 2em
+  div.status-assignment
+    +display-flex()
+    +justify-content(space-between)
+  //+align-items(stretch)
+  div.attendance-status
+    border: 1px solid #dddddd
+    +border-radius(2px)
+    //padding: 2px
+    width: 30%
+    h2
+      background: #f9f9f9
+      margin: 0
+      padding: 1em
+    ul
+      height: 100%
+    li
+      background: #fcfcfc
+      margin: .75em
+      padding: .5em
+      border: 1px solid #f3f3f3
+      +border-radius(2px)
+      cursor: move
+      span
+        background: none
+        border: 0
+        display: block
+        &.col_0
+          font-size: 10px
+        &.col_1,
+        &.col_3
+          display: none
+        &.col_2
+          font-size: 14px
+          font-weight: bold
+    li + li
+      margin-top: 2px

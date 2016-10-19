@@ -11,18 +11,14 @@
 namespace Ferienpass\ApplicationSystem;
 
 
-use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
-use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
-use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
+use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
+use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
+use Ferienpass\DcGeneral\View\OfferAttendancesView;
 use Ferienpass\Event\SaveAttendanceEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
-use MetaModels\BackendIntegration\ViewCombinations;
-use MetaModels\DcGeneral\Data\Model;
-use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
-use MetaModels\Events\MetaModelsBootEvent;
-use MetaModels\MetaModelsEvents;
 
 
 class Lot extends AbstractApplicationSystem
@@ -34,17 +30,14 @@ class Lot extends AbstractApplicationSystem
     public static function getSubscribedEvents()
     {
         return [
-            SaveAttendanceEvent::NAME                => [
+            SaveAttendanceEvent::NAME      => [
                 'updateAttendanceStatus',
             ],
-            GetOperationButtonEvent::NAME            => [
-                'createAttendancesButtonInOfferView',
+            PopulateEnvironmentEvent::NAME => [
+                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 1.5],
             ],
-            BuildMetaModelOperationsEvent::NAME      => [
-                'addAttendancesOperationToMetaModelView',
-            ],
-            MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND => [
-                'addAttendancesToMetaModelModuleTables',
+            ModelToLabelEvent::NAME        => [
+                ['addMemberEditLinkForParticipantListView', -10],
             ],
         ];
     }
@@ -68,85 +61,92 @@ class Lot extends AbstractApplicationSystem
     }
 
 
-    /**
-     * Add the Attendances table name to the MetaModel back end module tables, to make them editable
-     *
-     * @param MetaModelsBootEvent $event
-     */
-    public function addAttendancesToMetaModelModuleTables(MetaModelsBootEvent $event)
+    public function populateEnvironmentForAttendancesChildTable(PopulateEnvironmentEvent $event)
     {
-        $metaModelName = FerienpassConfig::getInstance()->offer_model;
-        /** @var ViewCombinations $viewCombinations */
-        $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
-        $inputScreen = $viewCombinations->getInputScreenDetails($metaModelName);
-        \Controller::loadDataContainer($metaModelName);
+        $environment = $event->getEnvironment();
 
-        // Add table name to back end module tables
-        $GLOBALS['BE_MOD'][$inputScreen->getBackendSection()]['metamodel_'.$metaModelName]['tables']
-        [] = Attendance::getTable();
-    }
-
-
-    /**
-     * Add the "edit attendances" operation to the MetaModel back end view
-     *
-     * @param BuildMetaModelOperationsEvent $event
-     */
-    public function addAttendancesOperationToMetaModelView(BuildMetaModelOperationsEvent $event)
-    {
-        if ($event->getMetaModel()->getTableName() != FerienpassConfig::getInstance()->offer_model) {
+        // Already populated or not in Backend? Get out then.
+        if ($environment->getView() || ('BE' !== TL_MODE)) {
             return;
         }
 
-        /** @var Contao2BackendViewDefinitionInterface $view */
-        $view = $event->getContainer()->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
-        $collection = $view->getModelCommands();
+        $definition = $environment->getDataDefinition();
 
-        $command = new Command();
-        $command->setName('edit_attendances');
+        // Not attendances for offer MetaModel
+        if (!($definition->getName() === Attendance::getTable()
+                && $definition
+                    ->getBasicDefinition()
+                    ->getParentDataProvider() === FerienpassConfig::getInstance()->offer_model)
+            || !$definition->hasBasicDefinition()
+        ) {
+            return;
+        }
 
-        $parameters = $command->getParameters();
-        $parameters['table'] = Attendance::getTable();
+        $view = new OfferAttendancesView();
 
-//        if (!$command->getLabel()) {
-//            $command->setLabel($operationName . '.0');
-//            if (isset($extraValues['label'])) {
-//                $command->setLabel($extraValues['label']);
-//            }
-//        }
+        $view->setEnvironment($environment);
+        $environment->setView($view);
+
+
+//        /** @var Contao2BackendViewDefinitionInterface $viewDefinition */
+//        $viewDefinition = $definition->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
 //
-//        if (!$command->getDescription()) {
-//            $command->setDescription($operationName . '.1');
-//            if (isset($extraValues['description'])) {
-//                $command->setDescription($extraValues['description']);
-//            }
-//        }
-
-        $extra = $command->getExtra();
-        $extra['icon'] = 'edit.gif';
-        $extra['attributes'] = 'onclick="Backend.getScrollOffset();"';
-        $extra['idparam'] = 'pid';
-
-        $collection->addCommand($command);
+//        $listingConfig = $viewDefinition->getListingConfig();
+//
+//        $listingConfig->setShowColumns(false);
     }
 
 
-    /**
-     * Remove the "edit attendances" operation for variant bases
-     *
-     * @param GetOperationButtonEvent $event
-     */
-    public function createAttendancesButtonInOfferView(GetOperationButtonEvent $event)
+    public function addMemberEditLinkForParticipantListView(ModelToLabelEvent $event)
     {
-        if ($event->getCommand()->getName() != 'edit_attendances') {
+        $model = $event->getModel();
+        $definition = $event->getEnvironment()->getDataDefinition();
+
+        // Not attendances for offer MetaModel
+        if (!($definition->getName() === Attendance::getTable()
+                && $definition
+                    ->getBasicDefinition()
+                    ->getParentDataProvider() === FerienpassConfig::getInstance()->offer_model)
+            || !$definition->hasBasicDefinition()
+        ) {
             return;
         }
-        /** @var Model $model */
-        $model = $event->getModel();
-        $metaModel = $model->getItem()->getMetaModel();
 
-        if ($metaModel->hasVariants() && $model->getProperty('varbase') === '1') {
-            $event->setHtml('');
+        $args = $event->getArgs();
+//
+//        \System::loadLanguageFile('tl_member');
+//
+//        $parentRaw = $model->getItem()->get($parentColName);
+
+//        unset($args['offer']);
+//
+        // Adjust the label
+        foreach ($args as $k => $v) {
+            switch ($k) {
+//                case $parentColName:
+//                    /** @noinspection HtmlUnknownTarget */
+//                    $args[$k] = sprintf(
+//                        '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_parent" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
+//                        // Member ID
+//                        $parentRaw['id'],
+//                        // Link
+//                        '<i class="fa fa-external-link tl_gray"></i> '.$args[$k],
+//                        // Member edit description
+//                        sprintf(
+//                            $GLOBALS['TL_LANG']['tl_member']['edit'][1],
+//                            $parentRaw['id']
+//                        ),
+//                        REQUEST_TOKEN
+//                    );
+//                    break;
+
+//                default:
+//                    if ('' === $model->getItem()->get($k) && '' !== ($parentData = $parentRaw[$k])) {
+//                        $args[$k] = sprintf('<span class="tl_gray">%s</span>', $parentData);
+//                    }
+            }
         }
+
+        $event->setArgs($args);
     }
 }

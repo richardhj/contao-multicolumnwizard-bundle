@@ -13,9 +13,6 @@
  * @filesource
  */
 
-use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
-use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
-use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
 use MetaModels\Attribute\Age\AttributeTypeFactory;
 use MetaModels\Attribute\Events\CreateAttributeFactoryEvent;
 use MetaModels\Filter\Setting\AgeFilterSettingTypeFactory;
@@ -45,20 +42,5 @@ return [
         function (CreateFilterSettingFactoryEvent $event) {
             $event->getFactory()->addTypeFactory(new AttendanceAvailableFilterSettingTypeFactory());
         },
-    ],
-
-    // List View Label
-    ModelToLabelEvent::NAME                         => [
-        [['Ferienpass\Helper\Dca', 'addMemberEditLinkForParticipantListView'], -10],
-    ],
-
-    // On Submit Offer Sync
-    PostPersistModelEvent::NAME                     => [
-        ['Ferienpass\Helper\Dca', 'triggerSyncForOffer'],
-    ],
-
-    // Trigger attendance status change
-    EncodePropertyValueFromWidgetEvent::NAME        => [
-        ['Ferienpass\Helper\Dca', 'triggerAttendanceStatusChange'],
     ],
 ];

@@ -84,19 +84,20 @@ $GLOBALS['TL_DCA'][$table] = [
                 'messageType',
                 'locked',
                 'increasesCount',
+                'enableManualSort',
             ],
         ],
     ],
 
     // Fields
     'fields'       => [
-        'id'                    => [
+        'id'               => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'tstamp'                => [
+        'tstamp'           => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'name'                  => [
+        'name'             => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['name'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -175,7 +176,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'table' => Notification::getTable(),
             ],
         ],
-        'cssClass'              => [
+        'cssClass'         => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['cssClass'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -185,7 +186,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'messageType'           => [
+        'messageType'      => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['messageType'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -196,5 +197,15 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
+        'enableManualSort' => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['enableManualSort'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => [
+                'tl_class' => 'w50',
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+
     ],
 ];

@@ -1,0 +1,94 @@
+<?php echo $this->getMessages(); ?>
+<div class="tl_listing_container attendances_offer_view table_<?php echo $this->tableName; ?>">
+
+    <?php if (strlen($this->breadcrumb)) {
+        echo $this->breadcrumb;
+    } ?>
+
+    <div class="tl_header" onmouseover="Theme.hoverDiv(this,1)" onmouseout="Theme.hoverDiv(this,0)">
+
+        <div class="tl_content_right">
+            <?php echo $this->headerButtons; ?>
+        </div>
+
+        <table class="tl_header_table">
+
+            <?php foreach ($this->header as $key => $value): ?>
+                <tr>
+                    <td><span class="tl_label"><?php echo $key; ?></span></td>
+                    <td><?php echo $value; ?></td>
+                </tr>
+            <?php endforeach; ?>
+
+        </table>
+
+    </div>
+
+    <?php if ($this->collection->length() < 1): ?>
+        <p class="tl_empty"><?php echo $GLOBALS['TL_LANG']['MSC']['noResult']; ?></p>
+    <?php else: ?>
+        <div id="table_<?php echo $this->tableName; ?>" class="status-assignment">
+
+            <?php foreach ($this->status as $status): ?>
+                <div class="attendance-status -<?php echo $status->cssClass ?>">
+                    <h2><?php echo $status->name ?></h2>
+                    <ul id="status-<?php echo $status->id ?>">
+
+                        <?php foreach ($this->collection as $objModel): ?>
+                            <?php /** @var \ContaoCommunityAlliance\DcGeneral\Data\ModelInterface $objModel */ ?>
+                            <?php if ($objModel->getProperty('status') !== $status->id)
+                                continue ?>
+                            <li id="table_row_<?php echo $objModel->getId(); ?>"
+                                class="<?php echo $objModel->getMeta($objModel::CSS_ROW_CLASS); ?>"
+                                data-model-id="<?php echo \ContaoCommunityAlliance\DcGeneral\Data\ModelId::fromModel(
+                                    $objModel
+                                )->getSerialized(); ?>">
+                                <?php $arrLabels = $objModel->getMeta($objModel::LABEL_VALUE); ?>
+
+                                <?php foreach ($arrLabels as $arrLabel): ?>
+                                    <span class="<?php echo $arrLabel['class']; ?>">
+									<?php echo $arrLabel['content']; ?>
+								</span>
+                                <?php endforeach; ?>
+                                <span class="tl_file_list tl_right_nowrap">
+									<?php echo $objModel->getMeta($objModel::OPERATION_BUTTONS); ?>
+                                    <?php if ($this->sortable): echo $this->generateImage(
+                                        'system/modules/dc-general/html/images/drag.gif',
+                                        '&udarr;',
+                                        'class="drag"'
+                                    ); endif; ?>
+								</span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endforeach ?>
+        </div>
+        <script src="<?php echo TL_ASSETS_URL ?>/assets/ferienpass/backend/js/html.sortable.min.js"></script>
+        <script>
+            sortable('.status-assignment ul', {
+                connectWith: '.status-assignment ul',
+                forcePlaceholderSize: true,
+                placeholderClass: 'sortable-placeholder'
+            })[0].addEventListener('sortupdate', function (e) {
+                var request = new Request.JSON({
+                    url: location.href,
+                    method: 'post',
+                    data: {
+                        action: 'offerAttendancesSorting',
+                        model: e.detail.item.getAttribute('data-model-id'),
+                        newStatusId: e.detail.endparent.id.substr(7)
+                    },
+                    onSuccess: function (responseJSON, responseText) {
+                        console.log(responseJSON, responseText);
+                    },
+                    onError: function (text, error) {
+                        alert('TODO');
+                    }
+                });
+
+                request.send();
+            });
+        </script>
+    <?php endif; ?>
+</div>
