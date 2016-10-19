@@ -53,7 +53,7 @@ class OfferAttendancesView extends ParentView
 
         $objTemplate = $this->getTemplate('dcbe_general_offerAttendancesView');
 
-        $status = AttendanceStatus::findBy('enableManualSort', 1);
+        $status = AttendanceStatus::findBy('enableManualAssignment', 1);
         $statusCount = [];
 
         while (null !== $status && $status->next()) {

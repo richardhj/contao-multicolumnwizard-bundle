@@ -64,6 +64,13 @@ if (null !== ($objMetaModel = \Ferienpass\Model\Participant::getInstance()->getM
 	$GLOBALS['TL_LANG']['MSC'][$objMetaModel->getTableName()]['details'] = 'Bearbeiten';
 }
 
+$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'] = [
+    'confirmed'  => 'Zusage',
+    'waiting'    => 'wartend',
+    'waitlisted' => 'Warteliste',
+    'error'      => 'abgelehnt',
+];
+
 /**
  * Errors
  */

@@ -31,7 +31,7 @@
 
             <?php foreach ($this->status as $status): ?>
                 <div id="status-<?php echo $status->id ?>" class="attendance-status -<?php echo $status->cssClass ?>">
-                    <h2><?php echo $status->name ?></h2>
+                    <h2><?php echo Haste\Util\Format::dcaValue($status->getTable(), 'type', $status->type) ?></h2>
                     <div class="count">
                         <span
                             class="current"><?php echo $this->statusCount[$status->id]['current'] ?></span> / <span

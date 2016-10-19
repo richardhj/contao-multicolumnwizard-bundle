@@ -24,7 +24,7 @@ use Contao\Model;
  * @property integer $notification_new
  * @property integer $notification_onChange
  * @property string  $messageType
- * @property bool    $enableManualSort
+ * @property bool    $enableManualAssignment
  *
  * @package Ferienpass
  */

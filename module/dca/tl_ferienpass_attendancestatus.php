@@ -36,15 +36,20 @@ $GLOBALS['TL_DCA'][$table] = [
         'sorting'           => [
             'mode'        => 1,
             'fields'      => ['type'],
-            'flag'        => 1,
-            'panelLayout' => 'filter;search,limit',
+            'panelLayout' => 'limit',
         ],
         'label'             => [
-            'fields' => [
-                'name',
+            'fields'      => [
+                'type',
+                'title',
+                'notification_new',
+                'notification_onChange',
                 'cssClass',
+                'locked',
+                'increasesCount',
+                'enableManualAssignment',
             ],
-            'format' => '%s <span style="color:#b3b3b3;padding-left:3px">[%s]</span>',
+            'showColumns' => true,
         ],
         'global_operations' => [
             'back' =>
@@ -84,42 +89,32 @@ $GLOBALS['TL_DCA'][$table] = [
                 'messageType',
                 'locked',
                 'increasesCount',
-                'enableManualSort',
+                'enableManualAssignment',
             ],
         ],
     ],
 
     // Fields
     'fields'       => [
-        'id'               => [
+        'id'                     => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'tstamp'           => [
+        'tstamp'                 => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'name'             => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['name'],
-            'exclude'   => true,
-            'inputType' => 'text',
-            'eval'      => [
-                'mandatory' => true,
-                'maxlength' => 255,
-                'tl_class'  => 'w50',
-            ],
-            'sql'       => "varchar(255) NOT NULL default ''",
-        ],
-        'type'                  => [
+        'type'                   => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
             'exclude'   => true,
             'inputType' => 'select',
             'options'   => $GLOBALS['FERIENPASS_STATUS'],
+            'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'],
             'eval'      => [
                 'tl_class' => 'w50',
                 'unique'   => true,
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'title'                 => [
+        'title'                  => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['title'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -129,7 +124,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'increasesCount'        => [
+        'increasesCount'         => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['increasesCount'],
             'exclude'   => true,
             'inputType' => 'checkbox',
@@ -138,7 +133,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'locked'                => [
+        'locked'                 => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['locked'],
             'exclude'   => true,
             'inputType' => 'checkbox',
@@ -147,7 +142,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'notification_new'      => [
+        'notification_new'       => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['notification_new'],
             'exclude'          => true,
             'inputType'        => 'select',
@@ -160,7 +155,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'              => "int(10) unsigned NOT NULL default '0'",
             'relation'         => ['type' => 'hasOne', 'table' => Notification::getTable()],
         ],
-        'notification_onChange' => [
+        'notification_onChange'  => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['notification_onChange'],
             'exclude'          => true,
             'inputType'        => 'select',
@@ -176,7 +171,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'table' => Notification::getTable(),
             ],
         ],
-        'cssClass'         => [
+        'cssClass'               => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['cssClass'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -186,7 +181,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'messageType'      => [
+        'messageType'            => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['messageType'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -197,8 +192,8 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'enableManualSort' => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['enableManualSort'],
+        'enableManualAssignment' => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['enableManualAssignment'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => [
