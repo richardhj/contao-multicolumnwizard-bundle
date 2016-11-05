@@ -109,17 +109,6 @@ if ($_GET['do'] == 'ferienpass_management') {
 
 
 /**
- * Ferienpass status
- */
-$GLOBALS['FERIENPASS_STATUS'] = [
-    'confirmed',
-    'waitlisted',
-    'waiting',
-    'error',
-];
-
-
-/**
  * Back end styles
  */
 if (TL_MODE == 'BE') {

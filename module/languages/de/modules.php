@@ -15,6 +15,8 @@ $GLOBALS['TL_LANG']['MOD']['offers'][0] = 'Angebote';
 $GLOBALS['TL_LANG']['MOD']['offers'][1] = 'Die Ferienpass-Angebote verwalten.';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_management'][0] = 'Management';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_management'][1] = 'Den Ferienpass verwalten';
+$GLOBALS['TL_LANG']['MOD']['ferienpass_attendances'][0] = 'Anmeldungen';
+$GLOBALS['TL_LANG']['MOD']['ferienpass_attendances'][1] = 'Die Ferienpass-Anmeldungen einsehen';
 
 
 /**

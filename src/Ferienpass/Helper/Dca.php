@@ -19,6 +19,7 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
+use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
@@ -52,9 +53,9 @@ class Dca implements EventSubscriberInterface
             MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND => [
                 'addAttendancesToMetaModelModuleTables',
             ],
-//            DcGeneralEvents::ACTION                  => [
-//                ['setParentedListModeWhenPidParameterPresent', 100],
-//            ],
+            PrePersistModelEvent::NAME               => [
+                ['prohibitDuplicateKeyOnSaveAttendance', -100],
+            ],
             PopulateEnvironmentEvent::NAME           => [
                 ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 2],
             ],
@@ -81,12 +82,20 @@ class Dca implements EventSubscriberInterface
         if ($event->getCommand()->getName() != 'edit_attendances') {
             return;
         }
+
         /** @var Model $model */
         $model = $event->getModel();
         $metaModel = $model->getItem()->getMetaModel();
 
-        if ($metaModel->hasVariants() && $model->getProperty('varbase') === '1') {
-            $event->setHtml('');
+        if ($metaModel->hasVariants() && '1' === $model->getProperty('varbase')) {
+            $event->setDisabled(true);
+        } elseif (0 === Attendance::countByOfferAndStatus(
+                $model->getProperty('id'),
+                AttendanceStatus::findWaiting()->id
+            )
+        ) {
+            //todo
+//            $event->setHtml('<p>test</p>'.$event->getHtml());
         }
     }
 
@@ -173,34 +182,46 @@ class Dca implements EventSubscriberInterface
             return;
         };
 
+        $modelId = ModelId::fromSerialized($pid);
+
         // Set parented list mode
         $environment->getDataDefinition()->getBasicDefinition()->setMode(BasicDefinitionInterface::MODE_PARENTEDLIST);
         // Set parent data provider corresponding to pid
-        $definition->getBasicDefinition()->setParentDataProvider(ModelId::fromSerialized($pid)->getDataProviderName());
+        $definition->getBasicDefinition()->setParentDataProvider($modelId->getDataProviderName());
+
+        // Remove redundant legend (offer_legend in offer view)
+        $palette = $definition->getPalettesDefinition()->getPaletteByName('default');
+
+        switch ($modelId->getDataProviderName()) {
+            case FerienpassConfig::getInstance()->offer_model:
+                $palette->removeLegend($palette->getLegend('offer'));
+                break;
+
+            case FerienpassConfig::getInstance()->participant_model:
+                $palette->removeLegend($palette->getLegend('participant'));
+                break;
+        }
     }
 
 
-//    /**
-//     * Set parented list mode and parent data provider, so that the attendances are editable as child modules too
-//     *
-//     * @param ActionEvent $event
-//     */
-//    public function setParentedListModeWhenPidParameterPresent(ActionEvent $event)
-//    {
-//        $environment = $event->getEnvironment();
-//        $definition = $environment->getDataDefinition();
-//
-//        if ($definition->getName() !== Attendance::getTable()
-//            || null === ($pid = $environment->getInputProvider()->getParameter('pid'))
-//        ) {
-//            return;
-//        };
-//
-//        // Set parented list mode
-//        $environment->getDataDefinition()->getBasicDefinition()->setMode(BasicDefinitionInterface::MODE_PARENTEDLIST);
-//        // Set parent data provider corresponding to pid
-//        $definition->getBasicDefinition()->setParentDataProvider(ModelId::fromSerialized($pid)->getDataProviderName());
-//    }
+    public function prohibitDuplicateKeyOnSaveAttendance(PrePersistModelEvent $event)
+    {
+        $environment = $event->getEnvironment();
+        $definition = $environment->getDataDefinition();
+
+        // Not attendances table
+        if ($definition->getName() !== Attendance::getTable()) {
+            return;
+        };
+
+        $model = $event->getModel();
+
+        if (!Attendance::isNotExistent($model->getProperty('participant'), $model->getProperty('offer'))) {
+            \Message::addError('Es besteht schon eine Anmeldung für diesen Benutzer und dieses Angebot');
+            \Controller::reload();
+        }
+
+    }
 
 
     /**
@@ -401,13 +422,18 @@ class Dca implements EventSubscriberInterface
      */
     public function addDefaultStatus()
     {
-        if ('' !== Input::get('act') || AttendanceStatus::countAll() === count($GLOBALS['FERIENPASS_STATUS'])) {
+        global $container;
+
+        if ('' !== Input::get('act') || AttendanceStatus::countAll() === count(
+                $container['ferienpass.attendance-status']
+            )
+        ) {
             return;
         }
 
         $status = [];
 
-        foreach ($GLOBALS['FERIENPASS_STATUS'] as $number => $statusName) {
+        foreach ($container['ferienpass.attendance-status'] as $number => $statusName) {
             $status[] = [
                 'type'     => $number,
                 'name'     => lcfirst($statusName),

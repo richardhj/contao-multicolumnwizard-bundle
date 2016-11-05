@@ -170,9 +170,13 @@ $GLOBALS['TL_DCA'][$table] = [
 //    // Meta Palettes
     'metapalettes' => [
         'default' => [
-            'title' => [
+            'offer'       => [
                 'offer',
+            ],
+            'participant' => [
                 'participant',
+            ],
+            'status'      => [
                 'status',
             ],
         ],
@@ -184,23 +188,26 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
         'tstamp'      => [
-            'sql'  => "int(10) unsigned NOT NULL default '0'",
-            'eval' => ['rgxp' => 'datim'],
+            'label' => &$GLOBALS['TL_LANG'][$table]['tstamp'],
+            'sql'   => "int(10) unsigned NOT NULL default '0'",
+            'eval'  => ['rgxp' => 'datim'],
 //            'flag' => 5,
         ],
         'sorting'     => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         'offer'       => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['offer'],
             'inputType' => 'tableLookup',
             'eval'      => [
-                'foreignTable'     => Offer::getInstance()->getMetaModel()->getTableName(),
-                'fieldType'        => 'radio',
-                'listFields'       => [
+                'mandatory'    => true,
+                'foreignTable' => Offer::getInstance()->getMetaModel()->getTableName(),
+                'fieldType'    => 'radio',
+                'listFields'   => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
                     Ferienpass\Model\Config::getInstance()->offer_attribute_date_check_age,
                 ],
-                'searchFields'     => [
+                'searchFields' => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
                 ],
                 'matchAllKeywords' => true,
@@ -225,11 +232,13 @@ $GLOBALS['TL_DCA'][$table] = [
             'filter'    => true,
         ],
         'participant' => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['participant'],
             'inputType' => 'tableLookup',
             'eval'      => [
-                'foreignTable'     => Participant::getInstance()->getMetaModel()->getTableName(),
-                'fieldType'        => 'radio',
-                'listFields'       => [
+                'mandatory'    => true,
+                'foreignTable' => Participant::getInstance()->getMetaModel()->getTableName(),
+                'fieldType'    => 'radio',
+                'listFields'   => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,
                     Ferienpass\Model\Config::getInstance()->participant_attribute_dateofbirth,
                     \MemberModel::getTable().'.firstname',
@@ -267,7 +276,15 @@ $GLOBALS['TL_DCA'][$table] = [
         'status'      => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['status'],
             'inputType' => 'select',
-            'reference' => AttendanceStatus::findAll()->fetchEach('name'),
+            'reference' => array_reduce(
+                iterator_to_array(AttendanceStatus::findAll()),
+                function (array $carry, AttendanceStatus $status) {
+                    $carry[$status->id] = $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'][$status->type];
+
+                    return $carry;
+                },
+                []
+            ),
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'relation'  => [
                 'type'  => 'hasOne',

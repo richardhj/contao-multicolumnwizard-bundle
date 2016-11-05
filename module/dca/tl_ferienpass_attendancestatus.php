@@ -10,6 +10,7 @@
 use NotificationCenter\Model\Notification;
 
 
+global $container;
 $table = Ferienpass\Model\AttendanceStatus::getTable();
 
 
@@ -78,7 +79,6 @@ $GLOBALS['TL_DCA'][$table] = [
     'metapalettes' => [
         'default' => [
             'name'   => [
-                'name',
                 'type',
                 'title',
             ],
@@ -106,7 +106,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
             'exclude'   => true,
             'inputType' => 'select',
-            'options'   => $GLOBALS['FERIENPASS_STATUS'],
+            'options'   => $container['ferienpass.attendance-status'],
             'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'],
             'eval'      => [
                 'tl_class' => 'w50',

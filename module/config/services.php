@@ -13,3 +13,10 @@ $container['ferienpass.applicationsystem'] = $container->share(
         return $container['ferienpass.applicationsystem.lot'];
     }
 );
+
+$container['ferienpass.attendance-status'] = [
+    'confirmed',
+    'waitlisted',
+    'waiting',
+    'error',
+];
