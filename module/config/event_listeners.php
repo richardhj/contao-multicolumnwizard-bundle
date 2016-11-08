@@ -13,8 +13,9 @@
  * @filesource
  */
 
-use MetaModels\Attribute\Age\AttributeTypeFactory;
+use MetaModels\Attribute\Age\AttributeTypeFactory as AgeAttributeTypeFactory;
 use MetaModels\Attribute\Events\CreateAttributeFactoryEvent;
+use MetaModels\Attribute\OfferDate\AttributeTypeFactory as OfferDateAttributeTypeFactory;
 use MetaModels\Filter\Setting\AgeFilterSettingTypeFactory;
 use MetaModels\Filter\Setting\AttendanceAvailableFilterSettingTypeFactory;
 use MetaModels\Filter\Setting\Events\CreateFilterSettingFactoryEvent;
@@ -27,7 +28,12 @@ return [
         // Age attribute
         function (CreateAttributeFactoryEvent $event) {
             $factory = $event->getFactory();
-            $factory->addTypeFactory(new AttributeTypeFactory());
+            $factory->addTypeFactory(new AgeAttributeTypeFactory());
+        },
+        // Offer date attribute
+        function (CreateAttributeFactoryEvent $event) {
+            $factory = $event->getFactory();
+            $factory->addTypeFactory(new OfferDateAttributeTypeFactory());
         },
     ],
 

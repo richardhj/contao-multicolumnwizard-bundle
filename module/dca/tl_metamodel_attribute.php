@@ -22,6 +22,7 @@
  */
 
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['age extends _simpleattribute_'] = array();
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['offer_date extends _simpleattribute_'] = [];
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['alias_trigger_sync extends alias'] = array
 (
 	'+advanced' => array

@@ -43,19 +43,20 @@ TemplateLoader::addFiles(array
     'mm_attr_checkbox_applicationlist_active_xmlexport' => 'system/modules/ferienpass/templates',
     'mm_attr_combinedvalues_date_xmlexport'             => 'system/modules/ferienpass/templates',
     'mm_attr_select_host_xmlexport'                     => 'system/modules/ferienpass/templates',
+    'mm_attr_offer_date'                                => 'system/modules/ferienpass/templates',
 
 	// Backend
-    'be_overview'                       => 'system/modules/ferienpass/templates',
-    'be_simple_content'                 => 'system/modules/ferienpass/templates',
+    'be_overview'                                       => 'system/modules/ferienpass/templates',
+    'be_simple_content'                                 => 'system/modules/ferienpass/templates',
 
 	// Document
-    'fp_document_default'               => 'system/modules/ferienpass/templates/document',
+    'fp_document_default'                               => 'system/modules/ferienpass/templates/document',
 
 	// Collection
-    'fp_collection_applicationlist'     => 'system/modules/ferienpass/templates/collection',
+    'fp_collection_applicationlist'                     => 'system/modules/ferienpass/templates/collection',
 
 	// Data Processing
-    'dataprocessing_xml_comment'        => 'system/modules/ferienpass/templates',
+    'dataprocessing_xml_comment'                        => 'system/modules/ferienpass/templates',
 
 	// jQuery
     'j_chosen'                          => 'system/modules/ferienpass/templates/jquery',
