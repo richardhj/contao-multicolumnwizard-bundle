@@ -37,23 +37,23 @@ $GLOBALS['TL_DCA'][$table] = [
     'dca_config'   => [
         'data_provider'  => [
 //            'parent'  => [
-//                'source' => Offer::getInstance()->getMetaModel()->getTableName(),
+//                'source' => Offer::getInstance()->getTable(),
 //            ],
-            'default'                                                  => [
+            'default'                              => [
                 'source' => $table,
             ],
-            Offer::getInstance()->getMetaModel()->getTableName()       => [
-                'source' => Offer::getInstance()->getMetaModel()->getTableName(),
+            Offer::getInstance()->getTable()       => [
+                'source' => Offer::getInstance()->getTable(),
             ],
-            Participant::getInstance()->getMetaModel()->getTableName() => [
-                'source' => Participant::getInstance()->getMetaModel()->getTableName(),
+            Participant::getInstance()->getTable() => [
+                'source' => Participant::getInstance()->getTable(),
             ],
         ],
         'child_list'     => [
-            Offer::getInstance()->getMetaModel()->getTableName() => [
+            Offer::getInstance()->getTable() => [
                 'fields' => ['tstamp'],
             ],
-            $table                                               => [
+            $table                           => [
                 'fields' => [
                     'tstamp',
                     'offer',
@@ -64,7 +64,7 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'childCondition' => [
             [
-                'from'   => Offer::getInstance()->getMetaModel()->getTableName(),
+                'from'   => Offer::getInstance()->getTable(),
                 'to'     => $table,
                 'setOn'  => [
                     [
@@ -81,7 +81,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 ],
             ],
             [
-                'from'   => Participant::getInstance()->getMetaModel()->getTableName(),
+                'from'   => Participant::getInstance()->getTable(),
                 'to'     => $table,
                 'setOn'  => [
                     [
@@ -200,21 +200,21 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'     => &$GLOBALS['TL_LANG'][$table]['offer'],
             'inputType' => 'tableLookup',
             'eval'      => [
-                'mandatory'    => true,
-                'foreignTable' => Offer::getInstance()->getMetaModel()->getTableName(),
-                'fieldType'    => 'radio',
-                'listFields'   => [
+                'mandatory'        => true,
+                'foreignTable'     => Offer::getInstance()->getTable(),
+                'fieldType'        => 'radio',
+                'listFields'       => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
                     Ferienpass\Model\Config::getInstance()->offer_attribute_date_check_age,
                 ],
-                'searchFields' => [
+                'searchFields'     => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
                 ],
                 'matchAllKeywords' => true,
                 // Exclude varbases if they have children
                 'sqlWhere'         => sprintf(
                     '%1$s.varbase=0 OR (%1$s.varbase=1 AND (SELECT COUNT(*) FROM %1$s c WHERE c.varbase=0 AND c.vargroup=%1$s.id)=0)',
-                    Offer::getInstance()->getMetaModel()->getTableName()
+                    Offer::getInstance()->getTable()
                 ),
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
@@ -236,7 +236,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'tableLookup',
             'eval'      => [
                 'mandatory'    => true,
-                'foreignTable' => Participant::getInstance()->getMetaModel()->getTableName(),
+                'foreignTable' => Participant::getInstance()->getTable(),
                 'fieldType'    => 'radio',
                 'listFields'   => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,
@@ -245,7 +245,7 @@ $GLOBALS['TL_DCA'][$table] = [
                     \MemberModel::getTable().'.lastname',
 
                 ],
-                'searchFields'     => [
+                'searchFields' => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,
                 ],
                 'joins'            => [

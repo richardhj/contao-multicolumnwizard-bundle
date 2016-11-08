@@ -112,6 +112,12 @@ abstract class MetaModelBridge
     }
 
 
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+
     /**
      * Return the owner attribute
      *
@@ -122,6 +128,23 @@ abstract class MetaModelBridge
         $this->fetchOwnerAttribute();
 
         return $this->ownerAttribute;
+    }
+
+
+    /**
+     * Set MetaModel's owner attribute
+     */
+    protected function fetchOwnerAttribute()
+    {
+        if (null !== $this->ownerAttribute) {
+            return;
+        }
+
+        $this->ownerAttribute = $this->metaModel->getAttributeById($this->metaModel->get('owner_attribute'));
+
+        if (null === $this->ownerAttribute) {
+            throw new \RuntimeException('No owner attribute in the MetaModel was found');
+        }
     }
 
 
@@ -145,6 +168,10 @@ abstract class MetaModelBridge
      */
     public function findAll()
     {
+        if (null === $this->metaModel) {
+            return null;
+        }
+
         return $this->metaModel->findByFilter(null);
     }
 
@@ -162,22 +189,5 @@ abstract class MetaModelBridge
         $filter->addFilterRule(new StaticIdList($ids));
 
         return $this->metaModel->findByFilter($filter);
-    }
-
-
-    /**
-     * Set MetaModel's owner attribute
-     */
-    protected function fetchOwnerAttribute()
-    {
-        if (null !== $this->ownerAttribute) {
-            return;
-        }
-
-        $this->ownerAttribute = $this->metaModel->getAttributeById($this->metaModel->get('owner_attribute'));
-
-        if (null === $this->ownerAttribute) {
-            throw new \RuntimeException('No owner attribute in the MetaModel was found');
-        }
     }
 }
