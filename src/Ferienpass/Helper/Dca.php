@@ -542,8 +542,8 @@ class Dca implements EventSubscriberInterface
         ) {
             return;
         }
-
+//fixme
         // Trigger attendance status update
-        Attendance::updateStatusByOffer($event->getModel()->getProperty('id'));
+//        Attendance::updateStatusByOffer($event->getModel()->getProperty('id'));
     }
 }
