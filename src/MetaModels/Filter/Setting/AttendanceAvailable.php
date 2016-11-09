@@ -81,7 +81,7 @@ SQL
 				Attendance::getTable(),
                 FerienpassConfig::getInstance()->offer_attribute_applicationlist_active,
 				$objAttribute->getColName(),
-                FerienpassConfig::getInstance()->offer_attribute_date_check_age,
+                FerienpassConfig::getInstance()->offer_attribute_date,
 			    time()
             );
 

@@ -32,6 +32,9 @@ class OfferDate extends \MultiColumnWizard
 //            $this->loadDataContainer($attributes['strTable']);
 //        }
 
+//        $this->buttons = ['up' => false, 'down' => false, 'copy' => false];
+        $this->disableSorting = true;
+
         $this->columnFields = [
             'start' => [
                 'inputType' => 'text',
@@ -47,5 +50,4 @@ class OfferDate extends \MultiColumnWizard
             ],
         ];
     }
-
 }

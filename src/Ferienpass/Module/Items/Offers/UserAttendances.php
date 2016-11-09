@@ -15,6 +15,7 @@ use Contao\Input;
 use Contao\RequestToken;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\Table;
+use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -75,9 +76,7 @@ class UserAttendances extends Items
                     TL_ERROR
                 );
             } // Check for offer's date
-            elseif ($this->metaModel->findById($attendanceToDelete->offer)
-                    ->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age) <= time()
-            ) {
+            elseif (ToolboxOfferDate::offerStart($attendanceToDelete->offer) <= time()) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteOfferInPast']);
             } // Delete
             else {
@@ -164,11 +163,7 @@ class UserAttendances extends Items
                             break;
 
                         case 'recall':
-                            if ($item
-                                    ->get(
-                                        FerienpassConfig::getInstance()->offer_attribute_date_check_age
-                                    ) >= time()
-                            ) {
+                            if (ToolboxOfferDate::offerStart($item) >= time()) {
                                 $url = $this->addToUrl('action=delete::'.$attendances->id.'::'.REQUEST_TOKEN);
                                 $attribute = ' onclick="return confirm(\''.htmlspecialchars(
                                         sprintf(
