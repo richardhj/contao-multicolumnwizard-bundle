@@ -205,7 +205,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'fieldType'        => 'radio',
                 'listFields'       => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
-                    Ferienpass\Model\Config::getInstance()->offer_attribute_date_check_age,
+                    Ferienpass\Model\Config::getInstance()->offer_attribute_date,
                 ],
                 'searchFields'     => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,

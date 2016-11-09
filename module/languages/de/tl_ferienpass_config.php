@@ -39,8 +39,8 @@ $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_ATTRIB
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_ATTRIBUTE_DATEOFBIRTH][1] = 'Das Attribut, welches das Geburtsdatum des Teilnhmers beinhaltet.';
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_ATTRIBUTE_AGREEMENT_PHOTOS][0] = 'Einverständniserklärung Fotos';
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_ATTRIBUTE_AGREEMENT_PHOTOS][1] = 'Das Attribut, welches die Einverständniserklärung für Fotos von Teilnehmer beinhaltet.';
-$GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE][0] = 'Datum des Angebotes für Alters-Check';
-$GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::OFFER_ATTRIBUTE_DATE_CHECK_AGE][1] = 'Das Attribut, welches das Datum des Angebotes beinhaltet. Das Datum wird für den Alterscheck des Teilnehmers herangezogen.';
+$GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::OFFER_ATTRIBUTE_DATE][0] = 'Datum des Angebotes für Alters-Check';
+$GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::OFFER_ATTRIBUTE_DATE][1] = 'Das Attribut, welches das Datum des Angebotes beinhaltet. Das Datum wird für den Alterscheck des Teilnehmers herangezogen.';
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::OFFER_ATTRIBUTE_AGE][0] = 'Altersbeschränkung des Angebots';
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::OFFER_ATTRIBUTE_AGE][1] = 'Das Attribut, welches die Altersbeschränkung des Angebotes beinhaltet.';
 // Restrictions

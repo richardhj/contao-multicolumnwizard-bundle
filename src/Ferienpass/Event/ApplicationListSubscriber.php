@@ -12,6 +12,7 @@ namespace Ferienpass\Event;
 
 
 use Ferienpass\Helper\Message;
+use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
@@ -80,11 +81,7 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     public function disableWrongAgeParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
         $options = $event->getResult();
-        $dateOffer = new DateTime(
-            '@'.$event
-                ->getOffer()
-                ->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age)
-        );
+        $dateOffer = new DateTime('@'.ToolboxOfferDate::offerStart($event->getOffer()));
 
         foreach ($options as $k => $option) {
             $dateOfBirth = new DateTime(

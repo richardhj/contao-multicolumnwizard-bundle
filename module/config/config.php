@@ -204,6 +204,7 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
  * Back end form fields
  */
 $GLOBALS['BE_FFL']['fp_age'] = 'Ferienpass\Widget\Age';
+$GLOBALS['BE_FFL']['offer_date'] = 'Ferienpass\Widget\OfferDate';
 $GLOBALS['BE_FFL']['request_access_token'] = 'Ferienpass\Widget\RequestAccessToken';
 
 
@@ -211,6 +212,7 @@ $GLOBALS['BE_FFL']['request_access_token'] = 'Ferienpass\Widget\RequestAccessTok
  * Front end form fields
  */
 $GLOBALS['TL_FFL']['fp_age'] = 'Ferienpass\Form\Age';
+$GLOBALS['TL_FFL']['offer_date'] = 'Ferienpass\Form\OfferDate';
 $GLOBALS['TL_FFL']['select_disabled_options'] = 'Ferienpass\Form\SelectDisabledOptions';
 $GLOBALS['TL_FFL']['fileTree'] = 'Ferienpass\Form\UploadImage';
 $GLOBALS['TL_FFL']['multiColumnWizard'] = 'Ferienpass\Form\MultiColumnWizard';

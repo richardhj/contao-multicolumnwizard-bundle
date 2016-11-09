@@ -1,0 +1,12 @@
+<span class="offer_date<?php echo $this->additional_class; ?>">
+<?php echo implode(
+    ' UND ',
+    array_map(
+        function ($item) {
+            return $item['combined'];
+        },
+        $this->parsed
+    )
+);
+?>
+</span>

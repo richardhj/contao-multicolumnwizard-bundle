@@ -47,7 +47,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 Config::PARTICIPANT_ATTRIBUTE_NAME,
                 Config::PARTICIPANT_ATTRIBUTE_DATEOFBIRTH,
                 Config::OFFER_ATTRIBUTE_AGE,
-                Config::OFFER_ATTRIBUTE_DATE_CHECK_AGE,
+                Config::OFFER_ATTRIBUTE_DATE,
                 Config::PARTICIPANT_ATTRIBUTE_AGREEMENT_PHOTOS,
             ],
             'restrictions'    => [
@@ -61,7 +61,7 @@ $GLOBALS['TL_DCA'][$table] = [
 
     // Fields
     'fields'       => [
-        Config::OFFER_MODEL                              => [
+        Config::OFFER_MODEL          => [
             'label'            => &$GLOBALS['TL_LANG'][$table][Config::OFFER_MODEL],
             'inputType'        => 'select',
             'options_callback' => ['Ferienpass\Helper\Dca', 'getMetaModels'],
@@ -157,7 +157,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'save_callback'    => [['Ferienpass\Helper\Dca', 'checkMetaModelAttributeType']],
         ],
-        Config::OFFER_ATTRIBUTE_AGE                      => [
+        Config::OFFER_ATTRIBUTE_AGE  => [
             'label'            => &$GLOBALS['TL_LANG'][$table][Config::OFFER_ATTRIBUTE_AGE],
             'inputType'        => 'conditionalselect',
             'options_callback' => ['Ferienpass\Helper\Dca', 'getMetaModelsAttributes'],
@@ -170,8 +170,8 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'save_callback'    => [['Ferienpass\Helper\Dca', 'checkMetaModelAttributeType']],
         ],
-        Config::OFFER_ATTRIBUTE_DATE_CHECK_AGE           => [
-            'label'            => &$GLOBALS['TL_LANG'][$table][Config::OFFER_ATTRIBUTE_DATE_CHECK_AGE],
+        Config::OFFER_ATTRIBUTE_DATE => [
+            'label'            => &$GLOBALS['TL_LANG'][$table][Config::OFFER_ATTRIBUTE_DATE],
             'inputType'        => 'conditionalselect',
             'options_callback' => ['Ferienpass\Helper\Dca', 'getMetaModelsAttributes'],
             'eval'             => [

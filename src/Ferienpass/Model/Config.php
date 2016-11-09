@@ -19,7 +19,7 @@ use DcGeneral\Contao\Model\AbstractSingleModel;
  * @property $offer_attribute_applicationlist_active
  * @property $offer_attribute_applicationlist_max
  * @property $offer_attribute_age
- * @property $offer_attribute_date_check_age
+ * @property $offer_attribute_date
  * @property $participant_attribute_name
  * @property $participant_attribute_dateofbirth
  * @property $participant_attribute_agreement_photos
@@ -30,16 +30,6 @@ use DcGeneral\Contao\Model\AbstractSingleModel;
  */
 class Config extends AbstractSingleModel
 {
-
-    /**
-     * Table name
-     * @var string
-     */
-    protected static $strTable = 'tl_ferienpass_config';
-
-
-    protected static $objInstance;
-
 
     /**
      * MetaModels
@@ -65,7 +55,7 @@ class Config extends AbstractSingleModel
     const OFFER_ATTRIBUTE_AGE = 'offer_attribute_age';
 
 
-    const OFFER_ATTRIBUTE_DATE_CHECK_AGE = 'offer_attribute_date_check_age'; //@todo this attribute is used for others purposes too. check usages
+    const OFFER_ATTRIBUTE_DATE = 'offer_attribute_date';
 
 
     const PARTICIPANT_ATTRIBUTE_NAME = 'participant_attribute_name';
@@ -87,4 +77,14 @@ class Config extends AbstractSingleModel
 
 
     const PARTICIPANT_REGISTRATION_REQUIRED_FIELDS = 'registration_required_fields';
+
+
+    /**
+     * Table name
+     * @var string
+     */
+    protected static $strTable = 'tl_ferienpass_config';
+
+
+    protected static $objInstance;
 }

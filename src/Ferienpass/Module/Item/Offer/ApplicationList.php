@@ -13,6 +13,7 @@ namespace Ferienpass\Module\Item\Offer;
 use Ferienpass\Event\ApplicationListSubscriber;
 use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
 use Ferienpass\Helper\Message;
+use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
@@ -53,7 +54,7 @@ class ApplicationList extends Item
         }
 
         // Stop if the offer is in the past
-        if (time() >= $this->item->get(FerienpassConfig::getInstance()->offer_attribute_date_check_age)) {
+        if (time() >= ToolboxOfferDate::offerStart($this->item)) {
             $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['past'];
 
             return;
