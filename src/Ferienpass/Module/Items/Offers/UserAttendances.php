@@ -93,7 +93,7 @@ class UserAttendances extends Items
         $attendances = Attendance::findByParent($this->User->id);
 
         $rows = [];
-        $fields = ['offer.name', 'participant.name', 'offer.date_combined', 'state', 'details', 'recall'];
+        $fields = ['offer.name', 'participant.name', 'offer.date_period', 'state', 'details', 'recall'];
 
         if (null !== $attendances) {
             // Create table head
