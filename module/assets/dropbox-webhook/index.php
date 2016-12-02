@@ -11,19 +11,17 @@ header('Content-Type: text/plain');
 
 // Check get parameter
 // Necessary for enabling the webhook via dropbox' app console
-if (($challenge = \Input::get('challenge')))
-{
-	die($challenge);
+if (($challenge = \Input::get('challenge'))) {
+    die($challenge);
 }
 
 $raw_data = file_get_contents('php://input');
 $json = json_decode($raw_data);
 $app_secret = \Config::get('dropbox_ferienpass_appSecret');
 
-if ($_SERVER['HTTP_X_DROPBOX_SIGNATURE'] != hash_hmac('sha256', $raw_data, $app_secret))
-{
-	header('HTTP/1.0 403 Forbidden');
-	die('Invalid request');
+if ($_SERVER['HTTP_X_DROPBOX_SIGNATURE'] !== hash_hmac('sha256', $raw_data, $app_secret)) {
+    header('HTTP/1.0 403 Forbidden');
+    die('Invalid request');
 }
 
 // Return a response to the client before processing
@@ -35,32 +33,22 @@ ob_end_flush();
 flush();
 
 // Fetch all dropbox data processings with the submitted UIDs
-/** @type \Model\Collection $objProcessings */
-$objProcessings = DataProcessing::findBy
+/** @type \Model\Collection $processings */
+$processings = DataProcessing::findBy
 (
-	array
-	(
-		'filesystem=?',
-		'sync=1',
-		sprintf(
-			'dropbox_uid IN(%s)',
-			implode(',', array_map('intval', $json->delta->users))
-		)
-	),
-	array
-	(
-		'dropbox'
-	)
+    [
+        'filesystem=\'dropbox\'',
+        'sync=1',
+        sprintf(
+            'dropbox_uid IN(%s)',
+            implode(',', array_map('intval', $json->delta->users))
+        ),
+    ],
+    null
 );
 
-if (null !== $objProcessings)
-{
-	// Walk each data processing
-	while ($objProcessings->next())
-	{
-		/** @var DataProcessing $objProcessings ->current() */
-		$objProcessings->current()->syncFromRemoteDropbox();
-	}
+// Walk each data processing
+while (null !== $processings && $processings->next()) {
+    /** @var DataProcessing $processings ->current() */
+    $processings->current()->syncFromRemoteDropbox();
 }
-
-exit;
