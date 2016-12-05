@@ -80,6 +80,7 @@ class Ajax
         $versions->initialize();
 
         $attendance = Attendance::findByPk($modelId->getId());
+        $attendance->tstamp = time();
         $attendance->status = $newStatusId;
         $attendance->save();
 
