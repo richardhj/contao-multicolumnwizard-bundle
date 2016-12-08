@@ -10,7 +10,6 @@
 
 namespace Ferienpass\Model;
 
-use MetaModels\Filter\Filter;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\IFilterRule;
 use MetaModels\Filter\Rules\SimpleQuery;
@@ -51,7 +50,7 @@ class Participant extends MetaModelBridge
      */
     public function byParentFilter($parentId)
     {
-        $filter = new Filter($this->metaModel);
+        $filter = $this->metaModel->getEmptyFilter();
         $filter->addFilterRule($this->byParentFilterRule($parentId));
 
         return $filter;
@@ -112,7 +111,7 @@ class Participant extends MetaModelBridge
      */
     public function byParentAndOfferFilter($parentId, $offerId)
     {
-        $filter = new Filter($this->metaModel);
+        $filter = $this->metaModel->getEmptyFilter();
         $filter->addFilterRule($this->byParentFilterRule($parentId));
         $filter->addFilterRule($this->byOfferFilterRule($offerId));
 
