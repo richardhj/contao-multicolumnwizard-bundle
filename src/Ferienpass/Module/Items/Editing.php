@@ -488,7 +488,7 @@ HTML;
         $template->class = 'create_new_variant';
 
         //@todo IF lightbox
-        $template->attribute = ' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
+        $template->attribute = '';//' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
 
         $template->href = sprintf
         (

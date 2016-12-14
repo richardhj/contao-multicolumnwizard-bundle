@@ -107,7 +107,7 @@ class Management extends ModelList
         $jumpTo = $this->jumpTo;
 
         if (!$itemData['raw']['varbase']) {
-            $attribute = ' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
+//            $attribute = ' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
             $jumpTo = 36;
         }
 
