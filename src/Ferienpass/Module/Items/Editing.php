@@ -15,6 +15,7 @@ use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Module\Items;
 use Haste\Form\Form;
+use MetaModels\Attribute\Tags\MetaModelTags as MetaModelTagsAttribute;
 use MetaModels\FrontendEditingItem as Item;
 use MetaModels\IItem;
 use MetaModels\IItems;
@@ -224,6 +225,11 @@ class Editing extends Items
                         ->valueToWidget($this->item->get($field)),
                 ]
             );
+
+            // Load options for tags attribute
+            if ($attribute instanceof MetaModelTagsAttribute) {
+                $data['options'] = $attribute->getFilterOptions($this->item->get('id'), false);
+            }
 
             // Modify arrData by attribute's type
             switch ($attribute->get('type')) /** @noinspection PhpMissingBreakStatementInspection */ {
