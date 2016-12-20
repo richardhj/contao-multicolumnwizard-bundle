@@ -120,6 +120,7 @@ class Events extends \Controller
 
                     switch ($attribute['calendar_field']) {
                         case 'startDate':
+                            $event[$attribute['calendar_field']] = ToolboxOfferDate::offerStart($items->getItem());
                             $start = $event[$attribute['calendar_field']];
                             $addTime = in_array(
                                 $items->getItem()->getAttribute($attribute['metamodel_field'])->get('timetype'),
@@ -128,6 +129,7 @@ class Events extends \Controller
                             break;
 
                         case 'endDate':
+                            $event[$attribute['calendar_field']] = ToolboxOfferDate::offerEnd($items->getItem());
                             $end = $event[$attribute['calendar_field']];
                             break;
                     }
