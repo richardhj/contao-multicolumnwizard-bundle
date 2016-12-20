@@ -138,6 +138,7 @@ abstract class Items extends Module
             foreach ($this->metaModel->getAttributes() as $attribute) {
                 if ($attribute->get('type') == 'alias') {
                     $this->aliasColName = $attribute->getColName();
+                    break;
                 }
             }
 
