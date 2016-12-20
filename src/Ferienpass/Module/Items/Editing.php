@@ -284,22 +284,12 @@ HTML;
                     ),
                     array
                     (
-                        'col_0' => 'Kosten',
+                        'col_0' => 'Wegbeschreibung',
                         'col_1' => '',
                     ),
                     array
                     (
-                        'col_0' => 'Anmeldung',
-                        'col_1' => '',
-                    ),
-                    array
-                    (
-                        'col_0' => 'max. Teilnehmer',
-                        'col_1' => '',
-                    ),
-                    array
-                    (
-                        'col_0' => 'Mitbringen',
+                        'col_0' => 'Mitzubringen',
                         'col_1' => '',
                     ),
 
@@ -310,12 +300,7 @@ HTML;
                     ),
                     array
                     (
-                        'col_0' => 'Veranstalter',
-                        'col_1' => '',
-                    ),
-                    array
-                    (
-                        'col_0' => 'Verantwortlich',
+                        'col_0' => 'Auskunft unter',
                         'col_1' => '',
                     ),
                 );
