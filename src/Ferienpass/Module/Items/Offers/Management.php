@@ -91,7 +91,7 @@ class Management extends ModelList
      */
     protected function detailsLink($arrItem)
     {
-        return [$arrItem['jumpTo']['url'], ' data-lightbox=""']; //@todo IF lightbox
+        return [$arrItem['jumpTo']['url']];
     }
 
 
@@ -102,16 +102,7 @@ class Management extends ModelList
      */
     protected function editLink($itemData)
     {
-        //@todo configurable
-        $attribute = '';
-        $jumpTo = $this->jumpTo;
-
-        if (!$itemData['raw']['varbase']) {
-//            $attribute = ' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
-            $jumpTo = 36;
-        }
-
-        return [$this->generateJumpToLink($jumpTo, $itemData['raw']['alias']), $attribute];
+        return [$this->generateJumpToLink($this->jumpTo, $itemData['raw']['alias'])];
     }
 
 

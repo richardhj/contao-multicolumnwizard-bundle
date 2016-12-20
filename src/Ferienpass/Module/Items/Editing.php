@@ -15,6 +15,7 @@ use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Module\Items;
 use Haste\Form\Form;
+use Haste\Input\Input;
 use MetaModels\FrontendEditingItem as Item;
 use MetaModels\IItem;
 use MetaModels\IItems;
@@ -43,6 +44,28 @@ class Editing extends Items
      */
     public function generate()
     {
+        global $objPage;
+
+        //quick'n'dirty
+        $asf='';
+        if ('36' === $objPage->id) {
+            $asf = Input::getAutoItem('items');
+            Input::setGet('auto_item', '');
+
+            $itemDatabase = $this->database
+                ->prepare(
+                    sprintf
+                    (
+                        'SELECT * FROM %1$s WHERE (id=? OR %2$s=?)',
+                        $this->metaModel->getTableName(),
+                        'alias'
+                    )
+                )
+                ->execute(is_int($asf) ? $asf : 0, $asf);
+
+            $asf = $itemDatabase->id;
+        }
+
         // Try to load the the item by its auto_item
         if (!$this->fetchItem()) {
             // Generate 404 if item not found
@@ -61,7 +84,7 @@ class Editing extends Items
             );
 
             // Prepare variant creation
-            if (($varGroup = (int)\Input::get('vargroup'))) {
+            if (($varGroup = (int)\Input::get('vargroup')) || ($varGroup = $asf)) {
                 $parentItem = $this->metaModel->findById($varGroup);
 
                 // Exit if permissions for provided var group are insufficient
@@ -423,16 +446,8 @@ HTML;
                 }
             }
 
-            //@todo enhance || being a variant doesn't mean it is opened in a lightbox || we don't want JS here
-            // auto-close colorbox
-            if ($this->metaModel->get('id') == 2 || $this->item->isVariant()) {
-                $GLOBALS['TL_JQUERY'][] = <<<HTML
-<script>
-    parent.jQuery.colorbox.close();
-</script>
-HTML;
-            } // Check whether there is a jumpTo page
-            elseif (null !== ($objJumpTo = $this->objModel->getRelated('jumpTo'))) {
+            // Check whether there is a jumpTo page
+            if (null !== ($objJumpTo = $this->objModel->getRelated('jumpTo'))) {
                 $this->jumpToOrReload($objJumpTo->row());
             }
         }
@@ -487,9 +502,6 @@ HTML;
         $template = new \FrontendTemplate('ce_hyperlink');
         $template->class = 'create_new_variant';
 
-        //@todo IF lightbox
-        $template->attribute = '';//' data-lightbox="" data-lightbox-iframe="" data-lightbox-reload=""';
-
         $template->href = sprintf
         (
             '%s?vargroup=%u',
@@ -543,7 +555,6 @@ HTML;
                 ),
                 'title'  => sprintf(specialchars('Die Variante "%s" bearbeiten'), $objVariants->getItem()->get('name')),
                 //@todo lang
-                'target' => ' data-lightbox=""',
                 'link'   => $objVariants->getItem()->get('name'),
             ];
         }
