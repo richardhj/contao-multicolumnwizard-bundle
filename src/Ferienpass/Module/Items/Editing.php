@@ -506,7 +506,7 @@ HTML;
         $template->href = sprintf
         (
             '%s?vargroup=%u',
-            rtrim(str_replace($this->autoItem, '', \Environment::get('request')), '/').'-variante',
+            rtrim(str_replace($this->autoItem, '', \Environment::get('request')), '/'),
             //@todo be configurable
             $this->item->get('id')
         );
