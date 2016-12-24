@@ -19,6 +19,7 @@ use MetaModels\Attribute\OfferDate\AttributeTypeFactory as OfferDateAttributeTyp
 use MetaModels\Filter\Setting\AgeFilterSettingTypeFactory;
 use MetaModels\Filter\Setting\AttendanceAvailableFilterSettingTypeFactory;
 use MetaModels\Filter\Setting\Events\CreateFilterSettingFactoryEvent;
+use MetaModels\Filter\Setting\FromToOfferDateFilterSettingTypeFactory;
 use MetaModels\MetaModelsEvents;
 
 
@@ -37,7 +38,8 @@ return [
         function (CreateFilterSettingFactoryEvent $event) {
             $event->getFactory()
                 ->addTypeFactory(new AgeFilterSettingTypeFactory())
-                ->addTypeFactory(new AttendanceAvailableFilterSettingTypeFactory());
+                ->addTypeFactory(new AttendanceAvailableFilterSettingTypeFactory())
+                ->addTypeFactory(new FromToOfferDateFilterSettingTypeFactory());
         },
     ],
 ];

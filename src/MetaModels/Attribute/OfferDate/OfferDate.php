@@ -400,4 +400,61 @@ class OfferDate extends BaseComplex
 
         return \Config::get($format);
     }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function filterGreaterThan($value, $inclusive = false)
+    {
+        return $this->getIdsFiltered($value, ($inclusive) ? '>=' : '>');
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function filterLessThan($value, $inclusive = false)
+    {
+        return $this->getIdsFiltered($value, ($inclusive) ? '<=' : '<');
+    }
+
+
+    /**
+     * Filter all values by specified operation.
+     *
+     * @param int    $value     The value to use as upper end.
+     *
+     * @param string $operation The specified operation like greater than, lower than etc.
+     *
+     * @return string[] The list of item ids of all items matching the condition.
+     */
+    private function getIdsFiltered($value, $operation)
+    {
+        switch (substr($operation, 0, 1)) {
+            case '<';
+                $function = 'MAX(end)';
+                break;
+
+            case '>':
+                $function = 'MIN(start)';
+                break;
+
+            default:
+                throw new \InvalidArgumentException(sprintf('Invalid operation "%s" given', $operation));
+        }
+
+        $query = sprintf(
+            'SELECT item_id FROM %s WHERE att_id=%s GROUP BY item_id HAVING %s %s %d',
+            $this->getValueTable(),
+            $this->get('id'),
+            $function,
+            $operation,
+            intval($value)
+        );
+
+        $result = $this->getMetaModel()->getServiceContainer()->getDatabase()->execute($query);
+
+        return $result->fetchEach('item_id');
+    }
 }
