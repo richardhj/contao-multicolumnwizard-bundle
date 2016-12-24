@@ -39,9 +39,9 @@ class ApplicationListHost extends Item
      * {@inheritdoc}
      * Include permission check
      */
-    public function generate()
+    public function generate($isProtected = true)
     {
-        return parent::generate(true);
+        return parent::generate($isProtected);
     }
 
 
