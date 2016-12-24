@@ -25,28 +25,19 @@ use MetaModels\MetaModelsEvents;
 return [
     // MetaModel Attributes
     MetaModelsEvents::ATTRIBUTE_FACTORY_CREATE      => [
-        // Age attribute
         function (CreateAttributeFactoryEvent $event) {
-            $factory = $event->getFactory();
-            $factory->addTypeFactory(new AgeAttributeTypeFactory());
-        },
-        // Offer date attribute
-        function (CreateAttributeFactoryEvent $event) {
-            $factory = $event->getFactory();
-            $factory->addTypeFactory(new OfferDateAttributeTypeFactory());
+            $event->getFactory()
+                ->addTypeFactory(new AgeAttributeTypeFactory())
+                ->addTypeFactory(new OfferDateAttributeTypeFactory());
         },
     ],
 
     // MetaModel Filters
     MetaModelsEvents::FILTER_SETTING_FACTORY_CREATE => [
-        // Age filter
         function (CreateFilterSettingFactoryEvent $event) {
-            $event->getFactory()->addTypeFactory(new AgeFilterSettingTypeFactory());
-        },
-
-        // Attendance available filter
-        function (CreateFilterSettingFactoryEvent $event) {
-            $event->getFactory()->addTypeFactory(new AttendanceAvailableFilterSettingTypeFactory());
+            $event->getFactory()
+                ->addTypeFactory(new AgeFilterSettingTypeFactory())
+                ->addTypeFactory(new AttendanceAvailableFilterSettingTypeFactory());
         },
     ],
 ];
