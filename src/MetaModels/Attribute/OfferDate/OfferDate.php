@@ -132,7 +132,7 @@ class OfferDate extends BaseComplex
                 ->execute($this->get('id'), $id);
 
             // Walk every row.
-            foreach ($values[$id] as $period) {
+            foreach ((array)$values[$id] as $period) {
                 // Walk every column and update / insert the value.
                 $database
                     ->prepare('INSERT INTO '.$this->getValueTable().' %s')
@@ -339,7 +339,7 @@ class OfferDate extends BaseComplex
 
         $parsedDates = [];
 
-        foreach ($template->raw as $period) {
+        foreach ((array)$template->raw as $period) {
             $parsedDate = [];
 
             if ((new \Date($period['start']))->dayBegin !== (new \Date($period['end']))->dayBegin) {
