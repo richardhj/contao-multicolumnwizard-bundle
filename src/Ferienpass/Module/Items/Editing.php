@@ -511,7 +511,7 @@ HTML;
             $this->item->get('id')
         );
 
-        $template->link = 'Variante erstellen';
+        $template->link = 'Termin erstellen';
         $template->linkTitle = specialchars(
             sprintf('Eine neue Variante zum Element "%s" erstellen', $this->item->get('name'))
         ); //@todo lang
