@@ -15,6 +15,14 @@
                 }
             }
         );
+        $$('.table_mm_ferienpass .item .field.aktivpass').each(function (item) {
+                item.addClass(
+                    (item.getElements('.text').get('text')[0] == '1')
+                        ? 'active'
+                        : 'inactive'
+                );
+            }
+        );
         $$('.table_mm_ferienpass .item .field.age').each(function (item) {
                 if (!item.getElements('span').get('text')[0]) {
                     item.addClass('invisible');

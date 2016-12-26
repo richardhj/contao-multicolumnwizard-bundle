@@ -29,60 +29,79 @@ $fa-font-path: "../../../components/font-awesome/fonts"
     background: #f6f6f6
 
   .item
-    .field.image
-      float: left
-      margin-right: 10px
-      width: 60px
-      height: 84px
-      background: #c5c5c5
-      &:after
-        +icon($fa-var-ban, 30px)
-        color: #e8e8e8
-        height: 100%
-        width: 100%
-        top: 0
-        display: block
-        +display-flex()
-        +align-items(center)
-        +justify-content(center)
-        pointer-events: none
-      img
-        background: #ffffff
-    .field.host
-      font-weight: bold
-    .field.date_combined
-      margin: 10px 0
-      .text:before
-        +icon($fa-var-calendar, 14px)
-        padding-right: 6px
-    .field.applicationlist_active, .field.applicationlist_max, .field.age
-      display: inline-block
-      padding: 4px
-      background: #e9e9e9
-      margin-left: -4px
-      line-height: 16px
-      +border-radius(4px)
-    .field.applicationlist_active
-      +border-right-radius(0)
-      .value:before
-        +icon($fa-var-users, 14px)
-      &.active
-        .value:before
-          color: $confirmation
-      &.inactive
-        .value:before
-          color: $error
-      .text
-        display: none
-    .field.applicationlist_max
-      +border-left-radius(0)
-      .text
-        &:before
-          content: " ("
+    .field
+      &.image
+        float: left
+        margin-right: 10px
+        width: 60px
+        height: 84px
+        background: #c5c5c5
         &:after
-          content: " max)"
-    .field.age
-      margin-left: 6px
-      .value:before
-        +icon($fa-var-child, 14px)
-        padding-right: 6px
+          +icon($fa-var-ban, 30px)
+          color: #e8e8e8
+          height: 100%
+          width: 100%
+          top: 0
+          display: block
+          +display-flex()
+          +align-items(center)
+          +justify-content(center)
+          pointer-events: none
+        img
+          background: #ffffff
+      &.host
+        font-weight: bold
+      &.date_period
+        margin: 10px 0
+        .value:before
+          +icon($fa-var-calendar, 14px)
+          padding-right: 6px
+      &.applicationlist_active,
+      &.applicationlist_max,
+      &.age,
+      &.fee,
+      &.aktivpass
+        display: inline-block
+        padding: 4px
+        background: #e9e9e9
+        margin-left: -4px
+        line-height: 16px
+        +border-radius(4px)
+      &.applicationlist_active
+        @extend %checkbox
+        +border-right-radius(0)
+        .value:before
+          +icon($fa-var-users, 14px)
+      &.applicationlist_max
+        +border-left-radius(0)
+        .text
+          &:before
+            content: " ("
+          &:after
+            content: " max)"
+      &.age
+        margin-left: 6px
+        .value:before
+          +icon($fa-var-child, 14px)
+          padding-right: 6px
+      &.fee
+        margin-left: 6px
+        .value:before
+          +icon($fa-var-money, 14px)
+          padding-right: 6px
+      &.aktivpass
+        @extend %checkbox
+        margin-left: 6px
+        .value:before
+          +icon($fa-var-ticket, 14px)
+          padding-right: 6px
+
+%checkbox
+  &.active
+    .value:before
+      color: $confirmation
+  &.inactive
+    .value:before
+      color: $error
+  .text
+    display: none
