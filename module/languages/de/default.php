@@ -56,8 +56,8 @@ $GLOBALS['TL_LANG']['MSC']['al-states']['error'] = 'nicht angemeldet';
 $GLOBALS['TL_LANG']['MSC']['state'] = 'Status';
 $GLOBALS['TL_LANG']['MSC']['recall'] = 'Zurückziehen';
 
-$GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['n'] = 'Das Element ist ein Einzeltermin';
-$GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['y'] = 'Das Element soll Termin-Varianten verwalten';
+$GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['n'] = 'Ich biete das Angebot einmalig an';
+$GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['y'] = 'Ich biete das Angebot mehrmals (an mehreren Terminen) an';
 
 if (null !== ($objMetaModel = \Ferienpass\Model\Participant::getInstance()->getMetaModel())) # MetaModel is null if BE user not logged in
 {
