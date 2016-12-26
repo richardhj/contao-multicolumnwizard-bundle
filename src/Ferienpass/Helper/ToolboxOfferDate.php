@@ -28,7 +28,7 @@ class ToolboxOfferDate
      *
      * @param mixed $offer
      *
-     * @return int The timestamp
+     * @return int|null The timestamp or null if no date given
      */
     public static function offerStart($offer)
     {
@@ -36,6 +36,11 @@ class ToolboxOfferDate
         $attribute = self::fetchDateAttribute($offer);
 
         $date = $offer->get($attribute->getColName());
+
+        if (null === $date) {
+            return null;
+        }
+
         $date = array_shift($date);
 
         return $date['start'];
@@ -77,7 +82,7 @@ class ToolboxOfferDate
      *
      * @param mixed $offer
      *
-     * @return int The timestamp
+     * @return int|null The timestamp or null if no date given
      */
     public static function offerEnd($offer)
     {
@@ -85,6 +90,11 @@ class ToolboxOfferDate
         $attribute = self::fetchDateAttribute($offer);
 
         $date = $offer->get($attribute->getColName());
+
+        if (null === $date) {
+            return null;
+        }
+
         $date = array_pop($date);
 
         return $date['end'];
