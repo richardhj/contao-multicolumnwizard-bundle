@@ -254,7 +254,7 @@ class Attendance extends Model
 
     /**
      * Get attendance's current position
-     * @return integer|null if participant not in attendance list (yet) or has error status. Index starting from 1
+     * @return integer|null if participant not in attendance list (yet) or has error status
      */
     public function getPosition()
     {
@@ -265,7 +265,7 @@ class Attendance extends Model
             return null;
         }
 
-        for ($i = 1; $attendances->next(); $i++) {
+        for ($i = 0; $attendances->next(); $i++) {
             if (!$attendances->current()->getStatus()->increasesCount) {
                 --$i;
                 continue;

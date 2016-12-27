@@ -101,7 +101,7 @@ class FirstCome extends AbstractApplicationSystem
         $position = $attendance->getPosition();
 
         if (null !== $position) {
-            if ($position <= $max) {
+            if ($position < $max) {
                 return AttendanceStatus::findConfirmed();
 
             } else {
