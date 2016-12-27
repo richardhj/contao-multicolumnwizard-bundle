@@ -16,25 +16,42 @@ class SaveAttendanceEvent extends Event
     /**
      * @var Attendance
      */
-    protected $attendance;
+    protected $model;
+
+
+    /**
+     * @var Attendance
+     */
+    protected $originalModel;
 
 
     /**
      * SaveAttendanceEvent constructor.
      *
-     * @param Attendance $attendance
+     * @param Attendance       $model
+     * @param Attendance $originalModel
      */
-    public function __construct(Attendance $attendance)
+    public function __construct(Attendance $model, Attendance $originalModel)
     {
-        $this->attendance = $attendance;
+        $this->model = $model;
+        $this->originalModel = $originalModel;
     }
 
 
     /**
      * @return Attendance
      */
-    public function getAttendance()
+    public function getModel()
     {
-        return $this->attendance;
+        return $this->model;
+    }
+
+
+    /**
+     * @return Attendance
+     */
+    public function getOriginalModel()
+    {
+        return $this->originalModel;
     }
 }

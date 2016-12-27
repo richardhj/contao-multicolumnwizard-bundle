@@ -53,11 +53,7 @@ class Lot extends AbstractApplicationSystem
      */
     public function updateAttendanceStatus(SaveAttendanceEvent $event)
     {
-        global $container;
-        /** @var EventDispatcher $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
-
-        $attendance = $event->getAttendance();
+        $attendance = $event->getModel();
 
         if (null !== ($oldStatus = $attendance->getStatus())) {
             return;
@@ -67,9 +63,6 @@ class Lot extends AbstractApplicationSystem
 
         $attendance->status = $newStatus->id;
         $attendance->save();
-
-        $event = new ChangeAttendanceStatusEvent($attendance, $oldStatus, $newStatus);
-        $dispatcher->dispatch(ChangeAttendanceStatusEvent::NAME, $event);
     }
 
 

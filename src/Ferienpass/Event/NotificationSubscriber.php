@@ -40,7 +40,7 @@ class NotificationSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            ChangeAttendanceStatusEvent::NAME => [
+            SaveAttendanceEvent::NAME => [
                 ['sendNewAttendanceStatusNotification'],
                 ['sendChangedAttendanceStatusNotification'],
             ],
@@ -48,9 +48,9 @@ class NotificationSubscriber implements EventSubscriberInterface
     }
 
 
-    public function sendNewAttendanceStatusNotification(ChangeAttendanceStatusEvent $event)
+    public function sendNewAttendanceStatusNotification(SaveAttendanceEvent $event)
     {
-        if (null !== $event->getOldStatus()) {
+        if (null !== $event->getOriginalModel()->getStatus()) {
             return;
         }
 
@@ -59,8 +59,8 @@ class NotificationSubscriber implements EventSubscriberInterface
         $notification = Notification::findByPk($event->getAttendance()->getStatus()->notification_new);
 
         if (null !== $notification) {
-            $participant = $event->getAttendance()->getParticipant();
-            $offer = $event->getAttendance()->getOffer();
+            $participant = $event->getModel()->getParticipant();
+            $offer = $event->getModel()->getOffer();
 
             global $container;
             /** @var AbstractApplicationSystem $applicationSystem */
@@ -71,9 +71,9 @@ class NotificationSubscriber implements EventSubscriberInterface
     }
 
 
-    public function sendChangedAttendanceStatusNotification(ChangeAttendanceStatusEvent $event)
+    public function sendChangedAttendanceStatusNotification(SaveAttendanceEvent $event)
     {
-        if (null === $event->getOldStatus()) {
+        if (null === $event->getOriginalModel()->getStatus()) {
             return;
         }
 
@@ -90,8 +90,8 @@ class NotificationSubscriber implements EventSubscriberInterface
 
             $notification->send(
                 $applicationSystem->getNotificationTokens(
-                    $event->getAttendance()->getParticipant(),
-                    $event->getAttendance()->getOffer()
+                    $event->getModel()->getParticipant(),
+                    $event->getModel()->getOffer()
                 )
             );
         }

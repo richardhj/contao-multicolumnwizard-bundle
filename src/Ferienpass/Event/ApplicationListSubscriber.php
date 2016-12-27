@@ -144,12 +144,12 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     public function addAttendanceStatusMessage(SaveAttendanceEvent $event)
     {
         $participantName = $event
-            ->getAttendance()
+            ->getModel()
             ->getParticipant()
             ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)
         ['text'];
 
-        $status = $event->getAttendance()->getStatus();
+        $status = $event->getModel()->getStatus();
 
         Message::add(
             sprintf(

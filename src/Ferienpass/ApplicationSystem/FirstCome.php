@@ -46,11 +46,7 @@ class FirstCome extends AbstractApplicationSystem
      */
     public function updateAttendanceStatus(SaveAttendanceEvent $event)
     {
-        global $container;
-        /** @var EventDispatcher $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
-
-        $attendance = $event->getAttendance();
+        $attendance = $event->getModel();
         $oldStatus = $attendance->getStatus();
         $newStatus = self::findStatusForAttendance($attendance);
 
@@ -60,9 +56,6 @@ class FirstCome extends AbstractApplicationSystem
 
         $attendance->status = $newStatus->id;
         $attendance->save();
-
-        $event = new ChangeAttendanceStatusEvent($attendance, $oldStatus, $newStatus);
-        $dispatcher->dispatch(ChangeAttendanceStatusEvent::NAME, $event);
 
         \System::log(
             sprintf(
@@ -133,6 +126,7 @@ class FirstCome extends AbstractApplicationSystem
             return;
         }
 
+        // todo does this produces a loop overload?
         while ($attendances->next()) {
             $attendances->save();
         }

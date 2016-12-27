@@ -219,19 +219,19 @@ class Attendance extends Model
 
 
     /**
-     * Trigger notification if attendance is new created
-     * {@inheritdoc}
+     * Trigger the SaveAttendanceEvent
+     *
+     * @param int $intType
      */
-    public function save()
+    protected function postSave($intType)
     {
         global $container;
+
+        parent::postSave($intType);
+
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
-
-        // Save model
-        parent::save();
-
-        $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this));
+        $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this, $this->cloneOriginal()));
     }
 
 
