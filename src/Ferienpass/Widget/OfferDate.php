@@ -10,10 +10,13 @@
 
 namespace Ferienpass\Widget;
 
-
 use Contao\Widget;
 
 
+/**
+ * Class OfferDate
+ * @package Ferienpass\Widget
+ */
 class OfferDate extends \MultiColumnWizard
 {
 

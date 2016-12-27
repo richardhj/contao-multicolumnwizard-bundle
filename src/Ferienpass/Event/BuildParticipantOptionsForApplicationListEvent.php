@@ -1,13 +1,24 @@
 <?php
+/**
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
+ */
 
 namespace Ferienpass\Event;
-
 
 use MetaModels\IItem;
 use MetaModels\IItems;
 use Symfony\Component\EventDispatcher\Event;
 
 
+/**
+ * Class BuildParticipantOptionsForApplicationListEvent
+ * @package Ferienpass\Event
+ */
 class BuildParticipantOptionsForApplicationListEvent extends Event
 {
 

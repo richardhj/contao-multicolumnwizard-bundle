@@ -1,15 +1,14 @@
 <?php
 /**
- * E-POSTBUSINESS API integration for Contao Open Source CMS
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
  * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package E-POST
- * @author  Richard Henkenjohann <richard-epost@henkenjohann.me>
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\ApplicationSystem;
-
 
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
@@ -24,6 +23,10 @@ use Ferienpass\Model\Config as FerienpassConfig;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
+/**
+ * Class Lot
+ * @package Ferienpass\ApplicationSystem
+ */
 class Lot extends AbstractApplicationSystem
 {
 
@@ -40,7 +43,7 @@ class Lot extends AbstractApplicationSystem
                 ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 1.5],
             ],
             ModelToLabelEvent::NAME        => [
-                ['addMemberEditLinkForParticipantListView', -10],
+                ['addAttendancesEditLinkInOfferListView', -10],
             ],
         ];
     }
@@ -66,6 +69,11 @@ class Lot extends AbstractApplicationSystem
     }
 
 
+    /**
+     * Use the OfferAttendancesView if applicable
+     *
+     * @param PopulateEnvironmentEvent $event
+     */
     public function populateEnvironmentForAttendancesChildTable(PopulateEnvironmentEvent $event)
     {
         $environment = $event->getEnvironment();
@@ -105,7 +113,12 @@ class Lot extends AbstractApplicationSystem
     }
 
 
-    public function addMemberEditLinkForParticipantListView(ModelToLabelEvent $event)
+    /**
+     * Show the participant's overall attendances and show an popup link
+     *
+     * @param ModelToLabelEvent $event
+     */
+    public function addAttendancesEditLinkInOfferListView(ModelToLabelEvent $event)
     {
         $model = $event->getModel();
         $definition = $event->getEnvironment()->getDataDefinition();

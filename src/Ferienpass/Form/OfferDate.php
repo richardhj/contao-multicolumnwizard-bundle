@@ -11,6 +11,10 @@
 namespace Ferienpass\Form;
 
 
+/**
+ * Class OfferDate
+ * @package Ferienpass\Form
+ */
 class OfferDate extends \Ferienpass\Widget\OfferDate
 {
 

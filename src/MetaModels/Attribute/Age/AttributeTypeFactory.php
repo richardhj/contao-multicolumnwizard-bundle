@@ -1,21 +1,11 @@
 <?php
 /**
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * PHP version 5
+ * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package    MetaModels
- * @subpackage AttributeNumeric
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author     Stefan Heimes <stefan_heimes@hotmail.com>
- * @author     Andreas Isaak <info@andreas-isaak.de>
- * @author     David Greminger <david.greminger@1up.io>
- * @copyright  The MetaModels team.
- * @license    LGPL.
- * @filesource
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace MetaModels\Attribute\Age;
@@ -24,7 +14,8 @@ use MetaModels\Attribute\AbstractAttributeTypeFactory;
 
 
 /**
- * Attribute type factory for numeric attributes.
+ * Class AttributeTypeFactory
+ * @package MetaModels\Attribute\Age
  */
 class AttributeTypeFactory extends AbstractAttributeTypeFactory
 {

@@ -14,6 +14,10 @@ use Contao\SelectMenu;
 use Contao\System;
 
 
+/**
+ * Class ExportXml
+ * @package Ferienpass\BackendModule
+ */
 class ExportXml extends \BackendModule
 {
 

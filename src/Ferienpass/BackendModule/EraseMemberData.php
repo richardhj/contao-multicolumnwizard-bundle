@@ -10,7 +10,6 @@
 
 namespace Ferienpass\BackendModule;
 
-
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
 use Haste\Util\Format;
@@ -20,6 +19,10 @@ use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
 
 
+/**
+ * Class EraseMemberData
+ * @package Ferienpass\BackendModule
+ */
 class EraseMemberData extends \BackendModule
 {
 

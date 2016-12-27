@@ -1,7 +1,14 @@
 <?php
+/**
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
+ */
 
 namespace Ferienpass\Widget;
-
 
 use Contao\FormHidden;
 use Contao\TextField;
@@ -13,6 +20,10 @@ use Pixelfear\OAuth2\Client\Provider\Dropbox;
 use Pixelfear\OAuth2\Client\Provider\DropboxResourceOwner;
 
 
+/**
+ * Class RequestAccessToken
+ * @package Ferienpass\Widget
+ */
 class RequestAccessToken extends Widget
 {
 

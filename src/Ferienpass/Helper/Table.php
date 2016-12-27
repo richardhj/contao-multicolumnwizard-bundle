@@ -11,6 +11,10 @@
 namespace Ferienpass\Helper;
 
 
+/**
+ * Class Table
+ * @package Ferienpass\Helper
+ */
 class Table
 {
 

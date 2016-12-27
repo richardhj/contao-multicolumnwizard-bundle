@@ -11,6 +11,10 @@
 namespace Ferienpass\BackendModule;
 
 
+/**
+ * Class Management
+ * @package Ferienpass\BackendModule
+ */
 class Management extends BackendOverview
 {
 

@@ -16,6 +16,10 @@ use Contao\System;
 use Ferienpass\Helper\DataProcessing;
 
 
+/**
+ * Class ExportXmlAll
+ * @package Ferienpass\BackendModule
+ */
 class ExportXmlAll extends \BackendModule
 {
 

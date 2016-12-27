@@ -1,24 +1,18 @@
 <?php
 /**
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * PHP version 5
+ * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package    MetaModels
- * @subpackage FilterCheckbox
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  The MetaModels team.
- * @license    LGPL.
- * @filesource
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace MetaModels\Filter\Setting;
 
 /**
- * Attribute type factory for tags filter settings.
+ * Class AttendanceAvailableFilterSettingTypeFactory
+ * @package MetaModels\Filter\Setting
  */
 class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 {

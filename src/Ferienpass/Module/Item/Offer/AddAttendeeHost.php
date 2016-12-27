@@ -1,13 +1,14 @@
 <?php
 /**
  * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
- * Copyright (c) 2015-2015 Richard Henkenjohann
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
  * @package Ferienpass
- * @author  Richard Henkenjohann <richard-ferienpass@henkenjohann.me>
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\Module\Item\Offer;
-
 
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
@@ -18,6 +19,10 @@ use MetaModels\Attribute\IAttribute;
 use MetaModels\FrontendEditingItem;
 
 
+/**
+ * Class AddAttendeeHost
+ * @package Ferienpass\Module\Item\Offer
+ */
 class AddAttendeeHost extends Item
 {
 

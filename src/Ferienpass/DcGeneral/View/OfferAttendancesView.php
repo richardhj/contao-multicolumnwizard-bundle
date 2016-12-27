@@ -1,5 +1,14 @@
 <?php
 /**
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
+ */
+
+/**
  * E-POSTBUSINESS API integration for Contao Open Source CMS
  *
  * Copyright (c) 2015-2016 Richard Henkenjohann
@@ -10,20 +19,34 @@
 
 namespace Ferienpass\DcGeneral\View;
 
-
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\RedirectEvent;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ParentView;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ViewHelpers;
+use ContaoCommunityAlliance\DcGeneral\Data\CollectionInterface;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelInterface;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
 
 
+/**
+ * Class OfferAttendancesView
+ * @package Ferienpass\DcGeneral\View
+ */
 class OfferAttendancesView extends ParentView
 {
 
+    /**
+     * Show parent view mode 4.
+     *
+     * @param CollectionInterface $collection  The collection containing the models.
+     *
+     * @param ModelInterface      $parentModel The parent model.
+     *
+     * @return string HTML output
+     */
     public function viewParent($collection, $parentModel)
     {
         $definition = $this->getEnvironment()->getDataDefinition();

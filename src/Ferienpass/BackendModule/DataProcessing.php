@@ -15,6 +15,10 @@ use Ferienpass\Model\Config;
 use Ferienpass\Model\Offer;
 
 
+/**
+ * Class DataProcessing
+ * @package Ferienpass\BackendModule
+ */
 class DataProcessing extends \BackendModule
 {
 

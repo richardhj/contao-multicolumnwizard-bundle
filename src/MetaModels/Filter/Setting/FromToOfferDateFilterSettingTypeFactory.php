@@ -1,25 +1,18 @@
 <?php
 /**
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * PHP version 5
+ * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package    MetaModels
- * @subpackage FilterAge
- * @author     Christopher Boelter <christopher@boelter.eu>
- * @author     Marc Reimann <reimann@mediendepot-ruhr.de>
- * @copyright  The MetaModels team.
- * @license    LGPL.
- * @filesource
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace MetaModels\Filter\Setting;
 
 /**
- * Attribute type factory for text filter settings.
+ * Class FromToOfferDateFilterSettingTypeFactory
+ * @package MetaModels\Filter\Setting
  */
 class FromToOfferDateFilterSettingTypeFactory extends FromToDateFilterSettingTypeFactory
 {

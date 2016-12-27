@@ -1,20 +1,23 @@
 <?php
 /**
- * E-POSTBUSINESS API integration for Contao Open Source CMS
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
  * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package E-POST
- * @author  Richard Henkenjohann <richard-epost@henkenjohann.me>
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\ApplicationSystem;
-
 
 use MetaModels\IItem;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
+/**
+ * Class AbstractApplicationSystem
+ * @package Ferienpass\ApplicationSystem
+ */
 abstract class AbstractApplicationSystem implements EventSubscriberInterface
 {
 

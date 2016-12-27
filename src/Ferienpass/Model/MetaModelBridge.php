@@ -18,6 +18,10 @@ use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IMetaModel;
 
 
+/**
+ * Class MetaModelBridge
+ * @package Ferienpass\Model
+ */
 abstract class MetaModelBridge
 {
 

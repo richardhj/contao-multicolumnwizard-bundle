@@ -13,6 +13,10 @@ namespace Ferienpass\Widget;
 use Contao\Widget;
 
 
+/**
+ * Class Age
+ * @package Ferienpass\Widget
+ */
 class Age extends Widget
 {
 

@@ -11,6 +11,10 @@
 namespace Ferienpass\Model;
 
 
+/**
+ * Class Offer
+ * @package Ferienpass\Model
+ */
 class Offer extends MetaModelBridge
 {
 

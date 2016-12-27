@@ -1,9 +1,11 @@
 <?php
 /**
  * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
- * Copyright (c) 2015-2015 Richard Henkenjohann
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
  * @package Ferienpass
- * @author  Richard Henkenjohann <richard-ferienpass@henkenjohann.me>
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\Helper;
@@ -35,6 +37,10 @@ use MetaModels\MetaModelsEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
+/**
+ * Class Dca
+ * @package Ferienpass\Helper
+ */
 class Dca implements EventSubscriberInterface
 {
 
@@ -171,6 +177,11 @@ class Dca implements EventSubscriberInterface
     }
 
 
+    /**
+     * Make the "attendances" table editable as a child table of the offer or participant
+     *
+     * @param PopulateEnvironmentEvent $event
+     */
     public function populateEnvironmentForAttendancesChildTable(PopulateEnvironmentEvent $event)
     {
         $environment = $event->getEnvironment();
@@ -204,6 +215,11 @@ class Dca implements EventSubscriberInterface
     }
 
 
+    /**
+     * Prohibit a "duplicate key" sql error when trying to save an attendance that is already existent
+     *
+     * @param PrePersistModelEvent $event
+     */
     public function prohibitDuplicateKeyOnSaveAttendance(PrePersistModelEvent $event)
     {
         $environment = $event->getEnvironment();
@@ -227,6 +243,7 @@ class Dca implements EventSubscriberInterface
     /**
      * Get MetaModel attributes grouped by MetaModel
      * @category options_callback
+     *
      * @return array
      */
     public function getMetaModelsAttributes()
@@ -234,8 +251,8 @@ class Dca implements EventSubscriberInterface
         $return = [];
 
         foreach ($this->getMetaModels() as $table => $metaModelTitle) {
-            foreach (Factory::getDefaultFactory()->getMetaModel($table)->getAttributes(
-            ) as $attributeName => $attribute) {
+            foreach (Factory::getDefaultFactory()->getMetaModel($table)->getAttributes()
+                     as $attributeName => $attribute) {
                 $return[$table][$attributeName] = $attribute->getName();
             }
         }
@@ -247,6 +264,7 @@ class Dca implements EventSubscriberInterface
     /**
      * Get MetaModels
      * @category options_callback
+     *
      * @return array
      */
     public function getMetaModels()
@@ -453,6 +471,11 @@ class Dca implements EventSubscriberInterface
     }
 
 
+    /**
+     * Add the member edit link when in participant list view
+     *
+     * @param ModelToLabelEvent $event
+     */
     public function addMemberEditLinkForParticipantListView(ModelToLabelEvent $event)
     {
         $model = $event->getModel();
@@ -506,6 +529,11 @@ class Dca implements EventSubscriberInterface
     }
 
 
+    /**
+     * Trigger data processing when saving an offer
+     *
+     * @param PostPersistModelEvent $event
+     */
     public function triggerSyncForOffer(PostPersistModelEvent $event)
     {
         $model = $event->getModel();
@@ -535,6 +563,11 @@ class Dca implements EventSubscriberInterface
     }
 
 
+    /**
+     * Update the attendances when changing the "applicationlist max" value
+     *
+     * @param EncodePropertyValueFromWidgetEvent $event
+     */
     public function triggerAttendanceStatusChange(EncodePropertyValueFromWidgetEvent $event)
     {
         if (($event->getEnvironment()->getDataDefinition()->getName() !== FerienpassConfig::getInstance()->offer_model)

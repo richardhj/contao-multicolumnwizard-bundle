@@ -1,4 +1,12 @@
 <?php
+/**
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
+ */
 
 namespace League\Flysystem\Plugin;
 
@@ -9,6 +17,10 @@ use League\Flysystem\PluginInterface;
 use League\Flysystem\Util;
 
 
+/**
+ * Class DropboxDelta
+ * @package League\Flysystem\Plugin
+ */
 class DropboxDelta implements PluginInterface
 {
 
@@ -34,18 +46,29 @@ class DropboxDelta implements PluginInterface
     ];
 
 
+    /**
+     * @param FilesystemInterface $filesystem
+     */
     public function setFilesystem(FilesystemInterface $filesystem)
     {
         $this->filesystem = $filesystem;
     }
 
 
+    /**
+     * @return string
+     */
     public function getMethod()
     {
         return 'getDelta';
     }
 
 
+    /**
+     * @param null $cursor
+     *
+     * @return array
+     */
     public function handle($cursor = null)
     {
         $this->adapter = $this->filesystem->getAdapter();

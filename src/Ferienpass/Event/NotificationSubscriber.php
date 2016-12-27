@@ -1,21 +1,24 @@
 <?php
 /**
- * E-POSTBUSINESS API integration for Contao Open Source CMS
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
  * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package E-POST
- * @author  Richard Henkenjohann <richard-epost@henkenjohann.me>
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\Event;
-
 
 use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
 use NotificationCenter\Model\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
+/**
+ * Class NotificationSubscriber
+ * @package Ferienpass\Event
+ */
 class NotificationSubscriber implements EventSubscriberInterface
 {
 
@@ -48,6 +51,11 @@ class NotificationSubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Send the corresponding notification if the attendance status is assigned newly
+     *
+     * @param SaveAttendanceEvent $event
+     */
     public function sendNewAttendanceStatusNotification(SaveAttendanceEvent $event)
     {
         if (null !== $event->getOriginalModel()->getStatus()) {
@@ -71,6 +79,11 @@ class NotificationSubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Send the corresponding notification if the attendance status was changed
+     *
+     * @param SaveAttendanceEvent $event
+     */
     public function sendChangedAttendanceStatusNotification(SaveAttendanceEvent $event)
     {
         if (null === $event->getOriginalModel()->getStatus()) {

@@ -17,6 +17,10 @@ use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\Item;
 
 
+/**
+ * Class Participant
+ * @package Ferienpass\Model
+ */
 class Participant extends MetaModelBridge
 {
 

@@ -1,9 +1,11 @@
 <?php
 /**
  * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
- * Copyright (c) 2015-2015 Richard Henkenjohann
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
  * @package Ferienpass
- * @author  Richard Henkenjohann <richard-ferienpass@henkenjohann.me>
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\Model;
@@ -15,6 +17,10 @@ use Haste\Haste;
 use MetaModels\IItems;
 
 
+/**
+ * Class Document
+ * @package Ferienpass\Model
+ */
 class Document extends Model
 {
 

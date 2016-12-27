@@ -1,23 +1,11 @@
 <?php
-
 /**
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
- * PHP version 5
- * @package      MetaModels
- * @subpackage   FilterAge
- * @author       Christian de la Haye <service@delahaye.de>
- * @author       Andreas Isaak <info@andreas-isaak.de>
- * @author       Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author       David Molineus <mail@netzmacht.de>
- * @author       David Maack <david.maack@arcor.de>
- * @author       Stefan Heimes <stefan_heimes@hotmail.com>
- * @author       Christopher Boelter <christopher@boelter.eu>
- * @copyright    The MetaModels team.
- * @license      LGPL.
- * @filesource
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace MetaModels\Filter\Setting;
@@ -29,10 +17,8 @@ use MetaModels\FrontendIntegration\FrontendFilterOptions;
 
 
 /**
- * Filter "age" for FE-filtering, based on filters by the MetaModels team.
- * @package       MetaModels
- * @subpackage    FrontendFilter
- * @author        Richard Henkenjohann <richard-ferienpass@henkenjohann.me>
+ * Class Age
+ * @package MetaModels\Filter\Setting
  */
 class Age extends SimpleLookup
 {

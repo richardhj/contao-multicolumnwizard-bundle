@@ -1,15 +1,14 @@
 <?php
 /**
- * E-POSTBUSINESS API integration for Contao Open Source CMS
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
  * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package E-POST
- * @author  Richard Henkenjohann <richard-epost@henkenjohann.me>
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\ApplicationSystem;
-
 
 use Ferienpass\Event\ChangeAttendanceStatusEvent;
 use Ferienpass\Event\DeleteAttendanceEvent;
@@ -20,6 +19,10 @@ use Ferienpass\Model\Config as FerienpassConfig;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
+/**
+ * Class FirstCome
+ * @package Ferienpass\ApplicationSystem
+ */
 class FirstCome extends AbstractApplicationSystem
 {
 
@@ -70,6 +73,13 @@ class FirstCome extends AbstractApplicationSystem
     }
 
 
+    /**
+     * Find the status that matches the current attendance
+     *
+     * @param Attendance $attendance
+     *
+     * @return AttendanceStatus
+     */
     protected static function findStatusForAttendance(Attendance $attendance)
     {
         // Is current status locked?

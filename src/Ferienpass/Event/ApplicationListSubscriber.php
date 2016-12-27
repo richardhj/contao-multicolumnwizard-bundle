@@ -1,15 +1,14 @@
 <?php
 /**
- * E-POSTBUSINESS API integration for Contao Open Source CMS
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
  * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package E-POST
- * @author  Richard Henkenjohann <richard-epost@henkenjohann.me>
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 namespace Ferienpass\Event;
-
 
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
@@ -20,6 +19,10 @@ use Haste\DateTime\DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
+/**
+ * Class ApplicationListSubscriber
+ * @package Ferienpass\Event
+ */
 class ApplicationListSubscriber implements EventSubscriberInterface
 {
 
@@ -56,6 +59,11 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Disable participants from options that are already attending
+     *
+     * @param BuildParticipantOptionsForApplicationListEvent $event
+     */
     public function disableAlreadyAttendingParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
         $options = $event->getResult();
@@ -78,6 +86,11 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Disable participants from options that have a wrong age
+     *
+     * @param BuildParticipantOptionsForApplicationListEvent $event
+     */
     public function disableWrongAgeParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
         $options = $event->getResult();
@@ -110,6 +123,11 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Disable participants from options that have reached their limit
+     *
+     * @param BuildParticipantOptionsForApplicationListEvent $event
+     */
     public function disableLimitReachedParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
         $options = $event->getResult();
@@ -141,6 +159,11 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Display a message after saving a new attendance
+     *
+     * @param SaveAttendanceEvent $event
+     */
     public function addAttendanceStatusMessage(SaveAttendanceEvent $event)
     {
         $participantName = $event

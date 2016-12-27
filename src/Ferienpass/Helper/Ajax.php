@@ -16,9 +16,16 @@ use Ferienpass\Model\DataProcessing;
 use Haste\Http\Response\JsonResponse;
 
 
+/**
+ * Class Ajax
+ * @package Ferienpass\Helper
+ */
 class Ajax
 {
 
+    /**
+     * Handle the Dropbox webhook
+     */
     public function handleDropboxWebhook()
     {
         if (!\Environment::get('isAjaxRequest') || 'dropbox-webhook' !== \Input::get('action')) {
@@ -44,6 +51,10 @@ class Ajax
     }
 
 
+    /**
+     * Handle the reposition of attendances in the backend
+     * @param $action
+     */
     public function handleOfferAttendancesView($action)
     {
         if ($action !== 'offerAttendancesSorting') {

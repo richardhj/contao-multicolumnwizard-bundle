@@ -23,6 +23,10 @@ use Ferienpass\Model\Participant;
 use Ferienpass\Module\Items;
 
 
+/**
+ * Class UserAttendances
+ * @package Ferienpass\Module\Items\Offers
+ */
 class UserAttendances extends Items
 {
 
