@@ -23,6 +23,7 @@ namespace MetaModels\Filter\Setting;
  */
 class AgeFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 {
+
     /**
      * {@inheritDoc}
      */
@@ -34,8 +35,6 @@ class AgeFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
             ->setTypeName('age')
             ->setTypeIcon('assets/ferienpass/backend/img/filter_fp_age.png')
             ->setTypeClass('MetaModels\Filter\Setting\Age')
-            ->allowAttributeTypes(
-                'age'
-            );
+            ->allowAttributeTypes('age');
     }
 }

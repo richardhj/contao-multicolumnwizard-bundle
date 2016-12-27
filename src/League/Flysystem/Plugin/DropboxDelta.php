@@ -11,84 +11,88 @@ use League\Flysystem\Util;
 
 class DropboxDelta implements PluginInterface
 {
-	/**
-	 * @var Filesystem
-	 */
-	protected $filesystem;
 
-	/**
-	 * @var DropboxAdapter
-	 */
-	protected $adapter;
+    /**
+     * @var Filesystem
+     */
+    protected $filesystem;
 
-	/**
-	 * @see DropboxAdapter (copied)
-	 * @var array
-	 */
-	protected static $resultMap = [
-		'bytes'     => 'size',
-		'mime_type' => 'mimetype',
-	];
 
-	public function setFilesystem(FilesystemInterface $filesystem)
-	{
-		$this->filesystem = $filesystem;
-	}
+    /**
+     * @var DropboxAdapter
+     */
+    protected $adapter;
 
-	public function getMethod()
-	{
-		return 'getDelta';
-	}
 
-	public function handle($cursor = null)
-	{
-		$this->adapter = $this->filesystem->getAdapter();
-		$client = $this->adapter->getClient();
+    /**
+     * @see DropboxAdapter (copied)
+     * @var array
+     */
+    protected static $resultMap = [
+        'bytes'     => 'size',
+        'mime_type' => 'mimetype',
+    ];
 
-		$prefix = $this->adapter->getPathPrefix() ? '/' . rtrim($this->adapter->getPathPrefix(), '/') : null;
 
-		$delta = $client->getDelta($cursor, $prefix);
+    public function setFilesystem(FilesystemInterface $filesystem)
+    {
+        $this->filesystem = $filesystem;
+    }
 
-		/**
-		 * @var int   $i
-		 * @var array $entry [0] => <path>
-		 *                   [1] => <metadata>|null if entry was deleted
-		 */
-		foreach ($delta['entries'] as $i => $entry)
-		{
-			$delta['entries'][$i][0] = ltrim($this->adapter->removePathPrefix($delta['entries'][$i][0]), '/');
-			$delta['entries'][$i][1] = $this->normalizeResponse($delta['entries'][$i][1]);
-		}
 
-		return $delta;
-	}
+    public function getMethod()
+    {
+        return 'getDelta';
+    }
 
-	/**
-	 * Normalize a Dropbox response.
-	 * @see DropboxAdapter (copied)
-	 *
-	 * @param array $response
-	 *
-	 * @return array|null if the entry was deleted in user's dropbox
-	 */
-	protected function normalizeResponse($response)
-	{
-		// Check for null
-		if (null === $response)
-		{
-			return null;
-		}
 
-		$result = ['path' => ltrim($this->adapter->removePathPrefix($response['path']), '/')];
+    public function handle($cursor = null)
+    {
+        $this->adapter = $this->filesystem->getAdapter();
+        $client = $this->adapter->getClient();
 
-		if (isset($response['modified']))
-		{
-			$result['timestamp'] = strtotime($response['modified']);
-		}
+        $prefix = $this->adapter->getPathPrefix() ? '/'.rtrim($this->adapter->getPathPrefix(), '/') : null;
 
-		$result = array_merge($result, Util::map($response, static::$resultMap));
-		$result['type'] = $response['is_dir'] ? 'dir' : 'file';
+        $delta = $client->getDelta($cursor, $prefix);
 
-		return $result;
-	}
+        /**
+         * @var int   $i
+         * @var array $entry [0] => <path>
+         *                   [1] => <metadata>|null if entry was deleted
+         */
+        foreach ($delta['entries'] as $i => $entry) {
+            $delta['entries'][$i][0] = ltrim($this->adapter->removePathPrefix($delta['entries'][$i][0]), '/');
+            $delta['entries'][$i][1] = $this->normalizeResponse($delta['entries'][$i][1]);
+        }
+
+        return $delta;
+    }
+
+
+    /**
+     * Normalize a Dropbox response.
+     * @see DropboxAdapter (copied)
+     *
+     * @param array $response
+     *
+     * @return array|null if the entry was deleted in user's dropbox
+     */
+    protected function normalizeResponse($response)
+    {
+        // Check for null
+        if (null === $response) {
+            return null;
+        }
+
+        $result = ['path' => ltrim($this->adapter->removePathPrefix($response['path']), '/')];
+
+        if (isset($response['modified'])) {
+            $result['timestamp'] = strtotime($response['modified']);
+        }
+
+        $result = array_merge($result, Util::map($response, static::$resultMap));
+        $result['type'] = $response['is_dir'] ? 'dir' : 'file';
+
+        return $result;
+    }
 }

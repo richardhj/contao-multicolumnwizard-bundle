@@ -28,6 +28,7 @@ use MetaModels\Attribute\AbstractAttributeTypeFactory;
  */
 class AttributeTypeFactory extends AbstractAttributeTypeFactory
 {
+
     /**
      * {@inheritDoc}
      */
@@ -35,7 +36,7 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
     {
         parent::__construct();
 
-        $this->typeName  = 'age';
+        $this->typeName = 'age';
         $this->typeIcon = 'assets/ferienpass/backend/img/fp_age.png';
         $this->typeClass = 'MetaModels\Attribute\Age\Age';
     }

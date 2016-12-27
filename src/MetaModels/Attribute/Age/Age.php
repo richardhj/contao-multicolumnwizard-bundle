@@ -33,218 +33,205 @@ use MetaModels\Render\Template;
  */
 class Age extends BaseComplex
 {
-	/**
-	 * {@inheritdoc}
-	 */
-	public function searchFor($strPattern)
-	{
-		$objValue = $this
-			->getMetaModel()
-			->getServiceContainer()
-			->getDatabase()
-			->prepare
-			(
-				sprintf
-				(
-					'SELECT item_id FROM %1$s WHERE (lower=0 OR lower<=?) AND (upper=0 OR upper>=?) AND att_id=?',
-					$this->getValueTable()
-				)
-			)
-			->execute
-			(
-				$strPattern,
-				$strPattern,
-				$this->get('id')
-			);
 
-		return $objValue->fetchEach('item_id');
-	}
+    /**
+     * {@inheritdoc}
+     */
+    public function searchFor($pattern)
+    {
+        $result = $this
+            ->getMetaModel()
+            ->getServiceContainer()
+            ->getDatabase()
+            ->prepare(
+                sprintf(
+                    'SELECT item_id FROM %1$s WHERE (lower=0 OR lower<=?) AND (upper=0 OR upper>=?) AND att_id=?',
+                    $this->getValueTable()
+                )
+            )
+            ->execute(
+                $pattern,
+                $pattern,
+                $this->get('id')
+            );
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getDataFor($arrIds)
-	{
-		$arrWhere = $this->getWhere($arrIds);
-		$objValue = $this
-			->getMetaModel()
-			->getServiceContainer()
-			->getDatabase()
-			->prepare
-			(
-				sprintf
-				(
-					'SELECT * FROM %1$s%2$s',
-					$this->getValueTable(),
-					($arrWhere ? ' WHERE ' . $arrWhere['procedure'] : '')
-				)
-			)
-			->execute(($arrWhere ? $arrWhere['params'] : null));
-
-		$arrReturn = array();
-
-		while ($objValue->next())
-		{
-			$lower = $objValue->lower ?: '';
-			$upper = $objValue->upper ?: '';
-
-			$arrReturn[$objValue->item_id] = ($lower === '' && $upper === '') ? 0 : sprintf('%s,%s', $lower, $upper);
-		}
-
-		return $arrReturn;
-	}
+        return $result->fetchEach('item_id');
+    }
 
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function setDataFor($arrValues)
-	{
-		if (empty($arrValues))
-		{
-			return;
-		}
+    /**
+     * {@inheritdoc}
+     */
+    public function getDataFor($ids)
+    {
+        $where = $this->getWhere($ids);
+        $result = $this
+            ->getMetaModel()
+            ->getServiceContainer()
+            ->getDatabase()
+            ->prepare(
+                sprintf(
+                    'SELECT * FROM %1$s%2$s',
+                    $this->getValueTable(),
+                    ($where ? ' WHERE '.$where['procedure'] : '')
+                )
+            )
+            ->execute(($where ? $where['params'] : null));
 
-		// Get the ids
-		$arrIds = array_keys($arrValues);
-		$objDB  = $this->getMetaModel()->getServiceContainer()->getDatabase();
+        $return = [];
 
-		$strQuery = 'INSERT INTO ' . $this->getValueTable() . ' %s';
-		$strQueryUpdate = 'UPDATE %s';
+        while ($result->next()) {
+            $lower = $result->lower ?: '';
+            $upper = $result->upper ?: '';
 
-		// Set data
-		foreach ($arrIds as $intId)
-		{
-			$objDB
-				->prepare
-				(
-					$strQuery .
-					' ON DUPLICATE KEY ' .
-					str_replace
-					(
-						'SET ',
-						'',
-						$objDB
-							->prepare($strQueryUpdate)
-							->set($this->getSetValues($arrValues[$intId], $intId))
-							->query
-					)
-				)
-				->set($this->getSetValues($arrValues[$intId], $intId))
-				->execute();
-		}
-	}
+            $return[$result->item_id] = ($lower === '' && $upper === '') ? 0 : sprintf('%s,%s', $lower, $upper);
+        }
+
+        return $return;
+    }
 
 
-	/**
-	 * Calculate the array of query parameters for the given cell.
-	 *
-	 * @param string $strValue The widget's value as string
-	 * @param int    $intId    The data set id.
-	 *
-	 * @return array
-	 */
-	protected function getSetValues($strValue, $intId)
-	{
-		$lower = 0;
-		$upper = 0;
+    /**
+     * {@inheritdoc}
+     */
+    public function setDataFor($values)
+    {
+        if (empty($values)) {
+            return;
+        }
 
-		if ($strValue)
-		{
-			list($lower, $upper) = trimsplit(',', $strValue);
-		}
+        // Get the ids
+        $ids = array_keys($values);
+        $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
 
-		return array
-		(
-			'tstamp'  => time(),
-			'att_id'  => (int)$this->get('id'),
-			'item_id' => $intId,
-			'lower'   => (int)$lower,
-			'upper'   => (int)$upper
-		);
-	}
+        $query = 'INSERT INTO '.$this->getValueTable().' %s';
+        $queryUpdate = 'UPDATE %s';
+
+        // Set data
+        foreach ($ids as $id) {
+            $database
+                ->prepare(
+                    $query.' ON DUPLICATE KEY '.str_replace(
+                        'SET ',
+                        '',
+                        $database
+                            ->prepare($queryUpdate)
+                            ->set($this->getSetValues($values[$id], $id))
+                            ->query
+                    )
+                )
+                ->set($this->getSetValues($values[$id], $id))
+                ->execute();
+        }
+    }
 
 
-	/**
-	 * {@inheritdoc}
-	 *
-	 * Fetch filter options from foreign table.
-	 * @todo
-	 */
-	public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
-	{
-		return array();
-		if ($idList) {
-			$objRow = $this
-				->getMetaModel()
-				->getServiceContainer()
-				->getDatabase()
-				->prepare(
-					sprintf(
-						'SELECT value, COUNT(value) as mm_count
+    /**
+     * Calculate the array of query parameters for the given cell.
+     *
+     * @param string $value The widget's value as string
+     * @param int    $id    The data set id.
+     *
+     * @return array
+     */
+    protected function getSetValues($value, $id)
+    {
+        $lower = 0;
+        $upper = 0;
+
+        if ($value) {
+            list($lower, $upper) = trimsplit(',', $value);
+        }
+
+        return [
+            'tstamp'  => time(),
+            'att_id'  => (int)$this->get('id'),
+            'item_id' => $id,
+            'lower'   => (int)$lower,
+            'upper'   => (int)$upper,
+        ];
+    }
+
+
+    /**
+     * {@inheritdoc}
+     *
+     * Fetch filter options from foreign table.
+     * @todo
+     */
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
+    {
+        return [];
+        if ($idList) {
+            $objRow = $this
+                ->getMetaModel()
+                ->getServiceContainer()
+                ->getDatabase()
+                ->prepare(
+                    sprintf(
+                        'SELECT value, COUNT(value) as mm_count
                         FROM %1$s
                         WHERE item_id IN (%2$s) AND att_id = ?
                         GROUP BY value
                         ORDER BY FIELD(id,%2$s)',
-						$this->getValueTable(),
-						$this->parameterMask($idList)
-					)
-				)
-				->execute(array_merge($idList, array($this->get('id')), $idList));
-		} else {
-			$objRow = $this
-				->getMetaModel()
-				->getServiceContainer()
-				->getDatabase()
-				->prepare(
-					sprintf(
-						'SELECT value, COUNT(value) as mm_count
+                        $this->getValueTable(),
+                        $this->parameterMask($idList)
+                    )
+                )
+                ->execute(array_merge($idList, [$this->get('id')], $idList));
+        } else {
+            $objRow = $this
+                ->getMetaModel()
+                ->getServiceContainer()
+                ->getDatabase()
+                ->prepare(
+                    sprintf(
+                        'SELECT value, COUNT(value) as mm_count
                         FROM %s
                         WHERE att_id = ?
                         GROUP BY value',
-						$this->getValueTable()
-					)
-				)
-				->execute($this->get('id'));
-		}
+                        $this->getValueTable()
+                    )
+                )
+                ->execute($this->get('id'));
+        }
 
-		$arrResult = array();
-		while ($objRow->next()) {
-			$strValue = $objRow->value;
+        $arrResult = [];
 
-			if (is_array($arrCount)) {
-				$arrCount[$strValue] = $objRow->mm_count;
-			}
+        while ($objRow->next()) {
+            $strValue = $objRow->value;
 
-			$arrResult[$strValue] = $strValue;
-		}
+            if (is_array($arrCount)) {
+                $arrCount[$strValue] = $objRow->mm_count;
+            }
 
-		return $arrResult;
-	}
+            $arrResult[$strValue] = $strValue;
+        }
+
+        return $arrResult;
+    }
 
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function unsetDataFor($arrIds)
-	{
-		$arrWhere = $this->getWhere($arrIds);
+    /**
+     * {@inheritdoc}
+     */
+    public function unsetDataFor($ids)
+    {
+        $where = $this->getWhere($ids);
 
-		$this
-			->getMetaModel()
-			->getServiceContainer()
-			->getDatabase()
-			->prepare
-			(
-				sprintf
-				(
-					'DELETE FROM %1$s%2$s',
-					$this->getValueTable(),
-					($arrWhere ? ' WHERE ' . $arrWhere['procedure'] : '')
-				)
-			)
-			->execute(($arrWhere ? $arrWhere['params'] : null));
-	}
+        $this
+            ->getMetaModel()
+            ->getServiceContainer()
+            ->getDatabase()
+            ->prepare(
+                sprintf(
+                    'DELETE FROM %1$s%2$s',
+                    $this->getValueTable(),
+                    ($where ? ' WHERE '.$where['procedure'] : '')
+                )
+            )
+            ->execute(($where ? $where['params'] : null));
+    }
 
 
     /**
@@ -254,143 +241,132 @@ class Age extends BaseComplex
     {
         return array_merge(
             parent::getAttributeSettingNames(),
-            array(
+            [
                 'mandatory',
                 'filterable',
                 'searchable',
-            )
+            ]
         );
     }
 
-	/**
-	 * Return the table we are operating on.
-	 *
-	 * @return string
-	 */
-	protected function getValueTable()
-	{
-		return 'tl_metamodel_age';
-	}
+
+    /**
+     * Return the table we are operating on.
+     *
+     * @return string
+     */
+    protected function getValueTable()
+    {
+        return 'tl_metamodel_age';
+    }
 
 
     /**
      * {@inheritdoc}
      * @todo
      */
-    public function getFieldDefinition($arrOverrides = array())
+    public function getFieldDefinition($overrides = [])
     {
-        $arrFieldDef                 = parent::getFieldDefinition($arrOverrides);
-        $arrFieldDef['inputType']    = 'fp_age';
-	    $arrFieldDef['eval']['widget_lines'] = array
-		(
-		    array
-		    (
-			    'input_format' => 'alle Ferienpass-Kinder',
-			    'render_format' => 'alle Ferienpass-Kinder',
-			    'save_format' => '0',
-			    'default' => true
-		    ),
-			array
-			(
-			    'input_format' => 'Kinder ab</label> %s Jahre',
-				'render_format' => 'Kinder ab %s Jahre',
-			    'save_format' => '%s,'
-			),
-			array
-			(
-			    'input_format' => 'Kinder bis</label> %s Jahre',
-			    'render_format' => 'Kinder bis %s Jahre',
-			    'save_format' => ',%s'
-			),
-			array
-			(
-			    'input_format' => 'Kinder von</label> %s bis %s Jahre',
-			    'render_format' => 'Kinder von %s bis %s Jahre',
-			    'save_format' => '%s,%s'
-			)
-		);
+        $fieldDefinition = parent::getFieldDefinition($overrides);
+        $fieldDefinition['inputType'] = 'fp_age';
+        $fieldDefinition['eval']['widget_lines'] = [
+            [
+                'input_format'  => 'alle Ferienpass-Kinder',
+                'render_format' => 'alle Ferienpass-Kinder',
+                'save_format'   => '0',
+                'default'       => true,
+            ],
+            [
+                'input_format'  => 'Kinder ab</label> %s Jahre',
+                'render_format' => 'Kinder ab %s Jahre',
+                'save_format'   => '%s,',
+            ],
+            [
+                'input_format'  => 'Kinder bis</label> %s Jahre',
+                'render_format' => 'Kinder bis %s Jahre',
+                'save_format'   => ',%s',
+            ],
+            [
+                'input_format'  => 'Kinder von</label> %s bis %s Jahre',
+                'render_format' => 'Kinder von %s bis %s Jahre',
+                'save_format'   => '%s,%s',
+            ],
+        ];
 
-        return $arrFieldDef;
+        return $fieldDefinition;
     }
 
 
-	/**
-	 * Build a where clause for the given id(s) and rows/cols.
-	 *
-	 * @param mixed $mixIds One, none or many ids to use.
-	 *
-	 * @return array<string,string|array>
-	 */
-	protected function getWhere($mixIds)
-	{
-		$strWhereIds = '';
+    /**
+     * Build a where clause for the given id(s) and rows/cols.
+     *
+     * @param mixed $ids One, none or many ids to use.
+     *
+     * @return array<string,string|array>
+     */
+    protected function getWhere($ids)
+    {
+        $whereIds = '';
 
-		if ($mixIds)
-		{
-			if (is_array($mixIds))
-			{
-				$strWhereIds = ' AND item_id IN (' . implode(',', $mixIds) . ')';
-			}
-			else
-			{
-				$strWhereIds = ' AND item_id=' . $mixIds;
-			}
-		}
+        if ($ids) {
+            if (is_array($ids)) {
+                $whereIds = ' AND item_id IN ('.implode(',', $ids).')';
+            } else {
+                $whereIds = ' AND item_id='.$ids;
+            }
+        }
 
-		$arrReturn = array(
-			'procedure' => 'att_id=?' . $strWhereIds,
-			'params'    => array($this->get('id'))
-		);
+        $return = [
+            'procedure' => 'att_id=?'.$whereIds,
+            'params'    => [$this->get('id')],
+        ];
 
-		return $arrReturn;
-	}
+        return $return;
+    }
 
 
-	/**
-	 * {@inheritdoc}
-	 */
-	protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings)
-	{
-		parent::prepareTemplate($objTemplate, $arrRowData, $objSettings);
+    /**
+     * {@inheritdoc}
+     */
+    protected function prepareTemplate(Template $template, $rowData, $settings)
+    {
+        parent::prepareTemplate($template, $rowData, $settings);
 
-		$colname = $this->getColName();
-		$varValue = $arrRowData[$colname];
+        $colname = $this->getColName();
+        $varValue = $rowData[$colname];
 
-		$arrFieldDefinition = $this->getFieldDefinition();
-		$arrWidgetLines = $arrFieldDefinition['eval']['widget_lines'];
-		$checkedFile = $this->getCheckedLine($varValue, $arrWidgetLines);
+        $arrFieldDefinition = $this->getFieldDefinition();
+        $arrWidgetLines = $arrFieldDefinition['eval']['widget_lines'];
+        $checkedFile = $this->getCheckedLine($varValue, $arrWidgetLines);
 
-		if ($checkedFile !== false)
-		{
-			$arrLineInputValues = array_values(array_filter(trimsplit(',', $varValue)));
-			$objTemplate->parsed = vsprintf($arrWidgetLines[$checkedFile]['render_format'], $arrLineInputValues);
-		}
-	}
+        if (false !== $checkedFile) {
+            $arrLineInputValues = array_values(array_filter(trimsplit(',', $varValue)));
+            $template->parsed = vsprintf($arrWidgetLines[$checkedFile]['render_format'], $arrLineInputValues);
+        }
+    }
 
 
-	/**
-	 * Get widget's checked line
-	 *
-	 * @param mixed $varValue
-	 * @param array $arrWidgetLines
-	 *
-	 * @return false|int
-	 */
-	protected function getCheckedLine($varValue, $arrWidgetLines)
-	{
-		$intCheckedLine = null;
+    /**
+     * Get widget's checked line
+     *
+     * @param mixed $value
+     * @param array $widgetLines
+     *
+     * @return false|int
+     */
+    protected function getCheckedLine($value, $widgetLines)
+    {
+        $checkedLine = null;
 
-		foreach ($arrWidgetLines as $i=>$arrWidgetLine)
-		{
-			$strDerivedSaveFormat = preg_replace('/[1-9][0-9]*/', '%s', $varValue);
+        foreach ($widgetLines as $i => $widgetLine) {
+            $derivedSaveFormat = preg_replace('/[1-9][0-9]*/', '%s', $value);
 
-			if ($strDerivedSaveFormat == $arrWidgetLine['save_format'])
-			{
-				$intCheckedLine = $i;
-				break;
-			}
-		}
+            if ($derivedSaveFormat === $widgetLine['save_format']) {
+                $checkedLine = $i;
+                break;
+            }
+        }
 
-		return ($intCheckedLine !== null) ? $intCheckedLine : false;
-	}
+        return ($checkedLine !== null) ? $checkedLine : false;
+    }
 }

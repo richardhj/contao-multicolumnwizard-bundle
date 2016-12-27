@@ -22,6 +22,7 @@ namespace MetaModels\Filter\Setting;
  */
 class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 {
+
     /**
      * {@inheritDoc}
      */

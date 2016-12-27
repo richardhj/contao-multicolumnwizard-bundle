@@ -39,31 +39,30 @@ use MetaModels\Filter\Rules\StaticIdList;
 class AttendanceAvailable extends Checkbox
 {
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function prepareRules(IFilter $objFilter, $arrFilterUrl)
-	{
-		$objMetaModel = $this->getMetaModel();
-		$strParamName = $this->getParamName();
-		$objAttribute = $objMetaModel->getAttributeById($this->get('attr_id'));
+    /**
+     * {@inheritdoc}
+     */
+    public function prepareRules(IFilter $objFilter, $arrFilterUrl)
+    {
+        $objMetaModel = $this->getMetaModel();
+        $strParamName = $this->getParamName();
+        $objAttribute = $objMetaModel->getAttributeById($this->get('attr_id'));
 
-		// If is a checkbox defined as "no", 1 has to become -1 like with radio fields.
-		if (isset($arrFilterUrl[$strParamName]))
-		{
-			$arrFilterUrl[$strParamName] =
+        // If is a checkbox defined as "no", 1 has to become -1 like with radio fields.
+        if (isset($arrFilterUrl[$strParamName])) {
+            $arrFilterUrl[$strParamName] =
                 ('1' === $arrFilterUrl[$strParamName] && 'no' === $this->get('ynmode')
-					? '-1'
-					: $arrFilterUrl[$strParamName]);
-		}
+                    ? '-1'
+                    : $arrFilterUrl[$strParamName]);
+        }
 
-		if ($objAttribute && $strParamName && !empty($arrFilterUrl[$strParamName]))
-		{
-			// Param -1 has to be '' meaning 'really empty'.
+        if ($objAttribute && $strParamName && !empty($arrFilterUrl[$strParamName])) {
+            // Param -1 has to be '' meaning 'really empty'.
             $arrFilterUrl[$strParamName] = ('-1' === $arrFilterUrl[$strParamName] ? '' : $arrFilterUrl[$strParamName]);
 
-			$strQuery = sprintf(<<<'SQL'
-SELECT item.id
+            $strQuery = sprintf(
+                <<<'SQL'
+                SELECT item.id
 FROM %1$s AS item
 LEFT JOIN (
   SELECT offer, COUNT(id) as current_participants
@@ -81,20 +80,20 @@ WHERE (
 )
 AND startDateTime >= %5$s
 SQL
-				,
-				$objMetaModel->getTableName(),
-				Attendance::getTable(),
+                ,
+                $objMetaModel->getTableName(),
+                Attendance::getTable(),
                 FerienpassConfig::getInstance()->offer_attribute_applicationlist_active,
-				$objAttribute->getColName(),
-			    time()
+                $objAttribute->getColName(),
+                time()
             );
 
             $objFilterRule = new SimpleQuery($strQuery, [], 'id', $objMetaModel->getServiceContainer()->getDatabase());
-			$objFilter->addFilterRule($objFilterRule);
+            $objFilter->addFilterRule($objFilterRule);
 
-			return;
-		}
+            return;
+        }
 
-		$objFilter->addFilterRule(new StaticIdList(null));
-	}
+        $objFilter->addFilterRule(new StaticIdList(null));
+    }
 }

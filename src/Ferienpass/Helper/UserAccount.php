@@ -27,27 +27,28 @@ class UserAccount extends \Frontend
      * Check the postal code on user registration
      * @category HOOK: createNewUser
      *
-     * @param integer             $intId
-     * @param array               $arrData
-     * @param \ModuleRegistration $objModule
+     * @param integer $id
+     * @param array   $data
+     *
+     * @internal param \ModuleRegistration $module
      */
-    public function createNewUser($intId, $arrData, $objModule)
+    public function createNewUser($id, $data)
     {
-        $arrAllowedZipCodes = trimsplit(',', FerienpassConfig::getInstance()->registration_allowed_zip_codes);
+        $allowedZipCodes = trimsplit(',', FerienpassConfig::getInstance()->registration_allowed_zip_codes);
 
-        if (empty($arrAllowedZipCodes)) {
+        if (empty($allowedZipCodes)) {
             return;
         }
 
         // Check for allowed zip code
-        if (!in_array($arrData['postal'], $arrAllowedZipCodes)) {
+        if (!in_array($data['postal'], $allowedZipCodes)) {
             // Add error as message
             // !!! You have to include the message in registration template (member_…)
             Message::addError(
                 'Ihre Postleitzahl ist für die Registrierung nicht zulässig. Wenn Sie meinen, dass das ein Fehler ist, kontaktieren Sie uns bitte.'
             ); //@todo lang
 
-            $this->deleteUser($intId);
+            $this->deleteUser($id);
             \Controller::reload();
 
             return;
@@ -58,14 +59,14 @@ class UserAccount extends \Frontend
     /**
      * Delete a user by id
      *
-     * @param integer $intId
+     * @param integer $id
      */
-    protected function deleteUser($intId)
+    protected function deleteUser($id)
     {
         @\FrontendUser::getInstance()->logout();
         @define('FE_USER_LOGGED_IN', $this->getLoginStatus('FE_USER_AUTH'));
         /** @noinspection PhpUndefinedMethodInspection */
-        @\MemberModel::findByPk($intId)->delete();
+        @\MemberModel::findByPk($id)->delete();
     }
 
 
@@ -73,38 +74,39 @@ class UserAccount extends \Frontend
      * Delete a member's participants and attendances
      * @category HOOK: closeAccount
      *
-     * @param integer             $intUserId
-     * @param string              $strRegClose
-     * @param \ModuleCloseAccount $objModule
+     * @param integer $userId
+     * @param string  $regClose
+     *
+     * @internal param \ModuleCloseAccount $module
      */
-    public function closeAccount($intUserId, $strRegClose, $objModule)
+    public function closeAccount($userId, $regClose)
     {
-        if ($strRegClose != 'close_delete') {
+        if ('close_delete' !== $regClose) {
             return;
         }
 
         // Delete attendances
-        $objAttendances = Attendance::findByParent($intUserId);
-        $intCountAttendances = (null !== $objAttendances) ? $objAttendances->count() : 0;
+        $attendances = Attendance::findByParent($userId);
+        $countAttendances = (null !== $attendances) ? $attendances->count() : 0;
 
-        while (null !== $objAttendances && $objAttendances->next()) {
-            $objAttendances->delete();
+        while (null !== $attendances && $attendances->next()) {
+            $attendances->delete();
         }
 
         // Delete participants
-        $objParticipants = Participant::getInstance()->findByParent($intUserId);
-        $intCountParticipants = $objParticipants->getCount();
+        $participants = Participant::getInstance()->findByParent($userId);
+        $countParticipants = $participants->getCount();
 
-        while ($objParticipants->next()) {
-            Participant::getInstance()->getMetaModel()->delete($objParticipants->getItem());
+        while ($participants->next()) {
+            Participant::getInstance()->getMetaModel()->delete($participants->getItem());
         }
 
         \System::log(
             sprintf(
                 '%u participants and %u attendances for member ID %u has been deleted',
-                $intCountParticipants,
-                $intCountAttendances,
-                $intUserId
+                $countParticipants,
+                $countAttendances,
+                $userId
             ),
             __METHOD__,
             TL_GENERAL

@@ -41,10 +41,10 @@ abstract class AbstractApplicationSystem implements EventSubscriberInterface
         }
 
         // Add all the parent's member fields
-        $objOwnerAttribute = $participant->getMetaModel()->getAttributeById(
+        $ownerAttribute = $participant->getMetaModel()->getAttributeById(
             $participant->getMetaModel()->get('owner_attribute')
         );
-        foreach ($participant->get($objOwnerAttribute->getColName()) as $k => $v) {
+        foreach ($participant->get($ownerAttribute->getColName()) as $k => $v) {
             $tokens['member_'.$k] = $v;
         }
 

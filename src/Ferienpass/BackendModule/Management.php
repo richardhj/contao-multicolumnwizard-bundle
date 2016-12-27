@@ -19,7 +19,7 @@ class Management extends BackendOverview
      */
     protected function getModules()
     {
-        $return = array();
+        $return = [];
 
         foreach ($GLOBALS['FERIENPASS_MOD'] as $strGroup => $arrModules) {
             foreach ($arrModules as $strModule => $arrConfig) {
@@ -30,13 +30,12 @@ class Management extends BackendOverview
 
                     $return[$strGroup]['modules'][$strModule] = array_merge(
                         $arrConfig,
-                        array
-                        (
+                        [
                             'label'       => specialchars($GLOBALS['TL_LANG']['FPMD'][$strModule][0] ?: $strModule),
                             'description' => specialchars(strip_tags($GLOBALS['TL_LANG']['FPMD'][$strModule][1])),
                             'href'        => TL_SCRIPT.'?do=ferienpass_management&mod='.$strModule,
                             'class'       => $arrConfig['class'],
-                        )
+                        ]
                     );
 
                     $strLabel = str_replace(':hide', '', $strGroup);
