@@ -48,6 +48,30 @@ class ToolboxOfferDate
 
 
     /**
+     * Get the offer's ending datetime as timestamp
+     *
+     * @param mixed $offer
+     *
+     * @return int|null The timestamp or null if no date given
+     */
+    public static function offerEnd($offer)
+    {
+        $offer = self::fetchOffer($offer);
+        $attribute = self::fetchDateAttribute($offer);
+
+        $date = $offer->get($attribute->getColName());
+
+        if (null === $date) {
+            return null;
+        }
+
+        $date = array_pop($date);
+
+        return $date['end'];
+    }
+
+
+    /**
      * @param IItem|int $offer
      *
      * @return IItem|null
@@ -74,29 +98,5 @@ class ToolboxOfferDate
     protected static function fetchDateAttribute(IItem $item)
     {
         return $item->getAttribute(Config::getInstance()->offer_attribute_date);
-    }
-
-
-    /**
-     * Get the offer's ending datetime as timestamp
-     *
-     * @param mixed $offer
-     *
-     * @return int|null The timestamp or null if no date given
-     */
-    public static function offerEnd($offer)
-    {
-        $offer = self::fetchOffer($offer);
-        $attribute = self::fetchDateAttribute($offer);
-
-        $date = $offer->get($attribute->getColName());
-
-        if (null === $date) {
-            return null;
-        }
-
-        $date = array_pop($date);
-
-        return $date['end'];
     }
 }
