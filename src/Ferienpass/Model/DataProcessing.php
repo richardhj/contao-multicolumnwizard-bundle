@@ -118,7 +118,7 @@ class DataProcessing extends Model
 
         log_message(var_export($arrDelta, true), 'syncFromRemoteDropbox.log');
 
-        $arrFiles = array();
+        $arrFiles = [];
 
         // Walk each changed files in dropbox
         foreach ($arrDelta['entries'] as $entry) {
@@ -502,31 +502,29 @@ class DataProcessing extends Model
                 /** @var DataProcessing|\Model\Collection $objProcessings */
                 $objProcessings = static::findBy
                 (
-                    array
-                    (
+                    [
                         'filesystem=?',
                         'sync=1',
                         'id<>?',
-                    ),
-                    array
-                    (
+                    ],
+                    [
                         'dropbox',
                         $this->id,
-                    )
+                    ]
                 );
 
                 while (null !== $objProcessings && $objProcessings->next()) {
                     $objProcessings->current()->run(
                         array_merge
                         (
-                            array($objOffer->get('id')),
+                            [$objOffer->get('id')],
                             array_map(
                                 function ($variant) {
                                     /** @noinspection PhpUndefinedMethodInspection */
                                     return $variant->get('id');
                                 },
                                 $objVariants
-                            ) ?: array()
+                            ) ?: []
                         )
                     );
                 }
@@ -559,7 +557,7 @@ class DataProcessing extends Model
                 break;
 
             case 'file':
-                $widget = array();
+                $widget = [];
 
                 /** @type \DOMElement $file */
                 foreach ($element->getElementsByTagName('Link') as $file) {
@@ -593,7 +591,7 @@ class DataProcessing extends Model
                 break;
 
             case 'tabletext':
-                $widget = array();
+                $widget = [];
 
                 /** @type \DOMElement $element */
                 $element = $element->getElementsByTagName('Tabletext')->item(0);
@@ -635,9 +633,9 @@ class DataProcessing extends Model
      *
      * @throws \Exception
      */
-    public function run($arrOffers = array())
+    public function run($arrOffers = [])
     {
-        $arrToExport = array();
+        $arrToExport = [];
 
         $objMountManger = $this->getMountManager();
         $objOffers = null;
@@ -703,7 +701,7 @@ class DataProcessing extends Model
                 $objMountManger->put('local://'.$path, $this->createICalForOffers($objOffers));
                 $arrToExport[] = array_merge(
                     $objMountManger->getMetadata('local://'.$path),
-                    array('basename' => basename($path))
+                    ['basename' => basename($path)]
                 );
                 break;
 
@@ -896,7 +894,7 @@ class DataProcessing extends Model
 
         // Add variant ids (order will be important for following processings)
         if (null !== $objVariants && $objVariants->getCount()) {
-            $arrVariantIds = array();
+            $arrVariantIds = [];
 
             while ($objVariants->next()) {
                 $arrVariantIds[] = $objVariants->getItem()->get('id');
@@ -914,7 +912,7 @@ class DataProcessing extends Model
             // It is a variant attribute
             if ($this->combine_variants && $objVariants->getCount() && $objAttribute->get('isvariant')) {
                 // Fetch variants
-                $parsed = array();
+                $parsed = [];
                 $objVariants->reset();
 
                 // Parse each attribute with render setting

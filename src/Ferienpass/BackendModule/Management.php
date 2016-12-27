@@ -57,6 +57,7 @@ class Management extends BackendOverview
      */
     protected function checkUserAccess($module)
     {
+        /** @noinspection PhpParamsInspection */
         return \BackendUser::getInstance()->isAdmin || \BackendUser::getInstance()->hasAccess($module, 'iso_modules');
     }
 

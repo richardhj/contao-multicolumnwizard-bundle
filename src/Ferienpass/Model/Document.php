@@ -177,16 +177,15 @@ class Document extends Model
         $template->items = $collectionTemplate->parse();
 
         // Generate template and fix PDF issues, see Contao's ModuleArticle
-        $buffer = Haste::getInstance()->call('replaceInsertTags', array($template->parse(), false));
+        $buffer = Haste::getInstance()->call('replaceInsertTags', [$template->parse(), false]);
         $buffer = html_entity_decode($buffer, ENT_QUOTES, \Config::get('characterSet'));
         $buffer = \Controller::convertRelativeUrls($buffer, '', true);
 
         // Remove form elements and JavaScript links
-        $search = array
-        (
+        $search = [
             '@<form.*</form>@Us',
             '@<a [^>]*href="[^"]*javascript:[^>]+>.*</a>@Us',
-        );
+        ];
 
         $buffer = preg_replace($search, '', $buffer);
 
@@ -208,25 +207,23 @@ class Document extends Model
         $buffer = preg_replace_callback('@(<pre.*</pre>)@Us', 'nl2br_callback', $buffer);
 
         // Default PDF export using TCPDF
-        $search = array
-        (
+        $search = [
             '@<span style="text-decoration: ?underline;?">(.*)</span>@Us',
             '@(<img[^>]+>)@',
             '@(<div[^>]+block[^>]+>)@',
             '@[\n\r\t]+@',
             '@<br( /)?><div class="mod_article@',
             '@href="([^"]+)(pdf=[0-9]*(&|&amp;)?)([^"]*)"@',
-        );
+        ];
 
-        $replace = array
-        (
+        $replace = [
             '<u>$1</u>',
             '<br>$1',
             '<br>$1',
             ' ',
             '<div class="mod_article',
             'href="$1$4"',
-        );
+        ];
 
         $buffer = preg_replace($search, $replace, $buffer);
 

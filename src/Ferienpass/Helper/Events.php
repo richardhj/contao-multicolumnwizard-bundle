@@ -80,15 +80,16 @@ class Events extends \Controller
     /**
      * Add a MetaModel's items as events
      *
-     * @param array   $events
-     * @param array   $calendars
-     * @param integer $calendarRangeStart
-     * @param integer $calendarRangeEnd
-     * @param \Events $module
+     * @param array $events
+     * @param array $calendars
      *
      * @return array
+     *
+     * @internal param int $calendarRangeStart
+     * @internal param int $calendarRangeEnd
+     * @internal param \Events $module
      */
-    public function getMetaModelAsEvents($events, $calendars, $calendarRangeStart, $calendarRangeEnd, $module)
+    public function getMetaModelAsEvents($events, $calendars)
     {
         /** @type \Model $objPage */
         global $objPage;

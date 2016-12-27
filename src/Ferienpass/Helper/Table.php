@@ -33,27 +33,25 @@ class Table
         global $objPage;
 
         $nl2br = ($objPage->outputFormat == 'xhtml') ? 'nl2br_xhtml' : 'nl2br_html5';
-        $arrDataTable = array
-        (
+        $arrDataTable = [
             'id'    => $strName.'_'.$objModule->id,
             'class' => $strName,
-        );
+        ];
 
         $arrDataTable['useHeader'] = $objModule->useHeader;
 
-        $arrHeader = array();
-        $arrBody = array();
+        $arrHeader = [];
+        $arrBody = [];
 
         // Table header
         foreach ($arrRows[0] as $i => $v) {
             // Add cell
-            $arrHeader[] = array
-            (
+            $arrHeader[] = [
                 'class'   => 'head_'.$i.(($i == 0) ? ' col_first' : '').(($i == (count(
                                 $arrRows[0]
                             ) - 1)) ? ' col_last' : '').(($i == 0 && $objModule->tleft) ? ' unsortable' : ''),
                 'content' => (($v != '') ? $nl2br($v) : '&nbsp;'),
-            );
+            ];
         }
 
         array_shift($arrRows);
@@ -94,11 +92,10 @@ class Table
                     $class_td .= ' '.$cellClass($i, $arrRows, $objModule);
                 }
 
-                $arrBody['row_'.$j.$class_tr.$class_eo][] = array
-                (
+                $arrBody['row_'.$j.$class_tr.$class_eo][] = [
                     'class'   => 'col_'.$i.$class_td,
                     'content' => (($v != '') ? $nl2br($v) : '&nbsp;'),
-                );
+                ];
             }
         }
 

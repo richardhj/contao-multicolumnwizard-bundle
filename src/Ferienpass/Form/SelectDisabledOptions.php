@@ -92,6 +92,7 @@ class SelectDisabledOptions extends FormSelectMenu
      */
     protected function isValidOption($input)
     {
+        /** @noinspection PhpUndefinedMethodInspection */
         if (false === parent::isValidOption($input)) {
             return false;
         }

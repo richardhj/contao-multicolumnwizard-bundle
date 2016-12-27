@@ -88,7 +88,7 @@ class Age extends SimpleLookup
      */
     public function getParameters()
     {
-        return ($strParamName = $this->getParamName()) ? array($strParamName) : array();
+        return ($strParamName = $this->getParamName()) ? [$strParamName] : [];
     }
 
 
@@ -98,13 +98,12 @@ class Age extends SimpleLookup
     public function getParameterFilterNames()
     {
         if (($strParamName = $this->getParamName())) {
-            return array
-            (
+            return [
                 $strParamName => ($this->get('label') ? $this->get('label') : $this->getParamName()),
-            );
+            ];
         }
 
-        return array();
+        return [];
     }
 
 

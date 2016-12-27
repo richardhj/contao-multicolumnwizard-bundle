@@ -63,12 +63,11 @@ class OfferDate extends \Ferienpass\Widget\OfferDate
                     (
                         http_build_query
                         (
-                            array
-                            (
+                            [
                                 $this->strCommand => $button,
                                 'cid'             => $level,
                                 'id'              => $this->currentRecord,
-                            )
+                            ]
                         ),
                         false
                     )

@@ -380,11 +380,11 @@ class Dca implements EventSubscriberInterface
      * Get all metamodel render settings
      * @category options_callback
      *
-     * @param \DataContainer $dc
-     *
      * @return array
+     *
+     * @internal param \DataContainer $dc
      */
-    public function getAllMetaModelRenderSettings($dc)
+    public function getAllMetaModelRenderSettings()
     {
         $renderSettings = \Database::getInstance()
             ->query('SELECT * FROM tl_metamodel_rendersettings');
@@ -422,7 +422,7 @@ class Dca implements EventSubscriberInterface
         $return = [];
 
         \System::loadLanguageFile('tl_member');
-        $this->loadDataContainer('tl_member');
+        \Controller::loadDataContainer('tl_member');
 
         foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $k => $v) {
             if ($v['eval']['feEditable']) {

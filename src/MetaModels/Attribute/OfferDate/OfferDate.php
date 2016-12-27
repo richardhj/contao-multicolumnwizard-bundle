@@ -26,11 +26,11 @@ class OfferDate extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    public function searchFor($strPattern)
+    public function searchFor($parttern)
     {
         return [];
 
-        $objValue = $this
+        $result = $this
             ->getMetaModel()
             ->getServiceContainer()
             ->getDatabase()
@@ -41,11 +41,11 @@ class OfferDate extends BaseComplex
                 )
             )
             ->execute(
-                str_replace(array('*', '?'), array('%', '_'), $strPattern),
+                str_replace(['*', '?'], ['%', '_'], $parttern),
                 $this->get('id')
             );
 
-        return $objValue->fetchEach('item_id');
+        return $result->fetchEach('item_id');
     }
 
 //    /**
@@ -176,7 +176,7 @@ class OfferDate extends BaseComplex
                         $this->parameterMask($idList)
                     )
                 )
-                ->execute(array_merge($idList, array($this->get('id')), $idList));
+                ->execute(array_merge($idList, [$this->get('id')], $idList));
         } else {
             $objRow = $this
                 ->getMetaModel()
@@ -194,7 +194,7 @@ class OfferDate extends BaseComplex
                 ->execute($this->get('id'));
         }
 
-        $arrResult = array();
+        $arrResult = [];
         while ($objRow->next()) {
             $strValue = $objRow->value;
 

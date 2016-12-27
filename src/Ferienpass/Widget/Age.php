@@ -41,7 +41,7 @@ class Age extends Widget
      *
      * @var array
      */
-    protected $arrWidgetLines = array();
+    protected $arrWidgetLines = [];
 
 
     /**
@@ -49,7 +49,7 @@ class Age extends Widget
      *
      * @var array
      */
-    protected $arrOptionsParsed = array();
+    protected $arrOptionsParsed = [];
 
 
     /**
@@ -80,7 +80,7 @@ class Age extends Widget
 
             case 'checked_line':
                 if (!isset($this->intCheckedLine)) {
-                    $this->getCheckedLine();
+                    $this->findCheckedLine();
                 }
 
                 return $this->intCheckedLine;
@@ -130,8 +130,8 @@ class Age extends Widget
                 $arrOption['input_format'] .= '</label>';
             }
 
-            $arrLineInputs = array();
-            $arrLineInputValues = array();
+            $arrLineInputs = [];
+            $arrLineInputValues = [];
 
             if ($i === $this->checked_line) {
                 $arrLineInputValues = array_values(array_filter(trimsplit(',', $this->varValue)));
@@ -184,10 +184,8 @@ class Age extends Widget
 
     /**
      * Get widget's checked line
-     *
-     * @return int|false
      */
-    protected function getCheckedLine()
+    protected function findCheckedLine()
     {
         $intCheckedLine = null;
         $arrWidgetLines = $this->arrWidgetLines;
@@ -214,7 +212,7 @@ class Age extends Widget
         $intSelectedLine = (int)$arrSubmit['line'];
         $arrWidgetLine = $this->arrWidgetLines[$intSelectedLine];
         $intRequestedInputs = substr_count($arrWidgetLine['input_format'], '%s');
-        $arrLineInputs = array();
+        $arrLineInputs = [];
 
         for ($i = 0; $i < $intRequestedInputs; $i++) {
             $value = $arrSubmit['values'][$intSelectedLine][$i];

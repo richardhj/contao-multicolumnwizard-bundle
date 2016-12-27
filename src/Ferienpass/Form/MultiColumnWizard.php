@@ -83,12 +83,11 @@ class MultiColumnWizard extends \MultiColumnWizard
                     (
                         http_build_query
                         (
-                            array
-                            (
+                            [
                                 $this->strCommand => $button,
                                 'cid'             => $level,
                                 'id'              => $this->currentRecord,
-                            )
+                            ]
                         ),
                         false
                     )

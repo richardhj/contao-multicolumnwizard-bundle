@@ -48,7 +48,7 @@ class Editing extends Items
         global $objPage;
 
         //quick'n'dirty
-        $asf='';
+        $asf = '';
         if ('36' === $objPage->id) {
             $asf = Input::getAutoItem('items');
             Input::setGet('auto_item', '');
@@ -298,45 +298,37 @@ HTML;
 
 
             if ($attribute->get('colname') == 'infotable' && !$form->isSubmitted() && empty($data['value'])) {
-                $data['value'] = array
-                (
-                    array
-                    (
+                $data['value'] = [
+                    [
                         'col_0' => 'Ort',
                         'col_1' => '',
-                    ),
-                    array
-                    (
+                    ],
+                    [
                         'col_0' => 'Wegbeschreibung',
                         'col_1' => '',
-                    ),
-                    array
-                    (
+                    ],
+                    [
                         'col_0' => 'Mitzubringen',
                         'col_1' => '',
-                    ),
-                    array
-                    (
+                    ],
+                    [
                         'col_0' => 'max. Teilnehmer',
                         'col_1' => '',
-                    ),
-                    array
-                    (
+                    ],
+                    [
                         'col_0' => 'Mitbringen',
                         'col_1' => '',
-                    ),
+                    ],
 
-                    array
-                    (
+                    [
                         'col_0' => 'Zu beachten',
                         'col_1' => '',
-                    ),
-                    array
-                    (
+                    ],
+                    [
                         'col_0' => 'Auskunft unter',
                         'col_1' => '',
-                    ),
-                );
+                    ],
+                ];
             }//@todo refactor: move
 
 
@@ -354,8 +346,8 @@ HTML;
             // It must not be changed afterwards
             $form->addValidator(
                 FerienpassConfig::getInstance()->participant_attribute_dateofbirth,
-                function ($varValue, $objWidget, $objForm) {
-                    if ($varValue != $this->item->get($objWidget->name)) {
+                function ($value, $widget) {
+                    if ($value != $this->item->get($widget->name)) {
                         if (Attendance::countByParticipant($this->item->get('id'))) {
                             throw new \Exception($GLOBALS['TL_LANG']['ERR']['changedDateOfBirthAfterwards']);
                         }
@@ -367,9 +359,9 @@ HTML;
             // It must not be revoked afterwards
             $form->addValidator(
                 FerienpassConfig::getInstance()->participant_attribute_agreement_photos,
-                function ($varValue, $objWidget, $objForm) {
+                function ($value, $widget) {
                     // Allow to grant but not to revoke
-                    if ($varValue != $this->item->get($objWidget->name) && !$varValue) {
+                    if ($value != $this->item->get($widget->name) && !$value) {
                         if (Attendance::countByParticipant($this->item->get('id'))) {
                             throw new \Exception($GLOBALS['TL_LANG']['ERR']['changedAgreementPhotosAfterwards']);
                         }
@@ -548,15 +540,15 @@ HTML;
 
         while ($objVariants->next()) {
             $arrItems[] = [
-                'class'  => 'edit-variant',
-                'href'   => str_replace(
+                'class' => 'edit-variant',
+                'href'  => str_replace(
                     $this->item->get($this->aliasColName),
                     $objVariants->getItem()->get($this->aliasColName),
                     \Environment::get('request')
                 ),
-                'title'  => sprintf(specialchars('Die Variante "%s" bearbeiten'), $objVariants->getItem()->get('name')),
+                'title' => sprintf(specialchars('Die Variante "%s" bearbeiten'), $objVariants->getItem()->get('name')),
                 //@todo lang
-                'link'   => $objVariants->getItem()->get('name'),
+                'link'  => $objVariants->getItem()->get('name'),
             ];
         }
 

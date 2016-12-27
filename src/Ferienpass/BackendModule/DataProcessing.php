@@ -51,25 +51,25 @@ class DataProcessing extends \BackendModule
 
         $objModel = \Ferienpass\Model\DataProcessing::findByPk($intModuleId);
 
-        $arrIds = array();
+        $arrIds = [];
 
         if ($objModel->scope == 'single') {
             $strFormSubmit = 'select_items';
 
             if (\Input::post('FORM_SUBMIT') != $strFormSubmit) {
                 $objOffers = Offer::getInstance()->findAll();
-                $arrOffers = array();
+                $arrOffers = [];
 
 
                 /*
                  * Single checkbox
                  */
                 while ($objOffers->next()) {
-                    $arrOffers[] = array
-                    (
-                        'value' => $objOffers->getItem()->get('id'),
-                        'label' => $objOffers->getItem()->get(Config::getInstance()->offer_attribute_name),
-                    );
+                    $arrOffers[] =
+                        [
+                            'value' => $objOffers->getItem()->get('id'),
+                            'label' => $objOffers->getItem()->get(Config::getInstance()->offer_attribute_name),
+                        ];
                 }
 
                 $buttons[] = sprintf(
@@ -86,14 +86,12 @@ class DataProcessing extends \BackendModule
                 $this->Template->subHeadline = 'Angebote zum Export auswählen';
                 $this->Template->table = $strFormSubmit;
                 $this->Template->editButtons = $buttons;
-                $this->Template->fieldsets = array
-                (
-                    array
-                    (
+                $this->Template->fieldsets = [
+                    [
                         'class'   => 'tl_box',
                         'palette' => $objWidget->generate(),
-                    ),
-                );
+                    ],
+                ];
 
                 return;
             }

@@ -10,13 +10,11 @@
 
 namespace Ferienpass\ApplicationSystem;
 
-use Ferienpass\Event\ChangeAttendanceStatusEvent;
 use Ferienpass\Event\DeleteAttendanceEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 /**
