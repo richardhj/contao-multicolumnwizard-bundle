@@ -21,7 +21,7 @@ $container['ferienpass.applicationsystem'] = $container->share(
         $current = Ferienpass\Model\ApplicationSystem::findCurrent();
 
         if (null === $current) {
-            return null;
+            return new Ferienpass\ApplicationSystem\NoOp();
         }
 
         return $container['ferienpass.applicationsystem.'.$current->type];
