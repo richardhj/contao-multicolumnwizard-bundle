@@ -38,6 +38,7 @@ array_insert(
  * Models
  */
 $GLOBALS['TL_MODELS']['tl_ferienpass_attendance'] = 'Ferienpass\Model\Attendance';
+$GLOBALS['TL_MODELS']['tl_ferienpass_applicationsystem'] = 'Ferienpass\Model\ApplicationSystem';
 $GLOBALS['TL_MODELS']['tl_ferienpass_attendancestatus'] = 'Ferienpass\Model\AttendanceStatus';
 $GLOBALS['TL_MODELS']['tl_ferienpass_document'] = 'Ferienpass\Model\Document';
 $GLOBALS['TL_MODELS']['tl_ferienpass_dataprocessing'] = 'Ferienpass\Model\DataProcessing';
@@ -69,6 +70,10 @@ $GLOBALS['FERIENPASS_MOD'] = [
         'documents'         => [
             'tables' => [\Ferienpass\Model\Document::getTable()],
             'icon'   => 'file-text-o',
+        ],
+        'application_system' => [
+            'tables' => [\Ferienpass\Model\ApplicationSystem::getTable()],
+            'icon'   => 'th-list',
         ],
         'attendance_status' => [
             'tables' => [\Ferienpass\Model\AttendanceStatus::getTable()],

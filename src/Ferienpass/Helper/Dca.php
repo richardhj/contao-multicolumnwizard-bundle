@@ -23,6 +23,7 @@ use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
+use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -467,6 +468,39 @@ class Dca implements EventSubscriberInterface
             $objStatus = new AttendanceStatus();
             $objStatus->setRow($data);
             $objStatus->save();
+        }
+    }
+
+
+    /**
+     * Add default application systems if none are set
+     * @category onload_callback
+     */
+    public function addDefaultApplicationSystems()
+    {
+        $systems = ApplicationSystem::getApplicationSystemNames();
+
+        if (null !== \Input::get('act') || ApplicationSystem::countAll() === count($systems)) {
+            return;
+        }
+
+        $rows = [];
+
+        foreach ($systems as $system) {
+            $rows[] = [
+                'type'  => $system,
+                'title' => lcfirst($system),
+            ];
+        }
+
+        foreach ($rows as $row) {
+            if (null !== ApplicationSystem::findByType($row['type'])) {
+                continue;
+            }
+
+            $model = new ApplicationSystem();
+            $model->setRow($row);
+            $model->save();
         }
     }
 

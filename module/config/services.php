@@ -18,7 +18,13 @@ $container['ferienpass.applicationsystem.lot'] = function ($container) {
 
 $container['ferienpass.applicationsystem'] = $container->share(
     function ($container) {
-        return $container['ferienpass.applicationsystem.lot'];
+        $current = Ferienpass\Model\ApplicationSystem::findCurrent();
+
+        if (null === $current) {
+            return null;
+        }
+
+        return $container['ferienpass.applicationsystem.'.$current->type];
     }
 );
 
