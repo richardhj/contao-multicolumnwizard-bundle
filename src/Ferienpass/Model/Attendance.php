@@ -20,6 +20,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 /**
  * Class Attendance
  * @property integer $tstamp
+ * @property integer $created
  * @property integer $offer
  * @property integer $participant
  * @property integer $status

@@ -142,6 +142,7 @@ class UserApplication extends Item
                         // Set new attendance
                         $attendance = new Attendance();
                         $attendance->tstamp = time();
+                        $attendance->created = time();
                         $attendance->offer = $this->item->get('id');
                         $attendance->participant = $participant;
                         $attendance->save();
