@@ -1,13 +1,13 @@
 <?php
-
 /**
- * Contao Open Source CMS
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * Copyright (c) 2005-2015 Leo Feyer
+ * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @license LGPL-3.0+
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
- 
+
 
 /**
  * Register the templates

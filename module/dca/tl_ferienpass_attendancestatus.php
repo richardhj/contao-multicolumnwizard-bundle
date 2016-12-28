@@ -7,6 +7,7 @@
  * @package Ferienpass
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
+
 use NotificationCenter\Model\Notification;
 
 

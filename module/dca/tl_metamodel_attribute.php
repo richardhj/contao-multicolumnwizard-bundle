@@ -1,26 +1,17 @@
 <?php
 /**
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * PHP version 5
+ * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @package     MetaModels
- * @subpackage  AttributeForeignKey
- * @author      Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author      Andreas Isaak <info@andreas-isaak.de>
- * @author      Christopher Boelter <christopher@boelter.eu>
- * @copyright   The MetaModels team.
- * @license     LGPL.
- * @filesource
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
+
 
 /**
  * Table tl_metamodel_attribute
  */
-
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['age extends _simpleattribute_'] = array();
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['offer_date extends _simpleattribute_'] = [];
 $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['alias_trigger_sync extends alias'] = array

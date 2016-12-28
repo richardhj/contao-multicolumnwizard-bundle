@@ -1,14 +1,11 @@
 <?php
 /**
- * Translations are managed using Transifex. To create a new translation
- * or to help to maintain an existing one, please register at transifex.com.
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * @link http://help.transifex.com/intro/translating.html
- * @link https://www.transifex.com/projects/p/metamodels/language/de/
+ * Copyright (c) 2015-2016 Richard Henkenjohann
  *
- * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
- *
- * last-updated: 2013-05-13T22:13:58+02:00
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 

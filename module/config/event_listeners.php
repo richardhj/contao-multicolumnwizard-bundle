@@ -1,16 +1,11 @@
 <?php
 /**
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
- * PHP version 5
- * @package    MetaModels
- * @subpackage FilterText
- * @author     Christopher Boelter <christopher@boelter.eu>
- * @copyright  The MetaModels team.
- * @license    LGPL.
- * @filesource
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 use MetaModels\Attribute\Age\AttributeTypeFactory as AgeAttributeTypeFactory;

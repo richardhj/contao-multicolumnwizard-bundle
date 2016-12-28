@@ -1,9 +1,11 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: richard
- * Date: 26.01.15
- * Time: 19:18
+ * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
+ *
+ * Copyright (c) 2015-2016 Richard Henkenjohann
+ *
+ * @package Ferienpass
+ * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
 
