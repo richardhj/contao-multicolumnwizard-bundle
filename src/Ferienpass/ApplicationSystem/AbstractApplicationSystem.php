@@ -10,6 +10,8 @@
 
 namespace Ferienpass\ApplicationSystem;
 
+use Ferienpass\Helper\Message;
+use Ferienpass\Model\Attendance;
 use MetaModels\IItem;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -61,5 +63,27 @@ abstract class AbstractApplicationSystem implements EventSubscriberInterface
         $tokens['admin_email'] = $GLOBALS['TL_ADMIN_EMAIL'];
 
         return $tokens;
+    }
+
+
+    /**
+     * @param IItem $offer
+     * @param IItem $participant
+     */
+    protected function setNewAttendanceInDatabase(IItem $offer, IItem $participant)
+    {
+        // Check if participant id allowed here and attendance not existent yet
+        if (Attendance::isNotExistent($participant->get('id'), $offer->get('id'))) {
+            $attendance = new Attendance();
+            $attendance->tstamp = time();
+            $attendance->created = time();
+            $attendance->offer = $offer->get('id');
+            $attendance->participant = $participant->get('id');
+            $attendance->save();
+
+        } // Attendance already exists
+        else {
+            Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['error']);
+        }
     }
 }

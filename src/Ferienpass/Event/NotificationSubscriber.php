@@ -63,8 +63,7 @@ class NotificationSubscriber implements EventSubscriberInterface
         }
 
         /** @var Notification $notification */
-        /** @noinspection PhpUndefinedMethodInspection */
-        $notification = Notification::findByPk($event->getAttendance()->getStatus()->notification_new);
+        $notification = Notification::findByPk($event->getModel()->getStatus()->notification_new);
 
         if (null !== $notification) {
             $participant = $event->getModel()->getParticipant();

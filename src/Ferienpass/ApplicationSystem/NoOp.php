@@ -11,6 +11,10 @@
 namespace Ferienpass\ApplicationSystem;
 
 
+use Ferienpass\Event\UserSetAttendanceEvent;
+use Ferienpass\Helper\Message;
+
+
 class NoOp extends AbstractApplicationSystem
 {
 
@@ -34,7 +38,19 @@ class NoOp extends AbstractApplicationSystem
      */
     public static function getSubscribedEvents()
     {
-        // TODO: Implement getSubscribedEvents() method.
-        return [];
+        return [
+            UserSetAttendanceEvent::NAME => [
+                'setNewAttendance'
+            ],
+        ];
+    }
+
+
+    /**
+     * @internal param UserSetAttendanceEvent $event
+     */
+    public function setNewAttendance()
+    {
+        Message::addError('zur zeit keine Anmeldungen möglich');
     }
 }

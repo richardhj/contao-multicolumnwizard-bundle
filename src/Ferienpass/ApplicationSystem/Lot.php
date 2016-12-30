@@ -16,6 +16,8 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\Model
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\DcGeneral\View\OfferAttendancesView;
 use Ferienpass\Event\SaveAttendanceEvent;
+use Ferienpass\Event\UserSetAttendanceEvent;
+use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -34,6 +36,9 @@ class Lot extends AbstractApplicationSystem
     public static function getSubscribedEvents()
     {
         return [
+            UserSetAttendanceEvent::NAME => [
+                'setNewAttendance'
+            ],
             SaveAttendanceEvent::NAME      => [
                 'updateAttendanceStatus',
             ],
@@ -44,6 +49,12 @@ class Lot extends AbstractApplicationSystem
                 ['addAttendancesEditLinkInOfferListView', -10],
             ],
         ];
+    }
+
+
+    public function setNewAttendance(UserSetAttendanceEvent $event)
+    {
+        $this->setNewAttendanceInDatabase($event->getOffer(), $event->getParticipant());
     }
 
 
@@ -64,6 +75,8 @@ class Lot extends AbstractApplicationSystem
 
         $attendance->status = $newStatus->id;
         $attendance->save();
+
+        Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
     }
 
 

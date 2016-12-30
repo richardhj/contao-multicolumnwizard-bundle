@@ -12,6 +12,8 @@ namespace Ferienpass\ApplicationSystem;
 
 use Ferienpass\Event\DeleteAttendanceEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
+use Ferienpass\Event\UserSetAttendanceEvent;
+use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -30,6 +32,9 @@ class FirstCome extends AbstractApplicationSystem
     public static function getSubscribedEvents()
     {
         return [
+            UserSetAttendanceEvent::NAME => [
+                'setNewAttendance'
+            ],
             SaveAttendanceEvent::NAME   => [
                 'updateAttendanceStatus',
             ],
@@ -37,6 +42,12 @@ class FirstCome extends AbstractApplicationSystem
                 'updateAllStatusByOffer',
             ],
         ];
+    }
+
+
+    public function setNewAttendance(UserSetAttendanceEvent $event)
+    {
+        $this->setNewAttendanceInDatabase($event->getOffer(), $event->getParticipant());
     }
 
 
@@ -57,6 +68,22 @@ class FirstCome extends AbstractApplicationSystem
 
         $attendance->status = $newStatus->id;
         $attendance->save();
+
+        // Add message corresponding to attendance's status
+        switch ($newStatus->type)
+        {
+            case 'confirmed':
+                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
+                break;
+
+            case 'waiting':
+                Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
+                break;
+
+            case 'error':
+                Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
+                break;
+        }
 
         \System::log(
             sprintf(

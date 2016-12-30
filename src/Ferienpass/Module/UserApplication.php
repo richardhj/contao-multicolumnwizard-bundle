@@ -12,6 +12,7 @@ namespace Ferienpass\Module;
 
 use Ferienpass\Event\ApplicationListSubscriber;
 use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
+use Ferienpass\Event\UserSetAttendanceEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
@@ -137,22 +138,12 @@ class UserApplication extends Item
             if ($form->validate()) {
                 // Process new applications
                 foreach ((array)$form->fetch('participant') as $participant) {
-                    // Check if participant id allowed here and attendance not existent yet
-                    if (Attendance::isNotExistent($participant, $this->item->get('id'))) {
-                        // Set new attendance
-                        $attendance = new Attendance();
-                        $attendance->tstamp = time();
-                        $attendance->created = time();
-                        $attendance->offer = $this->item->get('id');
-                        $attendance->participant = $participant;
-                        $attendance->save();
-
-                    } // Attendance already exists
-                    else {
-                        Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['error']);
-
-                        return;
-                    }
+                    // Trigger event and let the application system set the attendance
+                    $event = new UserSetAttendanceEvent(
+                        $this->item,
+                        Participant::getInstance()->findById($participant)
+                    );
+                    $dispatcher->dispatch(UserSetAttendanceEvent::NAME, $event);
                 }
 
                 // Reload page to show confirmation message
