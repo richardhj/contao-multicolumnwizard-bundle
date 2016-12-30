@@ -8,12 +8,11 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Module\Item\Offer;
+namespace Ferienpass\Module;
 
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
-use Ferienpass\Module\Item;
 use Haste\Form\Form;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\FrontendEditingItem;
@@ -21,7 +20,7 @@ use MetaModels\FrontendEditingItem;
 
 /**
  * Class AddAttendeeHost
- * @package Ferienpass\Module\Item\Offer
+ * @package Ferienpass\Module
  */
 class AddAttendeeHost extends Item
 {

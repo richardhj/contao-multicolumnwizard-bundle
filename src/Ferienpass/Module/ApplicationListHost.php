@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Module\Item\Offer;
+namespace Ferienpass\Module;
 
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\Table;
@@ -16,13 +16,12 @@ use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Document;
 use Ferienpass\Model\Participant;
-use Ferienpass\Module\Item;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\ItemList;
 
 
 /**
- * Class OfferApplicationListHost
+ * Class ApplicationListHost
  * @package Ferienpass\Module
  */
 class ApplicationListHost extends Item

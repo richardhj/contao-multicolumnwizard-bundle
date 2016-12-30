@@ -127,16 +127,12 @@ if (TL_MODE == 'BE') {
 /**
  * Front end modules
  */
-// Host overview and editing
-$GLOBALS['FE_MOD']['application']['offer_editing'] = 'Ferienpass\Module\Items\Editing';
-$GLOBALS['FE_MOD']['application']['items_editing_actions'] = 'Ferienpass\Module\Items\EditingActions';
-
-// Application list
-$GLOBALS['FE_MOD']['application']['offer_applicationlist'] = 'Ferienpass\Module\Item\Offer\ApplicationList';
-$GLOBALS['FE_MOD']['application']['offer_applicationlisthost'] = 'Ferienpass\Module\Item\Offer\ApplicationListHost';
-$GLOBALS['FE_MOD']['application']['offer_addattendeehost'] = 'Ferienpass\Module\Item\Offer\AddAttendeeHost';
-
-$GLOBALS['FE_MOD']['application']['offers_user_attendances'] = 'Ferienpass\Module\Items\Offers\UserAttendances';
+$GLOBALS['FE_MOD']['application']['offer_editing'] = 'Ferienpass\Module\Editing';
+$GLOBALS['FE_MOD']['application']['items_editing_actions'] = 'Ferienpass\Module\EditingActions';
+$GLOBALS['FE_MOD']['application']['offer_user_application'] = 'Ferienpass\Module\UserApplication';
+$GLOBALS['FE_MOD']['application']['offer_applicationlisthost'] = 'Ferienpass\Module\ApplicationListHost';
+$GLOBALS['FE_MOD']['application']['offer_addattendeehost'] = 'Ferienpass\Module\AddAttendeeHost';
+$GLOBALS['FE_MOD']['application']['offers_user_attendances'] = 'Ferienpass\Module\UserAttendances';
 $GLOBALS['FE_MOD']['application']['ferienpass_messages'] = 'Ferienpass\Module\Messages';
 
 /**

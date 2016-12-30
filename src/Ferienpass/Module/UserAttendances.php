@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Module\Items\Offers;
+namespace Ferienpass\Module;
 
 use Contao\Controller;
 use Contao\Input;
@@ -20,12 +20,11 @@ use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
-use Ferienpass\Module\Items;
 
 
 /**
  * Class UserAttendances
- * @package Ferienpass\Module\Items\Offers
+ * @package Ferienpass\Module
  */
 class UserAttendances extends Items
 {

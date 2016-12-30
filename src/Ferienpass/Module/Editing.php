@@ -8,12 +8,11 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Module\Items;
+namespace Ferienpass\Module;
 
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
-use Ferienpass\Module\Items;
 use Haste\Form\Form;
 use Haste\Input\Input;
 use MetaModels\Attribute\Tags\MetaModelTags as MetaModelTagsAttribute;
@@ -23,7 +22,7 @@ use MetaModels\IItems;
 
 
 /**
- * Class OfferEditing
+ * Class Editing
  *
  * @property \FrontendTemplate Template
  * @property bool              isNewItem

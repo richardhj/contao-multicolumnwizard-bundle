@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Module\Item\Offer;
+namespace Ferienpass\Module;
 
 use Ferienpass\Event\ApplicationListSubscriber;
 use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
@@ -17,16 +17,15 @@ use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
-use Ferienpass\Module\Item;
 use Haste\Form\Form;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 /**
- * Class OfferApplicationList
- * @package Ferienpass\Module\SingleOffer
+ * Class UserApplication
+ * @package Ferienpass\Module
  */
-class ApplicationList extends Item
+class UserApplication extends Item
 {
 
     /**

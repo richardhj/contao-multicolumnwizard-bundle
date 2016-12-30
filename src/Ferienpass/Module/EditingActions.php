@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Module\Items;
+namespace Ferienpass\Module;
 
 use Contao\Controller;
 use Contao\Environment;
@@ -16,7 +16,6 @@ use Contao\Input;
 use Contao\PageModel;
 use Contao\RequestToken;
 use Ferienpass\Helper\Message;
-use Ferienpass\Module\Items;
 
 
 /**
