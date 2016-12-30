@@ -26,8 +26,6 @@ $GLOBALS['TL_LANG']['MOD']['ferienpass_attendances'][1] = 'Die Ferienpass-Anmeld
  */
 $GLOBALS['TL_LANG']['FMD']['offer_editing'][0] = 'Angebot-Bearbeitung';
 $GLOBALS['TL_LANG']['FMD']['offer_editing'][1] = 'Bearbeiten Sie mit diesem Modul das jeweilige Angebot.';
-$GLOBALS['TL_LANG']['FMD']['offers_management'][0]	= 'Angebotsverwaltung';
-$GLOBALS['TL_LANG']['FMD']['offers_management'][1]	= 'Dieses Modul listet alle Angebote des jeweiligen Anbieters an.';
 $GLOBALS['TL_LANG']['FMD']['items_editing_actions'][0] = 'Elementverwaltung Aktionen';
 $GLOBALS['TL_LANG']['FMD']['items_editing_actions'][1] = 'Dieses Modul muss eingebunden werden, um die Aktionen der Elementverwaltung ausführen zu können.';
 $GLOBALS['TL_LANG']['FMD']['calendar_offers'][0] = 'Kalender mit Ferienpass-Angeboten';
