@@ -33,12 +33,12 @@ class FirstCome extends AbstractApplicationSystem
     {
         return [
             UserSetAttendanceEvent::NAME => [
-                'setNewAttendance'
+                'setNewAttendance',
             ],
-            SaveAttendanceEvent::NAME   => [
-                'updateAttendanceStatus',
+            SaveAttendanceEvent::NAME    => [
+                ['updateAttendanceStatus', 100],
             ],
-            DeleteAttendanceEvent::NAME => [
+            DeleteAttendanceEvent::NAME  => [
                 'updateAllStatusByOffer',
             ],
         ];

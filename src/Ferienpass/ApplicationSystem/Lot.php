@@ -40,7 +40,7 @@ class Lot extends AbstractApplicationSystem
                 'setNewAttendance',
             ],
             SaveAttendanceEvent::NAME      => [
-                'updateAttendanceStatus',
+                ['updateAttendanceStatus', 100],
             ],
             PopulateEnvironmentEvent::NAME => [
                 ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 1.5],
