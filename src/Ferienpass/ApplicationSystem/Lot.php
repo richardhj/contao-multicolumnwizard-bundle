@@ -76,7 +76,7 @@ class Lot extends AbstractApplicationSystem
         $attendance->status = $newStatus->id;
         $attendance->save();
 
-        Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
+        Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')['text']));
     }
 
 

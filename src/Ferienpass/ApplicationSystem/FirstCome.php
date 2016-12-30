@@ -73,15 +73,15 @@ class FirstCome extends AbstractApplicationSystem
         switch ($newStatus->type)
         {
             case 'confirmed':
-                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
+                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')['text']));
                 break;
 
             case 'waiting':
-                Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
+                Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')['text']));
                 break;
 
             case 'error':
-                Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')));
+                Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')['text']));
                 break;
         }
 
