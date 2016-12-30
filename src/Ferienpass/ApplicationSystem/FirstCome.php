@@ -69,22 +69,6 @@ class FirstCome extends AbstractApplicationSystem
         $attendance->status = $newStatus->id;
         $attendance->save();
 
-        // Add message corresponding to attendance's status
-        switch ($newStatus->type)
-        {
-            case 'confirmed':
-                Message::addConfirmation(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')['text']));
-                break;
-
-            case 'waiting':
-                Message::addWarning(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')['text']));
-                break;
-
-            case 'error':
-                Message::addError(sprintf($GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$newStatus->type], $attendance->getParticipant()->parseAttribute('name')['text']));
-                break;
-        }
-
         \System::log(
             sprintf(
                 'Status for attendance ID %u was changed from "%s" to "%s"',
