@@ -12,7 +12,6 @@
 /**
  * Palettes
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes']['offers_management'] = str_replace(',metamodel_use_limit', ',metamodel_use_limit,jumpTo,jumpToApplicationList', $GLOBALS['TL_DCA']['tl_module']['palettes']['metamodel_list']);
 $GLOBALS['TL_DCA']['tl_module']['palettes']['items_editing_actions'] = '{title_legend},name,headline,type;{config_legend},metamodel,jumpTo;{link_legend},target,linkTitle,titleText,rel;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_editing'] = '{title_legend},name,headline,type;{config_legend},metamodel,enableVariants;{redirect_legend},jumpTo;{template_legend:hide},editFormTpl,tableless;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['calendar_offers'] = $GLOBALS['TL_DCA']['tl_module']['palettes']['calendar'];
