@@ -128,7 +128,6 @@ if (TL_MODE == 'BE') {
  * Front end modules
  */
 // Host overview and editing
-$GLOBALS['FE_MOD']['application']['offers_management'] = 'Ferienpass\Module\Items\Offers\Management';
 $GLOBALS['FE_MOD']['application']['offer_editing'] = 'Ferienpass\Module\Items\Editing';
 $GLOBALS['FE_MOD']['application']['items_editing_actions'] = 'Ferienpass\Module\Items\EditingActions';
 
