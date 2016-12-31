@@ -58,7 +58,7 @@ class NotificationSubscriber implements EventSubscriberInterface
      */
     public function sendNewAttendanceStatusNotification(SaveAttendanceEvent $event)
     {
-        if (null !== $event->getOriginalModel()->getStatus()) {
+        if (null !== $event->getOriginalModel()->getStatus() || null === $event->getModel()->getStatus()) {
             return;
         }
 
@@ -85,7 +85,9 @@ class NotificationSubscriber implements EventSubscriberInterface
      */
     public function sendChangedAttendanceStatusNotification(SaveAttendanceEvent $event)
     {
-        if (null === $event->getOriginalModel()->getStatus()) {
+        if (null === $event->getOriginalModel()->getStatus()
+            || $event->getOriginalModel()->getStatus() === $event->getModel()->getStatus()
+        ) {
             return;
         }
 
