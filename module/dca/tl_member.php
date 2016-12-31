@@ -20,6 +20,20 @@ $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = ['Ferienpass\Helper\
 
 
 /**
+ * Palettes
+ */
+MetaPalettes::appendBefore(
+    $table,
+    'address',
+    [
+        'ferienpass' => [
+            'ferienpass_host',
+        ],
+    ]
+);
+
+
+/**
  * Fields
  */
 $GLOBALS['TL_DCA'][$table]['fields']['persist'] = [
@@ -31,4 +45,20 @@ $GLOBALS['TL_DCA'][$table]['fields']['persist'] = [
         'feEditable' => true,
     ],
     'sql'       => "char(1) NOT NULL default ''",
+];
+
+$GLOBALS['TL_DCA'][$table]['fields']['ferienpass_host'] = [
+    'label'      => &$GLOBALS['TL_LANG'][$table]['ferienpass_host'],
+    'exclude'    => true,
+    'inputType'  => 'select',
+    'foreignKey' => 'mm_host.name',
+    'eval'       => [
+        'includeBlankOption' => true,
+        'chosen'             => true,
+        'tl_class'           => 'w50',
+    ],
+    'relation'   => [
+        'type' => 'belongsTo',
+    ],
+    'sql'        => "int(10) NOT NULL default '0'",
 ];
