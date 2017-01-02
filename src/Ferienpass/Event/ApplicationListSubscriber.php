@@ -93,8 +93,12 @@ class ApplicationListSubscriber implements EventSubscriberInterface
      */
     public function disableWrongAgeParticipants(BuildParticipantOptionsForApplicationListEvent $event)
     {
+        if (null === ($offerStart = ToolboxOfferDate::offerStart($event->getOffer()))) {
+            return;
+        }
+
         $options = $event->getResult();
-        $dateOffer = new DateTime('@'.ToolboxOfferDate::offerStart($event->getOffer()));
+        $dateOffer = new DateTime('@'.$offerStart);
 
         foreach ($options as $k => $option) {
             $dateOfBirth = new DateTime(
