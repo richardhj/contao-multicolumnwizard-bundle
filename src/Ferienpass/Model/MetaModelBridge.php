@@ -38,7 +38,7 @@ abstract class MetaModelBridge
      *
      * @var string
      */
-    protected $table;
+    private static $tableName;
 
 
     /**
@@ -70,19 +70,14 @@ abstract class MetaModelBridge
      */
     public function __construct()
     {
-        $configKey = lcfirst((new \ReflectionClass($this))->getShortName());
-
         // Get MetaModel object
         $factory = Factory::getDefaultFactory();
-        $this->metaModel = $factory->getMetaModel(FerienpassConfig::getInstance()->{$configKey.'_model'});
+        $this->metaModel = $factory->getMetaModel($this->getTableName());
 
         // Exit if MetaModel object could not be created
         if (null === $this->metaModel) {
             return;
         }
-
-        // Get table name
-        $this->table = $this->metaModel->getTableName();
 
         // Get database object
         $this->database = $this->metaModel->getServiceContainer()->getDatabase();
@@ -116,9 +111,9 @@ abstract class MetaModelBridge
     }
 
 
-    public function getTable()
+    public function getTableName()
     {
-        return $this->table;
+        return self::$tableName;
     }
 
 

@@ -39,21 +39,21 @@ $GLOBALS['TL_DCA'][$table] = [
 //            'parent'  => [
 //                'source' => Offer::getInstance()->getTable(),
 //            ],
-            'default'                              => [
+            'default'                                  => [
                 'source' => $table,
             ],
-            Offer::getInstance()->getTable()       => [
-                'source' => Offer::getInstance()->getTable(),
+            Offer::getInstance()->getTableName()       => [
+                'source' => Offer::getInstance()->getTableName(),
             ],
-            Participant::getInstance()->getTable() => [
-                'source' => Participant::getInstance()->getTable(),
+            Participant::getInstance()->getTableName() => [
+                'source' => Participant::getInstance()->getTableName(),
             ],
         ],
         'child_list'     => [
-            Offer::getInstance()->getTable() => [
+            Offer::getInstance()->getTableName() => [
                 'fields' => ['tstamp'],
             ],
-            $table                           => [
+            $table                               => [
                 'fields' => [
                     'created',
                     'offer',
@@ -64,7 +64,7 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'childCondition' => [
             [
-                'from'   => Offer::getInstance()->getTable(),
+                'from'   => Offer::getInstance()->getTableName(),
                 'to'     => $table,
                 'setOn'  => [
                     [
@@ -81,7 +81,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 ],
             ],
             [
-                'from'   => Participant::getInstance()->getTable(),
+                'from'   => Participant::getInstance()->getTableName(),
                 'to'     => $table,
                 'setOn'  => [
                     [
@@ -212,7 +212,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'tableLookup',
             'eval'      => [
                 'mandatory'        => true,
-                'foreignTable'     => Offer::getInstance()->getTable(),
+                'foreignTable'     => Offer::getInstance()->getTableName(),
                 'fieldType'        => 'radio',
                 'listFields'       => [
                     Ferienpass\Model\Config::getInstance()->offer_attribute_name,
@@ -225,7 +225,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 // Exclude varbases if they have children
                 'sqlWhere'         => sprintf(
                     '%1$s.varbase=0 OR (%1$s.varbase=1 AND (SELECT COUNT(*) FROM %1$s c WHERE c.varbase=0 AND c.vargroup=%1$s.id)=0)',
-                    Offer::getInstance()->getTable()
+                    Offer::getInstance()->getTableName()
                 ),
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
@@ -247,7 +247,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'tableLookup',
             'eval'      => [
                 'mandatory'    => true,
-                'foreignTable' => Participant::getInstance()->getTable(),
+                'foreignTable' => Participant::getInstance()->getTableName(),
                 'fieldType'    => 'radio',
                 'listFields'   => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,

@@ -32,6 +32,9 @@ class Participant extends MetaModelBridge
     protected static $instance;
 
 
+    protected static $tableName = 'mm_participant';
+
+
     /**
      * Find multiple participants by its parent (member) id
      *
@@ -83,7 +86,7 @@ class Participant extends MetaModelBridge
             sprintf
             (
                 'SELECT id FROM %1$s WHERE %2$s=?',
-                $this->table,
+                $this->getTableName(),
                 $ownerAttribute->getColName()
             ),
             [$parentId]

@@ -25,4 +25,7 @@ class Offer extends MetaModelBridge
      */
     protected static $instance;
 
+
+    protected static $tableName = 'mm_ferienpass';
+
 }
