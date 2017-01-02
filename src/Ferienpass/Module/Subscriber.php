@@ -128,6 +128,11 @@ class Subscriber implements EventSubscriberInterface
             $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
             if ($filterParams['pass_release']['value'] == 2) { //@todo configurable
                 $buttons[] = 'copy';
+            } elseif ($filterParams['pass_release']['value'] == 1
+                && $item->isVariantBase()
+                && $item->getVariants(null)->getCount()
+            ) {
+                $buttons[] = 'createVariant';
             }
 
             foreach ($buttons as $button) {
@@ -179,6 +184,17 @@ class Subscriber implements EventSubscriberInterface
     protected function copyLink($itemData)
     {
         return [str_replace('act=edit', 'act=copy', $itemData['editUrl'])];
+    }
+
+
+    /**
+     * @param  array $itemData
+     *
+     * @return array
+     */
+    protected function createVariantLink($itemData)
+    {
+        return [str_replace(['act=edit', 'id'], ['act=create', 'vargroup'], $itemData['editUrl'])];
     }
 
 
