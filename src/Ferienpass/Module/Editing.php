@@ -117,7 +117,7 @@ class Editing extends Items
             if ('mm_ferienpass' === $this->metaModel->getTableName()) {
                 $this->item->set('host', $this->User->ferienpass_host);
             }
-            elseif ('mm_participants' === $this->metaModel->getTableName()) {
+            elseif ('mm_participant' === $this->metaModel->getTableName()) {
                 $this->item->set('pmember', $this->User->id);
             }
 

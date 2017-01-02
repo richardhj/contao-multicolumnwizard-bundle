@@ -13,6 +13,7 @@ namespace Ferienpass\Module;
 
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Events\RenderItemListEvent;
+use MetaModels\FrontendIntegration\HybridList;
 use MetaModels\MetaModelsEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -41,14 +42,41 @@ class Subscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            MetaModelsEvents::RENDER_ITEM_LIST => 'alterHostMetaModelList',
+            MetaModelsEvents::RENDER_ITEM_LIST => [
+                ['alterHostMetaModelList'],
+                ['alterFrontendEditingLabelInListRendering'],
+            ],
         ];
+    }
+
+
+    public function alterFrontendEditingLabelInListRendering(RenderItemListEvent $event)
+    {
+        $caller = $event->getCaller();
+
+        if (!($caller instanceof HybridList)) {
+            return;
+        }
+
+        switch ($event->getList()->getMetaModel()->getTableName()) {
+            case 'mm_ferienpass':
+                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editOffer'];
+                $caller->Template->addNewLabel = $GLOBALS['TL_LANG']['MSC']['addNewOffer'];
+                break;
+
+            case 'mm_participant':
+                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editParticipant'];
+                $caller->Template->addNewLabel = $GLOBALS['TL_LANG']['MSC']['addNewParticipant'];
+                break;
+        }
     }
 
 
     public function alterHostMetaModelList(RenderItemListEvent $event)
     {
-        if ('metamodel_multiple_buttons' !== $event->getTemplate()->getName()) {
+        if (!($event->getCaller() instanceof HybridList) ||
+            'metamodel_multiple_buttons' !== $event->getTemplate()->getName()
+        ) {
             return;
         }
 

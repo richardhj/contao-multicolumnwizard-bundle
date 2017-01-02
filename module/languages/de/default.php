@@ -64,10 +64,10 @@ $GLOBALS['TL_LANG']['MSC']['recall'] = 'Zurückziehen';
 $GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['n'] = 'Ich biete das Angebot einmalig an';
 $GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['y'] = 'Ich biete das Angebot mehrmals (an mehreren Terminen) an';
 
-if (null !== ($objMetaModel = \Ferienpass\Model\Participant::getInstance()->getMetaModel())) # MetaModel is null if BE user not logged in
-{
-	$GLOBALS['TL_LANG']['MSC'][$objMetaModel->getTableName()]['details'] = 'Bearbeiten';
-}
+$GLOBALS['TL_LANG']['MSC']['editParticipant'] = 'Bearbeiten';
+$GLOBALS['TL_LANG']['MSC']['addNewParticipant'] = 'Teilnehmer hinzufügen';
+$GLOBALS['TL_LANG']['MSC']['editOffer'] = 'Bearbeiten';
+$GLOBALS['TL_LANG']['MSC']['addNewOffer'] = 'Neues Angebot';
 
 $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'] = [
     'confirmed'  => 'Zusage',

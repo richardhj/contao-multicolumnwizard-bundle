@@ -177,7 +177,7 @@ abstract class Items extends Module
                     $this->exitWith403();
                 }
                 break;
-            case 'mm_participants':
+            case 'mm_participant':
                 if ($this->User->id != $this->item->get($this->ownerAttribute->getColName())['id']) {
                     $this->exitWith403();
                 }
