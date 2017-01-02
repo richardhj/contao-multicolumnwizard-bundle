@@ -95,7 +95,8 @@ class HostLogo extends Items
 
                 \Controller::reload();
             } elseif ($form->fetch('upload')) {
-                $this->item->set('logo', $form->fetch('upload'));
+                $attribute = $this->metaModel->getAttribute('logo');
+                $this->item->set('logo', $attribute->widgetToValue($form->fetch('upload'), $this->item->get('id')));
                 $this->item->save();
             }
         }
