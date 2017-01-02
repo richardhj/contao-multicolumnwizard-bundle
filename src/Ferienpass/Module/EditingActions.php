@@ -16,6 +16,7 @@ use Contao\Input;
 use Contao\PageModel;
 use Contao\RequestToken;
 use Ferienpass\Helper\Message;
+use MetaModels\Attribute\Select\MetaModelSelect;
 
 
 /**
@@ -75,7 +76,9 @@ class EditingActions extends Items
                 if (null === $this->item) {
                     Message::addError($GLOBALS['TL_LANG']['XPT']['itemDeleteNotFound']);
                 } // Do permission check
-                elseif ($this->item->get($this->ownerAttribute->getColName())['id'] != $this->User->id) {
+                elseif ('mm_ferienpass' !== $this->metaModel->getTableName() ||
+                    $this->item->get('host')[MetaModelSelect::SELECT_RAW]['id'] != $this->User->ferienpass_host
+                ) {
                     Message::addError($GLOBALS['TL_LANG']['XPT']['itemDeleteMissingPermission']);
                 } // Delete
                 else {
@@ -89,10 +92,5 @@ class EditingActions extends Items
         }
 
         $this->Template->message = Message::generate();
-
-        // Override the link target
-        if ($this->target) {
-            $this->Template->target = ($objPage->outputFormat == 'xhtml') ? ' onclick="return !window.open(this.href)"' : ' target="_blank"';
-        }
     }
 }

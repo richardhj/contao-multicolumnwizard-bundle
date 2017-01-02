@@ -15,7 +15,7 @@ use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Haste\Form\Form;
-use Haste\Input\Input;
+use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Attribute\Tags\MetaModelTags as MetaModelTagsAttribute;
 use MetaModels\FrontendEditingItem as Item;
 use MetaModels\IItem;
@@ -45,10 +45,10 @@ class Editing extends Items
      */
     public function generate()
     {
-        global $objPage;
-
-        //quick'n'dirty
-        $asf = '';
+//        global $objPage;
+//
+//        //quick'n'dirty
+//        $asf = '';
 //        if ('36' === $objPage->id) {
 //            $asf = Input::getAutoItem('items');
 //            Input::setGet('auto_item', '');
@@ -82,8 +82,7 @@ class Editing extends Items
             }
 
             $this->checkPermission();
-        }
-        elseif ('copy' === \Input::get('act')) {
+        } elseif ('copy' === \Input::get('act')) {
             $modelId = ModelId::fromSerialized(\Input::get('id'));
 
             if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
@@ -98,7 +97,7 @@ class Editing extends Items
             }
 
 
-            if (1!=1) {
+            if (1 != 1) {
                 //todo check permission
                 $this->exitWith403();
             }
@@ -108,26 +107,41 @@ class Editing extends Items
             $this->item->set('alias', null);
 
             $this->isNewItem = true;
-        }
-        else {
+        } else {
             $this->item = new Item(
                 $this->metaModel, []
             );
 
-            if ('mm_ferienpass' === $this->metaModel->getTableName()) {
-                $this->item->set('host', $this->User->ferienpass_host);
-            }
-            elseif ('mm_participant' === $this->metaModel->getTableName()) {
-                $this->item->set('pmember', $this->User->id);
+            switch ($this->metaModel->getTableName()) {
+                case 'mm_ferienpass':
+                    $this->item->set('host', $this->User->ferienpass_host);
+                    break;
+
+                case 'mm_participant':
+                    $this->item->set('pmember', $this->User->id);
+                    break;
             }
 
             // Prepare variant creation
-            if (($varGroup = (int)\Input::get('vargroup')) || ($varGroup = $asf)) {
-                $parentItem = $this->metaModel->findById($varGroup);
+            if (($varGroup = \Input::get('vargroup'))) {
+                $modelId = ModelId::fromSerialized($varGroup);
+
+                if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
+                    throw new \RuntimeException('data provider name does not match');
+                }
+
+                $parentItem = $this->metaModel->findById($modelId->getId());
 
                 // Exit if permissions for provided var group are insufficient
-                if ($parentItem->get($this->ownerAttribute->getColName())['id'] != $this->User->id) {
-                    $this->exitWith403();
+                switch ($this->metaModel->getTableName()) {
+                    case 'mm_ferienpass':
+                        if ($parentItem->get(
+                                'host'
+                            )[MetaModelSelect::SELECT_RAW]['id'] != $this->User->ferienpass_host
+                        ) {
+                            $this->exitWith403();
+                        }
+                        break;
                 }
 
                 // Set a copy as current item
@@ -501,16 +515,7 @@ HTML;
                         ); //@todo lang
                     }
 
-                    \Controller::redirect(
-                        $this->addToUrl(
-                            sprintf
-                            (
-                                'items=%s&vargroup=',
-                                $this->item->get($this->aliasColName)
-                            ),
-                            true
-                        )
-                    );
+                    \Controller::redirect(str_replace(['create', 'vargroup'], ['edit', 'id'], \Environment::get('request')));
                 }
             }
 
@@ -570,13 +575,7 @@ HTML;
         $template = new \FrontendTemplate('ce_hyperlink');
         $template->class = 'create_new_variant';
 
-        $template->href = sprintf
-        (
-            '%s?vargroup=%u',
-            rtrim(str_replace($this->autoItem, '', \Environment::get('request')), '/'),
-            //@todo be configurable
-            $this->item->get('id')
-        );
+        $template->href = str_replace(['edit', 'id'], ['create', 'vargroup'], \Environment::get('request'));
 
         $template->link = 'Termin erstellen';
         $template->linkTitle = specialchars(
