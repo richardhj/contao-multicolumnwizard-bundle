@@ -517,9 +517,14 @@ HTML;
                         ); //@todo lang
                     }
 
-                    \Controller::redirect(
-                        str_replace(['create', 'vargroup'], ['edit', 'id'], \Environment::get('request'))
-                    );
+                    $redirectUrl = str_replace(['create', 'vargroup'], ['edit', 'id'], \Environment::get('request'));
+
+                    if (false === strpos($redirectUrl, 'id=')) {
+                        $modelId = ModelId::fromValues($this->metaModel->getTableName(), $this->item->get('id'));
+                        $redirectUrl .= '&id='.$modelId->getSerialized();
+                    }
+
+                    \Controller::redirect($redirectUrl);
                 }
             }
 
