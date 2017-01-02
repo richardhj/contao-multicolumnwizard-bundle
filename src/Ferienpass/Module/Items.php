@@ -12,6 +12,7 @@ namespace Ferienpass\Module;
 
 use Contao\Module;
 use Haste\Input\Input;
+use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Factory;
 use MetaModels\IMetaModel;
 
@@ -173,7 +174,9 @@ abstract class Items extends Module
         // todo
         switch ($this->metaModel->getTableName()) {
             case 'mm_ferienpass':
-                if ($this->User->ferienpass_host != $this->item->get($this->ownerAttribute->getColName())['__SELECT_RAW__']['id']) {
+                $hostId = $this->item->get($this->ownerAttribute->getColName())[MetaModelSelect::SELECT_RAW]['id'];
+
+                if ($this->User->ferienpass_host != $hostId) {
                     $this->exitWith403();
                 }
                 break;
