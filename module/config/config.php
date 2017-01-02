@@ -134,6 +134,7 @@ $GLOBALS['FE_MOD']['application']['offer_applicationlisthost'] = 'Ferienpass\Mod
 $GLOBALS['FE_MOD']['application']['offer_addattendeehost'] = 'Ferienpass\Module\AddAttendeeHost';
 $GLOBALS['FE_MOD']['application']['offers_user_attendances'] = 'Ferienpass\Module\UserAttendances';
 $GLOBALS['FE_MOD']['application']['ferienpass_messages'] = 'Ferienpass\Module\Messages';
+$GLOBALS['FE_MOD']['user']['host_logo'] = 'Ferienpass\Module\HostLogo';
 
 /**
  * Notification center

@@ -29,8 +29,8 @@ class UploadImage extends \UploadPreviewFieldFE
             array_merge
             (
                 [
-                    'uploadFolder' => '7a56a80f-f055-11e4-b330-ce2f81f95ce0', //@todo
-                    'renameFile'   => 'angebot_##id##_'.substr(md5(uniqid(mt_rand())), 0, 6) //@todo
+                    'uploadFolder' => '926817ba-c7bf-11e6-86e8-acb172276daf', //@todo
+//                    'renameFile'   => 'angebot_##id##_'.substr(md5(uniqid(mt_rand())), 0, 6) //@todo
                 ],
                 (array)$attributes
             )
