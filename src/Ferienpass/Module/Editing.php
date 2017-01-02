@@ -116,6 +116,8 @@ class Editing extends Items
             switch ($this->metaModel->getTableName()) {
                 case 'mm_ferienpass':
                     $this->item->set('host', $this->User->ferienpass_host);
+                    //todo
+                    $this->item->set('pass_release', '1');
                     break;
 
                 case 'mm_participant':
@@ -136,9 +138,8 @@ class Editing extends Items
                 // Exit if permissions for provided var group are insufficient
                 switch ($this->metaModel->getTableName()) {
                     case 'mm_ferienpass':
-                        if ($parentItem->get(
-                                'host'
-                            )[MetaModelSelect::SELECT_RAW]['id'] != $this->User->ferienpass_host
+                        if ($parentItem->get('host')[MetaModelSelect::SELECT_RAW]['id']
+                            != $this->User->ferienpass_host
                         ) {
                             $this->exitWith403();
                         }
@@ -516,7 +517,9 @@ HTML;
                         ); //@todo lang
                     }
 
-                    \Controller::redirect(str_replace(['create', 'vargroup'], ['edit', 'id'], \Environment::get('request')));
+                    \Controller::redirect(
+                        str_replace(['create', 'vargroup'], ['edit', 'id'], \Environment::get('request'))
+                    );
                 }
             }
 
