@@ -12,7 +12,7 @@
 /**
  * Palettes
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes']['items_editing_actions'] = '{title_legend},name,headline,type;{config_legend},metamodel,jumpTo;{link_legend},target,linkTitle,titleText,rel;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['items_editing_actions'] = '{title_legend},name,headline,type;{config_legend},metamodel;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_editing'] = '{title_legend},name,headline,type;{config_legend},metamodel,enableVariants;{redirect_legend},jumpTo;{template_legend:hide},editFormTpl,tableless;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['calendar_offers'] = $GLOBALS['TL_DCA']['tl_module']['palettes']['calendar'];
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_applicationlist'] = '{title_legend},name,headline,type;{config_legend},metamodel;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
@@ -31,10 +31,6 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['jumpToApplicationList']['label'] = &$
 
 \Controller::loadDataContainer('tl_content');
 \Controller::loadLanguageFile('tl_content');
-$GLOBALS['TL_DCA']['tl_module']['fields']['target'] = $GLOBALS['TL_DCA']['tl_content']['fields']['target'];
-$GLOBALS['TL_DCA']['tl_module']['fields']['linkTitle'] = $GLOBALS['TL_DCA']['tl_content']['fields']['linkTitle'];
-$GLOBALS['TL_DCA']['tl_module']['fields']['titleText'] = $GLOBALS['TL_DCA']['tl_content']['fields']['titleText'];
-$GLOBALS['TL_DCA']['tl_module']['fields']['rel'] = $GLOBALS['TL_DCA']['tl_content']['fields']['rel'];
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['editFormTpl'] = array
 (

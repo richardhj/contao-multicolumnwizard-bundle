@@ -88,58 +88,11 @@ class EditingActions extends Items
             }
         }
 
-        /*
-         * Generate button
-         */
-        $url = $this->getEditLink();
-
-        $this->linkTitle = $this->linkTitle ?: $url;
-
-//        $this->Template->attribute = $this->rel ? ' data-lightbox="'.substr(
-//                $this->rel,
-//                9,
-//                -1
-//            ).'" data-lightbox-reload="" data-lightbox-iframe=""' : ''; //@todo
-        $this->Template->href = $url;
-        $this->Template->link = $this->linkTitle;
-        $this->Template->linkTitle = specialchars($this->titleText ?: $this->linkTitle);
-        $this->Template->target = '';
         $this->Template->message = Message::generate();
 
         // Override the link target
         if ($this->target) {
             $this->Template->target = ($objPage->outputFormat == 'xhtml') ? ' onclick="return !window.open(this.href)"' : ' target="_blank"';
         }
-    }
-
-
-    /**
-     * Generate and return the edit link
-     *
-     * @param  string $alias
-     *
-     * @return string
-     */
-    protected function getEditLink($alias = '')
-    {
-        if ($this->jumpTo < 1) {
-            return '';
-        }
-
-        $url = ampersand(Environment::get('request'), true);
-
-        /** @type \Model\Collection $target */
-        $target = PageModel::findByPk($this->jumpTo);
-
-        if (null !== $target) {
-            $url = ampersand(
-                $this->generateFrontendUrl(
-                    $target->row(),
-                    ((\Config::get('useAutoItem') && !\Config::get('disableAlias')) ? '/%s' : '/items/%s')
-                )
-            );
-        }
-
-        return rtrim(sprintf($url, $alias), '/');
     }
 }

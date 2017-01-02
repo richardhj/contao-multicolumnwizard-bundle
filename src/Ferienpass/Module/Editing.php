@@ -10,6 +10,7 @@
 
 namespace Ferienpass\Module;
 
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -48,40 +49,77 @@ class Editing extends Items
 
         //quick'n'dirty
         $asf = '';
-        if ('36' === $objPage->id) {
-            $asf = Input::getAutoItem('items');
-            Input::setGet('auto_item', '');
-
-            $itemDatabase = $this->database
-                ->prepare(
-                    sprintf
-                    (
-                        'SELECT * FROM %1$s WHERE (id=? OR %2$s=?)',
-                        $this->metaModel->getTableName(),
-                        'alias'
-                    )
-                )
-                ->execute(is_int($asf) ? $asf : 0, $asf);
-
-            $asf = $itemDatabase->id;
-        }
+//        if ('36' === $objPage->id) {
+//            $asf = Input::getAutoItem('items');
+//            Input::setGet('auto_item', '');
+//
+//            $itemDatabase = $this->database
+//                ->prepare(
+//                    sprintf
+//                    (
+//                        'SELECT * FROM %1$s WHERE (id=? OR %2$s=?)',
+//                        $this->metaModel->getTableName(),
+//                        'alias'
+//                    )
+//                )
+//                ->execute(is_int($asf) ? $asf : 0, $asf);
+//
+//            $asf = $itemDatabase->id;
+//        }
 
         // Try to load the the item by its auto_item
-        if (!$this->fetchItem()) {
-            // Generate 404 if item not found
-            if ($this->autoItem) {
+        if ('edit' === \Input::get('act')) {
+            $modelId = ModelId::fromSerialized(\Input::get('id'));
+
+            if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
+                throw new \RuntimeException('data provider name does not match');
+            }
+
+            $this->item = $this->metaModel->findById($modelId->getId());
+
+            if (null === $this->item) {
                 $this->exitWith404();
             }
 
-            // Otherwise create a new item for the referenced owner
-            $this->fetchOwnerAttribute();
+            $this->checkPermission();
+        }
+        elseif ('copy' === \Input::get('act')) {
+            $modelId = ModelId::fromSerialized(\Input::get('id'));
 
-            $this->item = new Item
-            (
-                $this->metaModel, [
-                    $this->ownerAttribute->getColName() => $this->User->getData(),
-                ]
+            if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
+                throw new \RuntimeException('data provider name does not match');
+            }
+
+            $itemToCopy = $this->metaModel->findById($modelId->getId());
+            $itemToCopy->set('vargroup', null);
+
+            if (null === $itemToCopy) {
+                $this->exitWith404();
+            }
+
+
+            if (1!=1) {
+                //todo check permission
+                $this->exitWith403();
+            }
+
+            $this->item = $itemToCopy->copy();
+            // Remove alias to trigger the auto generation
+            $this->item->set('alias', null);
+
+            $this->isNewItem = true;
+        }
+        else {
+            $this->item = new Item(
+                $this->metaModel, []
             );
+
+            if ('mm_ferienpass' === $this->metaModel->getTableName()) {
+                $this->item->set('host', $this->User->ferienpass_host);
+            }
+            elseif ('mm_participants' === $this->metaModel->getTableName()) {
+                $this->item->set('pmember', $this->User->id);
+            }
 
             // Prepare variant creation
             if (($varGroup = (int)\Input::get('vargroup')) || ($varGroup = $asf)) {
@@ -96,14 +134,52 @@ class Editing extends Items
                 $this->item = $parentItem->varCopy();
 
                 // Remove alias to trigger the auto generation
-                $this->item->set($this->aliasColName, null);
+                $this->item->set('alias', null);
             }
 
             $this->isNewItem = true;
-        } else {
-            // Check permission for editing an existent item
-            $this->checkPermission();
         }
+//        if (!$this->fetchItem()) {
+//            // Generate 404 if item not found
+//            if ($this->autoItem) {
+//                $this->exitWith404();
+//            }
+//
+//            // Otherwise create a new item for the referenced owner
+//            $this->fetchOwnerAttribute();
+
+//            $this->item = new Item
+//            (
+//                $this->metaModel, [
+//                    $this->ownerAttribute->getColName() => $this->User->getData(),
+//                ]
+//            );
+
+//            if ('mm_ferienpass' === $this->metaModel->getTableName()) {
+//                $this->item->set('host', $this->User->ferienpass_host);
+//            }
+
+//            // Prepare variant creation
+//            if (($varGroup = (int)\Input::get('vargroup')) || ($varGroup = $asf)) {
+//                $parentItem = $this->metaModel->findById($varGroup);
+//
+//                // Exit if permissions for provided var group are insufficient
+//                if ($parentItem->get($this->ownerAttribute->getColName())['id'] != $this->User->id) {
+//                    $this->exitWith403();
+//                }
+//
+//                // Set a copy as current item
+//                $this->item = $parentItem->varCopy();
+//
+//                // Remove alias to trigger the auto generation
+//                $this->item->set($this->aliasColName, null);
+//            }
+//
+//            $this->isNewItem = true;
+//        } else {
+//            // Check permission for editing an existent item
+//            $this->checkPermission();
+//        }
 
         return parent::generate();
     }

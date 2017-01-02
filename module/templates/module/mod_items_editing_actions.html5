@@ -6,8 +6,4 @@
 <?= $this->message ?>
 <?php endif ?>
 
-<p class="create_new_item">
-<a href="<?= $this->href ?>" title="<?= $this->linkTitle ?>"<?= $this->attribute ?><?= $this->target ?>><?= $this->link ?></a>
-</p>
-
 <?php $this->endblock(); ?>

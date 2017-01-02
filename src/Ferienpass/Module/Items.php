@@ -170,29 +170,21 @@ abstract class Items extends Module
     {
         $this->fetchOwnerAttribute();
 
-        $callback = false;
-
-        // HOOK: add custom permission check
-        if (isset($GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck']) && is_array(
-                $GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck']
-            )
-        ) {
-            foreach ($GLOBALS['METAMODEL_HOOKS']['editingPermissionCheck'] as $callback) {
-                if (true === \Controller::importStatic($callback[0])->{$callback[1]}(
-                        $this->metaModel,
-                        $this->item,
-                        $this->ownerAttribute,
-                        $this->autoItem
-                    )
-                ) {
-                    $callback = true;
-                    break;
+        // todo
+        switch ($this->metaModel->getTableName()) {
+            case 'mm_ferienpass':
+                if ($this->User->ferienpass_host != $this->item->get($this->ownerAttribute->getColName())['__SELECT_RAW__']['id']) {
+                    $this->exitWith403();
                 }
-            }
-        }
-
-        if (!$callback && $this->User->id != $this->item->get($this->ownerAttribute->getColName())['id']) {
-            $this->exitWith403();
+                break;
+            case 'mm_participants':
+                if ($this->User->id != $this->item->get($this->ownerAttribute->getColName())['id']) {
+                    $this->exitWith403();
+                }
+                break;
+            default:
+                $this->exitWith403();
+                break;
         }
     }
 

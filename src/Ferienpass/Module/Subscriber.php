@@ -11,6 +11,7 @@
 namespace Ferienpass\Module;
 
 
+use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\MetaModelsEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -85,10 +86,17 @@ class Subscriber implements EventSubscriberInterface
                 unset($buttons[array_search('applicationlist', $buttons)]);
             }
 
-            //@todo configurable in the backend
             // Disable buttons if ferienpass is live
-//        unset($buttons[array_search('edit', $buttons)]);
-//        unset($buttons[array_search('delete', $buttons)]);
+            if (time() > $item->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
+                unset($buttons[array_search('edit', $buttons)]);
+                unset($buttons[array_search('delete', $buttons)]);
+            }
+
+            // Add the "copy item" button for last release's items
+            $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
+            if ($filterParams['pass_release']['value'] == 2) { //@todo configurable
+                $buttons[] = 'copy';
+            }
 
             foreach ($buttons as $button) {
                 $buttonData = [];
@@ -127,8 +135,18 @@ class Subscriber implements EventSubscriberInterface
      */
     protected function editLink($itemData)
     {
-        $v = 4; // todo configurable
-        return [$this->generateJumpToLink($v, $itemData['raw']['alias'])];
+        return [$itemData['editUrl']];
+    }
+
+
+    /**
+     * @param  array $itemData
+     *
+     * @return array
+     */
+    protected function copyLink($itemData)
+    {
+        return [str_replace('act=edit', 'act=copy', $itemData['editUrl'])];
     }
 
 
