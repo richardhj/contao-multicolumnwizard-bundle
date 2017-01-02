@@ -68,6 +68,10 @@ class Subscriber implements EventSubscriberInterface
                 $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editParticipant'];
                 $caller->Template->addNewLabel = $GLOBALS['TL_LANG']['MSC']['addNewParticipant'];
                 break;
+
+            case 'mm_host':
+                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editHost'];
+                break;
         }
     }
 
