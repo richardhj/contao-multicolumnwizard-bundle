@@ -32,8 +32,8 @@ CREATE TABLE `tl_metamodel_offer_date` (
   `tstamp` int(10) unsigned NOT NULL default '0',
   `att_id` int(10) unsigned NOT NULL default '0',
   `item_id` int(10) unsigned NOT NULL default '0',
-  `start` int(10) NOT NULL default '0',
-  `end` int(10) NOT NULL default '0'
+  `start` int(10) NULL,
+  `end` int(10) NULL
   PRIMARY KEY  (`id`),
 --  UNIQUE KEY `attitem` (`att_id`, `item_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
