@@ -120,10 +120,14 @@ class OfferDate extends BaseComplex
 
             // Walk every row.
             foreach ((array)$values[$id] as $period) {
+                if (null === ($setValues = $this->getSetValues($period, $id))) {
+                    continue;
+                }
+
                 // Walk every column and update / insert the value.
                 $database
                     ->prepare('INSERT INTO '.$this->getValueTable().' %s')
-                    ->set($this->getSetValues($period, $id))
+                    ->set($setValues)
                     ->execute();
             }
         }
@@ -141,6 +145,10 @@ class OfferDate extends BaseComplex
      */
     protected function getSetValues($period, $id)
     {
+        if ('' === $period['start'] && '' === $period['end']) {
+            return null;
+        }
+
         return [
             'tstamp'  => time(),
             'att_id'  => $this->get('id'),
