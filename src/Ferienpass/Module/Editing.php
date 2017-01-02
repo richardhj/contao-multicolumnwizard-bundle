@@ -82,7 +82,7 @@ class Editing extends Items
             }
 
             $this->checkPermission();
-        } elseif ('copy' === \Input::get('act')) {
+        } elseif ('copy' === \Input::get('act') && 'mm_ferienpass' === $this->metaModel->getTableName()) {
             $modelId = ModelId::fromSerialized(\Input::get('id'));
 
             if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
@@ -91,14 +91,15 @@ class Editing extends Items
 
             $itemToCopy = $this->metaModel->findById($modelId->getId());
             $itemToCopy->set('vargroup', null);
+            //todo
+            $itemToCopy->set('pass_release', '1');
 
             if (null === $itemToCopy) {
                 $this->exitWith404();
             }
 
-
-            if (1 != 1) {
-                //todo check permission
+            // Check permission
+            if ($itemToCopy->get('host')[MetaModelSelect::SELECT_RAW]['id'] != $this->User->ferienpass_host) {
                 $this->exitWith403();
             }
 
