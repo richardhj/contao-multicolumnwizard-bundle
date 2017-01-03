@@ -48,17 +48,28 @@ $GLOBALS['TL_DCA'][$table]['fields']['persist'] = [
 ];
 
 $GLOBALS['TL_DCA'][$table]['fields']['ferienpass_host'] = [
-    'label'      => &$GLOBALS['TL_LANG'][$table]['ferienpass_host'],
-    'exclude'    => true,
-    'inputType'  => 'select',
-    'foreignKey' => 'mm_host.name',
-    'eval'       => [
+    'label'         => &$GLOBALS['TL_LANG'][$table]['ferienpass_host'],
+    'exclude'       => true,
+    'inputType'     => 'select',
+    'foreignKey'    => 'mm_host.name',
+    'eval'          => [
         'includeBlankOption' => true,
         'chosen'             => true,
         'tl_class'           => 'w50',
     ],
-    'relation'   => [
+    'relation'      => [
         'type' => 'belongsTo',
     ],
-    'sql'        => "int(10) NOT NULL default '0'",
+    'save_callback' => [
+        function ($value, \DataContainer $dc) {
+            if ('' === $value) {
+                if (in_array('1', deserialize($dc->activeRecord->groups), true)) {
+                    throw new \Exception($GLOBALS['TL_LANG']['ERR']['missingHostForMember']);
+                }
+            }
+
+            return $value;
+        },
+    ],
+    'sql'           => "int(10) NOT NULL default '0'",
 ];

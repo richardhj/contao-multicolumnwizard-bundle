@@ -86,3 +86,4 @@ $GLOBALS['TL_LANG']['ERR']['ageInputMissingValues'] = 'Bitte füllen Sie alle no
 $GLOBALS['TL_LANG']['ERR']['ageInputReverseAgeRanges'] = 'Ihre eingegeben Altersgrenze <em>%s</em> ist nicht höher als die Altersgrenze <em>%s</em>.';
 $GLOBALS['TL_LANG']['ERR']['changedDateOfBirthAfterwards'] = 'Das Geburtsdatum kann nicht mehr verändert werden, nachdem Sie Ihr Kind zu Angeboten angemeldet haben.';
 $GLOBALS['TL_LANG']['ERR']['changedAgreementPhotosAfterwards'] = 'Die Einverständniserklärung kann nicht mehr widerrufen werden, nachdem Sie Ihr Kind zu Angeboten angemeldet haben.';
+$GLOBALS['TL_LANG']['ERR']['missingHostForMember'] = 'Bitte erstellen Sie vorerst einen Veranstalter und ordnen Sie diesen hier zu.';
