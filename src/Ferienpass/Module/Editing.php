@@ -45,157 +45,110 @@ class Editing extends Items
      */
     public function generate()
     {
-//        global $objPage;
-//
-//        //quick'n'dirty
-//        $asf = '';
-//        if ('36' === $objPage->id) {
-//            $asf = Input::getAutoItem('items');
-//            Input::setGet('auto_item', '');
-//
-//            $itemDatabase = $this->database
-//                ->prepare(
-//                    sprintf
-//                    (
-//                        'SELECT * FROM %1$s WHERE (id=? OR %2$s=?)',
-//                        $this->metaModel->getTableName(),
-//                        'alias'
-//                    )
-//                )
-//                ->execute(is_int($asf) ? $asf : 0, $asf);
-//
-//            $asf = $itemDatabase->id;
-//        }
-
-        // Try to load the the item by its auto_item
-        if ('edit' === \Input::get('act')) {
-            $modelId = ModelId::fromSerialized(\Input::get('id'));
-
-            if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
-                throw new \RuntimeException('data provider name does not match');
-            }
-
-            $this->item = $this->metaModel->findById($modelId->getId());
-
-            if (null === $this->item) {
-                $this->exitWith404();
-            }
-
-            $this->checkPermission();
-        } elseif ('copy' === \Input::get('act') && 'mm_ferienpass' === $this->metaModel->getTableName()) {
-            $modelId = ModelId::fromSerialized(\Input::get('id'));
-
-            if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
-                throw new \RuntimeException('data provider name does not match');
-            }
-
-            $itemToCopy = $this->metaModel->findById($modelId->getId());
-            $itemToCopy->set('vargroup', null);
-            //todo
-            $itemToCopy->set('pass_release', '1');
-
-            if (null === $itemToCopy) {
-                $this->exitWith404();
-            }
-
-            // Check permission
-            if ($itemToCopy->get('host')[MetaModelSelect::SELECT_RAW]['id'] != $this->User->ferienpass_host) {
-                $this->exitWith403();
-            }
-
-            $this->item = $itemToCopy->copy();
-            // Remove alias to trigger the auto generation
-            $this->item->set('alias', null);
-
-            $this->isNewItem = true;
-        } else {
-            $this->item = new Item(
-                $this->metaModel, []
-            );
-
-            switch ($this->metaModel->getTableName()) {
-                case 'mm_ferienpass':
-                    $this->item->set('host', $this->User->ferienpass_host);
-                    //todo
-                    $this->item->set('pass_release', '1');
-                    break;
-
-                case 'mm_participant':
-                    $this->item->set('pmember', $this->User->id);
-                    break;
-            }
-
-            // Prepare variant creation
-            if (($varGroup = \Input::get('vargroup'))) {
-                $modelId = ModelId::fromSerialized($varGroup);
+        switch (\Input::get('act')) {
+            /*
+             * Edit
+             */
+            case 'edit':
+                $modelId = ModelId::fromSerialized(\Input::get('id'));
 
                 if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
                     throw new \RuntimeException('data provider name does not match');
                 }
 
-                $parentItem = $this->metaModel->findById($modelId->getId());
+                $this->item = $this->metaModel->findById($modelId->getId());
 
-                // Exit if permissions for provided var group are insufficient
+                if (null === $this->item) {
+                    $this->exitWith404();
+                }
+
+                $this->checkPermission();
+                break;
+
+            /*
+             * Copy
+             */
+            case 'copy':
+                $modelId = ModelId::fromSerialized(\Input::get('id'));
+
+                if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()
+                    || 'mm_ferienpass' === $this->metaModel->getTableName()
+                ) {
+                    throw new \RuntimeException('data provider name does not match');
+                }
+
+                $itemToCopy = $this->metaModel->findById($modelId->getId());
+                $itemToCopy->set('vargroup', null);
+                //todo
+                $itemToCopy->set('pass_release', '1');
+
+                if (null === $itemToCopy) {
+                    $this->exitWith404();
+                }
+
+                // Check permission
+                if ($itemToCopy->get('host')[MetaModelSelect::SELECT_RAW]['id'] != $this->User->ferienpass_host) {
+                    $this->exitWith403();
+                }
+
+                $this->item = $itemToCopy->copy();
+                // Remove alias to trigger the auto generation
+                $this->item->set('alias', null);
+
+                $this->isNewItem = true;
+                break;
+
+            /*
+             * Create
+             */
+            default:
+                $this->item = new Item(
+                    $this->metaModel, []
+                );
+
                 switch ($this->metaModel->getTableName()) {
                     case 'mm_ferienpass':
-                        if ($parentItem->get('host')[MetaModelSelect::SELECT_RAW]['id']
-                            != $this->User->ferienpass_host
-                        ) {
-                            $this->exitWith403();
-                        }
+                        $this->item->set('host', $this->User->ferienpass_host);
+                        //todo
+                        $this->item->set('pass_release', '1');
+                        break;
+
+                    case 'mm_participant':
+                        $this->item->set('pmember', $this->User->id);
                         break;
                 }
 
-                // Set a copy as current item
-                $this->item = $parentItem->varCopy();
+                // Prepare variant creation
+                if (($varGroup = \Input::get('vargroup'))) {
+                    $modelId = ModelId::fromSerialized($varGroup);
 
-                // Remove alias to trigger the auto generation
-                $this->item->set('alias', null);
-            }
+                    if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()) {
+                        throw new \RuntimeException('data provider name does not match');
+                    }
 
-            $this->isNewItem = true;
+                    $parentItem = $this->metaModel->findById($modelId->getId());
+
+                    // Exit if permissions for provided var group are insufficient
+                    switch ($this->metaModel->getTableName()) {
+                        case 'mm_ferienpass':
+                            if ($parentItem->get('host')[MetaModelSelect::SELECT_RAW]['id']
+                                != $this->User->ferienpass_host
+                            ) {
+                                $this->exitWith403();
+                            }
+                            break;
+                    }
+
+                    // Set a copy as current item
+                    $this->item = $parentItem->varCopy();
+
+                    // Remove alias to trigger the auto generation
+                    $this->item->set('alias', null);
+                }
+
+                $this->isNewItem = true;
+                break;
         }
-//        if (!$this->fetchItem()) {
-//            // Generate 404 if item not found
-//            if ($this->autoItem) {
-//                $this->exitWith404();
-//            }
-//
-//            // Otherwise create a new item for the referenced owner
-//            $this->fetchOwnerAttribute();
-
-//            $this->item = new Item
-//            (
-//                $this->metaModel, [
-//                    $this->ownerAttribute->getColName() => $this->User->getData(),
-//                ]
-//            );
-
-//            if ('mm_ferienpass' === $this->metaModel->getTableName()) {
-//                $this->item->set('host', $this->User->ferienpass_host);
-//            }
-
-//            // Prepare variant creation
-//            if (($varGroup = (int)\Input::get('vargroup')) || ($varGroup = $asf)) {
-//                $parentItem = $this->metaModel->findById($varGroup);
-//
-//                // Exit if permissions for provided var group are insufficient
-//                if ($parentItem->get($this->ownerAttribute->getColName())['id'] != $this->User->id) {
-//                    $this->exitWith403();
-//                }
-//
-//                // Set a copy as current item
-//                $this->item = $parentItem->varCopy();
-//
-//                // Remove alias to trigger the auto generation
-//                $this->item->set($this->aliasColName, null);
-//            }
-//
-//            $this->isNewItem = true;
-//        } else {
-//            // Check permission for editing an existent item
-//            $this->checkPermission();
-//        }
 
         return parent::generate();
     }
@@ -403,15 +356,6 @@ HTML;
                         'col_1' => '',
                     ],
                     [
-                        'col_0' => 'max. Teilnehmer',
-                        'col_1' => '',
-                    ],
-                    [
-                        'col_0' => 'Mitbringen',
-                        'col_1' => '',
-                    ],
-
-                    [
                         'col_0' => 'Zu beachten',
                         'col_1' => '',
                     ],
@@ -432,7 +376,7 @@ HTML;
         }
 
         //@todo refactor: move
-        if ($this->metaModel->getTableName() == FerienpassConfig::getInstance()->participant_model) {
+        if ('mm_participant' === $this->metaModel->getTableName()) {
             // Add validator for participant's dateOfBirth
             // It must not be changed afterwards
             $form->addValidator(
