@@ -461,11 +461,20 @@ HTML;
                         ); //@todo lang
                     }
 
-                    $redirectUrl = str_replace(['create', 'vargroup'], ['edit', 'id'], \Environment::get('request'));
+                    $redirectUrl = \Environment::get('request');
 
-                    if (false === strpos($redirectUrl, 'id=')) {
-                        $modelId = ModelId::fromValues($this->metaModel->getTableName(), $this->item->get('id'));
-                        $redirectUrl .= '&id='.$modelId->getSerialized();
+                    if (false === \Environment::get('isAjaxRequest')) {
+                        $redirectUrl = str_replace(
+                            ['create', 'vargroup'],
+                            ['edit', 'id'],
+                            $redirectUrl
+                        );
+
+                        if (false === strpos($redirectUrl, 'id=')) {
+                            $modelId = ModelId::fromValues($this->metaModel->getTableName(), $this->item->get('id'));
+                            $redirectUrl .= '&id='.$modelId->getSerialized();
+                        }
+
                     }
 
                     \Controller::redirect($redirectUrl);
