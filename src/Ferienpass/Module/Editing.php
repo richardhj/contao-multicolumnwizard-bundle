@@ -72,7 +72,7 @@ class Editing extends Items
                 $modelId = ModelId::fromSerialized(\Input::get('id'));
 
                 if ($modelId->getDataProviderName() !== $this->metaModel->getTableName()
-                    || 'mm_ferienpass' === $this->metaModel->getTableName()
+                    || 'mm_ferienpass' !== $this->metaModel->getTableName()
                 ) {
                     throw new \RuntimeException('data provider name does not match');
                 }
