@@ -560,36 +560,4 @@ HTML;
             $variants->getCount()
         ); //@todo lang
     }
-
-
-    /**
-     * @param IItem[]|IItems $objVariants
-     *
-     * @return string
-     */
-    protected function variantsMenu($objVariants)
-    {
-        $objTemplate = new \FrontendTemplate('nav_default');
-        $objTemplate->level = 'variants';
-
-        $arrItems = [];
-
-        while ($objVariants->next()) {
-            $arrItems[] = [
-                'class' => 'edit-variant',
-                'href'  => str_replace(
-                    $this->item->get($this->aliasColName),
-                    $objVariants->getItem()->get($this->aliasColName),
-                    \Environment::get('request')
-                ),
-                'title' => sprintf(specialchars('Die Variante "%s" bearbeiten'), $objVariants->getItem()->get('name')),
-                //@todo lang
-                'link'  => $objVariants->getItem()->get('name'),
-            ];
-        }
-
-        $objTemplate->items = $arrItems;
-
-        return $objTemplate->parse();
-    }
 }
