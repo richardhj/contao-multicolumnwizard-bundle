@@ -71,8 +71,7 @@ abstract class MetaModelBridge
     public function __construct()
     {
         // Get MetaModel object
-        $factory = Factory::getDefaultFactory();
-        $this->metaModel = $factory->getMetaModel($this->getTableName());
+        $this->metaModel = Factory::getDefaultFactory()->getMetaModel(static::$tableName);
 
         // Exit if MetaModel object could not be created
         if (null === $this->metaModel) {
@@ -111,9 +110,14 @@ abstract class MetaModelBridge
     }
 
 
+    /**
+     * Return the MetaModel table name
+     *
+     * @return string
+     */
     public function getTableName()
     {
-        return self::$tableName;
+        return $this->getMetaModel()->getTableName();
     }
 
 
