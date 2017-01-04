@@ -25,11 +25,13 @@ $container['ferienpass.applicationsystem'] = $container->share(
         $table = Ferienpass\Model\ApplicationSystem::getTable();
 
         $result = $database
-            ->query(
+            ->prepare(
                 "SELECT type "
                 ."FROM {$table} "
                 ."WHERE (start='' OR start<='$time') AND (stop='' OR stop>'".($time + 60)."') AND published='1'"
-            );
+            )
+            ->limit(1)
+            ->execute();
 
         if (1 === $result->numRows) {
             return $container['ferienpass.applicationsystem.'.$result->type];
