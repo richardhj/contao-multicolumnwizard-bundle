@@ -114,7 +114,7 @@ class Editing extends Items
                         break;
 
                     case 'mm_participant':
-                        $this->item->set('pmember', $this->User->id);
+                        $this->item->set('pmember', $this->User->getData());
                         break;
                 }
 
