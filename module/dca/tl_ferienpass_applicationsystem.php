@@ -19,7 +19,7 @@ $table = Ferienpass\Model\ApplicationSystem::getTable();
 $GLOBALS['TL_DCA'][$table] = [
 
     // Config
-    'config'       => [
+    'config'          => [
         'dataContainer'   => 'General',
         'notCreatable'    => true,
         'notDeletable'    => true,
@@ -34,7 +34,7 @@ $GLOBALS['TL_DCA'][$table] = [
     ],
 
     // List
-    'list'         => [
+    'list'            => [
         'sorting'           => [
             'mode'        => 1,
             'fields'      => ['type'],
@@ -90,7 +90,7 @@ $GLOBALS['TL_DCA'][$table] = [
     ],
 
     // MetaPalettes
-    'metapalettes' => [
+    'metapalettes'    => [
         'default' => [
             'name'   => [
                 'type',
@@ -112,13 +112,13 @@ $GLOBALS['TL_DCA'][$table] = [
 
     // Fields
     'fields'          => [
-        'id'        => [
+        'id'                                         => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'tstamp'    => [
+        'tstamp'                                     => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'type'      => [
+        'type'                                       => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -132,7 +132,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'title'     => [
+        'title'                                      => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['title'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -142,7 +142,15 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'published' => [
+        'maxApplicationsPerDay' => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['maxApplicationsPerDay'],
+            'inputType' => 'text',
+            'eval'      => [
+                'tl_class' => 'w50',
+                'rgxp'     => 'numeric',
+            ],
+        ],
+        'published'                                  => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['published'],
             'exclude'   => true,
             'inputType' => 'checkbox',
@@ -152,7 +160,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'start'     => [
+        'start'                                      => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['start'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -163,7 +171,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(10) NOT NULL default ''",
         ],
-        'stop'      => [
+        'stop'                                       => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['stop'],
             'exclude'   => true,
             'inputType' => 'text',

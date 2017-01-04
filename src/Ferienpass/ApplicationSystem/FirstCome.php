@@ -10,13 +10,15 @@
 
 namespace Ferienpass\ApplicationSystem;
 
+use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
 use Ferienpass\Event\DeleteAttendanceEvent;
 use Ferienpass\Event\SaveAttendanceEvent;
 use Ferienpass\Event\UserSetAttendanceEvent;
-use Ferienpass\Helper\Message;
+use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
+use Ferienpass\Model\Participant;
 
 
 /**
@@ -32,14 +34,17 @@ class FirstCome extends AbstractApplicationSystem
     public static function getSubscribedEvents()
     {
         return [
-            UserSetAttendanceEvent::NAME => [
+            UserSetAttendanceEvent::NAME                         => [
                 'setNewAttendance',
             ],
-            SaveAttendanceEvent::NAME    => [
+            SaveAttendanceEvent::NAME                            => [
                 ['updateAttendanceStatus', 100],
             ],
-            DeleteAttendanceEvent::NAME  => [
+            DeleteAttendanceEvent::NAME                          => [
                 'updateAllStatusByOffer',
+            ],
+            BuildParticipantOptionsForApplicationListEvent::NAME => [
+                'disableLimitReachedParticipants',
             ],
         ];
     }
@@ -149,5 +154,41 @@ class FirstCome extends AbstractApplicationSystem
         while ($attendances->next()) {
             $attendances->save();
         }
+    }
+
+
+    /**
+     * Disable participants from options that have reached their limit
+     *
+     * @param BuildParticipantOptionsForApplicationListEvent $event
+     */
+    public function disableLimitReachedParticipants(BuildParticipantOptionsForApplicationListEvent $event)
+    {
+        $options = $event->getResult();
+        $maxApplicationsPerDay = ApplicationSystem::findFirstCome()->maxApplicationsPerDay;
+
+        if (!$maxApplicationsPerDay) {
+            return;
+        }
+
+        foreach ($options as $k => $option) {
+            $isLimitReached = Attendance::countByParticipantAndDay(
+                Participant::getInstance()
+                    ->findById($option['value'])
+                    ->get('id')
+            ) >= $maxApplicationsPerDay
+                ? true
+                : false;
+
+            if ($isLimitReached) {
+                $options[$k]['label'] = sprintf(
+                    $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'],
+                    $option['label']
+                );
+                $options[$k]['disabled'] = true;
+            }
+        }
+
+        $event->setResult($options);
     }
 }

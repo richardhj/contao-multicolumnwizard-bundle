@@ -47,7 +47,5 @@ $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::OFFER_ATTRIBUTE_AG
 // Restrictions
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_ALLOWED_ZIP_CODES][0] = 'Erlaubte Postleitzahlen bei Registrierung';
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_ALLOWED_ZIP_CODES][1] = 'Geben Sie die Postleitzahlen an, für welche nur eine Registrierung möglich ist.';
-$GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_MAX_APPLICATIONS_PER_DAY][0] = 'maximale Angebot-Anmeldungen per Tag';
-$GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_MAX_APPLICATIONS_PER_DAY][1] = 'Geben Sie an, wie oft sich ein Teilnehmer (nicht Mitglied) für Angebote an einem einzelnen Tag anmelden darf. Bei 0 deaktiviert.';
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_REGISTRATION_REQUIRED_FIELDS][0] = 'Pflichtfelder für Benutzerdaten';
 $GLOBALS['TL_LANG']['tl_ferienpass_config'][FerienpassConfig::PARTICIPANT_REGISTRATION_REQUIRED_FIELDS][1] = 'Wählen Sie die Felder aus, die von Mitgliedern angegeben werden müssen.';

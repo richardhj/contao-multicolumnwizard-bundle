@@ -25,7 +25,6 @@ use DcGeneral\Contao\Model\AbstractSingleModel;
  * @property $participant_attribute_name
  * @property $participant_attribute_dateofbirth
  * @property $participant_attribute_agreement_photos
- * @property $max_applications_per_day
  * @property $registration_allowed_zip_codes
  * @property $registration_required_fields
  * @package Ferienpass\Model
@@ -72,9 +71,6 @@ class Config extends AbstractSingleModel
     /**
      * Restrictions
      */
-    const PARTICIPANT_MAX_APPLICATIONS_PER_DAY = 'max_applications_per_day';
-
-
     const PARTICIPANT_ALLOWED_ZIP_CODES = 'registration_allowed_zip_codes';
 
 

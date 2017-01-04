@@ -16,6 +16,7 @@ use Contao\Model;
 /**
  * Class ApplicationSystem
  * @property string $type
+ * @property mixed $maxApplicationsPerDay
  * @package Ferienpass\Model
  */
 class ApplicationSystem extends Model
@@ -27,6 +28,24 @@ class ApplicationSystem extends Model
      * @var string
      */
     protected static $strTable = 'tl_ferienpass_applicationsystem';
+
+
+    public static function findByType($type)
+    {
+        return static::findBy('type', $type);
+    }
+
+
+    public static function findFirstCome()
+    {
+        return static::findByType('firstcome');
+    }
+
+
+    public static function findLot()
+    {
+        return static::findByType('lot');
+    }
 
 
     /**

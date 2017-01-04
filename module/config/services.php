@@ -8,23 +8,34 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-$container['ferienpass.applicationsystem.firstcome'] = function ($container) {
+$container['ferienpass.applicationsystem.firstcome'] = function () {
     return new Ferienpass\ApplicationSystem\FirstCome();
 };
 
-$container['ferienpass.applicationsystem.lot'] = function ($container) {
+$container['ferienpass.applicationsystem.lot'] = function () {
     return new Ferienpass\ApplicationSystem\Lot();
 };
 
 $container['ferienpass.applicationsystem'] = $container->share(
     function ($container) {
-        $current = Ferienpass\Model\ApplicationSystem::findCurrent();
+        /** @var \Database $database */
+        $database = $container['database.connection'];
 
-        if (null === $current) {
-            return new Ferienpass\ApplicationSystem\NoOp();
+        $time = time();
+        $table = Ferienpass\Model\ApplicationSystem::getTable();
+
+        $result = $database
+            ->query(
+                "SELECT type "
+                ."FROM {$table} "
+                ."WHERE (start='' OR start<='$time') AND (stop='' OR stop>'".($time + 60)."') AND published='1'"
+            );
+
+        if (1 === $result->numRows) {
+            return $container['ferienpass.applicationsystem.'.$result->type];
         }
 
-        return $container['ferienpass.applicationsystem.'.$current->type];
+        return new Ferienpass\ApplicationSystem\NoOp();
     }
 );
 

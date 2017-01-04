@@ -53,7 +53,6 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'restrictions'    => [
                 Config::PARTICIPANT_ALLOWED_ZIP_CODES,
-                Config::PARTICIPANT_MAX_APPLICATIONS_PER_DAY,
                 Config::PARTICIPANT_REGISTRATION_REQUIRED_FIELDS,
             ],
             'data_processing' => [],
@@ -189,14 +188,6 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'text', //@todo we want a select/multicolumnfield with csv delimiter
             'eval'      => [
                 'tl_class' => 'w50',
-            ],
-        ],
-        Config::PARTICIPANT_MAX_APPLICATIONS_PER_DAY     => [
-            'label'     => &$GLOBALS['TL_LANG'][$table][Config::PARTICIPANT_MAX_APPLICATIONS_PER_DAY],
-            'inputType' => 'text',
-            'eval'      => [
-                'tl_class' => 'w50',
-                'rgxp'     => 'numeric',
             ],
         ],
         Config::PARTICIPANT_REGISTRATION_REQUIRED_FIELDS => [

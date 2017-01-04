@@ -50,7 +50,6 @@ class ApplicationListSubscriber implements EventSubscriberInterface
             BuildParticipantOptionsForApplicationListEvent::NAME => [
                 ['disableAlreadyAttendingParticipants'],
                 ['disableWrongAgeParticipants'],
-                ['disableLimitReachedParticipants'],
             ],
             SaveAttendanceEvent::NAME                            => [
                 'addAttendanceStatusMessage',
@@ -117,42 +116,6 @@ class ApplicationListSubscriber implements EventSubscriberInterface
             if (!$isAgeAllowed) {
                 $options[$k]['label'] = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'],
-                    $option['label']
-                );
-                $options[$k]['disabled'] = true;
-            }
-        }
-
-        $event->setResult($options);
-    }
-
-
-    /**
-     * Disable participants from options that have reached their limit
-     *
-     * @param BuildParticipantOptionsForApplicationListEvent $event
-     */
-    public function disableLimitReachedParticipants(BuildParticipantOptionsForApplicationListEvent $event)
-    {
-        $options = $event->getResult();
-        $maxApplicationsPerDay = FerienpassConfig::getInstance()->max_applications_per_day;
-
-        if (!$maxApplicationsPerDay) {
-            return;
-        }
-
-        foreach ($options as $k => $option) {
-            $isLimitReached = Attendance::countByParticipantAndDay(
-                Participant::getInstance()
-                    ->findById($option['value'])
-                    ->get('id')
-            ) >= $maxApplicationsPerDay
-                ? true
-                : false;
-
-            if ($isLimitReached) {
-                $options[$k]['label'] = sprintf(
-                    $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'],
                     $option['label']
                 );
                 $options[$k]['disabled'] = true;
