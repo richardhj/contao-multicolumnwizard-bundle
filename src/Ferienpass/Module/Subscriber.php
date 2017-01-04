@@ -161,7 +161,7 @@ class Subscriber implements EventSubscriberInterface
      */
     protected function detailsLink($arrItem)
     {
-        return [$arrItem['jumpTo']['url']];
+        return [$arrItem['jumpTo']['url'], 'data-lightbox'];
     }
 
 
