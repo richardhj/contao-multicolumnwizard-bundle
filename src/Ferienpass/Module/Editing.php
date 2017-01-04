@@ -462,20 +462,15 @@ HTML;
                     }
 
                     $redirectUrl = \Environment::get('request');
+                    list($redirectUrl,) = explode('?', $redirectUrl, 2);
 
-                    if (false === \Environment::get('isAjaxRequest')) {
-                        $redirectUrl = str_replace(
-                            ['create', 'vargroup'],
-                            ['edit', 'id'],
-                            $redirectUrl
-                        );
-
-                        if (false === strpos($redirectUrl, 'id=')) {
-                            $modelId = ModelId::fromValues($this->metaModel->getTableName(), $this->item->get('id'));
-                            $redirectUrl .= '&id='.$modelId->getSerialized();
-                        }
-
-                    }
+                    $modelId = ModelId::fromValues(
+                        $this->metaModel->getTableName(),
+                        $this->item->isVariant()
+                            ? $this->item->get('vargroup')
+                            : $this->item->get('id')
+                    );
+                    $redirectUrl .= '?act=edit&id='.$modelId->getSerialized();
 
                     \Controller::redirect($redirectUrl);
                 }
