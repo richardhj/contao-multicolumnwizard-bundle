@@ -14,6 +14,7 @@ use Contao\Input;
 use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
+use ContaoCommunityAlliance\DcGeneral\Contao\InputProvider;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
@@ -64,7 +65,7 @@ class Dca implements EventSubscriberInterface
                 ['prohibitDuplicateKeyOnSaveAttendance', -100],
             ],
             PopulateEnvironmentEvent::NAME           => [
-                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 2],
+                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY + 100],
             ],
             ModelToLabelEvent::NAME                  => [
                 ['addMemberEditLinkForParticipantListView', -10],
@@ -86,15 +87,15 @@ class Dca implements EventSubscriberInterface
      */
     public function createAttendancesButtonInOfferView(GetOperationButtonEvent $event)
     {
-        if ($event->getCommand()->getName() != 'edit_attendances') {
+        if ('edit_attendances' !== $event->getCommand()->getName()) {
             return;
         }
 
         /** @var Model $model */
         $model = $event->getModel();
-        $metaModel = $model->getItem()->getMetaModel();
+        $metaModelItem = $model->getItem();
 
-        if ($metaModel->hasVariants() && '1' === $model->getProperty('varbase')) {
+        if ($metaModelItem->isVariantBase() && 0 !== $metaModelItem->getVariants(null)->getCount()) {
             $event->setDisabled(true);
         } elseif (0 === Attendance::countByOfferAndStatus(
                 $model->getProperty('id'),
@@ -114,11 +115,7 @@ class Dca implements EventSubscriberInterface
      */
     public function addAttendancesOperationToMetaModelView(BuildMetaModelOperationsEvent $event)
     {
-        if (!in_array(
-            $event->getMetaModel()->getTableName(),
-            [FerienpassConfig::getInstance()->offer_model, FerienpassConfig::getInstance()->participant_model]
-        )
-        ) {
+        if (!in_array($event->getMetaModel()->getTableName(), ['mm_ferienpass', 'mm_participant'])) {
             return;
         }
 
@@ -162,18 +159,15 @@ class Dca implements EventSubscriberInterface
      */
     public function addAttendancesToMetaModelModuleTables(MetaModelsBootEvent $event)
     {
-        foreach ([
-                     FerienpassConfig::getInstance()->offer_model,
-                     FerienpassConfig::getInstance()->participant_model,
-                 ] as $metaModelName) {
+        foreach (['mm_ferienpass', 'mm_participant'] as $metaModelName) {
             /** @var ViewCombinations $viewCombinations */
             $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
             $inputScreen = $viewCombinations->getInputScreenDetails($metaModelName);
+            $backendSection = $inputScreen->getBackendSection();
             \Controller::loadDataContainer($metaModelName);
 
             // Add table name to back end module tables
-            $GLOBALS['BE_MOD'][$inputScreen->getBackendSection()]['metamodel_'.$metaModelName]['tables']
-            [] = Attendance::getTable();
+            $GLOBALS['BE_MOD'][$backendSection]['metamodel_'.$metaModelName]['tables'][] = Attendance::getTable();
         }
     }
 
@@ -187,10 +181,9 @@ class Dca implements EventSubscriberInterface
     {
         $environment = $event->getEnvironment();
         $definition = $environment->getDataDefinition();
-        $inputProvider = $environment->getInputProvider();
+        $inputProvider = $environment->getInputProvider() ?: new InputProvider(); // FIXME Why is inputProvider null?
 
         if ($definition->getName() !== Attendance::getTable()
-            || null === $inputProvider
             || null === ($pid = $inputProvider->getParameter('pid'))
         ) {
             return;
@@ -239,7 +232,6 @@ class Dca implements EventSubscriberInterface
             \Message::addError('Es besteht schon eine Anmeldung für diesen Benutzer und dieses Angebot');
             \Controller::reload();
         }
-
     }
 
 
@@ -254,9 +246,8 @@ class Dca implements EventSubscriberInterface
         $return = [];
 
         foreach ($this->getMetaModels() as $table => $metaModelTitle) {
-            foreach (Factory::getDefaultFactory()->getMetaModel($table)->getAttributes()
-                     as $attributeName => $attribute) {
-                $return[$table][$attributeName] = $attribute->getName();
+            foreach (Factory::getDefaultFactory()->getMetaModel($table)->getAttributes() as $attrName => $attribute) {
+                $return[$table][$attrName] = $attribute->getName();
             }
         }
 
@@ -574,9 +565,7 @@ class Dca implements EventSubscriberInterface
     {
         $model = $event->getModel();
 
-        if ($model instanceof Model
-            && FerienpassConfig::getInstance()->offer_model === $model->getProviderName()
-        ) {
+        if ($model instanceof Model && 'mm_ferienpass' === $model->getProviderName()) {
             /** @type \Model\Collection|DataProcessing $processsings */
             $processsings = DataProcessing::findBy('sync', '1');
 

@@ -92,7 +92,7 @@ $GLOBALS['TL_DCA'][$table] = [
     // MetaPalettes
     'metapalettes'          => [
         'default' => [
-            'config'   => [
+            'config'    => [
                 'title',
                 'type',
             ],
@@ -162,6 +162,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'tl_class' => 'w50',
                 'rgxp'     => 'numeric',
             ],
+            'sql'       => "int(5) NOT NULL default '0'",
         ],
         'published'             => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['published'],
