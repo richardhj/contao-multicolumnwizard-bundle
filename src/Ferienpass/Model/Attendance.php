@@ -232,6 +232,9 @@ class Attendance extends Model
 
         parent::postSave($intType);
 
+        // Register model post save (see contao/core#8608)
+        \Model\Registry::getInstance()->register($this);
+
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
         $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this, $this->cloneOriginal()));
