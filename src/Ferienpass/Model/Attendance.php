@@ -46,7 +46,7 @@ class Attendance extends Model
     protected static $participant;
 
 
-    protected static $orderBy = 'order,status,sorting';
+    protected static $orderBy = 'offer,status,sorting';
 
 
     /**
