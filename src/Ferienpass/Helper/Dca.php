@@ -187,9 +187,11 @@ class Dca implements EventSubscriberInterface
     {
         $environment = $event->getEnvironment();
         $definition = $environment->getDataDefinition();
+        $inputProvider = $environment->getInputProvider();
 
         if ($definition->getName() !== Attendance::getTable()
-            || null === ($pid = $environment->getInputProvider()->getParameter('pid'))
+            || null === $inputProvider
+            || null === ($pid = $inputProvider->getParameter('pid'))
         ) {
             return;
         };
@@ -205,11 +207,11 @@ class Dca implements EventSubscriberInterface
         $palette = $definition->getPalettesDefinition()->getPaletteByName('default');
 
         switch ($modelId->getDataProviderName()) {
-            case FerienpassConfig::getInstance()->offer_model:
+            case 'mm_ferienpass':
                 $palette->removeLegend($palette->getLegend('offer'));
                 break;
 
-            case FerienpassConfig::getInstance()->participant_model:
+            case 'mm_participant':
                 $palette->removeLegend($palette->getLegend('participant'));
                 break;
         }

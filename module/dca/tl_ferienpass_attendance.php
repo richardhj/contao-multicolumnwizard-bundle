@@ -103,7 +103,7 @@ $GLOBALS['TL_DCA'][$table] = [
     // List
     'list'         => [
         'sorting'           => [
-            'mode'         => 4,
+            'mode'         => 1,
 //            'flag'                  => 6,
 //            'mode'         => 0,
             'fields'       => [
