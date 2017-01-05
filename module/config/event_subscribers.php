@@ -10,6 +10,7 @@
 
 use Ferienpass\Event\NotificationSubscriber;
 use Ferienpass\Helper\Dca;
+use Ferienpass\Helper\SortingAware;
 use Ferienpass\Module\Subscriber as ModuleSubscriber;
 
 
@@ -19,5 +20,6 @@ return [
     new Dca(),
     new NotificationSubscriber(),
     new ModuleSubscriber(),
+    new SortingAware(),
     $container['ferienpass.applicationsystem'],
 ];

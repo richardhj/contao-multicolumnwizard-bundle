@@ -46,6 +46,9 @@ class Attendance extends Model
     protected static $participant;
 
 
+    protected static $orderBy = 'order,status,sorting';
+
+
     /**
      * Find attendances by participant's parent
      *
@@ -71,7 +74,7 @@ class Attendance extends Model
             "SELECT * FROM ".static::$strTable." WHERE participant IN(".implode(
                 ',',
                 $participantIds
-            ).") ORDER BY tstamp,id"
+            ).") ORDER BY ".static::getOrderBy()
         );
 
         return static::createCollectionFromDbResult($result, static::$strTable);
@@ -114,7 +117,23 @@ class Attendance extends Model
             array_merge
             (
                 [
-                    'order' => 'tstamp,id',
+                    'order' => static::getOrderBy(),
+                ],
+                $options
+            )
+        );
+    }
+
+
+    public static function findLastByOfferAndStatus($offerId, $statusId, array $options = [])
+    {
+        return static::findOneBy(
+            ['offer=?', 'status=?'],
+            [$offerId, $statusId],
+            array_merge
+            (
+                [
+                    'order' => 'sorting DESC',
                 ],
                 $options
             )
@@ -222,6 +241,15 @@ class Attendance extends Model
 
 
     /**
+     * @return string
+     */
+    public static function getOrderBy()
+    {
+        return self::$orderBy;
+    }
+
+
+    /**
      * Trigger the SaveAttendanceEvent
      *
      * @param int $intType
@@ -265,7 +293,7 @@ class Attendance extends Model
     public function getPosition()
     {
         /** @var Attendance|\Model\Collection $attendances */
-        $attendances = static::findByOffer($this->offer); // Collection is ordered by tstamp,id
+        $attendances = static::findByOffer($this->offer); // Collection is already ordered
 
         if (null === $attendances) {
             return null;

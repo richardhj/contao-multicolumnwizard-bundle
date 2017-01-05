@@ -117,7 +117,7 @@ abstract class MetaModelBridge
      */
     public function getTableName()
     {
-        return $this->getMetaModel()->getTableName();
+        return static::$tableName;
     }
 
 
