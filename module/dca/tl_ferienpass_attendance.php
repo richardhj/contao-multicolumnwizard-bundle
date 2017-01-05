@@ -12,6 +12,7 @@ use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Offer;
 use Ferienpass\Model\Participant;
 use MetaModels\IItem;
+use MetaModels\Items;
 
 
 $table = Ferienpass\Model\Attendance::getTable();
@@ -230,7 +231,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
-                iterator_to_array(Offer::getInstance()->findAll()),
+                iterator_to_array((Offer::getInstance()->findAll() ?: new Items([]))),
                 function (array $carry, IItem $item) {
                     $carry[$item->get('id')] = $item->get(
                         Ferienpass\Model\Config::getInstance()->offer_attribute_name
@@ -246,33 +247,31 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'     => &$GLOBALS['TL_LANG'][$table]['participant'],
             'inputType' => 'tableLookup',
             'eval'      => [
-                'mandatory'    => true,
-                'foreignTable' => Participant::getInstance()->getTableName(),
-                'fieldType'    => 'radio',
-                'listFields'   => [
+                'mandatory'        => true,
+                'foreignTable'     => Participant::getInstance()->getTableName(),
+                'fieldType'        => 'radio',
+                'listFields'       => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,
                     Ferienpass\Model\Config::getInstance()->participant_attribute_dateofbirth,
                     \MemberModel::getTable().'.firstname',
                     \MemberModel::getTable().'.lastname',
 
                 ],
-                'searchFields' => [
+                'searchFields'     => [
                     Ferienpass\Model\Config::getInstance()->participant_attribute_name,
                 ],
                 'joins'            => [
                     \MemberModel::getTable() => [
                         'type' => 'INNER JOIN',
                         'jkey' => 'id',
-                        'fkey' => Participant::getInstance()->getMetaModel()->getAttributeById(
-                            Participant::getInstance()->getMetaModel()->get('owner_attribute')
-                        )->getColName(),
+                        'fkey' => 'pmember',
                     ],
                 ],
                 'matchAllKeywords' => true,
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
-                iterator_to_array(Participant::getInstance()->findAll()),
+                iterator_to_array((Participant::getInstance()->findAll() ?: new Items([]))),
                 function (array $carry, IItem $item) {
                     $carry[$item->get('id')] = $item->get(
                         Ferienpass\Model\Config::getInstance()->participant_attribute_name
