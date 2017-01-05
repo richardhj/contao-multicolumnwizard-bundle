@@ -107,7 +107,7 @@ $GLOBALS['TL_DCA'][$table] = [
 //            'flag'                  => 6,
 //            'mode'         => 0,
             'fields'       => [
-                'sorting'
+//                'sorting'
 ////                'tstamp',
 ////                'offer',
 ////                'participant',
@@ -141,12 +141,12 @@ $GLOBALS['TL_DCA'][$table] = [
                     ],
             ],
         'operations'        => [
-            'cut'  => [
-                'label'      => &$GLOBALS['TL_LANG'][$table]['cut'],
-                'href'       => 'act=paste&amp;mode=cut',
-                'icon'       => 'cut.gif',
-                'attributes' => 'onclick="Backend.getScrollOffset()"',
-            ],
+//            'cut'  => [
+//                'label'      => &$GLOBALS['TL_LANG'][$table]['cut'],
+//                'href'       => 'act=paste&amp;mode=cut',
+//                'icon'       => 'cut.gif',
+//                'attributes' => 'onclick="Backend.getScrollOffset()"',
+//            ],
             'show' =>
                 [
                     'label' => &$GLOBALS['TL_LANG'][$table]['show'],
