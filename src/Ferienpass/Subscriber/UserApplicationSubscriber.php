@@ -51,6 +51,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             BuildParticipantOptionsForUserApplicationEvent::NAME => [
                 ['disableAlreadyAttendingParticipants'],
                 ['disableWrongAgeParticipants'],
+                ['disableDoubleBookingParticipants'],
             ],
             PreSaveModelEvent::NAME                              => [
                 'setSorting',
@@ -132,9 +133,10 @@ class UserApplicationSubscriber implements EventSubscriberInterface
 
     /**
      * Disable participants from options that have an attendance for offer's date range already
-     * @param BuildParticipantOptionsForApplicationListEvent $event
+     *
+     * @param BuildParticipantOptionsForUserApplicationEvent $event
      */
-    public function disableDoubleBookingParticipants(BuildParticipantOptionsForApplicationListEvent $event)
+    public function disableDoubleBookingParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         $options = $event->getResult();
 
