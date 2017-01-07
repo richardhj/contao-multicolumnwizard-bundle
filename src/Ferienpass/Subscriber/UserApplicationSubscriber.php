@@ -131,6 +131,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
 
     /**
      * Disable participants from options that have an attendance for offer's date range already
+     *
      * @param BuildParticipantOptionsForUserApplicationEvent $event
      */
     public function disableDoubleBookingParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
@@ -138,29 +139,6 @@ class UserApplicationSubscriber implements EventSubscriberInterface
         $options = $event->getResult();
 
         $event->setResult($options);
-    }
-
-
-    /**
-     * Set the sorting when saving an attendance made by the user
-     *
-     * @param PreSaveModelEvent $event
-     */
-    public function setSorting(PreSaveModelEvent $event)
-    {
-        $attendance = $event->getModel();
-
-        if (!$attendance instanceof Attendance || $attendance->sorting) {
-            return;
-        }
-
-        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
-        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
-        $sorting += 128;
-
-        $data = $event->getData();
-        $data['sorting'] = $sorting;
-        $event->setData($data);
     }
 
 
