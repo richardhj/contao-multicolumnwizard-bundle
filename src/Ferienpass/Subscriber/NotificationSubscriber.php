@@ -2,13 +2,13 @@
 /**
  * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * Copyright (c) 2015-2016 Richard Henkenjohann
+ * Copyright (c) 2015-2017 Richard Henkenjohann
  *
  * @package Ferienpass
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Event;
+namespace Ferienpass\Subscriber;
 
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
 use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
@@ -65,7 +65,7 @@ class NotificationSubscriber implements EventSubscriberInterface
         /** @var Attendance $originalAttendance */
         $originalAttendance = $event->getOriginalModel();
 
-        if (null !== $originalAttendance->getStatus() || null === $attendance->getStatus()) {
+        if (!$attendance instanceof Attendance || null !== $originalAttendance->getStatus() || null === $attendance->getStatus()) {
             return;
         }
 
@@ -98,7 +98,8 @@ class NotificationSubscriber implements EventSubscriberInterface
         /** @var Attendance $originalAttendance */
         $originalAttendance = $event->getOriginalModel();
 
-        if (null === $originalAttendance->getStatus()
+        if (!$attendance instanceof Attendance
+            || null === $originalAttendance->getStatus()
             || $originalAttendance->getStatus() === $attendance->getStatus()
         ) {
             return;

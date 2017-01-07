@@ -2,7 +2,7 @@
 /**
  * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * Copyright (c) 2015-2016 Richard Henkenjohann
+ * Copyright (c) 2015-2017 Richard Henkenjohann
  *
  * @package Ferienpass
  * @author  Richard Henkenjohann <richard@ferienpass.online>
@@ -10,6 +10,8 @@
 
 namespace Ferienpass\Event;
 
+use Contao\Model\Event\PostSaveModelEvent;
+use Contao\Model\Event\PreSaveModelEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
@@ -51,10 +53,30 @@ class ApplicationListSubscriber implements EventSubscriberInterface
                 ['disableAlreadyAttendingParticipants'],
                 ['disableWrongAgeParticipants'],
             ],
-            SaveAttendanceEvent::NAME                            => [
+            PreSaveModelEvent::NAME                              => [
+                'setSorting',
+            ],
+            PostSaveModelEvent::NAME                             => [
                 'addAttendanceStatusMessage',
             ],
         ];
+    }
+
+
+    public function setSorting(PreSaveModelEvent $event)
+    {
+        $attendance = $event->getModel();
+
+        if (!$attendance instanceof Attendance || $attendance->sorting) {
+            return;
+        }
+
+        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
+        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+
+        $data = $event->getData();
+        $data['sorting'] = $sorting + 128;
+        $event->setData($data);
     }
 
 
@@ -129,17 +151,23 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     /**
      * Display a message after saving a new attendance
      *
-     * @param SaveAttendanceEvent $event
+     * @param PostSaveModelEvent $event
      */
-    public function addAttendanceStatusMessage(SaveAttendanceEvent $event)
+    public function addAttendanceStatusMessage(PostSaveModelEvent $event)
     {
-        $participantName = $event
-            ->getModel()
+        /** @var Attendance $attendance */
+        $attendance = $event->getModel();
+
+        if (!$attendance instanceof Attendance) {
+            return;
+        }
+
+        $participantName = $attendance
             ->getParticipant()
             ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)
         ['text'];
 
-        $status = $event->getModel()->getStatus();
+        $status = $attendance->getStatus();
 
         Message::add(
             sprintf(

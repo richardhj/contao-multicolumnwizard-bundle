@@ -67,7 +67,7 @@ class Lot extends AbstractApplicationSystem
         /** @var Attendance $attendance */
         $attendance = $event->getModel();
 
-        if (null !== ($oldStatus = $attendance->getStatus())) {
+        if (!$attendance instanceof Attendance || null !== ($oldStatus = $attendance->getStatus())) {
             return;
         }
 

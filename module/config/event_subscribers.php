@@ -8,10 +8,9 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-use Ferienpass\Event\NotificationSubscriber;
 use Ferienpass\Helper\Dca;
-use Ferienpass\Helper\SortingAware;
 use Ferienpass\Module\Subscriber as ModuleSubscriber;
+use Ferienpass\Subscriber\NotificationSubscriber;
 
 
 global $container;
@@ -20,6 +19,5 @@ return [
     new Dca(),
     new NotificationSubscriber(),
     new ModuleSubscriber(),
-    new SortingAware(),
     $container['ferienpass.applicationsystem'],
 ];

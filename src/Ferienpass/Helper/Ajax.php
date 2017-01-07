@@ -96,7 +96,7 @@ class Ajax
         $versions->create();
 
         // Update sorting
-        SortingAware::init($modelId->getDataProviderName())->setAttendanceAfter($modelId, $previousModelId);
+        SortingHelper::init($modelId->getDataProviderName())->setAttendanceAfter($modelId, $previousModelId);
 
 
         $response = [

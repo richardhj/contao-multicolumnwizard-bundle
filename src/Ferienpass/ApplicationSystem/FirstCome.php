@@ -10,9 +10,9 @@
 
 namespace Ferienpass\ApplicationSystem;
 
+use Contao\Model\Event\DeleteModelEvent;
 use Contao\Model\Event\PreSaveModelEvent;
 use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
-use Ferienpass\Event\DeleteAttendanceEvent;
 use Ferienpass\Event\UserSetAttendanceEvent;
 use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
@@ -40,7 +40,7 @@ class FirstCome extends AbstractApplicationSystem
             PreSaveModelEvent::NAME                              => [
                 ['setAttendanceStatus'],
             ],
-            DeleteAttendanceEvent::NAME                          => [
+            DeleteModelEvent::NAME                               => [
                 'updateAllStatusByOffer',
             ],
             BuildParticipantOptionsForApplicationListEvent::NAME => [
@@ -63,8 +63,12 @@ class FirstCome extends AbstractApplicationSystem
      */
     public function setAttendanceStatus(PreSaveModelEvent $event)
     {
-        /** @var Attendance $attendance */
         $attendance = $event->getModel();
+
+        if (!$attendance instanceof Attendance) {
+            return;
+        }
+
         $oldStatus = $attendance->getStatus();
         $newStatus = self::findStatusForAttendance($attendance);
 
@@ -130,11 +134,17 @@ class FirstCome extends AbstractApplicationSystem
     /**
      * Update all attendance statuses for one offer
      *
-     * @param DeleteAttendanceEvent $event
+     * @param DeleteModelEvent $event
      */
-    public function updateAllStatusByOffer(DeleteAttendanceEvent $event)
+    public function updateAllStatusByOffer(DeleteModelEvent $event)
     {
-        $attendances = Attendance::findByOffer($event->getAttendance()->getOffer()->get('id'));
+        $attendance = $event->getModel();
+
+        if (!$attendance instanceof Attendance) {
+            return;
+        }
+
+        $attendances = Attendance::findByOffer($attendance->getOffer()->get('id'));
 
         // Stop if the last attendance was deleted
         if (null === $attendances) {

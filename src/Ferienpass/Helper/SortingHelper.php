@@ -12,23 +12,19 @@
 namespace Ferienpass\Helper;
 
 
-use Contao\Model\Event\PreSaveModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Controller\ModelCollector;
 use ContaoCommunityAlliance\DcGeneral\Controller\SortingManager;
 use ContaoCommunityAlliance\DcGeneral\Data\DataProviderInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\DefaultCollection;
-use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelIdInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelInterface;
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\DcGeneral\Factory\DcGeneralFactory;
 use ContaoCommunityAlliance\Translator\TranslatorInterface;
-use Ferienpass\Model\Attendance;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
-class SortingAware implements EventSubscriberInterface
+class SortingHelper
 {
 
     /**
@@ -43,51 +39,10 @@ class SortingAware implements EventSubscriberInterface
     private $dataProvider;
 
 
-    private static $instance;
-
-
-    /**
-     * Returns an array of event names this subscriber wants to listen to.
-     *
-     * The array keys are event names and the value can be:
-     *
-     *  * The method name to call (priority defaults to 0)
-     *  * An array composed of the method name to call and the priority
-     *  * An array of arrays composed of the method names to call and respective
-     *    priorities, or 0 if unset
-     *
-     * For instance:
-     *
-     *  * array('eventName' => 'methodName')
-     *  * array('eventName' => array('methodName', $priority))
-     *  * array('eventName' => array(array('methodName1', $priority), array('methodName2')))
-     *
-     * @return array The event names to listen to
-     */
-    public static function getSubscribedEvents()
+    public function __construct($table)
     {
-        return [
-            PreSaveModelEvent::NAME => [
-                'setSorting',
-            ],
-        ];
-    }
-
-
-    public function setSorting(PreSaveModelEvent $event)
-    {
-        $attendance = $event->getModel();
-
-        if ('BE' === TL_MODE || $attendance->sorting) {
-            return;
-        }
-
-        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
-        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
-
-        $data = $event->getData();
-        $data['sorting'] = $sorting + 128;
-        $event->setData($data);
+        $this->createDcGeneral($table);
+        $this->dataProvider = $this->environment->getDataProvider();
     }
 
 
@@ -116,19 +71,11 @@ class SortingAware implements EventSubscriberInterface
     }
 
 
-    public static function init($table)
-    {
-        if (null === self::$instance) {
-            self::$instance = new self();
-        }
-
-        self::$instance->createDcGeneral($table);
-        self::$instance->dataProvider = self::$instance->environment->getDataProvider();
-
-        return self::$instance;
-    }
-
-
+    /**
+     * @param ModelInterface $model
+     *
+     * @return \ContaoCommunityAlliance\DcGeneral\Data\CollectionInterface|ModelInterface[]|\string[]
+     */
     private function findSiblings(ModelInterface $model)
     {
         $config = $this->environment->getBaseConfigRegistry()->getBaseConfig();
