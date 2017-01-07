@@ -55,10 +55,12 @@ class Ajax
      * Handle the reposition of attendances in the backend
      *
      * @param $action
+     *
+     * @internal param $dc
      */
-    public function handleOfferAttendancesView($action, $dc)
+    public function handleOfferAttendancesView($action)
     {
-        if ($action !== 'offerAttendancesSorting') {
+        if ('offerAttendancesSorting' !== $action) {
             return;
         }
 
@@ -78,7 +80,7 @@ class Ajax
             $response = new JsonResponse($response);
             $response->send();
 
-            exit;
+            return;
         }
 
         // Check permissions
@@ -96,9 +98,10 @@ class Ajax
         $versions->create();
 
         // Update sorting
-        SortingHelper::init($modelId->getDataProviderName())->setAttendanceAfter($modelId, $previousModelId);
+        $sortingHelper = new SortingHelper($modelId->getDataProviderName());
+        $sortingHelper->setAttendanceAfter($modelId, $previousModelId);
 
-
+        // Respond
         $response = [
             'success'    => true,
             'startCount' => Attendance::countByOfferAndStatus($attendance->offer, $oldStatusId->getId()),
