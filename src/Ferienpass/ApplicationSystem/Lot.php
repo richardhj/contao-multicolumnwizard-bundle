@@ -10,14 +10,13 @@
 
 namespace Ferienpass\ApplicationSystem;
 
+use Contao\Model\Event\PreSaveModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\DcGeneral\View\OfferAttendancesView;
-use Ferienpass\Event\SaveAttendanceEvent;
 use Ferienpass\Event\UserSetAttendanceEvent;
-use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -39,8 +38,8 @@ class Lot extends AbstractApplicationSystem
             UserSetAttendanceEvent::NAME   => [
                 'setNewAttendance',
             ],
-            SaveAttendanceEvent::NAME      => [
-                ['updateAttendanceStatus', 100],
+            PreSaveModelEvent::NAME        => [
+                ['setAttendanceStatus'],
             ],
             PopulateEnvironmentEvent::NAME => [
                 ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 1.5],
@@ -61,10 +60,11 @@ class Lot extends AbstractApplicationSystem
     /**
      * Save the "waiting" status for one attendance per default
      *
-     * @param SaveAttendanceEvent $event
+     * @param PreSaveModelEvent $event
      */
-    public function updateAttendanceStatus(SaveAttendanceEvent $event)
+    public function setAttendanceStatus(PreSaveModelEvent $event)
     {
+        /** @var Attendance $attendance */
         $attendance = $event->getModel();
 
         if (null !== ($oldStatus = $attendance->getStatus())) {
@@ -73,8 +73,9 @@ class Lot extends AbstractApplicationSystem
 
         $newStatus = AttendanceStatus::findWaiting();
 
-        $attendance->status = $newStatus->id;
-        $attendance->save();
+        $data = $event->getData();
+        $data['status'] = $newStatus->id;
+        $event->setData($data);
     }
 
 

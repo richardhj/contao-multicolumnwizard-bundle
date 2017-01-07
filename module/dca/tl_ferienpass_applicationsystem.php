@@ -65,21 +65,9 @@ $GLOBALS['TL_DCA'][$table] = [
                 'icon'  => 'edit.gif',
             ],
             'toggle' => [
-                'label'                => &$GLOBALS['TL_LANG'][$table]['toggle'],
-                'attributes'           => 'onclick="Backend.getScrollOffset();"',
-                'haste_ajax_operation' => [
-                    'field'   => 'published',
-                    'options' => [
-                        [
-                            'value' => '',
-                            'icon'  => 'invisible.gif',
-                        ],
-                        [
-                            'value' => '1',
-                            'icon'  => 'visible.gif',
-                        ],
-                    ],
-                ],
+                'label'          => &$GLOBALS['TL_LANG'][$table]['toggle'],
+                'icon'           => 'visible.gif',
+                'toggleProperty' => 'published',
             ],
             'show'   => [
                 'label' => &$GLOBALS['TL_LANG'][$table]['show'],

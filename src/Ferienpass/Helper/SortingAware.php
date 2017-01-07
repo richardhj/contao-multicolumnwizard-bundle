@@ -12,14 +12,17 @@
 namespace Ferienpass\Helper;
 
 
+use Contao\Model\Event\PreSaveModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Controller\ModelCollector;
 use ContaoCommunityAlliance\DcGeneral\Controller\SortingManager;
 use ContaoCommunityAlliance\DcGeneral\Data\DataProviderInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\DefaultCollection;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelIdInterface;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelInterface;
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\DcGeneral\Factory\DcGeneralFactory;
 use ContaoCommunityAlliance\Translator\TranslatorInterface;
-use Ferienpass\Event\SaveAttendanceEvent;
 use Ferienpass\Model\Attendance;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -38,6 +41,9 @@ class SortingAware implements EventSubscriberInterface
      * @var DataProviderInterface
      */
     private $dataProvider;
+
+
+    private static $instance;
 
 
     /**
@@ -61,45 +67,69 @@ class SortingAware implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            SaveAttendanceEvent::NAME => [
-                'updateSorting',
+            PreSaveModelEvent::NAME => [
+                'setSorting',
             ],
         ];
     }
 
 
-    public function updateSorting(SaveAttendanceEvent $event)
+    public function setSorting(PreSaveModelEvent $event)
     {
-        if ('BE' === TL_MODE || $event->getModel()->status === $event->getOriginalModel()->status) {
+        $attendance = $event->getModel();
+
+        if ('BE' === TL_MODE || $attendance->sorting) {
             return;
         }
 
-        $attendance = $event->getModel();
         $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
+        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
 
-        $this->createDcGeneral($attendance::getTable());
-        $this->dataProvider = $this->environment->getDataProvider();
+        $data = $event->getData();
+        $data['sorting'] = $sorting + 128;
+        $event->setData($data);
+    }
 
-        $modelCollector = new ModelCollector($this->environment);
-        $model = $modelCollector->getModel($attendance->id, $attendance::getTable());
+
+    public function setAttendanceAfter(ModelIdInterface $model, ModelIdInterface $previousModel)
+    {
+        $model = $this->convertModelIdToModel($model);
+        $previousModel = $this->convertModelIdToModel($previousModel);
 
         $models = new DefaultCollection();
         $models->push($model);
 
-        if (null !== $lastAttendance) {
-            $lastAttendance = $modelCollector->getModel($lastAttendance->id, Attendance::getTable());
-        }
+        $siblings = self::findSiblings($model);
 
-        $siblings = $this->findSiblings($attendance);
-
-        $sortingManager = new SortingManager($models, $siblings, 'sorting', $lastAttendance);
+        $sortingManager = new SortingManager($models, $siblings, 'sorting', $previousModel);
         $result = $sortingManager->getResults();
 
         $this->dataProvider->saveEach($result);
     }
 
 
-    private function findSiblings(Attendance $attendance)
+    private function convertModelIdToModel(ModelIdInterface $modelId)
+    {
+        $modelCollector = new ModelCollector($this->environment);
+
+        return $modelCollector->getModel($modelId->getId(), $modelId->getDataProviderName());
+    }
+
+
+    public static function init($table)
+    {
+        if (null === self::$instance) {
+            self::$instance = new self();
+        }
+
+        self::$instance->createDcGeneral($table);
+        self::$instance->dataProvider = self::$instance->environment->getDataProvider();
+
+        return self::$instance;
+    }
+
+
+    private function findSiblings(ModelInterface $model)
     {
         $config = $this->environment->getBaseConfigRegistry()->getBaseConfig();
         $config->setSorting(['sorting' => 'ASC']);
@@ -108,12 +138,12 @@ class SortingAware implements EventSubscriberInterface
         $filters[] = [
             'operation' => '=',
             'property'  => 'offer',
-            'value'     => $attendance->offer,
+            'value'     => $model->getProperty('offer'),
         ];
         $filters[] = [
             'operation' => '=',
             'property'  => 'status',
-            'value'     => $attendance->status,
+            'value'     => $model->getProperty('status'),
         ];
         $config->setFilter($filters);
 

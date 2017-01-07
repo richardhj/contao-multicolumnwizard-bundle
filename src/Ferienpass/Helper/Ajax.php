@@ -53,16 +53,23 @@ class Ajax
 
     /**
      * Handle the reposition of attendances in the backend
+     *
      * @param $action
      */
-    public function handleOfferAttendancesView($action)
+    public function handleOfferAttendancesView($action, $dc)
     {
         if ($action !== 'offerAttendancesSorting') {
             return;
         }
 
         try {
+            $oldStatusId = ModelId::fromSerialized(\Input::post('oldStatus'));
+            $newStatusId = ModelId::fromSerialized(\Input::post('newStatus'));
             $modelId = ModelId::fromSerialized(\Input::post('model'));
+            $previousModelId = ('' !== \Input::post('previousModel'))
+                ? ModelId::fromSerialized(\Input::post('previousModel'))
+                : null;
+
         } catch (\Exception $e) {
             $response = [
                 'success' => false,
@@ -70,16 +77,7 @@ class Ajax
             ];
             $response = new JsonResponse($response);
             $response->send();
-            exit;
-        }
 
-        if (0 === ($newStatusId = (int)\Input::post('newStatusId'))) {
-            $response = [
-                'success' => false,
-                'error'   => 'Error with newStatusId',
-            ];
-            $response = new JsonResponse($response);
-            $response->send();
             exit;
         }
 
@@ -92,14 +90,18 @@ class Ajax
 
         $attendance = Attendance::findByPk($modelId->getId());
         $attendance->tstamp = time();
-        $attendance->status = $newStatusId;
+        $attendance->status = $newStatusId->getId();
         $attendance->save();
 
         $versions->create();
 
+        // Update sorting
+        SortingAware::init($modelId->getDataProviderName())->setAttendanceAfter($modelId, $previousModelId);
+
+
         $response = [
             'success'    => true,
-            'startCount' => Attendance::countByOfferAndStatus($attendance->offer, (int)\Input::post('oldStatusId')),
+            'startCount' => Attendance::countByOfferAndStatus($attendance->offer, $oldStatusId->getId()),
             'endCount'   => Attendance::countByOfferAndStatus($attendance->offer, $attendance->status),
         ];
         $response = new JsonResponse($response);

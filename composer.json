@@ -28,6 +28,7 @@
     "netzmacht/contao-flysystem": "~1.0",
     "pixelfear/oauth2-dropbox": "dev-master",
     "richardhj/contao-member_logo": "*",
+    "richardhj/contao-model-events": "^1.0",
     "richardhj/contao-upload_preview_field": "*",
       "richardhj/dc-general-single-model": "*",
     "terminal42/contao-conditionalselectmenu": "~3.0",

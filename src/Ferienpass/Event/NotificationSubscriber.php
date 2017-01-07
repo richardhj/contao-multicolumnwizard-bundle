@@ -10,7 +10,9 @@
 
 namespace Ferienpass\Event;
 
+use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
 use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
+use Ferienpass\Model\Attendance;
 use NotificationCenter\Model\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -43,7 +45,7 @@ class NotificationSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            SaveAttendanceEvent::NAME => [
+            PostPersistModelEvent::NAME => [
                 ['sendNewAttendanceStatusNotification'],
                 ['sendChangedAttendanceStatusNotification'],
             ],
@@ -54,22 +56,28 @@ class NotificationSubscriber implements EventSubscriberInterface
     /**
      * Send the corresponding notification if the attendance status is assigned newly
      *
-     * @param SaveAttendanceEvent $event
+     * @param PostPersistModelEvent $event
      */
-    public function sendNewAttendanceStatusNotification(SaveAttendanceEvent $event)
+    public function sendNewAttendanceStatusNotification(PostPersistModelEvent $event)
     {
-        if (null !== $event->getOriginalModel()->getStatus() || null === $event->getModel()->getStatus()) {
+        /** @var Attendance $attendance */
+        $attendance = $event->getModel();
+        /** @var Attendance $originalAttendance */
+        $originalAttendance = $event->getOriginalModel();
+
+        if (null !== $originalAttendance->getStatus() || null === $attendance->getStatus()) {
             return;
         }
 
         /** @var Notification $notification */
-        $notification = Notification::findByPk($event->getModel()->getStatus()->notification_new);
+        $notification = Notification::findByPk($attendance->getStatus()->notification_new);
 
         if (null !== $notification) {
-            $participant = $event->getModel()->getParticipant();
-            $offer = $event->getModel()->getOffer();
-
             global $container;
+
+            $participant = $attendance->getParticipant();
+            $offer = $attendance->getOffer();
+
             /** @var AbstractApplicationSystem $applicationSystem */
             $applicationSystem = $container['ferienpass.applicationsystem'];
 
@@ -81,12 +89,17 @@ class NotificationSubscriber implements EventSubscriberInterface
     /**
      * Send the corresponding notification if the attendance status was changed
      *
-     * @param SaveAttendanceEvent $event
+     * @param PostPersistModelEvent $event
      */
-    public function sendChangedAttendanceStatusNotification(SaveAttendanceEvent $event)
+    public function sendChangedAttendanceStatusNotification(PostPersistModelEvent $event)
     {
-        if (null === $event->getOriginalModel()->getStatus()
-            || $event->getOriginalModel()->getStatus() === $event->getModel()->getStatus()
+        /** @var Attendance $attendance */
+        $attendance = $event->getModel();
+        /** @var Attendance $originalAttendance */
+        $originalAttendance = $event->getOriginalModel();
+
+        if (null === $originalAttendance->getStatus()
+            || $originalAttendance->getStatus() === $attendance->getStatus()
         ) {
             return;
         }
@@ -104,8 +117,8 @@ class NotificationSubscriber implements EventSubscriberInterface
 
             $notification->send(
                 $applicationSystem->getNotificationTokens(
-                    $event->getModel()->getParticipant(),
-                    $event->getModel()->getOffer()
+                    $attendance->getParticipant(),
+                    $attendance->getOffer()
                 )
             );
         }

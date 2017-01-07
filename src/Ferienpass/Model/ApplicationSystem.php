@@ -76,7 +76,7 @@ class ApplicationSystem extends Model
 
                 return $name;
             },
-            preg_grep('/^ferienpass\.applicationsystem\.(.+)$/', $container->keys())
+            array_values(preg_grep('/^ferienpass\.applicationsystem\.(.+)$/', $container->keys()))
         );
     }
 }

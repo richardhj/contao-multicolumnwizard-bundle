@@ -30,7 +30,7 @@
         <div id="table_<?php echo $this->tableName; ?>" class="status-assignment">
 
             <?php foreach ($this->status as $status): ?>
-                <div id="status-<?php echo $status->id ?>" class="attendance-status -<?php echo $status->cssClass ?>">
+                <div data-status-id="<?php echo ContaoCommunityAlliance\DcGeneral\Data\ModelId::fromValues($status->getTable(), $status->id)->getSerialized(); ?>" class="attendance-status -<?php echo $status->cssClass ?>">
                     <h2><?php echo Haste\Util\Format::dcaValue($status->getTable(), 'type', $status->type) ?></h2>
                     <div class="count">
                         <span
@@ -82,8 +82,10 @@
                     data: {
                         action: 'offerAttendancesSorting',
                         model: e.detail.item.getAttribute('data-model-id'),
-                        oldStatusId: e.detail.startparent.getParent().id.substr(7),
-                        newStatusId: e.detail.endparent.getParent().id.substr(7)
+                        previousModel: (null != e.detail.item.getPrevious('li')) ? e.detail.item.getPrevious('li').getAttribute('data-model-id') : '',
+                        oldStatus: e.detail.startparent.getParent().getAttribute('data-status-id'),
+                        newStatus: e.detail.endparent.getParent().getAttribute('data-status-id'),
+                        REQUEST_TOKEN: '<?php echo REQUEST_TOKEN; ?>'
                     },
                     onRequest: function () {
                         e.detail.endparent.getParent().getElement('.count').addClass('ajax-waiting');

@@ -30,6 +30,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 class Attendance extends Model
 {
 
+    use Model\DispatchModelEventsTrait;
+
     /**
      * Table name
      *
@@ -246,43 +248,6 @@ class Attendance extends Model
     public static function getOrderBy()
     {
         return self::$orderBy;
-    }
-
-
-    /**
-     * Trigger the SaveAttendanceEvent
-     *
-     * @param int $intType
-     */
-    protected function postSave($intType)
-    {
-        global $container;
-
-        parent::postSave($intType);
-
-        // Register model post save (see contao/core#8608)
-        \Model\Registry::getInstance()->register($this);
-
-        /** @var EventDispatcher $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
-        $dispatcher->dispatch(SaveAttendanceEvent::NAME, new SaveAttendanceEvent($this, $this->cloneOriginal()));
-    }
-
-
-    /**
-     * Delete attendance and trigger status update actions
-     *
-     * @return void
-     */
-    public function delete()
-    {
-        if (parent::delete()) {
-            global $container;
-            /** @var EventDispatcher $dispatcher */
-            $dispatcher = $container['event-dispatcher'];
-
-            $dispatcher->dispatch(DeleteAttendanceEvent::NAME, new DeleteAttendanceEvent($this));
-        }
     }
 
 
