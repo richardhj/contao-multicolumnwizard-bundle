@@ -131,6 +131,18 @@ class UserApplicationSubscriber implements EventSubscriberInterface
 
 
     /**
+     * Disable participants from options that have an attendance for offer's date range already
+     * @param BuildParticipantOptionsForApplicationListEvent $event
+     */
+    public function disableDoubleBookingParticipants(BuildParticipantOptionsForApplicationListEvent $event)
+    {
+        $options = $event->getResult();
+
+        $event->setResult($options);
+    }
+
+
+    /**
      * Set the sorting when saving an attendance made by the user
      *
      * @param PreSaveModelEvent $event
