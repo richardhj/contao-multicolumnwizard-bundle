@@ -79,7 +79,7 @@ class ToolboxOfferDate
     protected static function fetchOffer($offer)
     {
         if ($offer instanceof IItem) {
-            if ($offer->getMetaModel()->getTableName() !== Config::getInstance()->offer_model) {
+            if ('mm_ferienpass' !== $offer->getMetaModel()->getTableName()) {
                 throw new \LogicException('Given item MetaModel does not match');
             }
 
@@ -97,6 +97,6 @@ class ToolboxOfferDate
      */
     protected static function fetchDateAttribute(IItem $item)
     {
-        return $item->getAttribute(Config::getInstance()->offer_attribute_date);
+        return $item->getAttribute('date_period');
     }
 }
