@@ -10,7 +10,7 @@
 
 namespace Ferienpass\Module;
 
-use Ferienpass\Event\ApplicationListSubscriber;
+use Ferienpass\Event\UserApplicationSubscriber;
 use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Helper\Message;
@@ -43,7 +43,7 @@ class UserApplication extends Item
         /** @var EventDispatcher $dispatcher */
         $dispatcher = $container['event-dispatcher'];
 
-        $dispatcher->addSubscriber(new ApplicationListSubscriber());
+        $dispatcher->addSubscriber(new UserApplicationSubscriber());
 
         // Stop if the procedure is not used
         if (!$this->item->get('applicationlist_active')) {

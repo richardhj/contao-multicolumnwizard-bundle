@@ -21,10 +21,10 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
 /**
- * Class ApplicationListSubscriber
+ * Class UserApplicationSubscriber
  * @package Ferienpass\Event
  */
-class ApplicationListSubscriber implements EventSubscriberInterface
+class UserApplicationSubscriber implements EventSubscriberInterface
 {
 
     /**
