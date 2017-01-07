@@ -167,9 +167,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $participantName = $attendance
-            ->getParticipant()
-            ->parseAttribute('name')['text'];
+        $participantName = $attendance->getParticipant()->parseAttribute('name')['text'];
 
         $status = $attendance->getStatus();
 
