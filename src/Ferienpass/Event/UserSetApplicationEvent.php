@@ -16,10 +16,10 @@ use Symfony\Component\EventDispatcher\Event;
 
 
 /**
- * Class UserSetAttendanceEvent
+ * Class UserSetApplicationEvent
  * @package Ferienpass\Event
  */
-class UserSetAttendanceEvent extends Event
+class UserSetApplicationEvent extends Event
 {
 
     const NAME = 'ferienpass.application-list.set-attendance';
@@ -38,7 +38,7 @@ class UserSetAttendanceEvent extends Event
 
 
     /**
-     * UserSetAttendanceEvent constructor.
+     * UserSetApplicationEvent constructor.
      *
      * @param IItem $offer
      * @param IItem $participant

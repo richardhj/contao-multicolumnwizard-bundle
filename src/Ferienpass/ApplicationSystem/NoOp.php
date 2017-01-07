@@ -11,7 +11,7 @@
 namespace Ferienpass\ApplicationSystem;
 
 
-use Ferienpass\Event\UserSetAttendanceEvent;
+use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Helper\Message;
 
 
@@ -39,7 +39,7 @@ class NoOp extends AbstractApplicationSystem
     public static function getSubscribedEvents()
     {
         return [
-            UserSetAttendanceEvent::NAME => [
+            UserSetApplicationEvent::NAME => [
                 'setNewAttendance'
             ],
         ];
@@ -47,7 +47,7 @@ class NoOp extends AbstractApplicationSystem
 
 
     /**
-     * @internal param UserSetAttendanceEvent $event
+     * @internal param UserSetApplicationEvent $event
      */
     public function setNewAttendance()
     {

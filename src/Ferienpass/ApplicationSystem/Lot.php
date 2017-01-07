@@ -16,7 +16,7 @@ use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\DcGeneral\View\OfferAttendancesView;
-use Ferienpass\Event\UserSetAttendanceEvent;
+use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Config as FerienpassConfig;
@@ -35,7 +35,7 @@ class Lot extends AbstractApplicationSystem
     public static function getSubscribedEvents()
     {
         return [
-            UserSetAttendanceEvent::NAME   => [
+            UserSetApplicationEvent::NAME  => [
                 'setNewAttendance',
             ],
             PreSaveModelEvent::NAME        => [
@@ -51,7 +51,7 @@ class Lot extends AbstractApplicationSystem
     }
 
 
-    public function setNewAttendance(UserSetAttendanceEvent $event)
+    public function setNewAttendance(UserSetApplicationEvent $event)
     {
         $this->setNewAttendanceInDatabase($event->getOffer(), $event->getParticipant());
     }

@@ -13,7 +13,7 @@ namespace Ferienpass\ApplicationSystem;
 use Contao\Model\Event\DeleteModelEvent;
 use Contao\Model\Event\PreSaveModelEvent;
 use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
-use Ferienpass\Event\UserSetAttendanceEvent;
+use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
@@ -34,7 +34,7 @@ class FirstCome extends AbstractApplicationSystem
     public static function getSubscribedEvents()
     {
         return [
-            UserSetAttendanceEvent::NAME                         => [
+            UserSetApplicationEvent::NAME                        => [
                 'setNewAttendance',
             ],
             PreSaveModelEvent::NAME                              => [
@@ -50,7 +50,7 @@ class FirstCome extends AbstractApplicationSystem
     }
 
 
-    public function setNewAttendance(UserSetAttendanceEvent $event)
+    public function setNewAttendance(UserSetApplicationEvent $event)
     {
         $this->setNewAttendanceInDatabase($event->getOffer(), $event->getParticipant());
     }

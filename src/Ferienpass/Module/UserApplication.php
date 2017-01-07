@@ -12,7 +12,7 @@ namespace Ferienpass\Module;
 
 use Ferienpass\Event\ApplicationListSubscriber;
 use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
-use Ferienpass\Event\UserSetAttendanceEvent;
+use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
@@ -139,11 +139,11 @@ class UserApplication extends Item
                 // Process new applications
                 foreach ((array)$form->fetch('participant') as $participant) {
                     // Trigger event and let the application system set the attendance
-                    $event = new UserSetAttendanceEvent(
+                    $event = new UserSetApplicationEvent(
                         $this->item,
                         Participant::getInstance()->findById($participant)
                     );
-                    $dispatcher->dispatch(UserSetAttendanceEvent::NAME, $event);
+                    $dispatcher->dispatch(UserSetApplicationEvent::NAME, $event);
                 }
 
                 // Reload page to show confirmation message
