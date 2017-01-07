@@ -19,7 +19,6 @@ use Ferienpass\DcGeneral\View\OfferAttendancesView;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Config as FerienpassConfig;
 
 
 /**
@@ -97,9 +96,9 @@ class Lot extends AbstractApplicationSystem
 
         // Not attendances for offer MetaModel
         if (!($definition->getName() === Attendance::getTable()
-                && $definition
+                && 'mm_ferienpass' === $definition
                     ->getBasicDefinition()
-                    ->getParentDataProvider() === FerienpassConfig::getInstance()->offer_model)
+                    ->getParentDataProvider())
             || !$definition->hasBasicDefinition()
         ) {
             return;
@@ -135,9 +134,9 @@ class Lot extends AbstractApplicationSystem
 
         // Not attendances for offer MetaModel
         if (!($definition->getName() === Attendance::getTable()
-                && $definition
+                && 'mm_ferienpass' === $definition
                     ->getBasicDefinition()
-                    ->getParentDataProvider() === FerienpassConfig::getInstance()->offer_model)
+                    ->getParentDataProvider())
             || !$definition->hasBasicDefinition()
         ) {
             return;

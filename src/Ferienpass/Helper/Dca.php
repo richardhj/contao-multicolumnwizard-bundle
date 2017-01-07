@@ -507,9 +507,7 @@ class Dca implements EventSubscriberInterface
     {
         $model = $event->getModel();
 
-        if ($model instanceof Model
-            && FerienpassConfig::getInstance()->participant_model === $model->getProviderName()
-        ) {
+        if ($model instanceof Model && 'mm_participant' === $model->getProviderName()) {
             $args = $event->getArgs();
 
             $metaModel = $model->getItem()->getMetaModel();
@@ -595,8 +593,8 @@ class Dca implements EventSubscriberInterface
      */
     public function triggerAttendanceStatusChange(EncodePropertyValueFromWidgetEvent $event)
     {
-        if (($event->getEnvironment()->getDataDefinition()->getName() !== FerienpassConfig::getInstance()->offer_model)
-            || ($event->getProperty() !== FerienpassConfig::getInstance()->offer_attribute_applicationlist_max)
+        if (('mm_ferienpass' !== $event->getEnvironment()->getDataDefinition()->getName())
+            || ('applicationlist_max' !== $event->getProperty())
         ) {
             return;
         }

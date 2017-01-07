@@ -13,7 +13,6 @@ namespace Ferienpass\Module;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\Table;
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Document;
 use Ferienpass\Model\Participant;
 use MetaModels\Filter\Rules\StaticIdList;
@@ -49,16 +48,14 @@ class ApplicationListHost extends Item
      */
     protected function compile()
     {
-        if (!$this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)) {
+        if (!$this->item->get('applicationlist_active')) {
             Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['inactive']);
             $this->Template->message = Message::generate();
 
             return;
         }
 
-        $maxParticipants = $this->item->get(
-            FerienpassConfig::getInstance()->offer_attribute_applicationlist_max
-        );
+        $maxParticipants = $this->item->get('applicationlist_max');
         $attendances = Attendance::findByOffer($this->item->get('id'));
         $view = Participant::getInstance()->getMetaModel()->getView($this->metamodel_child_list_view);
         $fields = $view->getSettingNames();

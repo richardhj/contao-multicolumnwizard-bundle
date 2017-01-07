@@ -10,7 +10,6 @@
 
 namespace Ferienpass\Model;
 
-use Ferienpass\Model\Config as FerienpassConfig;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\Factory;
 use MetaModels\Filter\Filter;

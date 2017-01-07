@@ -16,7 +16,6 @@ use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 use Haste\Form\Form;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -47,7 +46,7 @@ class UserApplication extends Item
         $dispatcher->addSubscriber(new ApplicationListSubscriber());
 
         // Stop if the procedure is not used
-        if (!$this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)) {
+        if (!$this->item->get('applicationlist_active')) {
             $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'];
 
             return;
@@ -61,7 +60,7 @@ class UserApplication extends Item
         }
 
         $countParticipants = Attendance::countParticipants($this->item->get('id'));
-        $maxParticipants = $this->item->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_max);
+        $maxParticipants = $this->item->get('applicationlist_max');
 
         $availableParticipants = $maxParticipants - $countParticipants;
 
@@ -98,9 +97,7 @@ class UserApplication extends Item
             while ($participants->next()) {
                 $options[] = [
                     'value' => $participants->getItem()->get('id'),
-                    'label' => $participants
-                        ->getItem()
-                        ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)['text'],
+                    'label' => $participants->getItem()->parseAttribute('name')['text'],
                 ];
             }
 

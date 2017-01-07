@@ -13,7 +13,6 @@ namespace Ferienpass\Module;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Haste\Form\Form;
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Attribute\Tags\MetaModelTags as MetaModelTagsAttribute;
@@ -304,7 +303,7 @@ class Editing extends Items
                 case 'timestamp':
 
                     // @todo this should be done with a setting in the dca and not hardcoded
-                    if ($this->metaModel->get('tableName') == FerienpassConfig::getInstance()->participant_model) {
+                    if ('mm_participant' === $this->metaModel->get('tableName')) {
                         continue;
                     }
 
@@ -380,7 +379,7 @@ HTML;
             // Add validator for participant's dateOfBirth
             // It must not be changed afterwards
             $form->addValidator(
-                FerienpassConfig::getInstance()->participant_attribute_dateofbirth,
+                'dateOfBirth',
                 function ($value, $widget) {
                     if ($value != $this->item->get($widget->name)) {
                         if (Attendance::countByParticipant($this->item->get('id'))) {
@@ -393,7 +392,7 @@ HTML;
             // Add validator for participant's agreement for photos
             // It must not be revoked afterwards
             $form->addValidator(
-                FerienpassConfig::getInstance()->participant_attribute_agreement_photos,
+                'agreement_photo',
                 function ($value, $widget) {
                     // Allow to grant but not to revoke
                     if ($value != $this->item->get($widget->name) && !$value) {

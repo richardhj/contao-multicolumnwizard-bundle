@@ -10,8 +10,6 @@
 
 namespace Ferienpass\Helper;
 
-use Ferienpass\Model\Config as FerienpassConfig;
-
 
 /**
  * Class InsertTags
@@ -32,7 +30,7 @@ class InsertTags
         if ($elements[0] == 'ferienpass') {
             switch ($elements[1]) {
                 case 'max_applications_per_day':
-                    return FerienpassConfig::getInstance()->max_applications_per_day;
+                    return ''; // todo
                     break;
             }
         }

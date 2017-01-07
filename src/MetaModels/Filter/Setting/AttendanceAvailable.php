@@ -11,7 +11,6 @@
 namespace MetaModels\Filter\Setting;
 
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\Config as FerienpassConfig;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
@@ -68,7 +67,7 @@ SQL
                 ,
                 $objMetaModel->getTableName(),
                 Attendance::getTable(),
-                FerienpassConfig::getInstance()->offer_attribute_applicationlist_active,
+                'applicationlist_active',
                 $objAttribute->getColName(),
                 time()
             );

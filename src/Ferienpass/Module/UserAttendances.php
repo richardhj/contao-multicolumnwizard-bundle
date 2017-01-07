@@ -18,7 +18,6 @@ use Ferienpass\Helper\Table;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 
 
@@ -171,13 +170,10 @@ class UserAttendances extends Items
                                 $attribute = ' onclick="return confirm(\''.htmlspecialchars(
                                         sprintf(
                                             $GLOBALS['TL_LANG']['MSC']['attendanceConfirmDeleteLink'],
-                                            $item->parseAttribute(
-                                                FerienpassConfig::getInstance()->offer_attribute_name
-                                            )['text'],
-                                            Participant::getInstance()->findById($attendances->participant)
-                                                ->parseAttribute(
-                                                    FerienpassConfig::getInstance()->participant_attribute_name
-                                                )['text']
+                                            $item->parseAttribute('name')['text'],
+                                            Participant::getInstance()
+                                                ->findById($attendances->participant)
+                                                ->parseAttribute('name')['text']
                                         )
                                     )
                                     .'\')"';

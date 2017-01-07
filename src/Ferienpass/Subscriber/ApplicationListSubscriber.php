@@ -15,7 +15,6 @@ use Contao\Model\Event\PreSaveModelEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 use Haste\DateTime\DateTime;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -108,14 +107,14 @@ class ApplicationListSubscriber implements EventSubscriberInterface
             $dateOfBirth = new DateTime(
                 '@'.Participant::getInstance()
                     ->findById($option['value'])
-                    ->get(FerienpassConfig::getInstance()->participant_attribute_dateofbirth)
+                    ->get('dateOfBirth')
             );
 
             $age = $dateOfBirth->getAge($dateOffer);
 
             $isAgeAllowed = in_array(
                 $event->getOffer()->get('id'),
-                $event->getOffer()->getAttribute(FerienpassConfig::getInstance()->offer_attribute_age)->searchFor($age)
+                $event->getOffer()->getAttribute('age')->searchFor($age)
             );
 
             if (!$isAgeAllowed) {
@@ -170,8 +169,7 @@ class ApplicationListSubscriber implements EventSubscriberInterface
 
         $participantName = $attendance
             ->getParticipant()
-            ->parseAttribute(FerienpassConfig::getInstance()->participant_attribute_name)
-        ['text'];
+            ->parseAttribute('name')['text'];
 
         $status = $attendance->getStatus();
 

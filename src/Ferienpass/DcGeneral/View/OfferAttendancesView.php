@@ -28,7 +28,6 @@ use ContaoCommunityAlliance\DcGeneral\Data\CollectionInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelInterface;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Config as FerienpassConfig;
 
 
 /**
@@ -86,9 +85,7 @@ class OfferAttendancesView extends ParentView
                 $status->id
             );
             $statusCount[$status->id]['max'] = ($status->id === AttendanceStatus::findConfirmed()->id)
-                ? $parentModel->getProperty(
-                    FerienpassConfig::getInstance()->offer_attribute_applicationlist_max
-                ) : '-';
+                ? $parentModel->getProperty('applicationlist_max') : '-';
         }
 
         $this

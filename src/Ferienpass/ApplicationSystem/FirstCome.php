@@ -17,7 +17,6 @@ use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 
 
@@ -102,10 +101,8 @@ class FirstCome extends AbstractApplicationSystem
         }
 
         // Offers without usage of application list or without limit
-        if (!$attendance->getOffer()->get(FerienpassConfig::getInstance()->offer_attribute_applicationlist_active)
-            || !($max = $attendance->getOffer()->get(
-                FerienpassConfig::getInstance()->offer_attribute_applicationlist_max
-            ))
+        if (!$attendance->getOffer()->get('applicationlist_active')
+            || !($max = $attendance->getOffer()->get('applicationlist_max'))
         ) {
             return AttendanceStatus::findConfirmed();
         }

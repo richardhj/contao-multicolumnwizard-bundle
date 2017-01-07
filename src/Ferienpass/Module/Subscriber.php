@@ -114,7 +114,7 @@ class Subscriber implements EventSubscriberInterface
             }
 
             // Disable application list if not active
-            if (!$item->get(\Ferienpass\Model\Config::getInstance()->offer_attribute_applicationlist_active)) {
+            if (!$item->get('applicationlist_active')) {
                 unset($buttons[array_search('applicationlist', $buttons)]);
             }
 
