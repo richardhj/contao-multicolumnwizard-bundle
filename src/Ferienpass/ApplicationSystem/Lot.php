@@ -42,7 +42,7 @@ class Lot extends AbstractApplicationSystem
                 ['setAttendanceStatus'],
             ],
             PopulateEnvironmentEvent::NAME => [
-                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY * 1.5],
+                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY + 50],
             ],
             ModelToLabelEvent::NAME        => [
                 ['addAttendancesEditLinkInOfferListView', -10],
