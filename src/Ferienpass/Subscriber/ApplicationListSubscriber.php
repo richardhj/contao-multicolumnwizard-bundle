@@ -48,7 +48,7 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            BuildParticipantOptionsForApplicationListEvent::NAME => [
+            BuildParticipantOptionsForUserApplicationEvent::NAME => [
                 ['disableAlreadyAttendingParticipants'],
                 ['disableWrongAgeParticipants'],
             ],
@@ -65,9 +65,9 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     /**
      * Disable participants from options that are already attending
      *
-     * @param BuildParticipantOptionsForApplicationListEvent $event
+     * @param BuildParticipantOptionsForUserApplicationEvent $event
      */
-    public function disableAlreadyAttendingParticipants(BuildParticipantOptionsForApplicationListEvent $event)
+    public function disableAlreadyAttendingParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         $options = $event->getResult();
 
@@ -92,9 +92,9 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     /**
      * Disable participants from options that have a wrong age
      *
-     * @param BuildParticipantOptionsForApplicationListEvent $event
+     * @param BuildParticipantOptionsForUserApplicationEvent $event
      */
-    public function disableWrongAgeParticipants(BuildParticipantOptionsForApplicationListEvent $event)
+    public function disableWrongAgeParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         if (null === ($offerStart = ToolboxOfferDate::offerStart($event->getOffer()))) {
             return;

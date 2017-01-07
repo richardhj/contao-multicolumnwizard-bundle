@@ -12,7 +12,7 @@ namespace Ferienpass\ApplicationSystem;
 
 use Contao\Model\Event\DeleteModelEvent;
 use Contao\Model\Event\PreSaveModelEvent;
-use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
+use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
@@ -42,7 +42,7 @@ class FirstCome extends AbstractApplicationSystem
             DeleteModelEvent::NAME                               => [
                 'updateAllStatusByOffer',
             ],
-            BuildParticipantOptionsForApplicationListEvent::NAME => [
+            BuildParticipantOptionsForUserApplicationEvent::NAME => [
                 'disableLimitReachedParticipants',
             ],
         ];
@@ -158,9 +158,9 @@ class FirstCome extends AbstractApplicationSystem
     /**
      * Disable participants from options that have reached their limit
      *
-     * @param BuildParticipantOptionsForApplicationListEvent $event
+     * @param BuildParticipantOptionsForUserApplicationEvent $event
      */
-    public function disableLimitReachedParticipants(BuildParticipantOptionsForApplicationListEvent $event)
+    public function disableLimitReachedParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         $options = $event->getResult();
         $maxApplicationsPerDay = ApplicationSystem::findFirstCome()->maxApplicationsPerDay;

@@ -11,7 +11,7 @@
 namespace Ferienpass\Module;
 
 use Ferienpass\Event\ApplicationListSubscriber;
-use Ferienpass\Event\BuildParticipantOptionsForApplicationListEvent;
+use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
@@ -101,8 +101,8 @@ class UserApplication extends Item
                 ];
             }
 
-            $event = new BuildParticipantOptionsForApplicationListEvent($participants, $this->item, $options);
-            $dispatcher->dispatch(BuildParticipantOptionsForApplicationListEvent::NAME, $event);
+            $event = new BuildParticipantOptionsForUserApplicationEvent($participants, $this->item, $options);
+            $dispatcher->dispatch(BuildParticipantOptionsForUserApplicationEvent::NAME, $event);
 
             $options = $event->getResult();
 

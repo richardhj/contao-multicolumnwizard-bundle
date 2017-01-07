@@ -16,13 +16,13 @@ use Symfony\Component\EventDispatcher\Event;
 
 
 /**
- * Class BuildParticipantOptionsForApplicationListEvent
+ * Class BuildParticipantOptionsForUserApplicationEvent
  * @package Ferienpass\Event
  */
-class BuildParticipantOptionsForApplicationListEvent extends Event
+class BuildParticipantOptionsForUserApplicationEvent extends Event
 {
 
-    const NAME = 'ferienpass.application-list.build-participant-options';
+    const NAME = 'ferienpass.user-application.build-participant-options';
 
 
     /**
@@ -44,7 +44,7 @@ class BuildParticipantOptionsForApplicationListEvent extends Event
 
 
     /**
-     * BuildParticipantOptionsForApplicationListEvent constructor.
+     * BuildParticipantOptionsForUserApplicationEvent constructor.
      *
      * @param IItems $participants
      * @param IItem  $offer

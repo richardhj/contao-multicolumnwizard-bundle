@@ -22,7 +22,7 @@ use Symfony\Component\EventDispatcher\Event;
 class UserSetApplicationEvent extends Event
 {
 
-    const NAME = 'ferienpass.application-list.set-attendance';
+    const NAME = 'ferienpass.user-application.set-attendance';
 
 
     /**
