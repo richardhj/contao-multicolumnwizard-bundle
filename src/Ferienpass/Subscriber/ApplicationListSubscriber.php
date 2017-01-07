@@ -63,23 +63,6 @@ class ApplicationListSubscriber implements EventSubscriberInterface
     }
 
 
-    public function setSorting(PreSaveModelEvent $event)
-    {
-        $attendance = $event->getModel();
-
-        if (!$attendance instanceof Attendance || $attendance->sorting) {
-            return;
-        }
-
-        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
-        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
-
-        $data = $event->getData();
-        $data['sorting'] = $sorting + 128;
-        $event->setData($data);
-    }
-
-
     /**
      * Disable participants from options that are already attending
      *
@@ -145,6 +128,29 @@ class ApplicationListSubscriber implements EventSubscriberInterface
         }
 
         $event->setResult($options);
+    }
+
+
+    /**
+     * Set the sorting when saving an attendance made by the user
+     *
+     * @param PreSaveModelEvent $event
+     */
+    public function setSorting(PreSaveModelEvent $event)
+    {
+        $attendance = $event->getModel();
+
+        if (!$attendance instanceof Attendance || $attendance->sorting) {
+            return;
+        }
+
+        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
+        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+        $sorting += 128;
+
+        $data = $event->getData();
+        $data['sorting'] = $sorting;
+        $event->setData($data);
     }
 
 
