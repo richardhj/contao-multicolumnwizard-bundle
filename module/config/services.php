@@ -24,20 +24,24 @@ $container['ferienpass.applicationsystem'] = $container->share(
         $time = time();
         $table = Ferienpass\Model\ApplicationSystem::getTable();
 
-        $result = $database
-            ->prepare(
-                "SELECT type "
-                ."FROM {$table} "
-                ."WHERE (start='' OR start<='$time') AND (stop='' OR stop>'".($time + 60)."') AND published='1'"
-            )
-            ->limit(1)
-            ->execute();
+        try {
+            $result = $database
+                ->prepare(
+                    "SELECT type "
+                    ."FROM {$table} "
+                    ."WHERE (start='' OR start<='$time') AND (stop='' OR stop>'".($time + 60)."') AND published='1'"
+                )
+                ->limit(1)
+                ->execute();
 
-        if (1 === $result->numRows) {
-            return $container['ferienpass.applicationsystem.'.$result->type];
+            if (1 === $result->numRows) {
+                return $container['ferienpass.applicationsystem.'.$result->type];
+            }
+
+        } finally {
+            return new Ferienpass\ApplicationSystem\NoOp();
         }
 
-        return new Ferienpass\ApplicationSystem\NoOp();
     }
 );
 
