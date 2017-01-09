@@ -51,19 +51,6 @@ class AttendanceStatus extends Model
 
 
     /**
-     * Fine one message by its type
-     *
-     * @param string $type
-     *
-     * @return AttendanceStatus
-     */
-    public static function findByType($type)
-    {
-        return static::findOneBy('type', $type);
-    }
-
-
-    /**
      * Find the status whose type is "waiting"
      *
      * @return AttendanceStatus
@@ -93,5 +80,18 @@ class AttendanceStatus extends Model
     public static function findError()
     {
         return static::findByType('error');
+    }
+
+
+    /**
+     * Fine one message by its type
+     *
+     * @param string $type
+     *
+     * @return AttendanceStatus
+     */
+    public static function findByType($type)
+    {
+        return static::findOneBy('type', $type);
     }
 }

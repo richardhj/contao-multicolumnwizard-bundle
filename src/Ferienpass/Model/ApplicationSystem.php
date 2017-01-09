@@ -31,7 +31,7 @@ class ApplicationSystem extends Model
 
 
     /**
-     * Find the application system with type `firstcome`
+     * Find the application system whose type is "firstcome"
      *
      * @return ApplicationSystem
      */
@@ -42,7 +42,7 @@ class ApplicationSystem extends Model
 
 
     /**
-     * Find the application system with type `lot`
+     * Find the application system whose type is "lot"
      *
      * @return ApplicationSystem
      */
