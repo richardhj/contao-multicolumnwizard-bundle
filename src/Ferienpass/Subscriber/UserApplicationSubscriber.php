@@ -160,7 +160,6 @@ class UserApplicationSubscriber implements EventSubscriberInterface
      */
     public function addAttendanceStatusMessage(PostSaveModelEvent $event)
     {
-        /** @var Attendance $attendance */
         $attendance = $event->getModel();
 
         if (!$attendance instanceof Attendance) {
