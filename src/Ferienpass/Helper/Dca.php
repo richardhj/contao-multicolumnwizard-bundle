@@ -160,14 +160,19 @@ class Dca implements EventSubscriberInterface
     public function addAttendancesToMetaModelModuleTables(MetaModelsBootEvent $event)
     {
         foreach (['mm_ferienpass', 'mm_participant'] as $metaModelName) {
-            /** @var ViewCombinations $viewCombinations */
-            $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
-            $inputScreen = $viewCombinations->getInputScreenDetails($metaModelName);
-            $backendSection = $inputScreen->getBackendSection();
-            \Controller::loadDataContainer($metaModelName);
+            try {
+                /** @var ViewCombinations $viewCombinations */
+                $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
+                $inputScreen = $viewCombinations->getInputScreenDetails($metaModelName);
+                $backendSection = $inputScreen->getBackendSection();
+                \Controller::loadDataContainer($metaModelName);
 
-            // Add table name to back end module tables
-            $GLOBALS['BE_MOD'][$backendSection]['metamodel_'.$metaModelName]['tables'][] = Attendance::getTable();
+                // Add table name to back end module tables
+                $GLOBALS['BE_MOD'][$backendSection]['metamodel_'.$metaModelName]['tables'][] = Attendance::getTable();
+
+            } catch (\RuntimeException $e) {
+                \System::log($e->getMessage(), __METHOD__, TL_ERROR);
+            }
         }
     }
 
