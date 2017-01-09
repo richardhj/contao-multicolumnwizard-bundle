@@ -30,18 +30,22 @@ class ApplicationSystem extends Model
     protected static $strTable = 'tl_ferienpass_applicationsystem';
 
 
-    public static function findByType($type)
-    {
-        return static::findBy('type', $type);
-    }
-
-
+    /**
+     * Find the application system with type `firstcome`
+     *
+     * @return ApplicationSystem
+     */
     public static function findFirstCome()
     {
         return static::findByType('firstcome');
     }
 
 
+    /**
+     * Find the application system with type `lot`
+     *
+     * @return ApplicationSystem
+     */
     public static function findLot()
     {
         return static::findByType('lot');
@@ -49,6 +53,21 @@ class ApplicationSystem extends Model
 
 
     /**
+     * Find a application system model by given type
+     *
+     * @param $type
+     *
+     * @return static
+     */
+    public static function findByType($type)
+    {
+        return static::findOneBy('type', $type);
+    }
+
+
+    /**
+     * Find the application system model that is active currently
+     *
      * @return ApplicationSystem
      */
     public static function findCurrent()
