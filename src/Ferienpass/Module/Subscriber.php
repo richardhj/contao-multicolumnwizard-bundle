@@ -86,13 +86,12 @@ class Subscriber implements EventSubscriberInterface
 
         $event->getTemplate()->getButtons = function ($itemData) use ($event) {
             $return = [];
-            $buttons =
-                [
-                    'details',
-                    'edit',
-                    'applicationlist',
-                    'delete',
-                ];
+            $buttons = [
+                'details',
+                'edit',
+                'applicationlist',
+                'delete',
+            ];
 
             $item = $event
                 ->getList()
@@ -126,9 +125,10 @@ class Subscriber implements EventSubscriberInterface
 
             // Add the "copy item" button for last release's items
             $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
-            if ($filterParams['pass_release']['value'] == 2) { //@todo configurable
+            if (2 == $filterParams['pass_release']['value']) { //@todo configurable
                 $buttons[] = 'copy';
-            } elseif ($filterParams['pass_release']['value'] == 1
+                unset($buttons[array_search('applicationlist', $buttons)]);
+            } elseif (1 == $filterParams['pass_release']['value']
                 && $item->isVariantBase()
                 && $item->getVariants(null)->getCount()
             ) {
