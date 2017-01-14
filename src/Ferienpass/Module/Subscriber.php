@@ -11,10 +11,12 @@
 namespace Ferienpass\Module;
 
 
+use Ferienpass\Event\BuildMetaModelEditingListButtonsEvent;
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\FrontendIntegration\HybridList;
 use MetaModels\MetaModelsEvents;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
@@ -42,9 +44,17 @@ class Subscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            MetaModelsEvents::RENDER_ITEM_LIST => [
+            MetaModelsEvents::RENDER_ITEM_LIST          => [
                 ['alterHostMetaModelList'],
                 ['alterFrontendEditingLabelInListRendering'],
+            ],
+            BuildMetaModelEditingListButtonsEvent::NAME => [
+                ['addDetailsLink'],
+                ['addEditLink'],
+                ['addApplicationListLink'],
+                ['addDeleteLink'],
+                ['addCopyLink'],
+                ['addCreateVariantLink'],
             ],
         ];
     }
@@ -76,156 +86,188 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
-    public function alterHostMetaModelList(RenderItemListEvent $event)
+    public function alterHostMetaModelList(RenderItemListEvent $renderEvent)
     {
-        if (!($event->getCaller() instanceof HybridList) ||
-            'metamodel_multiple_buttons' !== $event->getTemplate()->getName()
+        if (!($renderEvent->getCaller() instanceof HybridList) ||
+            'metamodel_multiple_buttons' !== $renderEvent->getTemplate()->getName()
         ) {
             return;
         }
 
-        $event->getTemplate()->getButtons = function ($itemData) use ($event) {
-            $return = [];
-            $buttons = [
-                'details',
-                'edit',
-                'applicationlist',
-                'delete',
-            ];
+        $renderEvent->getTemplate()->getButtons = function ($itemData) use ($renderEvent) {
+            global $container;
 
-            $item = $event
+            /** @var EventDispatcher $dispatcher */
+            $dispatcher = $container['event-dispatcher'];
+
+            $item = $renderEvent
                 ->getList()
                 ->getServiceContainer()
                 ->getFactory()
                 ->getMetaModel(
-                    $event
+                    $renderEvent
                         ->getList()
                         ->getServiceContainer()
                         ->getFactory()
-                        ->translateIdToMetaModelName($event->getCaller()->metamodel)
+                        ->translateIdToMetaModelName($renderEvent->getCaller()->metamodel)
                 )
                 ->findById($itemData['raw']['id']);
 
-            // Disable specific buttons for items with variants
-            if ($item->isVariantBase() && $item->getVariants(null)->getCount()) {
-                unset($buttons[array_search('details', $buttons)]);
-                unset($buttons[array_search('applicationlist', $buttons)]);
-            }
+            $event = new BuildMetaModelEditingListButtonsEvent($item, [], $itemData, $renderEvent->getCaller());
+            $dispatcher->dispatch(BuildMetaModelEditingListButtonsEvent::NAME, $event);
 
-            // Disable application list if not active
-            if (!$item->get('applicationlist_active')) {
-                unset($buttons[array_search('applicationlist', $buttons)]);
-            }
-
-            // Disable buttons if ferienpass is live
-            if (time() > $item->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
-                unset($buttons[array_search('edit', $buttons)]);
-                unset($buttons[array_search('delete', $buttons)]);
-            }
-
-            // Add the "copy item" button for last release's items
-            $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
-            if (2 == $filterParams['pass_release']['value']) { //@todo configurable
-                $buttons[] = 'copy';
-                unset($buttons[array_search('applicationlist', $buttons)]);
-            } elseif (1 == $filterParams['pass_release']['value']
-                && $item->isVariantBase()
-                && $item->getVariants(null)->getCount()
-            ) {
-                $buttons[] = 'createVariant';
-            }
-
-            foreach ($buttons as $button) {
-                $buttonData = [];
-                $key = $button.'Link';
-
-                if (in_array($key, get_class_methods(__CLASS__))) {
-                    $buttonData['link'] = $GLOBALS['TL_LANG']['MSC'][$key][0];
-                    $buttonData['title'] = $GLOBALS['TL_LANG']['MSC'][$key][1] ?: $buttonData['link'];
-                    $buttonData['class'] = $button;
-                    list ($buttonData['href'], $buttonData['attribute']) = $this->$key($itemData);
-
-                    $return[] = $buttonData;
-                }
-            }
-
-            return $return;
+            return $event->getButtons();
         };
     }
 
 
-    /**
-     * @param  array $arrItem
-     *
-     * @return array
-     */
-    protected function detailsLink($arrItem)
+    public function addDetailsLink(BuildMetaModelEditingListButtonsEvent $event)
     {
-        return [$arrItem['jumpTo']['url'], 'data-lightbox'];
-    }
+        if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()) {
+            return;
+        }
 
+        $buttons = $event->getButtons();
 
-    /**
-     * @param  array $itemData
-     *
-     * @return array
-     */
-    protected function editLink($itemData)
-    {
-        return [$itemData['editUrl']];
-    }
-
-
-    /**
-     * @param  array $itemData
-     *
-     * @return array
-     */
-    protected function copyLink($itemData)
-    {
-        return [str_replace('act=edit', 'act=copy', $itemData['editUrl'])];
-    }
-
-
-    /**
-     * @param  array $itemData
-     *
-     * @return array
-     */
-    protected function createVariantLink($itemData)
-    {
-        return [str_replace(['act=edit', 'id'], ['act=create', 'vargroup'], $itemData['editUrl'])];
-    }
-
-
-    /**
-     * @param  array $itemData
-     *
-     * @return array
-     */
-    protected function applicationlistLink($itemData)
-    {
-        $v = 19; // todo configurable
-        return [$this->generateJumpToLink($v, $itemData['raw']['alias'])];
-    }
-
-
-    /**
-     * @param  array $itemData
-     *
-     * @return array
-     */
-    protected function deleteLink($itemData)
-    {
-        $href = \Frontend::addToUrl(sprintf('action=delete::%u::%s', $itemData['raw']['id'], REQUEST_TOKEN));
-
-        return [
-            $href,
-            ' onclick="return confirm(\''.sprintf(
-                $GLOBALS['TL_LANG']['MSC']['itemConfirmDeleteLink'],
-                $itemData['raw']['name']
-            ).'\')"',
+        $button = [
+            'link'      => $GLOBALS['TL_LANG']['MSC']['detailsLink'][0],
+            'title'     => $GLOBALS['TL_LANG']['MSC']['detailsLink'][1],
+            'class'     => 'details',
+            'href'      => $event->getItemData()['jumpTo']['url'],
+            'attribute' => 'data-lightbox',
         ];
+        $buttons[] = $button;
+
+        $event->setButtons($buttons);
+    }
+
+
+    public function addEditLink(BuildMetaModelEditingListButtonsEvent $event)
+    {
+        if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
+            return;
+        }
+
+        $buttons = $event->getButtons();
+
+        $button = [
+            'link'  => $GLOBALS['TL_LANG']['MSC']['editLink'][0],
+            'title' => $GLOBALS['TL_LANG']['MSC']['editLink'][1],
+            'class' => 'edit',
+            'href'  => $event->getItemData()['editUrl'],
+        ];
+        $buttons[] = $button;
+
+        $event->setButtons($buttons);
+    }
+
+
+    public function addApplicationListLink(BuildMetaModelEditingListButtonsEvent $event)
+    {
+        $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
+
+        if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()
+            || !$event->getItem()->get('applicationlist_active')
+            || 2 == $filterParams['pass_release']['value']
+        ) {
+            return;
+        }
+
+        $buttons = $event->getButtons();
+        $v = 19; // todo configurable
+
+        $button = [
+            'link'  => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][0],
+            'title' => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][1],
+            'class' => 'applicationlist',
+            'href'  => $this->generateJumpToLink($v, $event->getItemData()['raw']['alias']),
+        ];
+        $buttons[] = $button;
+
+        $event->setButtons($buttons);
+    }
+
+
+    public function addDeleteLink(BuildMetaModelEditingListButtonsEvent $event)
+    {
+        if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
+            return;
+        }
+
+        $buttons = $event->getButtons();
+
+        $button = [
+            'link'      => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
+            'title'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][1],
+            'class'     => 'delete',
+            'href'      => \Frontend::addToUrl(
+                sprintf(
+                    'action=delete::%u::%s',
+                    $event->getItemData()['raw']['id'],
+                    REQUEST_TOKEN
+                )
+            ),
+            'attribute' => 'onclick="return confirm(\''.sprintf(
+                    $GLOBALS['TL_LANG']['MSC']['itemConfirmDeleteLink'],
+                    $event->getItemData()['raw']['name']
+                ).'\')"',
+        ];
+        $buttons[] = $button;
+
+        $event->setButtons($buttons);
+    }
+
+
+    public function addCopyLink(BuildMetaModelEditingListButtonsEvent $event)
+    {
+        $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
+
+        if (2 != $filterParams['pass_release']['value']) {
+            return;
+        }
+
+        $buttons = $event->getButtons();
+
+        $button = [
+            'link'      => $GLOBALS['TL_LANG']['MSC']['copyLink'][0],
+            'title'     => $GLOBALS['TL_LANG']['MSC']['copyLink'][1],
+            'class'     => 'copy',
+            'href'      => str_replace('act=edit', 'act=copy', $event->getItemData()['editUrl']),
+            'attribute' => '',
+        ];
+        $buttons[] = $button;
+
+        $event->setButtons($buttons);
+    }
+
+
+    public function addCreateVariantLink(BuildMetaModelEditingListButtonsEvent $event)
+    {
+        $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
+
+        if (!(1 == $filterParams['pass_release']['value']
+            && $event->getItem()->isVariantBase()
+            && $event->getItem()->getVariants(null)->getCount())
+        ) {
+            return;
+        }
+
+        $buttons = $event->getButtons();
+
+        $button = [
+            'link'      => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][0],
+            'title'     => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][1],
+            'class'     => 'createVariant',
+            'href'      => str_replace(
+                ['act=edit', 'id'],
+                ['act=create', 'vargroup'],
+                $event->getItemData()['editUrl']
+            ),
+            'attribute' => '',
+        ];
+        $buttons[] = $button;
+
+        $event->setButtons($buttons);
     }
 
 
