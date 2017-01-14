@@ -10,13 +10,13 @@
 
 namespace Ferienpass\Module;
 
-use Ferienpass\Event\UserApplicationSubscriber;
 use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
+use Ferienpass\Subscriber\UserApplicationSubscriber;
 use Haste\Form\Form;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 

@@ -8,10 +8,11 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Event;
+namespace Ferienpass\Subscriber;
 
 use Contao\Model\Event\PostSaveModelEvent;
 use Contao\Model\Event\PreSaveModelEvent;
+use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
