@@ -20,6 +20,12 @@ $GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = ['Ferienpass\Helper\
 
 
 /**
+ * List
+ */
+$GLOBALS['TL_DCA'][$table]['list']['label']['fields'][] = 'ferienpass_host';
+
+
+/**
  * Palettes
  */
 MetaPalettes::appendBefore(
