@@ -34,7 +34,8 @@ $GLOBALS['TL_LANG']['FMD']['offer_applicationlist'][0] = 'Teilnehmerliste';
 $GLOBALS['TL_LANG']['FMD']['offer_applicationlist'][1] = 'Dieses Modul ermöglicht die Anmeldung zu einem Angebot.';
 $GLOBALS['TL_LANG']['FMD']['offer_applicationlisthost'][0] = 'Teilnehmerliste für Veranstalter';
 $GLOBALS['TL_LANG']['FMD']['offer_applicationlisthost'][1] = 'Dieses Modul listet dem Veranstalter alle Teilnehmer auf.';
-
+$GLOBALS['TL_LANG']['FMD']['host_logo'][0] = 'Veranstalter-Logo';
+$GLOBALS['TL_LANG']['FMD']['host_logo'][1] = 'Dieses Modul ermöglicht den Upload der Logos der Veranstalter.';
 
 /**
  * Ferienpass modules

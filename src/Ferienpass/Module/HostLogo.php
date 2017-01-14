@@ -52,7 +52,7 @@ class HostLogo extends Items
                 'inputType' => 'member_logo',
                 'eval'      =>
                     [
-                        'uploadFolder' => '926817ba-c7bf-11e6-86e8-acb172276daf',
+                        'uploadFolder' => $this->hostLogoDir,
 //                'useUserHomeDir' => $this->logo_useHomeDir,
 //                'renameFile'     => $this->logo_renameFile,
 //                'outputSize'     => deserialize($this->imgSize, true)
