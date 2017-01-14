@@ -19,7 +19,7 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_user_application'] = '{title_
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_applicationlisthost'] = '{title_legend},name,headline,type;{config_legend},metamodel,metamodel_rendersettings,metamodel_child_list_view,document;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_addattendeehost'] = '{title_legend},name,headline,type;{config_legend},metamodel;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offers_user_attendances'] = '{title_legend},name,headline,type;{config_legend},metamodel,jumpTo;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
-$GLOBALS['TL_DCA']['tl_module']['palettes']['host_logo'] = '{title_legend},name,headline,type;{config_legend},hostLogoDir;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['host_logo'] = '{title_legend},name,headline,type;{config_legend},metamodel,hostLogoDir;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 
 /**
  * Fields
