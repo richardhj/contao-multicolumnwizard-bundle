@@ -13,6 +13,10 @@ sudo: false
 
 install:
   - travis_retry composer self-update && composer --version
+  - travis_retry composer config repositories.member-logo vcs https://github.com/richardhj/contao-member_logo
+  - travis_retry composer config repositories.upload-preview-field vcs https://github.com/richardhj/contao-upload_preview_field
+  - travis_retry composer config repositories.dcg-single-model vcs https://github.com/richardhj/dc-general-single-model
+  - travis_retry composer config repositories.member-logo vcs https://github.com/richardhj/contao-member_logo
   - travis_retry composer require contao/core $CONTAO_VERSION --no-update
   - travis_retry composer update --prefer-dist --no-interaction
 
