@@ -49,7 +49,7 @@ class HostLogo extends Items
             'upload',
             [
                 'value'     => $currentLogo,
-                'inputType' => 'member_logo',
+                'inputType' => 'host_logo',
                 'eval'      =>
                     [
                         'uploadFolder' => $this->hostLogoDir,

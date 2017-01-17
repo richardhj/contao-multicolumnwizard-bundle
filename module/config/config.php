@@ -217,6 +217,7 @@ $GLOBALS['TL_FFL']['offer_date'] = 'Ferienpass\Form\OfferDate';
 $GLOBALS['TL_FFL']['select_disabled_options'] = 'Ferienpass\Form\SelectDisabledOptions';
 $GLOBALS['TL_FFL']['fileTree'] = 'Ferienpass\Form\UploadImage';
 $GLOBALS['TL_FFL']['multiColumnWizard'] = 'Ferienpass\Form\MultiColumnWizard';
+$GLOBALS['TL_FFL']['host_logo'] = 'Ferienpass\Form\HostLogo';
 
 /**
  * Hooks
