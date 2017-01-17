@@ -20,6 +20,7 @@ TemplateLoader::addFiles(array
     'mod_user_attendances'                              => 'system/modules/ferienpass/templates/module',
     'mod_offer_addattendeehost'                         => 'system/modules/ferienpass/templates/module',
     'mod_ferienpass_messages'                           => 'system/modules/ferienpass/templates/module',
+    'mod_host_logo'                                     => 'system/modules/ferienpass/templates/module',
 
 	// Calendar
     'cal_offers'                                        => 'system/modules/ferienpass/templates',

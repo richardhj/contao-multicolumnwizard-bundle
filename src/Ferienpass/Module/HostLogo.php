@@ -26,7 +26,7 @@ class HostLogo extends Items
      *
      * @var string
      */
-    protected $strTemplate = 'mod_logo';
+    protected $strTemplate = 'mod_host_logo';
 
 
     /**
