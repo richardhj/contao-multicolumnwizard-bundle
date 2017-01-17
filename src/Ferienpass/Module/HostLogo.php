@@ -73,12 +73,12 @@ class HostLogo extends Items
         $form->addFormField(
             'reset',
             [
-                'label'     => $GLOBALS['TL_LANG']['MSC']['logo_reset'],
+                'label'     => $GLOBALS['TL_LANG']['MSC']['host_logo_reset'],
                 'inputType' => 'checkbox',
             ]
         );
 
-        $form->addSubmitFormField('submit', $GLOBALS['TL_LANG']['MSC']['logo_save']);
+        $form->addSubmitFormField('submit', $GLOBALS['TL_LANG']['MSC']['host_logo_save']);
 
 
         if ($form->validate()) {

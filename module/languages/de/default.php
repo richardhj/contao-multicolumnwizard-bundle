@@ -72,6 +72,10 @@ $GLOBALS['TL_LANG']['MSC']['editOffer'] = 'Bearbeiten';
 $GLOBALS['TL_LANG']['MSC']['addNewOffer'] = 'Neues Angebot';
 $GLOBALS['TL_LANG']['MSC']['editHost'] = 'Daten aktualisieren';
 
+$GLOBALS['TL_LANG']['MSC']['host_logo_save']  = 'Logo speichern';
+$GLOBALS['TL_LANG']['MSC']['host_logo_reset'][0] = 'Zurücksetzen';
+$GLOBALS['TL_LANG']['MSC']['host_logo_reset'][1] = 'Zurücksetzen auf Vorgabe';
+
 $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'] = [
     'confirmed'  => 'Zusage',
     'waiting'    => 'wartend',
