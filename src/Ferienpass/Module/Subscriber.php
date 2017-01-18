@@ -200,13 +200,12 @@ class Subscriber implements EventSubscriberInterface
             'link'      => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][1],
             'class'     => 'delete',
-            'href'      => \Frontend::addToUrl(
+            'href'      => \Environment::get('request').
                 sprintf(
-                    'action=delete::%u::%s',
+                    '?action=delete::%u::%s',
                     $event->getItemData()['raw']['id'],
                     REQUEST_TOKEN
-                )
-            ),
+                ),
             'attribute' => 'onclick="return confirm(\''.sprintf(
                     $GLOBALS['TL_LANG']['MSC']['itemConfirmDeleteLink'],
                     $event->getItemData()['raw']['name']
