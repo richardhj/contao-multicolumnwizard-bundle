@@ -216,11 +216,10 @@ $GLOBALS['TL_DCA'][$table] = [
                 'foreignTable'     => Offer::getInstance()->getTableName(),
                 'fieldType'        => 'radio',
                 'listFields'       => [
-                    Ferienpass\Model\Config::getInstance()->offer_attribute_name,
-//                    Ferienpass\Model\Config::getInstance()->offer_attribute_date,
+                    'name'
                 ],
                 'searchFields'     => [
-                    Ferienpass\Model\Config::getInstance()->offer_attribute_name,
+                    'name',
                 ],
                 'matchAllKeywords' => true,
                 // Exclude varbases if they have children
@@ -234,7 +233,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 iterator_to_array((Offer::getInstance()->findAll() ?: new Items([]))),
                 function (array $carry, IItem $item) {
                     $carry[$item->get('id')] = $item->get(
-                        Ferienpass\Model\Config::getInstance()->offer_attribute_name
+                        'name'
                     );
 
                     return $carry;
@@ -251,14 +250,14 @@ $GLOBALS['TL_DCA'][$table] = [
                 'foreignTable'     => Participant::getInstance()->getTableName(),
                 'fieldType'        => 'radio',
                 'listFields'       => [
-                    Ferienpass\Model\Config::getInstance()->participant_attribute_name,
-                    Ferienpass\Model\Config::getInstance()->participant_attribute_dateofbirth,
+                    'name',
+                    'dateOfBirth',
                     \MemberModel::getTable().'.firstname',
                     \MemberModel::getTable().'.lastname',
 
                 ],
                 'searchFields'     => [
-                    Ferienpass\Model\Config::getInstance()->participant_attribute_name,
+                    'name',
                 ],
                 'joins'            => [
                     \MemberModel::getTable() => [
@@ -274,7 +273,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 iterator_to_array((Participant::getInstance()->findAll() ?: new Items([]))),
                 function (array $carry, IItem $item) {
                     $carry[$item->get('id')] = $item->get(
-                        Ferienpass\Model\Config::getInstance()->participant_attribute_name
+                        'name'
                     );
 
                     return $carry;
