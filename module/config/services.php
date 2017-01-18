@@ -8,6 +8,10 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
+use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
+use Ferienpass\Model\ApplicationSystem;
+
+
 $container['ferienpass.applicationsystem.firstcome'] = function () {
     return new Ferienpass\ApplicationSystem\FirstCome();
 };
@@ -35,7 +39,11 @@ $container['ferienpass.applicationsystem'] = $container->share(
                 ->execute();
 
             if (1 === $result->numRows) {
-                return $container['ferienpass.applicationsystem.'.$result->type];
+                /** @var AbstractApplicationSystem $applicationSystem */
+                $applicationSystem = $container['ferienpass.applicationsystem.'.$result->type];
+                $applicationSystem->setModel((new ApplicationSystem($result)));
+
+                return $applicationSystem;
             }
 
         } finally {

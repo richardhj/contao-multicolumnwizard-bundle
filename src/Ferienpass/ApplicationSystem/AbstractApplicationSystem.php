@@ -11,6 +11,7 @@
 namespace Ferienpass\ApplicationSystem;
 
 use Ferienpass\Helper\Message;
+use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
 use MetaModels\IItem;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -22,6 +23,34 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 abstract class AbstractApplicationSystem implements EventSubscriberInterface
 {
+
+    /**
+     * @var ApplicationSystem
+     */
+    private $model;
+
+
+    /**
+     * @param ApplicationSystem $model
+     *
+     * @return self
+     */
+    public function setModel($model)
+    {
+        $this->model = $model;
+
+        return $this;
+    }
+
+
+    /**
+     * @return ApplicationSystem
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+
 
     /**
      * Get notification tokens
