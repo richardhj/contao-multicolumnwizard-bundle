@@ -83,6 +83,9 @@ $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'] = [
     'error'      => 'abgelehnt',
 ];
 
+$GLOBALS['TL_LANG']['MSC']['yesno'][0] = 'Nein';
+$GLOBALS['TL_LANG']['MSC']['yesno'][1] = 'Ja';
+
 /**
  * Errors
  */

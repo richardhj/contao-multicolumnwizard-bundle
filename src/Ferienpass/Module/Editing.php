@@ -14,6 +14,7 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Ferienpass\Helper\Message;
 use Ferienpass\Model\Attendance;
 use Haste\Form\Form;
+use MetaModels\Attribute\IAttribute;
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Attribute\Tags\MetaModelTags as MetaModelTagsAttribute;
 use MetaModels\FrontendEditingItem as Item;
@@ -141,8 +142,16 @@ class Editing extends Items
                     // Set a copy as current item
                     $this->item = $parentItem->varCopy();
 
-                    // Remove alias to trigger the auto generation
-                    $this->item->set('alias', null);
+//                    // Remove alias to trigger the auto generation
+//                    $this->item->set('alias', null);
+
+                    // Remove variant dependent attributes
+                    /** @var IAttribute $attribute */
+                    foreach ($this->item->getMetaModel()->getAttributes() as $attribute) {
+                        if ($attribute->get('isvariant')) {
+                            $this->item->set($attribute->getColName(), null);
+                        }
+                    }
                 }
 
                 $this->isNewItem = true;
@@ -291,6 +300,8 @@ class Editing extends Items
                         ->valueToWidget($this->item->get($field)),
                 ]
             );
+
+            $data['eval']['class'] = $attributesDatabase->tl_class;
 
             // Load options for tags attribute
             if ($attribute instanceof MetaModelTagsAttribute) {
