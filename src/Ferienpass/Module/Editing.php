@@ -259,6 +259,21 @@ class Editing extends Items
                     'reference' => $GLOBALS['TL_LANG']['MSC']['enableVariantsOptions'],
                 ]
             );
+
+            if ($editVariants) {
+                $expl = ($this->isNewItem)
+                    ? 'Bitte am Ende der Seite speichern. Dann können Sie neue Termine am Ende der Seite anlegen.'
+                    : 'Neue Termine legen Sie am Ende der Seite an.';
+                $form->addFormField(
+                    'variantsHelp',
+                    [
+                        'inputType' => 'explanation',
+                        'eval'      => [
+                            'text' => '<p class="information"><strong>Hinweis Terminerstellung: </strong> '.$expl.'</p>',
+                        ]
+                    ]
+                );
+            }
         }
 
         // Walk every attribute
