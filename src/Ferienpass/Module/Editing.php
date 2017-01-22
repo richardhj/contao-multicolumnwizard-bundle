@@ -451,14 +451,17 @@ HTML;
                  * Set the new field value
                  */
                 if ($this->metaModel->hasAttribute($name)) {
+                    $value =$this->metaModel
+                        ->getAttribute($name)
+                        ->widgetToValue($value, $this->item->get('id'));
+
+                    // Translate all '' values to null, so they will not set as '0' in the database.
+                    if ('' === $value) {
+                        $value = null;
+                    }
+
                     $modified = true;
-                    $this->item->set
-                    (
-                        $name,
-                        $this->metaModel
-                            ->getAttribute($name)
-                            ->widgetToValue($value, $this->item->get('id'))
-                    );
+                    $this->item->set($name, $value);
                 }
             }
 
