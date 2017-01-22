@@ -113,6 +113,11 @@ class Subscriber implements EventSubscriberInterface
                 )
                 ->findById($itemData['raw']['id']);
 
+            if (null === $item) {
+                var_dump($itemData);
+                return [];
+            }
+
             $event = new BuildMetaModelEditingListButtonsEvent($item, [], $itemData, $renderEvent->getCaller());
             $dispatcher->dispatch(BuildMetaModelEditingListButtonsEvent::NAME, $event);
 
@@ -200,7 +205,7 @@ class Subscriber implements EventSubscriberInterface
             'link'      => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][1],
             'class'     => 'delete',
-            'href'      => \Environment::get('request').
+            'href'      => strtok(\Environment::get('request'), '?').
                 sprintf(
                     '?action=delete::%u::%s',
                     $event->getItemData()['raw']['id'],

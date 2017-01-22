@@ -52,9 +52,6 @@ class EditingActions extends Items
      */
     protected function compile()
     {
-        /** @var \Contao\PageModel $objPage */
-        global $objPage;
-
         /*
          * Process link actions
          */

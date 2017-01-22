@@ -53,6 +53,10 @@ $container['ferienpass.applicationsystem'] = $container->share(
     }
 );
 
+$container['ferienpass.pass-release.show-current'] = 2;
+$container['ferienpass.pass-release.edit-current'] = 1;
+$container['ferienpass.pass-release.edit-previous'] = 1;
+
 $container['ferienpass.attendance-status'] = [
     'confirmed',
     'waitlisted',

@@ -45,6 +45,8 @@ class Editing extends Items
      */
     public function generate()
     {
+        global $container;
+
         switch (\Input::get('act')) {
             /*
              * Edit
@@ -79,8 +81,7 @@ class Editing extends Items
 
                 $itemToCopy = $this->metaModel->findById($modelId->getId());
                 $itemToCopy->set('vargroup', null);
-                //todo
-                $itemToCopy->set('pass_release', '1');
+                $itemToCopy->set('pass_release', $container['ferienpass.pass-release.edit-current']);
 
                 if (null === $itemToCopy) {
                     $this->exitWith404();
@@ -109,8 +110,7 @@ class Editing extends Items
                 switch ($this->metaModel->getTableName()) {
                     case 'mm_ferienpass':
                         $this->item->set('host', $this->User->ferienpass_host);
-                        //todo
-                        $this->item->set('pass_release', '1');
+                        $this->item->set('pass_release', $container['ferienpass.pass-release.edit-current']);
                         break;
 
                     case 'mm_participant':
@@ -241,7 +241,7 @@ class Editing extends Items
         {
             $this->addSubmitOnChangeForInput('#ctrl_variants .radio');
 
-            if ('y' === \Input::post('variants')) {
+            if (\Input::get('variants') || 'y' === \Input::post('variants')) {
                 $editVariants = true;
             } elseif ('n' === \Input::post('variants')) {
                 $editVariants = false;
@@ -302,6 +302,16 @@ class Editing extends Items
             );
 
             $data['eval']['class'] = $attributesDatabase->tl_class;
+
+            switch ($data['inputType']) {
+                case 'text':
+                    $data['eval']['template'] = 'form_textfield_description';
+                    break;
+
+                case 'multiColumnWizard':
+                    $data['eval']['template'] = 'form_mcw_description';
+                    break;
+            }
 
             // Load options for tags attribute
             if ($attribute instanceof MetaModelTagsAttribute) {
@@ -482,6 +492,15 @@ HTML;
                     );
                     $redirectUrl .= '?act=edit&id='.$modelId->getSerialized();
 
+                    if ($editVariants && 0 === $this->metaModel->findVariants($this->item->get('id'), null)->getCount()) {
+                        $redirectUrl .= '&variants=1';
+                    }
+
+                    \Controller::redirect($redirectUrl);
+                }
+                elseif ($editVariants && 0 === $this->metaModel->findVariants($this->item->get('id'), null)->getCount() && !\Input::get('variants')) {
+                    $redirectUrl = \Environment::get('request');
+                    $redirectUrl .= '&variants=1';
                     \Controller::redirect($redirectUrl);
                 }
             }
@@ -561,7 +580,7 @@ HTML;
     protected function variantsCount($variants)
     {
         return sprintf(
-            '<p class="count_variants">Es existieren aktuell %u Varianten zu diesem Angebot.</p>',
+            '<p class="count_variants">Es existieren aktuell %u Varianten zu diesem Angebot. Die erstellten Termine sehen Sie in der Übersicht.</p>',
             $variants->getCount()
         ); //@todo lang
     }
