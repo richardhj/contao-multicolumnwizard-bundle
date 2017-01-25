@@ -400,7 +400,7 @@ class Dca implements EventSubscriberInterface
     public function getNotificationChoices()
     {
         $notifications = \Database::getInstance()
-            ->query("SELECT id,title FROM tl_nc_notification WHERE type='offer_al_status_change' ORDER BY title");
+            ->query("SELECT id,title FROM tl_nc_notification WHERE type='application_list_status_change' ORDER BY title");
 
         return $notifications->fetchEach('title');
     }
