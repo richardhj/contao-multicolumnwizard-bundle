@@ -14,19 +14,32 @@ namespace Ferienpass\Helper;
 use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
 
 
+/**
+ * Class Backend
+ *
+ * @package Ferienpass\Helper
+ */
 class Backend
 {
 
+    /**
+     * Display the current application system at the back end start page
+     *
+     * @return string
+     */
     public function addCurrentApplicationSystemToSystemMessages()
     {
         global $container;
 
         /** @var AbstractApplicationSystem $applicationSystem */
         $applicationSystem = $container['ferienpass.applicationsystem'];
-        $name = $applicationSystem->getModel()->type;
 
-        $cssClass = (null !== $applicationSystem->getModel()) ? 'tl_info' : 'tl_error';
+        if (null !== $applicationSystem) {
+            $name = $applicationSystem->getModel()->title;
+            return sprintf('<p class="tl_info">Es läuft aktuell das Anmeldesystem <strong>%s</strong></p>', $name);
 
-        return sprintf('<p class="%s">Es läuft aktuell das Anmeldesystem <strong>%s</strong></p>', $cssClass,$name);
+        } else {
+            return '<p class="tl_error">Es läuft aktuell <strong>kein</strong> Anmeldesystem. Anmeldungen sind <strong>nicht möglich</strong></p>';
+        }
     }
 }

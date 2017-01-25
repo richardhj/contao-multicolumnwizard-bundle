@@ -13,6 +13,7 @@ namespace Ferienpass\Model;
 
 /**
  * Class ApplicationSystem
+ * @property string $title
  * @property string $type
  * @property mixed $maxApplicationsPerDay
  * @package Ferienpass\Model
