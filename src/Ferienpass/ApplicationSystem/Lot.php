@@ -149,7 +149,7 @@ class Lot extends AbstractApplicationSystem
             switch ($k) {
                 case 'attendances':
                     $args[$k] = sprintf(
-                        '<a href="contao/main.php?do=metamodel_mm_participants&amp;table=tl_ferienpass_attendance&amp;pid=mm_participants::%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_participant_attendances" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
+                        '<a href="contao/main.php?do=metamodel_mm_participant&amp;table=tl_ferienpass_attendance&amp;pid=mm_participant::%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_participant_attendances" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
                         // Member ID
                         $model->getProperty('participant'),
                         // Link
