@@ -39,6 +39,11 @@ class SortingHelper
     private $dataProvider;
 
 
+    /**
+     * SortingHelper constructor.
+     *
+     * @param $table
+     */
     public function __construct($table)
     {
         $this->createDcGeneral($table);
@@ -46,6 +51,12 @@ class SortingHelper
     }
 
 
+    /**
+     * Update the sorting to set a given model after a given model or at the top if none given
+     *
+     * @param ModelIdInterface      $model
+     * @param ModelIdInterface|null $previousModel
+     */
     public function setAttendanceAfter(ModelIdInterface $model, ModelIdInterface $previousModel = null)
     {
         $model = $this->convertModelIdToModel($model);
@@ -66,6 +77,13 @@ class SortingHelper
     }
 
 
+    /**
+     * Convert a ModelId to a DC General conform model instance
+     *
+     * @param ModelIdInterface $modelId
+     *
+     * @return ModelInterface
+     */
     private function convertModelIdToModel(ModelIdInterface $modelId)
     {
         $modelCollector = new ModelCollector($this->environment);
