@@ -60,6 +60,10 @@ $GLOBALS['FERIENPASS_MOD'] = [
             'callback' => 'Ferienpass\BackendModule\EraseMemberData',
             'icon'     => 'trash-o',
             ],
+        'send_member_attendances_overview' => [
+            'callback' => 'Ferienpass\BackendModule\SendMemberAttendancesOverview',
+            'icon'     => 'envelope-o',
+        ],
     ],
     'data_processing' => [],
     'setup'           => [
