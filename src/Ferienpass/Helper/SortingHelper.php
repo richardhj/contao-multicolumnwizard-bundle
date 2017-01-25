@@ -46,10 +46,13 @@ class SortingHelper
     }
 
 
-    public function setAttendanceAfter(ModelIdInterface $model, ModelIdInterface $previousModel)
+    public function setAttendanceAfter(ModelIdInterface $model, ModelIdInterface $previousModel = null)
     {
         $model = $this->convertModelIdToModel($model);
-        $previousModel = $this->convertModelIdToModel($previousModel);
+
+        if (null !== $previousModel) {
+            $previousModel = $this->convertModelIdToModel($previousModel);
+        }
 
         $models = new DefaultCollection();
         $models->push($model);
