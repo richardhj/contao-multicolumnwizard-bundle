@@ -9,7 +9,7 @@
  */
 
 use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
-use Ferienpass\Model\ApplicationSystem;
+use Ferienpass\Model\ApplicationSystem as ApplicationSystemModel;
 
 
 $container['ferienpass.applicationsystem.firstcome'] = function () {
@@ -31,7 +31,7 @@ $container['ferienpass.applicationsystem'] = $container->share(
         try {
             $result = $database
                 ->prepare(
-                    "SELECT type "
+                    "SELECT * "
                     ."FROM {$table} "
                     ."WHERE (start='' OR start<='$time') AND (stop='' OR stop>'".($time + 60)."') AND published='1'"
                 )
@@ -41,15 +41,17 @@ $container['ferienpass.applicationsystem'] = $container->share(
             if (1 === $result->numRows) {
                 /** @var AbstractApplicationSystem $applicationSystem */
                 $applicationSystem = $container['ferienpass.applicationsystem.'.$result->type];
-                $applicationSystem->setModel((new ApplicationSystem($result)));
+                $model = new ApplicationSystemModel($result);
+                $applicationSystem->setModel($model);
 
                 return $applicationSystem;
             }
 
-        } finally {
+        } catch (\Exception $e) {
             return new Ferienpass\ApplicationSystem\NoOp();
         }
 
+        return new Ferienpass\ApplicationSystem\NoOp();
     }
 );
 

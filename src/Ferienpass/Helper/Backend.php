@@ -25,7 +25,7 @@ class Backend
         $applicationSystem = $container['ferienpass.applicationsystem'];
         $name = $applicationSystem->getModel()->type;
 
-        $cssClass = (null !== $applicationSystem->getModel()) ? 'tl_info' : 'tl_warning';
+        $cssClass = (null !== $applicationSystem->getModel()) ? 'tl_info' : 'tl_error';
 
         return sprintf('<p class="%s">Es läuft aktuell das Anmeldesystem <strong>%s</strong></p>', $cssClass,$name);
     }

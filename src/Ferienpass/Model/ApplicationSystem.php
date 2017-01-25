@@ -10,8 +10,6 @@
 
 namespace Ferienpass\Model;
 
-use Contao\Model;
-
 
 /**
  * Class ApplicationSystem
@@ -19,7 +17,7 @@ use Contao\Model;
  * @property mixed $maxApplicationsPerDay
  * @package Ferienpass\Model
  */
-class ApplicationSystem extends Model
+class ApplicationSystem extends \Model
 {
 
     /**
