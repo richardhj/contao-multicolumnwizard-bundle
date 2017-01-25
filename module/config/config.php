@@ -148,7 +148,7 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
     (array)$GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'],
     [
         'ferienpass' => [
-            'offer_al_status_change' => [
+            'application_list_status_change' => [
                 'recipients'            => [
                     'participant_email',
                     'host_email',
@@ -193,6 +193,47 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
                 ],
                 'sms_recipients_region' => [
                     'participant_country',
+                    'member_country',
+                ],
+            ],
+            'applications_member_overview'   => [
+                'recipients'            => [
+                    'admin_email',
+                    'member_email',
+                ],
+                'sms_recipients'        => [
+                    'member_mobile',
+                    'member_phone',
+                ],
+                'email_text'            => [
+                    'applications_text',
+                    'member_*',
+                ],
+                'email_html'            => [
+                    'applications_text',
+                    'applications_html',
+                    'member_*',
+                ],
+                'email_sender_name'     => [
+                    'admin_email',
+                ],
+                'email_sender_address'  => [
+                    'admin_email',
+                ],
+                'email_recipient_cc'    => [
+                    'admin_email',
+                ],
+                'email_recipient_bcc'   => [
+                    'admin_email',
+                ],
+                'email_replyTo'         => [
+                    'admin_email',
+                ],
+                'sms_text'              => [
+                    'applications_text',
+                    'member_*',
+                ],
+                'sms_recipients_region' => [
                     'member_country',
                 ],
             ],
