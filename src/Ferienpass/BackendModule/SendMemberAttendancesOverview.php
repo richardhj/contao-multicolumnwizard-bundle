@@ -51,6 +51,8 @@ class SendMemberAttendancesOverview extends \BackendModule
         $output = '';
         $formSubmit = 'send_member_attendances_overview';
 
+        $members = $this->fetchMembersWithOpenAttendances();
+
         if ($formSubmit === \Input::post('FORM_SUBMIT')) {
 
         }
@@ -69,5 +71,24 @@ class SendMemberAttendancesOverview extends \BackendModule
                 'palette' => $output,
             ],
         ];
+    }
+
+
+    private function fetchMembersWithOpenAttendances()
+    {
+        /** @var Attendance|\Model\Collection $attendances */
+        $attendances = Attendance::findNotSent();
+
+        if (null === $attendances) {
+
+        }
+
+        $members = \MemberModel::findBy(
+            ['id IN (SELECT pmember FROM mm_participant WHERE id IN (' . $attendances->fetchEach('participant') . '))'],
+            []
+        );
+
+
+        return $members;
     }
 }
