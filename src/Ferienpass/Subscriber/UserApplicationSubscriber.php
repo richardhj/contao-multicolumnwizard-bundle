@@ -138,6 +138,9 @@ class UserApplicationSubscriber implements EventSubscriberInterface
      */
     public function setSorting(PreSaveModelEvent $event)
     {
+        // TODO refactor, AddAttendeeHost not in scope
+
+
         $attendance = $event->getModel();
 
         if (!$attendance instanceof Attendance || $attendance->sorting) {
