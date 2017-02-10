@@ -152,6 +152,7 @@ class AddAttendeeHost extends Item
                 // Create an attendance for this participant and offer
                 $attendance = new Attendance();
                 $attendance->tstamp = time();
+                $attendance->created = time();
                 $attendance->offer = $this->item->get('id');
                 $attendance->participant = $participant->get('id');
                 $attendance->save();
