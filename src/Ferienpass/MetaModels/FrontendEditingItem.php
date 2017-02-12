@@ -8,7 +8,9 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace MetaModels;
+namespace Ferienpass\MetaModels;
+
+use MetaModels\Item;
 
 
 /**

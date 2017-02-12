@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace MetaModels\Attribute\Age;
+namespace Ferienpass\MetaModels\Attribute\Age;
 
 use MetaModels\Attribute\BaseComplex;
 use MetaModels\Render\Template;

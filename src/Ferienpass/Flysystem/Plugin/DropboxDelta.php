@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace League\Flysystem\Plugin;
+namespace Ferienpass\Flysystem\Plugin;
 
 use League\Flysystem\Dropbox\DropboxAdapter;
 use League\Flysystem\Filesystem;
@@ -19,7 +19,7 @@ use League\Flysystem\Util;
 
 /**
  * Class DropboxDelta
- * @package League\Flysystem\Plugin
+ * @package Ferienpass\Flysystem\Plugin
  */
 class DropboxDelta implements PluginInterface
 {

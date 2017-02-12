@@ -12,12 +12,12 @@ namespace Ferienpass\Module;
 
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Ferienpass\Helper\Message;
+use Ferienpass\MetaModels\FrontendEditingItem as Item;
 use Ferienpass\Model\Attendance;
 use Haste\Form\Form;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Attribute\Tags\MetaModelTags as MetaModelTagsAttribute;
-use MetaModels\FrontendEditingItem as Item;
 use MetaModels\IItem;
 use MetaModels\IItems;
 

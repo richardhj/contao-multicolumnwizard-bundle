@@ -8,14 +8,14 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace MetaModels\Attribute\OfferDate;
+namespace Ferienpass\MetaModels\Attribute\Age;
 
 use MetaModels\Attribute\AbstractAttributeTypeFactory;
 
 
 /**
  * Class AttributeTypeFactory
- * @package MetaModels\Attribute\OfferDate
+ * @package MetaModels\Attribute\Age
  */
 class AttributeTypeFactory extends AbstractAttributeTypeFactory
 {
@@ -27,8 +27,8 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
     {
         parent::__construct();
 
-        $this->typeName = 'offer_date';
+        $this->typeName = 'age';
         $this->typeIcon = 'assets/ferienpass/backend/img/fp_age.png';
-        $this->typeClass = 'MetaModels\Attribute\OfferDate\OfferDate';
+        $this->typeClass = 'Ferienpass\MetaModels\Attribute\Age\Age';
     }
 }

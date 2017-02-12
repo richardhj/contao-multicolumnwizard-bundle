@@ -11,11 +11,11 @@
 namespace Ferienpass\Module;
 
 use Ferienpass\Helper\Message;
+use Ferienpass\MetaModels\FrontendEditingItem;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
 use Haste\Form\Form;
 use MetaModels\Attribute\IAttribute;
-use MetaModels\FrontendEditingItem;
 
 
 /**

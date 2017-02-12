@@ -8,7 +8,9 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace MetaModels\Filter\Setting;
+namespace Ferienpass\MetaModels\Filter\Setting;
+
+use MetaModels\Filter\Setting\AbstractFilterSettingTypeFactory;
 
 /**
  * Class AttendanceAvailableFilterSettingTypeFactory

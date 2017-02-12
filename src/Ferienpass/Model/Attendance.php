@@ -11,10 +11,7 @@
 namespace Ferienpass\Model;
 
 use Contao\Model;
-use Ferienpass\Event\DeleteAttendanceEvent;
-use Ferienpass\Event\SaveAttendanceEvent;
 use MetaModels\IItem;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 
 /**

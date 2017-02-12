@@ -8,12 +8,13 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace MetaModels\Filter\Setting;
+namespace Ferienpass\MetaModels\Filter\Setting;
 
 use Ferienpass\Model\Attendance;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\Filter\Setting\Checkbox;
 
 
 /**
