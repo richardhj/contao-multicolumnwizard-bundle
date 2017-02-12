@@ -16,8 +16,8 @@ use Contao\Widget;
 use Ferienpass\Model\DataProcessing;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
-use Pixelfear\OAuth2\Client\Provider\Dropbox;
-use Pixelfear\OAuth2\Client\Provider\DropboxResourceOwner;
+use Stevenmaguire\OAuth2\Client\Provider\Dropbox as DropboxOAuthProvider;
+use Stevenmaguire\OAuth2\Client\Provider\DropboxResourceOwner;
 
 
 /**
@@ -55,7 +55,7 @@ class RequestAccessToken extends Widget
      */
     public function generate()
     {
-        $provider = new Dropbox(
+        $provider = new DropboxOAuthProvider(
             [
                 'clientId'     => \Config::get('dropbox_ferienpass_appId'),
                 'clientSecret' => \Config::get('dropbox_ferienpass_appSecret'),
