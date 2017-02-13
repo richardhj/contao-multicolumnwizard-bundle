@@ -14,5 +14,17 @@ namespace Ferienpass\Model\DataProcessing;
 
 interface FormatInterface
 {
+    public function __construct($model, $offers);
+
+    /**
+     * @return self
+     */
+    public function processOffers();
+
+
+    /**
+     * @return array
+     */
+    public function getFiles();
 
 }

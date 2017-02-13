@@ -12,16 +12,17 @@ namespace Ferienpass\Model;
 
 use Contao\Model;
 use Dropbox\Client;
-use Dropbox\Exception_BadRequest;
-use Dropbox\Exception_NetworkIO;
-use Eluceo\iCal\Component\Calendar;
-use Eluceo\iCal\Component\Event;
 use Ferienpass\Flysystem\Plugin\DropboxDelta;
-use Haste\DateTime\DateTime;
+use Ferienpass\Model\DataProcessing\Filesystem\Dropbox;
+use Ferienpass\Model\DataProcessing\Filesystem\Local;
+use Ferienpass\Model\DataProcessing\Filesystem\SendToBrowser;
+use Ferienpass\Model\DataProcessing\FilesystemInterface;
+use Ferienpass\Model\DataProcessing\FormatInterface;
 use League\Flysystem\Dropbox\DropboxAdapter;
 use League\Flysystem\Filesystem;
 use League\Flysystem\MountManager;
 use MetaModels\Attribute\IAttribute;
+use MetaModels\IItems;
 
 
 /**
@@ -65,6 +66,30 @@ class DataProcessing extends Model
      * @var string
      */
     protected static $strTable = 'tl_ferienpass_dataprocessing';
+
+
+    /**
+     * @var FormatInterface
+     */
+    private $formatHandler;
+
+
+    /**
+     * @var FilesystemInterface
+     */
+    private $fileSystemHandler;
+
+
+    /**
+     * @var IItems
+     */
+    private $offers;
+
+
+    /**
+     * @var string
+     */
+    private $tmpPath;
 
 
     /**
@@ -116,13 +141,13 @@ class DataProcessing extends Model
         $this->dropbox_cursor = !($this->dropbox_cursor && $arrDelta['reset']) ? $arrDelta['cursor'] : '';
         $this->save();
 
-        log_message(var_export($arrDelta, true), 'syncFromRemoteDropbox.log');
+        //log_message(var_export($arrDelta, true), 'syncFromRemoteDropbox.log');
 
         $arrFiles = [];
 
         // Walk each changed files in dropbox
         foreach ($arrDelta['entries'] as $entry) {
-            if ($entry[1]['type'] == 'dir') {
+            if ('dir' === $entry[1]['type']) {
                 continue;
             }
 
@@ -635,178 +660,43 @@ class DataProcessing extends Model
      */
     public function run($arrOffers = [])
     {
-        $arrToExport = [];
-
-        $objMountManger = $this->getMountManager();
-        $objOffers = null;
-        $strTmpPath = 'system/tmp/'.time();
-
         if (!empty($arrOffers)) {
             $this->scope = 'single';
         }
 
         switch ($this->scope) {
             case 'full':
-                $objOffers = Offer::getInstance()->findAll();
+                $this->offers = Offer::getInstance()->findAll();
                 break;
 
             case 'single':
-                $objOffers = (empty($arrOffers))
+                $this->offers = (empty($arrOffers))
                     ? Offer::getInstance()->findAll()
                     : Offer::getInstance()->findMultipleByIds((array)$arrOffers);
                 break;
 
         }
 
-        switch ($this->type) {
-            case 'xml':
-                switch ($this->scope) {
-                    case 'full':
-                        // Fetch files from image folders
-                        if (null !== ($objOfferImages = \FilesModel::findByPk($this->offer_image_path))) {
-                            $arrToExport[self::EXPORT_OFFER_IMAGES_PATH] = $objMountManger->listContents(
-                                'dbafs://'.$objOfferImages->path
-                            );
-                        }
-                        if (null !== ($objHostLogos = \FilesModel::findByPk($this->host_logo_path))) {
-                            $arrToExport[self::EXPORT_HOST_LOGOS_PATH] = $objMountManger->listContents(
-                                'dbafs://'.$objHostLogos->path
-                            );
-                        }
-                        break;
+        $files = $this
+                ->getFormatHandler()
+                ->processOffers()
+                ->getFiles();
 
-                    case 'single':
-                        break;
-                }
 
-                if (null !== $objOffers) {
-                    // Walk each offer
-                    while ($objOffers->next()) {
-                        $strXml = $this->generateOfferXml($objOffers->getItem()->get('id'));
+//                throw new \LogicException(
+//                    sprintf('Type "%s" is not implemented. Data processing ID %u', $this->type, $this->id)
+//                );
 
-                        if (false !== $strXml) {
-                            $directory = $strTmpPath.'/offer_'.$objOffers->getItem()->get('id').'.xml';
-                            $objMountManger->put('local://'.$directory, $strXml);
+        $this
+            ->getFileSystemHandler()
+            ->processFiles($files);
 
-                            $arrToExport[self::EXPORT_XML_FILES_PATH] = $objMountManger->listContents(
-                                'local://'.$strTmpPath
-                            );
-                        }
-                    }
-                }
-                break;
-
-            case 'ical':
-                $path = $strTmpPath.'/'.$this->export_file_name.'.ics';
-                $objMountManger->put('local://'.$path, $this->createICalForOffers($objOffers));
-                $arrToExport[] = array_merge(
-                    $objMountManger->getMetadata('local://'.$path),
-                    ['basename' => basename($path)]
-                );
-                break;
-
-            default:
-                throw new \LogicException(
-                    sprintf('Type "%s" is not implemented. Data processing ID %u', $this->type, $this->id)
-                );
-                break;
-        }
-
-        switch ($this->filesystem) {
-            // Save files local
-            case 'local':
-                $path_prefix = ($this->path_prefix) ? $this->path_prefix.'/' : '';
-
-                if (array_is_assoc($arrToExport)) {
-                    foreach ($arrToExport as $directory => $arrFiles) {
-                        foreach ($arrFiles as $file) {
-                            $objMountManger->put(
-                                'local://share/'.$path_prefix.$directory.'/'.$file['basename'],
-                                $objMountManger->read('local://'.$file['path'])
-                            );
-                        }
-                    }
-                } else {
-                    foreach ($arrToExport as $file) {
-                        $objMountManger->put(
-                            'local://share/'.$path_prefix.$file['basename'],
-                            $objMountManger->read('local://'.$file['path'])
-                        );
-                    }
-                }
-                break;
-
-            // Send zip file to browser
-            case 'sendToBrowser':
-                // Generate a zip file
-                $objZip = new \ZipWriter($strTmpPath.'/export.zip');
-
-                if (array_is_assoc($arrToExport)) {
-                    foreach ($arrToExport as $directory => $arrFiles) {
-                        foreach ($arrFiles as $file) {
-                            $objZip->addFile($file['path'], $directory.'/'.$file['basename']);
-                        }
-                    }
-                } else {
-                    foreach ($arrToExport as $file) {
-                        $objZip->addFile($file['path'], $file['basename']);
-                    }
-                }
-
-                $objZip->close();
-
-                // Output ZIP
-                header('Content-type: application/octetstream');
-                header('Content-Disposition: attachment; filename="'.$this->export_file_name.'.zip"');
-                readfile(TL_ROOT.'/'.$strTmpPath.'/export.zip');
-                exit;
-
-                break;
-
-            // Upload to user's dropbox
-            case 'dropbox':
-
-                // Make sure to mount dropbox
-                $objMountManger = $this->getMountManager('dropbox');
-
-                foreach ($arrToExport as $directory => $arrFiles) {
-                    foreach ($arrFiles as $file) {
-                        try {
-                            $objMountManger->put(
-                                'dropbox://'.$directory.'/'.$file['basename'],
-                                $objMountManger->read('local://'.$file['path'])
-                            );
-
-                        } catch (Exception_BadRequest $e) {
-                            // File was not uploaded
-                            // often because it is on the ignored file list
-                            \System::log(
-                                sprintf('%s. Data processing ID %u', $e->getMessage(), $this->id),
-                                __METHOD__,
-                                TL_GENERAL
-                            );
-                        } catch (Exception_NetworkIO $e) {
-                            // File was not uploaded
-                            // Connection refused
-                            \System::log(
-                                sprintf('%s. Data processing ID %u', $e->getMessage(), $this->id),
-                                __METHOD__,
-                                TL_ERROR
-                            );
-                        }
-                    }
-                }
-                break;
-
-            default:
-                throw new \LogicException(
-                    sprintf('Filesystem "%s" is not implemented. Data processing ID %u', $this->filesystem, $this->id)
-                );
-                break;
-        }
+//                throw new \LogicException(
+//                    sprintf('Filesystem "%s" is not implemented. Data processing ID %u', $this->filesystem, $this->id)
+//                );
 
         // Delete xml tmp path
-        $objMountManger->deleteDir('local://'.$strTmpPath);
+        $this->getMountManager()->deleteDir('local://'.$this->getTmpPath());
     }
 
 
@@ -815,7 +705,7 @@ class DataProcessing extends Model
      *
      * @return MountManager
      */
-    protected function getMountManager($varFilesystems = null)
+    public function getMountManager($varFilesystems = null)
     {
         if (null !== $varFilesystems) {
             foreach ((array)$varFilesystems as $filesystem) {
@@ -858,225 +748,58 @@ class DataProcessing extends Model
     }
 
 
+
     /**
-     * Return the offer's xml as string
-     *
-     * @param integer $intId The offer's id
-     *
-     * @return string|false
+     * @return FormatInterface
      */
-    public function generateOfferXml($intId)
+    public function getFormatHandler()
     {
-        $objOffer = Offer::getInstance()->findById($intId);
-        $objVariants = null;
-
-        // If we combine variants, only variant bases will be exported
-        if ($this->combine_variants) {
-            if ($objOffer->isVariant()) {
-                return false;
-            }
-
-            $objVariants = $objOffer->getVariants(null);
-        }
-
-        $objRenderSetting = $objOffer->getMetaModel()->getView((int)$this->metamodel_view);
-
-        // Create DOM
-        $objDom = new \DOMDocument('1.0', 'utf-8');
-
-        // Create comment
-        $objCommentTemplate = new \FrontendTemplate('dataprocessing_xml_comment');
-        $objCommentTemplate->setData($this->arrData);
-        $objDom->appendChild($objDom->createComment($objCommentTemplate->parse()));
-
-        $objRoot = $objDom->createElement('Offer');
-        $objRoot->setAttribute('id', $intId);
-
-        // Add variant ids (order will be important for following processings)
-        if (null !== $objVariants && $objVariants->getCount()) {
-            $arrVariantIds = [];
-
-            while ($objVariants->next()) {
-                $arrVariantIds[] = $objVariants->getItem()->get('id');
-            }
-
-            $objRoot->setAttribute('variant_ids', implode(',', $arrVariantIds));
-        }
-
-        $objDom->appendChild($objRoot);
-
-        // Walk each attribute in render setting
-        foreach ($objRenderSetting->getSettingNames() as $colName) {
-            $objAttribute = $objOffer->getAttribute($colName);
-
-            // It is a variant attribute
-            if ($this->combine_variants && $objVariants->getCount() && $objAttribute->get('isvariant')) {
-                // Fetch variants
-                $parsed = [];
-                $objVariants->reset();
-
-                // Parse each attribute with render setting
-                while ($objVariants->next()) {
-                    $parsed[] = $objVariants->getItem()->parseAttribute($colName, 'text', $objRenderSetting)['text'];
-                }
-
-                // Combine variant attributes
-                $parsed = implode(self::VARIANT_DELIMITER, $parsed);
-            } // Default procedure for non-variant attributes
-            else {
-                // Parse attribute with render setting
-                $parsed = $objOffer->parseAttribute($colName, 'text', $objRenderSetting);
-                $parsed = $parsed['text'];
-            }
-
-            // Prepare attribute node by setting attribute id
-            $attribute = $objDom->createElement(static::camelCaseColName($colName));
-            $attribute->setAttribute('attr_id', $objAttribute->get('id'));
-
-            // Set the attribute node's value
-            $attribute->nodeValue = htmlspecialchars(
-                html_entity_decode($parsed),
-                ENT_XML1
-            ) ?: ' '; // Prohibit empty string
-
-            // Check if parsed attribute is an xml to import
-            // This will override the nodeValue defined before
-            $this->importXmlToNode($parsed, $attribute);
-
-            $objRoot->appendChild($attribute);
-        }
-
-        return $objDom->saveXML();
+        return $this->formatHandler;
     }
 
+    /**
+     * @return FilesystemInterface
+     */
+    public function getFileSystemHandler()
+    {
+        if (null === $this->fileSystemHandler) {
+            switch ($this->filesystem) {
+                case 'local':
+                    $this->fileSystemHandler = new Local($this, $this->getOffers());
+                    break;
+
+                case 'sendToBrowser':
+                    $this->fileSystemHandler = new SendToBrowser($this, $this->getOffers());
+                    break;
+
+                case 'dropbox':
+                    $this->fileSystemHandler = new Dropbox($this, $this->getOffers());
+                    break;
+            }
+        }
+
+        return $this->fileSystemHandler;
+    }
 
     /**
-     * Camel Case (with first case uppercase) a column name
-     *
-     * @param string $strColName
-     *
      * @return string
      */
-    public static function camelCaseColName($strColName)
+    public function getTmpPath()
     {
-        return preg_replace('/[\s\_\-]/', '', ucwords($strColName, ' _-'));
+        if (null === $this->tmpPath)
+        {
+            $this->tmpPath  = 'system/tmp/'.time();
+        }
+
+        return $this->tmpPath;
     }
 
-
     /**
-     * Check whether the parsed attribute string is in XML and import the nodes if so
-     *
-     * @param string   $strParsedAttribute
-     * @param \DOMNode $objAttributeNode
-     *
-     * @return bool True if xml was imported and appended to attribute False if nothing was changed
+     * @return IItems
      */
-    protected function importXmlToNode($strParsedAttribute, &$objAttributeNode)
+    public function getOffers()
     {
-        if (!$strParsedAttribute) {
-            return false;
-        }
-
-        libxml_use_internal_errors(true);
-
-        $objDom = new \DOMDocument('1.0', 'utf-8');
-        $objDom->loadXML($strParsedAttribute);
-        $errors = libxml_get_errors();
-
-        libxml_clear_errors();
-
-        // It is a xml string
-        if (empty($errors)) {
-            // Reset node
-            $objAttributeNode->nodeValue = '';
-
-            foreach ($objDom->childNodes as $element) {
-                $node = $objAttributeNode->ownerDocument->importNode($element, true);
-                $objAttributeNode->appendChild($node);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-
-    /**
-     * @param \MetaModels\IItem[]|\MetaModels\IItems $objOffers
-     *
-     * @return string
-     */
-    public function createICalForOffers($objOffers)
-    {
-        $vCalendar = new Calendar(\Environment::get('httpHost'));
-
-        $arrICalProperties = deserialize($this->ical_fields);
-
-        // Walk each offer
-        while (null !== $objOffers && $objOffers->next()) {
-            // Process published offers exclusively
-            if (!$objOffers->getItem()->get('published')) {
-                continue;
-            }
-
-            // filter by host
-            //@todo real quick'n'dirty
-            if ($this->id == 7 && $objOffers->getItem()->get('host')['id'] != 132) {
-                continue;
-            }
-
-            $vEvent = new Event();
-
-            /** @var array $arrProperty [ical_field] The property identifier
-             *                          [metamodel_attribute] The property assigned MetaModel attribute name */
-            foreach ($arrICalProperties as $arrProperty) {
-                switch ($arrProperty['ical_field']) {
-                    case 'dtStart':
-                        try {
-                            $objDate = new DateTime(
-                                '@'.$objOffers->getItem()->get($arrProperty['metamodel_attribute'])
-                            );
-                            $vEvent->setDtStart($objDate);
-                        } catch (\Exception $e) {
-                            continue 3;
-                        }
-                        break;
-
-                    case 'dtEnd':
-                        try {
-                            $objDate = new DateTime(
-                                '@'.$objOffers->getItem()->get($arrProperty['metamodel_attribute'])
-                            );
-                            $vEvent->setDtEnd($objDate);
-                        } catch (\Exception $e) {
-                            continue 3;
-                        }
-                        break;
-
-                    case 'summary':
-                        $vEvent->setSummary($objOffers->getItem()->get($arrProperty['metamodel_attribute']));
-                        break;
-
-                    case 'description':
-                        $vEvent->setDescription($objOffers->getItem()->get($arrProperty['metamodel_attribute']));
-                        break;
-                }
-            }
-
-            // skip events that pollute the calendar
-            //@todo really quick'n'dirty
-            $objDateStart = new DateTime('@'.$objOffers->getItem()->get('date'));
-            $objDateEnd = new DateTime('@'.$objOffers->getItem()->get('date_end'));
-            if ($objDateEnd->diff($objDateStart)->d > 1) {
-                continue;
-            }
-
-            $vEvent->setUseTimezone(true);
-            $vCalendar->addComponent($vEvent);
-        }
-
-        return $vCalendar->render();
+        return $this->offers;
     }
 
 

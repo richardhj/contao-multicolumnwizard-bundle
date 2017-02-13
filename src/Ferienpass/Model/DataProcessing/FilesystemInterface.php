@@ -13,5 +13,13 @@ namespace Ferienpass\Model\DataProcessing;
 
 interface FilesystemInterface
 {
+    public function __construct($model, $offers);
 
+
+    /**
+     * @param array $files
+     *
+     * @return void
+     */
+    public function processFiles(array $files);
 }

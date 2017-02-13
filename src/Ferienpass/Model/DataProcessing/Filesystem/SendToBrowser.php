@@ -16,7 +16,7 @@ use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\FilesystemInterface;
 use MetaModels\IItems;
 
-class Local implements FilesystemInterface
+class SendToBrowser implements FilesystemInterface
 {
 
     /**
@@ -37,6 +37,33 @@ class Local implements FilesystemInterface
     }
 
 
+    public function processFiles(array $files)
+    {
+        // Generate a zip file
+        $objZip = new \ZipWriter($this->getModel()->getTmpPath() . '/export.zip');
+
+        if (array_is_assoc($files)) {
+            foreach ($files as $directory => $arrFiles) {
+                foreach ($arrFiles as $file) {
+                    $objZip->addFile($file['path'], $directory . '/' . $file['basename']);
+                }
+            }
+        } else {
+            foreach ($files as $file) {
+                $objZip->addFile($file['path'], $file['basename']);
+            }
+        }
+
+        $objZip->close();
+
+        // Output ZIP
+        header('Content-type: application/octetstream');
+        header('Content-Disposition: attachment; filename="' . $this->getModel()->export_file_name . '.zip"');
+        readfile(TL_ROOT . '/' . $this->getModel()->getTmpPath() . '/export.zip');
+        exit;
+
+    }
+
     /**
      * @return DataProcessing|\Model
      */
@@ -45,27 +72,12 @@ class Local implements FilesystemInterface
         return $this->model;
     }
 
-    public function processFiles(array $files)
+    /**
+     * @return IItems
+     */
+    public function getOffers()
     {
-        $path_prefix = ($this->getModel()->path_prefix) ? $this->getModel()->path_prefix . '/' : '';
-
-        if (array_is_assoc($files)) {
-            foreach ($files as $directory => $arrFiles) {
-                foreach ($arrFiles as $file) {
-                    $this->getModel()->getMountManager()->put(
-                        'local://share/' . $path_prefix . $directory . '/' . $file['basename'],
-                        $this->getModel()->getMountManager()->read('local://' . $file['path'])
-                    );
-                }
-            }
-        } else {
-            foreach ($files as $file) {
-                $this->getModel()->getMountManager()->put(
-                    'local://share/' . $path_prefix . $file['basename'],
-                    $this->getModel()->getMountManager()->read('local://' . $file['path'])
-                );
-            }
-        }
-
+        return $this->offers;
     }
+
 }
