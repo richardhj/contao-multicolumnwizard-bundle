@@ -7,6 +7,8 @@ use Ferienpass\Model\DataProcessing;
 define('TL_MODE', 'FE');
 require '../../../../initialize.php';
 
+global $container;
+
 header('Content-Type: text/plain');
 
 // Check get parameter
@@ -17,7 +19,7 @@ if (($challenge = \Input::get('challenge'))) {
 
 $raw_data = file_get_contents('php://input');
 $json = json_decode($raw_data);
-$app_secret = \Config::get('dropbox_ferienpass_appSecret');
+$app_secret = $container['ferienpass.dropbox.appSecret'];
 
 if ($_SERVER['HTTP_X_DROPBOX_SIGNATURE'] !== hash_hmac('sha256', $raw_data, $app_secret)) {
     header('HTTP/1.0 403 Forbidden');

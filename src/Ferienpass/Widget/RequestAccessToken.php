@@ -55,10 +55,12 @@ class RequestAccessToken extends Widget
      */
     public function generate()
     {
+        global $container;
+
         $provider = new DropboxOAuthProvider(
             [
-                'clientId'     => \Config::get('dropbox_ferienpass_appId'),
-                'clientSecret' => \Config::get('dropbox_ferienpass_appSecret'),
+                'clientId'     => $container['ferienpass.dropbox.appId'],
+                'clientSecret' => $container['ferienpass.dropbox.appSecret'],
             ]
         );
 

@@ -44,12 +44,6 @@ $GLOBALS['TL_MODELS']['tl_ferienpass_document'] = 'Ferienpass\Model\Document';
 $GLOBALS['TL_MODELS']['tl_ferienpass_dataprocessing'] = 'Ferienpass\Model\DataProcessing';
 
 
-/**
- * (Local)config
- */
-$GLOBALS['TL_CONFIG']['dropbox_ferienpass_appId'] = 'sf04yiig0hbwzmi';
-$GLOBALS['TL_CONFIG']['dropbox_ferienpass_appSecret'] = '9gn0gckd2yr0fy9';
-
 
 /**
  * Ferienpass Modules

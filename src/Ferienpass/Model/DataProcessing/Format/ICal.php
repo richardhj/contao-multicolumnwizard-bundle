@@ -163,6 +163,4 @@ class ICal implements FormatInterface
 
         return $vCalendar->render();
     }
-
-
 }
