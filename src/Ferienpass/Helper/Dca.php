@@ -17,6 +17,7 @@ use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator
 use ContaoCommunityAlliance\DcGeneral\Contao\InputProvider;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionInterface;
@@ -76,6 +77,9 @@ class Dca implements EventSubscriberInterface
             EncodePropertyValueFromWidgetEvent::NAME => [
                 'triggerAttendanceStatusChange',
             ],
+            GetPropertyOptionsEvent::NAME => [
+                'loadDataProcessingFilterOptions'
+            ]
         ];
     }
 
@@ -606,5 +610,20 @@ class Dca implements EventSubscriberInterface
 //fixme
         // Trigger attendance status update
 //        Attendance::updateStatusByOffer($event->getModel()->getProperty('id'));
+    }
+
+
+    public function loadDataProcessingFilterOptions(GetPropertyOptionsEvent $event)
+    {
+        if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
+            || ('metamodel_filter' !== $event->getPropertyName())) {
+            return;
+        }
+
+        $filters = \Database::getInstance()
+            ->prepare('SELECT * FROM tl_metamodel_filter WHERE pid=?')
+            ->execute(Offer::getInstance()->getMetaModel()->get('id'));
+
+        $event->setOptions($filters->fetchEach('name'));
     }
 }

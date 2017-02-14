@@ -32,10 +32,10 @@ class SendToBrowser implements FilesystemInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $offers)
+    public function __construct(DataProcessing $model, IItems $items)
     {
         $this->model  = $model;
-        $this->offers = $offers;
+        $this->offers = $items;
     }
 
     /**

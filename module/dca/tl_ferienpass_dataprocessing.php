@@ -25,12 +25,12 @@ $GLOBALS['TL_DCA'][$table] = [
 
     // List
     'list'                  => [
-        'sorting' => [
-            'mode'   => 1,
-            'fields' => [
+        'sorting'           => [
+            'mode'        => 1,
+            'fields'      => [
                 'name'
             ],
-            'flag'   => 1,
+            'flag'        => 1,
             'panelLayout' => 'filter;search,limit',
         ],
         'label'             => [
@@ -69,7 +69,8 @@ $GLOBALS['TL_DCA'][$table] = [
                 'label'      => &$GLOBALS['TL_LANG'][$table]['delete'],
                 'href'       => 'act=delete',
                 'icon'       => 'delete.gif',
-                'attributes' => 'onclick="if (!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm'].'\')) return false; Backend.getScrollOffset();"',
+                'attributes' => 'onclick="if (!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm']
+                                . '\')) return false; Backend.getScrollOffset();"',
             ],
             'show'   => [
                 'label' => &$GLOBALS['TL_LANG'][$table]['show'],
@@ -90,6 +91,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'filesystem',
                 'static_dirs',
                 'scope',
+                'metamodel_filtering'
             ],
         ],
     ],
@@ -99,18 +101,19 @@ $GLOBALS['TL_DCA'][$table] = [
             'xml'  => [
                 'metamodel_view',
                 'combine_variants',
+                'xml_single_file'
             ],
             'ical' => [
                 'ical_fields',
             ],
         ],
-//        'scope'      => [
-//            'single' => [],
-//            'full'   => [
-//                'offer_image_path',
-//                'host_logo_path',
-//            ],
-//        ],
+        //        'scope'      => [
+        //            'single' => [],
+        //            'full'   => [
+        //                'offer_image_path',
+        //                'host_logo_path',
+        //            ],
+        //        ],
         'filesystem' => [
             'local'         => [
                 'export_file_name',
@@ -166,7 +169,16 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType'        => 'select',
             'options_callback' => ['Ferienpass\Helper\Dca', 'getOffersMetaModelRenderSettings'],
             'eval'             => [
-                'inlcudeBlankOption' => true,
+                'includeBlankOption' => true,
+                'tl_class'           => 'w50',
+            ],
+            'sql'              => "int(10) NOT NULL default '0'",
+        ],
+        'metamodel_filtering'       => [
+            'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_filtering'],
+            'inputType'        => 'select',
+            'eval'             => [
+                'includeBlankOption' => true,
                 'tl_class'           => 'w50',
             ],
             'sql'              => "int(10) NOT NULL default '0'",
@@ -199,27 +211,27 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-//        'offer_image_path'     => [
-//            'label'     => &$GLOBALS['TL_LANG'][$table]['offer_image_path'],
-//            'inputType' => 'fileTree',
-//            'eval'      => [
-//                'fieldType' => 'radio',
-//                'files'     => false,
-//                'tl_class'  => 'w50 clr',
-//            ],
-//            'sql'       => "binary(16) NULL",
-//        ],
-//        'host_logo_path'       => [
-//            'label'     => &$GLOBALS['TL_LANG'][$table]['host_logo_path'],
-//            'inputType' => 'fileTree',
-//            'eval'      => [
-//                'fieldType' => 'radio',
-//                'files'     => false,
-//                'tl_class'  => 'w50',
-//            ],
-//            'sql'       => "binary(16) NULL",
-//        ],
-        'static_dirs' => [
+        //        'offer_image_path'     => [
+        //            'label'     => &$GLOBALS['TL_LANG'][$table]['offer_image_path'],
+        //            'inputType' => 'fileTree',
+        //            'eval'      => [
+        //                'fieldType' => 'radio',
+        //                'files'     => false,
+        //                'tl_class'  => 'w50 clr',
+        //            ],
+        //            'sql'       => "binary(16) NULL",
+        //        ],
+        //        'host_logo_path'       => [
+        //            'label'     => &$GLOBALS['TL_LANG'][$table]['host_logo_path'],
+        //            'inputType' => 'fileTree',
+        //            'eval'      => [
+        //                'fieldType' => 'radio',
+        //                'files'     => false,
+        //                'tl_class'  => 'w50',
+        //            ],
+        //            'sql'       => "binary(16) NULL",
+        //        ],
+        'static_dirs'          => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['static_dirs'],
             'inputType' => 'fileTree',
             'eval'      => [
@@ -232,6 +244,14 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'combine_variants'     => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['combine_variants'],
+            'inputType' => 'checkbox',
+            'eval'      => [
+                'tl_class' => 'w50 m12',
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'xml_single_file'     => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['xml_single_file'],
             'inputType' => 'checkbox',
             'eval'      => [
                 'tl_class' => 'w50 m12',

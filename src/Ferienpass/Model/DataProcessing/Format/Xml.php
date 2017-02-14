@@ -37,15 +37,15 @@ class Xml implements FormatInterface
     /**
      * @var IItems
      */
-    private $offers;
+    private $items;
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $offers)
+    public function __construct(DataProcessing $model, IItems $items)
     {
-        $this->model  = $model;
-        $this->offers = $offers;
+        $this->model = $model;
+        $this->items = $items;
     }
 
     /**
@@ -68,34 +68,29 @@ class Xml implements FormatInterface
     /**
      * @return IItems
      */
-    public function getOffers()
+    public function getItems()
     {
-        return $this->offers;
+        return $this->items;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function processOffers()
+    public function processItems()
     {
-        if (null === $this->getOffers()) {
+        if (null === $this->getItems()) {
             $this->files = [];
             return $this;
         }
 
-        // Walk each offer
-        while ($this->getOffers()->next()) {
-            $xml = $this->generateOfferXml($this->getOffers()->getItem());
-
-            if (null === $xml) {
-                continue;
-            }
-
-            $path = sprintf(
-                '%s/xml/offer_%s.xml',
-                $this->getModel()->getTmpPath(),
-                $this->getOffers()->getItem()->get('id')
-            );
+        foreach ($this->getXml() as $i => $xml) {
+            $path = ($this->getModel()->xml_single_file)
+                ? $this->getModel()->getTmpPath() . '/xml/offers.xml'
+                : sprintf(
+                    '%s/xml/offer_%s.xml',
+                    $this->getModel()->getTmpPath(),
+                    $i
+                );
 
             // Save xml in tmp path
             $this
@@ -125,13 +120,54 @@ class Xml implements FormatInterface
     }
 
     /**
-     * Return the offer's xml as string
-     *
-     * @param IItem $offer The offer
-     *
-     * @return string|null
+     * @return array
      */
-    protected function generateOfferXml($offer)
+    protected function getXml()
+    {
+        $return = [];
+
+        // Create DOM
+        $dom = new \DOMDocument('1.0', 'utf-8');
+
+        // Create comment
+        $commentTemplate = new \FrontendTemplate('dataprocessing_xml_comment');
+        $commentTemplate->setData($this->getModel()->row());
+        $dom->appendChild($dom->createComment($commentTemplate->parse()));
+
+
+        if ($this->getModel()->xml_single_file) {
+            $root = $dom->createElement('Offers');
+
+            foreach ($this->getItems() as $offer) {
+                $domOffer = $this->offerAsDomNode($offer, $dom);
+                $root->appendChild($domOffer);
+            }
+
+            $dom->appendChild($root);
+        } else {
+            foreach ($this->getItems() as $offer) {
+                $domClone = clone $dom;
+                $domOffer = $this->offerAsDomNode($offer, $domClone);
+                $domClone->appendChild($domOffer);
+
+                $return[$offer->get('id')] = $domClone->saveXML();
+            }
+        }
+
+        $return[] = $dom->saveXML();
+
+        return $return;
+    }
+
+    /**
+     * Get the dom node for a particular offer
+     *
+     * @param IItem        $offer
+     * @param \DOMDocument $dom
+     *
+     * @return \DOMElement|null
+     */
+    protected function offerAsDomNode(IItem $offer, \DOMDocument $dom)
     {
         $variants = null;
 
@@ -146,13 +182,6 @@ class Xml implements FormatInterface
 
         $renderSetting = $offer->getMetaModel()->getView($this->getModel()->metamodel_view);
 
-        // Create DOM
-        $dom = new \DOMDocument('1.0', 'utf-8');
-
-        // Create comment
-        $commentTemplate = new \FrontendTemplate('dataprocessing_xml_comment');
-        $commentTemplate->setData($this->getModel()->row());
-        $dom->appendChild($dom->createComment($commentTemplate->parse()));
 
         $root = $dom->createElement('Offer');
         $root->setAttribute('id', $offer->get('id'));
@@ -167,8 +196,6 @@ class Xml implements FormatInterface
 
             $root->setAttribute('variant_ids', implode(',', $variantIds));
         }
-
-        $dom->appendChild($root);
 
         // Walk each attribute in render setting
         foreach ($renderSetting->getSettingNames() as $colName) {
@@ -211,8 +238,9 @@ class Xml implements FormatInterface
             $root->appendChild($domAttribute);
         }
 
-        return $dom->saveXML();
+        return $root;
     }
+
 
     /**
      * Check whether the parsed attribute string is in XML and import the nodes if so
@@ -566,7 +594,8 @@ class Xml implements FormatInterface
 
                     // Local file does not exist therefore the remote file was not uploaded
                     if (null === $file) {
-                        throw new \RuntimeException(sprintf(
+                        throw new \RuntimeException(
+                            sprintf(
                                 'File "%s" does not exist on local system. Sync files beforehand.',
                                 $path
                             )

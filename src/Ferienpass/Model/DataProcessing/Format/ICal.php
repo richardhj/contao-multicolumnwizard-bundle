@@ -36,16 +36,16 @@ class ICal implements FormatInterface
     /**
      * @var IItems
      */
-    private $offers;
+    private $items;
 
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $offers)
+    public function __construct(DataProcessing $model, IItems $items)
     {
-        $this->model  = $model;
-        $this->offers = $offers;
+        $this->model = $model;
+        $this->items = $items;
     }
 
 
@@ -60,9 +60,9 @@ class ICal implements FormatInterface
     /**
      * @return IItems
      */
-    public function getOffers()
+    public function getItems()
     {
-        return $this->offers;
+        return $this->items;
     }
 
     /**
@@ -76,7 +76,7 @@ class ICal implements FormatInterface
     /**
      * {@inheritdoc}
      */
-    public function processOffers()
+    public function processItems()
     {
         $files = [];
         $path = sprintf(
@@ -104,7 +104,7 @@ class ICal implements FormatInterface
     }
 
     /**
-     * Create the iCal for given offers
+     * Create the iCal for given items
      *
      * @return string
      */
@@ -114,8 +114,8 @@ class ICal implements FormatInterface
 
         $iCalProperties = deserialize($this->getModel()->ical_fields);
 
-        // Walk each offer
-        while (null !== $this->getOffers() && $this->getOffers()->next()) {
+        // Walk each item
+        while (null !== $this->getItems() && $this->getItems()->next()) {
             $vEvent = new Event();
 
             /** @var array $arrProperty [ical_field] The property identifier
@@ -125,7 +125,7 @@ class ICal implements FormatInterface
                     case 'dtStart':
                         try {
                             $objDate = new DateTime(
-                                '@' . $this->getOffers()->getItem()->get($arrProperty['metamodel_attribute'])
+                                '@' . $this->getItems()->getItem()->get($arrProperty['metamodel_attribute'])
                             );
                             $vEvent->setDtStart($objDate);
                         } catch (\Exception $e) {
@@ -136,7 +136,7 @@ class ICal implements FormatInterface
                     case 'dtEnd':
                         try {
                             $objDate = new DateTime(
-                                '@' . $this->getOffers()->getItem()->get($arrProperty['metamodel_attribute'])
+                                '@' . $this->getItems()->getItem()->get($arrProperty['metamodel_attribute'])
                             );
                             $vEvent->setDtEnd($objDate);
                         } catch (\Exception $e) {
@@ -145,12 +145,12 @@ class ICal implements FormatInterface
                         break;
 
                     case 'summary':
-                        $vEvent->setSummary($this->getOffers()->getItem()->get($arrProperty['metamodel_attribute']));
+                        $vEvent->setSummary($this->getItems()->getItem()->get($arrProperty['metamodel_attribute']));
                         break;
 
                     case 'description':
                         $vEvent->setDescription(
-                            $this->getOffers()->getItem()->get($arrProperty['metamodel_attribute'])
+                            $this->getItems()->getItem()->get($arrProperty['metamodel_attribute'])
                         );
                         break;
                 }

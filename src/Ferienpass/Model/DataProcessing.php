@@ -23,6 +23,8 @@ use League\Flysystem\Dropbox\DropboxAdapter;
 use League\Flysystem\Filesystem;
 use League\Flysystem\MountManager;
 use MetaModels\IItems;
+use MetaModels\IMetaModel;
+use MetaModels\ItemList;
 
 
 /**
@@ -40,6 +42,8 @@ use MetaModels\IItems;
  * @property mixed   $ical_fields
  * @property string  $type
  * @property boolean $combine_variants
+ * @property boolean $xml_single_file
+ * @property int     $metamodel_filtering
  */
 class DataProcessing extends Model
 {
@@ -49,6 +53,12 @@ class DataProcessing extends Model
      * @var string
      */
     protected static $strTable = 'tl_ferienpass_dataprocessing';
+
+
+    /**
+     * @var IMetaModel
+     */
+    private $metaModel;
 
 
     /**
@@ -66,7 +76,7 @@ class DataProcessing extends Model
     /**
      * @var IItems
      */
-    private $offers;
+    private $items;
 
 
     /**
@@ -83,11 +93,11 @@ class DataProcessing extends Model
         if (null === $this->formatHandler) {
             switch ($this->type) {
                 case 'xml':
-                    $this->formatHandler = new Xml($this, $this->getOffers());
+                    $this->formatHandler = new Xml($this, $this->getItems());
                     break;
 
                 case 'ical':
-                    $this->formatHandler = new ICal($this, $this->getOffers());
+                    $this->formatHandler = new ICal($this, $this->getItems());
                     break;
             }
         }
@@ -103,15 +113,15 @@ class DataProcessing extends Model
         if (null === $this->fileSystemHandler) {
             switch ($this->filesystem) {
                 case 'local':
-                    $this->fileSystemHandler = new Local($this, $this->getOffers());
+                    $this->fileSystemHandler = new Local($this, $this->getItems());
                     break;
 
                 case 'sendToBrowser':
-                    $this->fileSystemHandler = new SendToBrowser($this, $this->getOffers());
+                    $this->fileSystemHandler = new SendToBrowser($this, $this->getItems());
                     break;
 
                 case 'dropbox':
-                    $this->fileSystemHandler = new Dropbox($this, $this->getOffers());
+                    $this->fileSystemHandler = new Dropbox($this, $this->getItems());
                     break;
             }
         }
@@ -134,9 +144,9 @@ class DataProcessing extends Model
     /**
      * @return IItems
      */
-    public function getOffers()
+    public function getItems()
     {
-        return $this->offers;
+        return $this->items;
     }
 
 
@@ -149,26 +159,25 @@ class DataProcessing extends Model
      */
     public function run($arrOffers = [])
     {
-        if (!empty($arrOffers)) {
-            $this->scope = 'single';
-        }
+        // Provide filter
+        $filter = $this
+            ->getMetaModel()
+            ->getEmptyFilter();
+        $this
+            ->getMetaModel()
+            ->getServiceContainer()
+            ->getFilterFactory()
+            ->createCollection($this->metamodel_filtering)
+            ->addRules($filter, []);
 
-        switch ($this->scope) {
-            case 'full':
-                $this->offers = Offer::getInstance()->findAll();
-                break;
-
-            case 'single':
-                $this->offers = (empty($arrOffers))
-                    ? Offer::getInstance()->findAll()
-                    : Offer::getInstance()->findMultipleByIds((array) $arrOffers);
-                break;
-
-        }
+        // Find items by filter
+        $this->items = $this
+            ->getMetaModel()
+            ->findByFilter($filter);
 
         $files = $this
             ->getFormatHandler()
-            ->processOffers()
+            ->processItems()
             ->getFiles();
 
         $files = array_merge(
@@ -252,7 +261,7 @@ class DataProcessing extends Model
                 );
                 $adapter = new DropboxAdapter(
                     $client,
-                    rtrim('Ferienpass/' . $this->path_prefix, '/')
+                    rtrim('ferienpass.online/' . $this->path_prefix, '/')
                 );
 
                 $this
@@ -273,5 +282,17 @@ class DataProcessing extends Model
         return $this
             ->getMountManager($fileSystem)
             ->getFilesystem($fileSystem);
+    }
+
+    /**
+     * @return IMetaModel
+     */
+    public function getMetaModel()
+    {
+        if (null === $this->metaModel) {
+            $this->metaModel = Offer::getInstance()->getMetaModel();
+        }
+
+        return $this->metaModel;
     }
 }

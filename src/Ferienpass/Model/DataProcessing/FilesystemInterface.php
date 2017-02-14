@@ -21,9 +21,9 @@ interface FilesystemInterface
      * FilesystemInterface constructor.
      *
      * @param DataProcessing $model
-     * @param IItems         $offers
+     * @param IItems         $items
      */
-    public function __construct(DataProcessing $model, IItems $offers);
+    public function __construct(DataProcessing $model, IItems $items);
 
     /**
      * @param array $files

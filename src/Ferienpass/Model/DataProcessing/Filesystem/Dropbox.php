@@ -27,17 +27,17 @@ class Dropbox implements FilesystemInterface
     private $model;
 
     /**
-     * @var IItems $offers
+     * @var IItems $items
      */
-    private $offers;
+    private $items;
 
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $offers)
+    public function __construct(DataProcessing $model, IItems $items)
     {
-        $this->model  = $model;
-        $this->offers = $offers;
+        $this->model = $model;
+        $this->items = $items;
     }
 
     /**
@@ -51,9 +51,9 @@ class Dropbox implements FilesystemInterface
     /**
      * @return IItems
      */
-    public function getOffers()
+    public function getItems()
     {
-        return $this->offers;
+        return $this->items;
     }
 
     /**
@@ -205,7 +205,6 @@ class Dropbox implements FilesystemInterface
                 ),
                 'dropbox'
             );
-
         }
     }
 }
