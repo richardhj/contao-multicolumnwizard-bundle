@@ -1,31 +1,31 @@
 <?php
 
-$objDom = new \DOMDocument('1.0', 'utf-8');
+$dom = new \DOMDocument('1.0', 'utf-8');
 
-$root = $objDom->createElement('HostData');
+$domRoot = $dom->createElement('HostData');
 
 // Host name
-$node = $objDom->createElement('Name', htmlspecialchars(html_entity_decode($this->raw[$this->attribute->get('select_column')]), ENT_XML1) ?: ' '); # Prohibit empty value
-$root->appendChild($node);
+$domLogo = $dom->createElement(
+    'Name',
+    htmlspecialchars(html_entity_decode($this->raw[$this->attribute->get('select_column')]), ENT_XML1) ?: ' '
+); # Prohibit empty value
+$domRoot->appendChild($domLogo);
 
 // Host logo
-$node = $objDom->createElement('Logo');
-$file = $objDom->createElement('File');
+$domLogo = $dom->createElement('Logo');
+$domFile = $dom->createElement('File');
 
-$objFile = \FilesModel::findByPk($this->raw['logo']);
+$file = \FilesModel::findByPk($this->raw['logo']);
+if (null !== $file) {
+    $domFile->setAttribute(
+        'href',
+        'file://../' . $file->path
+    );
 
-if (null !== $objFile)
-{
-	$file->setAttribute(
-		'href',
-		\Ferienpass\Model\DataProcessing::getRelativeHostLogoPathOnRemoteSystem($objFile->name)
-	);
-	
-	$node->appendChild($file);
+    $domLogo->appendChild($domFile);
 }
 
-$root->appendChild($node);
+$domRoot->appendChild($domLogo);
+$dom->appendChild($domRoot);
 
-$objDom->appendChild($root);
-
-echo $objDom->saveXML();
+echo $dom->saveXML();

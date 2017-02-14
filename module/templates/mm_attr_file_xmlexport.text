@@ -1,55 +1,48 @@
 <?php
 
-use Ferienpass\Model\DataProcessing;
-
-
 // Generate nothing
-if (empty($this->raw['bin']))
-{
-	return;
+if (empty($this->raw['bin'])) {
+    return;
 }
 
 $i = 0;
 
-$objDom = new \DOMDocument('1.0', 'utf-8');
-$files = $objDom->createElement('Files');
+$dom      = new \DOMDocument('1.0', 'utf-8');
+$domFiles = $dom->createElement('Files');
 
-// Add default img
-if (empty($this->raw['bin']))
-{
-	$this->raw['bin'][] = FilesModel::findByHash('03369c2124686b9855702dc85bc06cc8')->uuid;
-}
+//// Add default img
+//if (empty($this->raw['bin'])) {
+//    $this->raw['bin'][] = FilesModel::findByHash('03369c2124686b9855702dc85bc06cc8')->uuid;
+//}
 
 //log_message(var_export($this->src, true), 'xmlexport_file_template.log');
 
-foreach ($this->raw['bin'] as $fileBin)
-{
+foreach ($this->raw['bin'] as $fileBin) {
 //	log_message(var_export($fileBin, true), 'xmlexport_file_template.log');
 //	log_message(var_export($i, true), 'xmlexport_file_template.log');
-	$file = $objDom->createElement('File');
+    $domFile = $dom->createElement('File');
 
-	$link = $objDom->createElement('Link');
-	$link->setAttribute(
-		'href',
-		DataProcessing::getRelativeOfferImagePathOnRemoteSystem(\FilesModel::findByPk($fileBin)->name)
-	);
+    $domLink = $dom->createElement('Link');
+    $domLink->setAttribute(
+        'href',
+        'file://../' . \FilesModel::findByPk($fileBin)->path
+    );
 
-	$meta = $objDom->createElement('Meta');
-	$meta->appendChild(
-		$objDom->createElement('Title', $this->src[$i]['title'] ?: ' ')
-	);
-	$meta->appendChild(
-		$objDom->createElement('Caption', $this->src[$i]['caption'] ?: ' ')
-	);
+    $meta = $dom->createElement('Meta');
+    $meta->appendChild(
+        $dom->createElement('Title', $this->src[$i]['title'] ?: ' ')
+    );
+    $meta->appendChild(
+        $dom->createElement('Caption', $this->src[$i]['caption'] ?: ' ')
+    );
 
-	$file->appendChild($link);
-	$file->appendChild($meta);
+    $domFile->appendChild($domLink);
+    $domFile->appendChild($meta);
+    $domFiles->appendChild($domFile);
 
-	$files->appendChild($file);
-
-	$i++;
+    $i++;
 }
 
-$objDom->appendChild($files);
+$dom->appendChild($domFiles);
 
-echo $objDom->saveXML();
+echo $dom->saveXML();
