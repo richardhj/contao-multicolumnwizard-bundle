@@ -38,7 +38,11 @@ class ICal implements FormatInterface
      */
     private $offers;
 
-    public function __construct($model, $offers)
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct(DataProcessing $model, IItems $offers)
     {
         $this->model  = $model;
         $this->offers = $offers;
@@ -74,37 +78,52 @@ class ICal implements FormatInterface
      */
     public function processOffers()
     {
-        $path = sprintf('%s/%s.ics', $this->getModel()->getTmpPath(), $this->getModel()->export_file_name);
+        $files = [];
+        $path = sprintf(
+            '%s/%s.ics',
+            $this->getModel()->getTmpPath(),
+            $this->getModel()->export_file_name
+        );
 
-        $this->getModel()->getMountManager()
+        // Save the iCal in the tmp path
+        $this
+            ->getModel()
+            ->getMountManager()
             ->put('local://' . $path, $this->createICal());
 
-        $arrToExport[] = array_merge(
+        $files[] = array_merge(
             $this->getModel()->getMountManager()->getMetadata('local://' . $path),
             [
                 'basename' => basename($path)
             ]
         );
 
+        $this->files = $files;
+
         return $this;
     }
 
-
+    /**
+     * Create the iCal for given offers
+     *
+     * @return string
+     */
     protected function createICal()
     {
         $vCalendar = new Calendar(\Environment::get('httpHost'));
 
-        $arrICalProperties = deserialize($this->getModel()->ical_fields);
+        $iCalProperties = deserialize($this->getModel()->ical_fields);
 
         // Walk each offer
         while (null !== $this->getOffers() && $this->getOffers()->next()) {
             // Process published offers exclusively
+            //Fixme filter
             if (!$this->getOffers()->getItem()->get('published')) {
                 continue;
             }
 
             // filter by host
-            //@todo real quick'n'dirty
+            // fixme filter
             if ($this->getModel()->id == 7 && $this->getOffers()->getItem()->get('host')['id'] != 132) {
                 continue;
             }
@@ -113,7 +132,7 @@ class ICal implements FormatInterface
 
             /** @var array $arrProperty [ical_field] The property identifier
              *                          [metamodel_attribute] The property assigned MetaModel attribute name */
-            foreach ($arrICalProperties as $arrProperty) {
+            foreach ($iCalProperties as $arrProperty) {
                 switch ($arrProperty['ical_field']) {
                     case 'dtStart':
                         try {
@@ -150,7 +169,7 @@ class ICal implements FormatInterface
             }
 
             // skip events that pollute the calendar
-            //@todo really quick'n'dirty
+            //fixme filter
             $objDateStart = new DateTime('@' . $this->getOffers()->getItem()->get('date'));
             $objDateEnd   = new DateTime('@' . $this->getOffers()->getItem()->get('date_end'));
             if ($objDateEnd->diff($objDateStart)->d > 1) {

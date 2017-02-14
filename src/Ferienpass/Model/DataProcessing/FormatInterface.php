@@ -12,19 +12,36 @@
 namespace Ferienpass\Model\DataProcessing;
 
 
+use Ferienpass\Model\DataProcessing;
+use MetaModels\IItems;
+
+
+/**
+ * Interface FormatInterface
+ *
+ * @package Ferienpass\Model\DataProcessing
+ */
 interface FormatInterface
 {
-    public function __construct($model, $offers);
+    /**
+     * FormatInterface constructor.
+     *
+     * @param DataProcessing $model
+     * @param IItems         $offers
+     */
+    public function __construct(DataProcessing $model, IItems $offers);
 
     /**
+     * Process the offers and provide the files in the expected format
+     *
      * @return self
      */
     public function processOffers();
 
-
     /**
-     * @return array
+     * Get the files in the expected format as an array
+     *
+     * @return array The file information in the format of `listContents`
      */
     public function getFiles();
-
 }

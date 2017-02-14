@@ -66,5 +66,5 @@ $container['ferienpass.attendance-status'] = [
     'error',
 ];
 
-$container['ferienpass.dropbox.appId'] = 'sf04yiig0hbwzmi';
-$container['ferienpass.dropbox.appSecret'] ='9gn0gckd2yr0fy9';
+$container['ferienpass.dropbox.appId'] = 'qgbgzoptvlpyofc';
+$container['ferienpass.dropbox.appSecret'] ='9fktiifz7cxhar6';

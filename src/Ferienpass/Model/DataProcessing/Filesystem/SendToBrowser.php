@@ -29,39 +29,13 @@ class SendToBrowser implements FilesystemInterface
      */
     private $offers;
 
-
-    public function __construct($model, $offers)
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct(DataProcessing $model, IItems $offers)
     {
         $this->model  = $model;
         $this->offers = $offers;
-    }
-
-
-    public function processFiles(array $files)
-    {
-        // Generate a zip file
-        $objZip = new \ZipWriter($this->getModel()->getTmpPath() . '/export.zip');
-
-        if (array_is_assoc($files)) {
-            foreach ($files as $directory => $arrFiles) {
-                foreach ($arrFiles as $file) {
-                    $objZip->addFile($file['path'], $directory . '/' . $file['basename']);
-                }
-            }
-        } else {
-            foreach ($files as $file) {
-                $objZip->addFile($file['path'], $file['basename']);
-            }
-        }
-
-        $objZip->close();
-
-        // Output ZIP
-        header('Content-type: application/octetstream');
-        header('Content-Disposition: attachment; filename="' . $this->getModel()->export_file_name . '.zip"');
-        readfile(TL_ROOT . '/' . $this->getModel()->getTmpPath() . '/export.zip');
-        exit;
-
     }
 
     /**
@@ -80,4 +54,32 @@ class SendToBrowser implements FilesystemInterface
         return $this->offers;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function processFiles(array $files)
+    {
+        // Generate a zip file
+        $zipWriter = new \ZipWriter($this->getModel()->getTmpPath() . '/export.zip');
+
+        if (array_is_assoc($files)) {
+            foreach ($files as $directory => $arrFiles) {
+                foreach ($arrFiles as $file) {
+                    $zipWriter->addFile($file['path'], $directory . '/' . $file['basename']);
+                }
+            }
+        } else {
+            foreach ($files as $file) {
+                $zipWriter->addFile($file['path'], $file['basename']);
+            }
+        }
+
+        $zipWriter->close();
+
+        // Output ZIP
+        header('Content-type: application/octetstream');
+        header('Content-Disposition: attachment; filename="' . $this->getModel()->export_file_name . '.zip"');
+        readfile(TL_ROOT . '/' . $this->getModel()->getTmpPath() . '/export.zip');
+        exit;
+    }
 }

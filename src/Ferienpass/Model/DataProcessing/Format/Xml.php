@@ -39,9 +39,18 @@ class Xml implements FormatInterface
      */
     private $offers;
 
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct(DataProcessing $model, IItems $offers)
+    {
+
+        $this->model  = $model;
+        $this->offers = $offers;
+    }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public function getFiles()
     {
@@ -65,74 +74,55 @@ class Xml implements FormatInterface
         return $this->offers;
     }
 
-
-    /**
-     * @param IItems $offers
-     *
-     * @return Xml
-     */
-    public function setOffers($offers)
-    {
-        $this->offers = $offers;
-        return $this;
-    }
-
-    public function __construct($model, $offers)
-    {
-
-        $this->model  = $model;
-        $this->offers = $offers;
-    }
-
     /**
      * {@inheritdoc}
      */
     public function processOffers()
     {
-        $files = [];
-
-        switch ($this->getModel()->scope) {
-            case 'full':
-                // Fetch files from image folders
-                if (null !== ($objOfferImages = \FilesModel::findByPk($this->getModel()->offer_image_path))) {
-                    $files[($this->getModel())::EXPORT_OFFER_IMAGES_PATH] = $this->getModel()
-                        ->getMountManager()
-                        ->listContents('dbafs://' . $objOfferImages->path);
-                }
-                if (null !== ($objHostLogos = \FilesModel::findByPk($this->getModel()->host_logo_path))) {
-                    $files[($this->getModel())::EXPORT_HOST_LOGOS_PATH] = $this->getModel()
-                        ->getMountManager()
-                        ->listContents('dbafs://' . $objHostLogos->path);
-                }
-                break;
-
-            case 'single':
-                break;
+        if (null === $this->getOffers()) {
+            $this->files = [];
+            return $this;
         }
 
-        if (null !== $this->getOffers()) {
-            // Walk each offer
-            while ($this->getOffers()->next()) {
-                $strXml = $this->generateOfferXml($this->getOffers()->getItem());
+        // Walk each offer
+        while ($this->getOffers()->next()) {
+            $xml = $this->generateOfferXml($this->getOffers()->getItem());
 
-                if (false !== $strXml) {
-                    $directory = sprintf(
-                        '%s/offer_%s.xml',
-                        $this->getModel()->getTmpPath(),
-                        $this->getOffers()->getItem()->get('id')
-                    );
-                    $this->getModel()->getMountManager()->put('local://' . $directory, $strXml);
-
-                    $files[($this->getModel())::EXPORT_XML_FILES_PATH] = $this->getModel()
-                        ->getMountManager()
-                        ->listContents('local://' . $this->getModel()->getTmpPath());
-                }
+            if (null === $xml) {
+                continue;
             }
+
+            $path = sprintf(
+                '%s/xml/offer_%s.xml',
+                $this->getModel()->getTmpPath(),
+                $this->getOffers()->getItem()->get('id')
+            );
+
+            // Save xml in tmp path
+            $this
+                ->getModel()
+                ->getMountManager()
+                ->put('local://' . $path, $xml);
         }
 
-        $this->files = $files;
+        // Fetch all files in xml tmp path
+        $this->files = $this->getModel()
+            ->getMountManager()
+            ->listContents(sprintf('local://%s/xml', $this->getModel()->getTmpPath()));
 
         return $this;
+    }
+
+    /**
+     * Camel Case (with first case uppercase) a column name
+     *
+     * @param string $value
+     *
+     * @return string
+     */
+    public static function camelCase($value)
+    {
+        return preg_replace('/[\s\_\-]/', '', ucwords($value, ' _-'));
     }
 
     /**
@@ -140,7 +130,7 @@ class Xml implements FormatInterface
      *
      * @param IItem $offer The offer
      *
-     * @return string|false
+     * @return string|null
      */
     protected function generateOfferXml($offer)
     {
@@ -149,7 +139,7 @@ class Xml implements FormatInterface
         // If we combine variants, only variant bases will be exported
         if ($this->getModel()->combine_variants) {
             if ($offer->isVariant()) {
-                return false;
+                return null;
             }
 
             $variants = $offer->getVariants(null);
@@ -197,7 +187,7 @@ class Xml implements FormatInterface
                 }
 
                 // Combine variant attributes
-                $parsed = implode(($this->getModel())::VARIANT_DELIMITER, $parsed);
+                $parsed = implode(self::VARIANT_DELIMITER, $parsed);
             } // Default procedure for non-variant attributes
             else {
                 // Parse attribute with render setting
@@ -206,7 +196,7 @@ class Xml implements FormatInterface
             }
 
             // Prepare attribute node by setting attribute id
-            $domAttribute = $dom->createElement($this->camelCase($colName));
+            $domAttribute = $dom->createElement(static::camelCase($colName));
             $domAttribute->setAttribute('attr_id', $attribute->get('id'));
 
             // Set the attribute node's value
@@ -567,14 +557,9 @@ class Xml implements FormatInterface
                 /** @type \DOMElement $fileDom */
                 foreach ($element->getElementsByTagName('Link') as $fileDom) {
                     // Replace remote path with local path
-                    $path = preg_replace_callback(
-                        '/^file:\/\/.*?(' . implode(
-                            '|',
-                            [($this->getModel())::EXPORT_OFFER_IMAGES_PATH, ($this->getModel())::EXPORT_HOST_LOGOS_PATH]
-                        ) . ')/',
-                        function ($matches) {
-                            return $this->getLocalPathByRemotePath($matches[1]);
-                        },
+                    $path = preg_replace(
+                        '/^file:\/\/[\.\/]*/',
+                        '',
                         $fileDom->getAttribute('href')
                     );
 
@@ -582,9 +567,7 @@ class Xml implements FormatInterface
 
                     // Local file does not exist therefore the remote file was not uploaded
                     if (null === $file) {
-                        throw new \RuntimeException(
-                            sprintf
-                            (
+                        throw new \RuntimeException(sprintf(
                                 'File "%s" does not exist on local system. Sync files beforehand.',
                                 $path
                             )
@@ -599,7 +582,9 @@ class Xml implements FormatInterface
                 $widget = [];
 
                 /** @type \DOMElement $element */
-                $element = $element->getElementsByTagName('Tabletext')->item(0);
+                $element = $element
+                    ->getElementsByTagName('Tabletext')
+                    ->item(0);
 
                 $cc = $element->getAttribute('aid:tcols');
                 $r  = 0;
@@ -628,18 +613,5 @@ class Xml implements FormatInterface
 
         // Convert the widget value to native MetaModel data
         return $attribute->widgetToValue($widget, $itemId);
-    }
-
-
-    /**
-     * Camel Case (with first case uppercase) a column name
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    private function camelCase($value)
-    {
-        return preg_replace('/[\s\_\-]/', '', ucwords($value, ' _-'));
     }
 }

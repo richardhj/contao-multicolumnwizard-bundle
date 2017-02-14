@@ -30,8 +30,7 @@ use MetaModels\IItems;
  * @property integer $metamodel_view
  * @property string  $scope
  * @property string  $filesystem
- * @property mixed   $offer_image_path
- * @property mixed   $host_logo_path
+ * @property mixed   $static_dirs
  * @property string  $export_file_name
  * @property string  $dropbox_access_token
  * @property string  $dropbox_uid
@@ -44,19 +43,6 @@ use MetaModels\IItems;
  */
 class DataProcessing extends Model
 {
-
-    /**
-     * Folder paths for export or rather on remote systems
-     */
-    const EXPORT_OFFER_IMAGES_PATH = 'offer_images';
-
-
-    const EXPORT_HOST_LOGOS_PATH = 'host_logos';
-
-
-    const EXPORT_XML_FILES_PATH = 'xml';
-
-
     /**
      * Table name
      *
@@ -87,32 +73,6 @@ class DataProcessing extends Model
      * @var string
      */
     private $tmpPath;
-
-
-    /**
-     * Get a offer image's relative path for a xml file on a remote system
-     *
-     * @param string $strFileName The file name
-     *
-     * @return string
-     */
-    public static function getRelativeOfferImagePathOnRemoteSystem($strFileName)
-    {
-        return 'file://../' . static::EXPORT_OFFER_IMAGES_PATH . '/' . $strFileName;
-    }
-
-
-    /**
-     * Get a host logo's relative path for a xml file on a remote system
-     *
-     * @param string $strFileName The file name
-     *
-     * @return string
-     */
-    public static function getRelativeHostLogoPathOnRemoteSystem($strFileName)
-    {
-        return 'file://../' . static::EXPORT_HOST_LOGOS_PATH . '/' . $strFileName;
-    }
 
 
     /**
@@ -211,6 +171,10 @@ class DataProcessing extends Model
             ->processOffers()
             ->getFiles();
 
+        $files = array_merge(
+            $files,
+            $this->fetchStaticFiles()
+        );
 
 //                throw new \LogicException(
 //                    sprintf('Type "%s" is not implemented. Data processing ID %u', $this->type, $this->id)
@@ -236,13 +200,36 @@ class DataProcessing extends Model
      */
     public function getMountManager($varFilesystems = null)
     {
+        global $container;
+
         if (null !== $varFilesystems) {
             foreach ((array) $varFilesystems as $filesystem) {
                 $this->mountFileSystem($filesystem);
             }
         }
 
-        return $GLOBALS['container']['flysystem.mount-manager'];
+        return $container['flysystem.mount-manager'];
+    }
+
+
+    /**
+     * @return array
+     */
+    protected function fetchStaticFiles()
+    {
+        $files      = [];
+        $fileSystem = $this->getFileSystem('local');
+
+        foreach (deserialize($this->static_dirs, true) as $dirBin) {
+            $path = (\FilesModel::findByPk($dirBin))->path;
+
+            $files = array_merge(
+                $files,
+                $fileSystem->listContents($path)
+            );
+        }
+
+        return $files;
     }
 
 
@@ -259,8 +246,14 @@ class DataProcessing extends Model
                 break;
 
             case 'dropbox':
-                $client  = new Client($this->dropbox_access_token, $container['ferienpass.dropbox.appSecret']);
-                $adapter = new DropboxAdapter($client, $this->path_prefix ?: null);
+                $client  = new Client(
+                    $this->dropbox_access_token,
+                    $container['ferienpass.dropbox.appSecret']
+                );
+                $adapter = new DropboxAdapter(
+                    $client,
+                    $this->path_prefix ?: 'test123'
+                );
 
                 $this
                     ->getMountManager()

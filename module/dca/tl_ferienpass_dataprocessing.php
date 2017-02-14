@@ -16,20 +16,21 @@ $GLOBALS['TL_DCA'][$table] = [
     // Config
     'config'                => [
         'dataContainer' => 'General',
-        'sql'           =>
-            [
-                'keys' => [
-                    'id' => 'primary',
-                ],
+        'sql'           => [
+            'keys' => [
+                'id' => 'primary',
             ],
+        ],
     ],
 
     // List
     'list'                  => [
-        'sorting'           => [
-            'mode'        => 1,
-            'fields'      => ['name'],
-            'flag'        => 1,
+        'sorting' => [
+            'mode'   => 1,
+            'fields' => [
+                'name'
+            ],
+            'flag'   => 1,
             'panelLayout' => 'filter;search,limit',
         ],
         'label'             => [
@@ -86,8 +87,9 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'processing' => [
                 'type',
-                'scope',
                 'filesystem',
+                'static_dirs',
+                'scope',
             ],
         ],
     ],
@@ -102,13 +104,13 @@ $GLOBALS['TL_DCA'][$table] = [
                 'ical_fields',
             ],
         ],
-        'scope'      => [
-            'single' => [],
-            'full'   => [
-                'offer_image_path',
-                'host_logo_path',
-            ],
-        ],
+//        'scope'      => [
+//            'single' => [],
+//            'full'   => [
+//                'offer_image_path',
+//                'host_logo_path',
+//            ],
+//        ],
         'filesystem' => [
             'local'         => [
                 'export_file_name',
@@ -197,25 +199,36 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'offer_image_path'     => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['offer_image_path'],
+//        'offer_image_path'     => [
+//            'label'     => &$GLOBALS['TL_LANG'][$table]['offer_image_path'],
+//            'inputType' => 'fileTree',
+//            'eval'      => [
+//                'fieldType' => 'radio',
+//                'files'     => false,
+//                'tl_class'  => 'w50 clr',
+//            ],
+//            'sql'       => "binary(16) NULL",
+//        ],
+//        'host_logo_path'       => [
+//            'label'     => &$GLOBALS['TL_LANG'][$table]['host_logo_path'],
+//            'inputType' => 'fileTree',
+//            'eval'      => [
+//                'fieldType' => 'radio',
+//                'files'     => false,
+//                'tl_class'  => 'w50',
+//            ],
+//            'sql'       => "binary(16) NULL",
+//        ],
+        'static_dirs' => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['static_dirs'],
             'inputType' => 'fileTree',
             'eval'      => [
-                'fieldType' => 'radio',
-                'files'     => false,
-                'tl_class'  => 'w50 clr',
-            ],
-            'sql'       => "binary(16) NULL",
-        ],
-        'host_logo_path'       => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['host_logo_path'],
-            'inputType' => 'fileTree',
-            'eval'      => [
-                'fieldType' => 'radio',
+                'multiple'  => 'true',
+                'fieldType' => 'checkbox',
                 'files'     => false,
                 'tl_class'  => 'w50',
             ],
-            'sql'       => "binary(16) NULL",
+            'sql'       => "blob NULL",
         ],
         'combine_variants'     => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['combine_variants'],
@@ -240,13 +253,13 @@ $GLOBALS['TL_DCA'][$table] = [
             'eval'      => [
                 'tl_class' => 'long clr',
             ],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'sql'       => "varchar(255) NULL",
         ],
         'dropbox_uid'          => [
-            'sql' => "int(10) NOT NULL default '0'",
+            'sql' => "int(10) NULL",
         ],
         'dropbox_cursor'       => [
-            'sql' => "varchar(255) NOT NULL default ''",
+            'sql' => "varchar(255) NULL",
         ],
         'path_prefix'          => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['path_prefix'],

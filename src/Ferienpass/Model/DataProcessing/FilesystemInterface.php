@@ -11,10 +11,19 @@
 namespace Ferienpass\Model\DataProcessing;
 
 
+use Ferienpass\Model\DataProcessing;
+use MetaModels\IItems;
+
 interface FilesystemInterface
 {
-    public function __construct($model, $offers);
 
+    /**
+     * FilesystemInterface constructor.
+     *
+     * @param DataProcessing $model
+     * @param IItems         $offers
+     */
+    public function __construct(DataProcessing $model, IItems $offers);
 
     /**
      * @param array $files

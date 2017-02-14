@@ -13,6 +13,7 @@ namespace Ferienpass\Widget;
 use Contao\FormHidden;
 use Contao\TextField;
 use Contao\Widget;
+use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
 use Ferienpass\Model\DataProcessing;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
@@ -22,6 +23,7 @@ use Stevenmaguire\OAuth2\Client\Provider\DropboxResourceOwner;
 
 /**
  * Class RequestAccessToken
+ *
  * @package Ferienpass\Widget
  */
 class RequestAccessToken extends Widget
@@ -29,6 +31,7 @@ class RequestAccessToken extends Widget
 
     /**
      * Submit user input
+     *
      * @var boolean
      */
     protected $blnSubmitInput = true;
@@ -36,6 +39,7 @@ class RequestAccessToken extends Widget
 
     /**
      * Add a for attribute
+     *
      * @var boolean
      */
     protected $blnForAttribute = true;
@@ -43,6 +47,7 @@ class RequestAccessToken extends Widget
 
     /**
      * Template
+     *
      * @var string
      */
     protected $strTemplate = 'be_widget';
@@ -64,18 +69,25 @@ class RequestAccessToken extends Widget
             ]
         );
 
-        $objModel = DataProcessing::findByPk($this->currentRecord);
+        /** @var DcCompat $dataContainer */
+        $dataContainer = $this->dataContainer;
+        $model         = $dataContainer->getModel();
 
-        if (!$this->varValue && !$objModel->dropbox_uid) {
-            $field = new TextField($this->arrConfiguration);
+        if ('create' === $dataContainer->getEnvironment()->getInputProvider()->getParameter('act')) {
+            return sprintf(
+                '<div class="tl_info" style="margin-bottom: 7px;">%s</div>',
+                'Bitte speichern und wiederkommen'
+            );
+        }
+
+        if (!$this->varValue && null === $model->getProperty('dropbox_uid')) {
+            $field       = new TextField($this->arrConfiguration);
             $field->name = $this->name;
-            $field->id = $this->id;
+            $field->id   = $this->id;
 
-            return sprintf
-            (
+            return sprintf(
                 '<div class="tl_info" style="margin-bottom: 7px;">%s%s</div>',
-                sprintf
-                (
+                sprintf(
                     '<a href="%2$s" target="_blank">%1$s</a>',
                     'Bitte klicken Sie diesen Link und geben dann den generierten Token in das untenstehende Feld ein.',
                     $provider->getAuthorizationUrl()
@@ -83,25 +95,36 @@ class RequestAccessToken extends Widget
                 $field->generate()
             );
         } // Convert given code to an access token
-        elseif (!$objModel->dropbox_uid) {
+        elseif (null === $model->getProperty('dropbox_uid')) {
             # At this point the value is an authorization code, not the access token
 
             try {
                 $objAccessToken = $provider->getAccessToken(
                     'authorization_code',
                     [
-                        'code'         => $this->varValue,
-                        'redirect_uri' => [] // only necessary with legacy oauth2-client
+                        'code' => $this->varValue
                     ]
                 );
-//@todo "Creating default object from empty value" when creating a DataProcessing in backend
-                $objModel->dropbox_access_token = $objAccessToken->getToken();
-                $objModel->dropbox_uid = $objAccessToken->getResourceOwnerId();
-                $objModel->save();
+
+                $model->setProperty('dropbox_access_token', $objAccessToken->getToken());
+                $model->setProperty('dropbox_uid', $objAccessToken->getResourceOwnerId());
+
+                $dataContainer
+                    ->getEnvironment()
+                    ->getDataProvider($model->getProviderName())
+                    ->save($model);
+
                 \Controller::reload();
+
             } catch (IdentityProviderException $e) {
-                return sprintf
-                (
+                $model->setProperty('dropbox_access_token', null);
+                $model->setProperty('dropbox_uid', null);
+                $dataContainer
+                    ->getEnvironment()
+                    ->getDataProvider($model->getProviderName())
+                    ->save($model);
+
+                return sprintf(
                     '<div class="tl_gerror" style="margin-bottom: 7px;">%s</div>',
                     $e->getMessage()
                 );
@@ -110,30 +133,36 @@ class RequestAccessToken extends Widget
 
         try {
             /** @var DropboxResourceOwner $user */
-            $user = $provider->getResourceOwner(new AccessToken(['access_token' => $this->varValue]));
+            $user = $provider->getResourceOwner(
+                new AccessToken(
+                    [
+                        'access_token' => $this->varValue
+                    ]
+                )
+            );
 
         } catch (IdentityProviderException $e) {
-            $objModel->dropbox_access_token = '';
-            $objModel->dropbox_uid = '';
-            $objModel->save();
+            $model->setProperty('dropbox_access_token', null);
+            $model->setProperty('dropbox_uid', null);
+            $dataContainer
+                ->getEnvironment()
+                ->getDataProvider($model->getProviderName())
+                ->save($model);
 
-            return sprintf
-            (
+            return sprintf(
                 '<div class="tl_gerror" style="margin-bottom: 7px;">%s</div>',
                 $e->getMessage()
             );
         }
 
-        $field_token = new FormHidden($this->arrConfiguration);
-        $field_token->name = $this->name;
-        $field_token->value = $this->varValue;
+        $fieldToken        = new FormHidden($this->arrConfiguration);
+        $fieldToken->name  = $this->name;
+        $fieldToken->value = $this->varValue;
 
-        return sprintf
-        (
+        return sprintf(
             '<div class="tl_confirm" style="margin-bottom: 7px;">%s%s</div>',
-            $field_token->generate(),
-            sprintf
-            (
+            $fieldToken->generate(),
+            sprintf(
                 'Mit der Dropbox von %s verknüpft',
                 $user->getName()
             )

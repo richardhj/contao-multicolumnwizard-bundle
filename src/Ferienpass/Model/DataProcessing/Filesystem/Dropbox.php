@@ -31,13 +31,14 @@ class Dropbox implements FilesystemInterface
      */
     private $offers;
 
-
-    public function __construct($model, $offers)
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct(DataProcessing $model, IItems $offers)
     {
-        $this->model = $model;
+        $this->model  = $model;
         $this->offers = $offers;
     }
-
 
     /**
      * @return DataProcessing|\Model
@@ -55,44 +56,44 @@ class Dropbox implements FilesystemInterface
         return $this->offers;
     }
 
-
+    /**
+     * {@inheritdoc}
+     */
     public function processFiles(array $files)
     {
         // Make sure to mount dropbox
-        $objMountManger = $this->getModel()->getMountManager('dropbox');
+        $mountManager = $this->getModel()->getMountManager('dropbox');
 
-        foreach ($files as $directory => $arrFiles) {
-            foreach ($arrFiles as $file) {
-                try {
-                    $objMountManger->put(
-                        'dropbox://' . $directory . '/' . $file['basename'],
-                        $objMountManger->read('local://' . $file['path'])
-                    );
+        foreach ($files as $file) {
+            try {
+                $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);
+                $mountManager->put(
+                    'dropbox://' . $path,
+                    $mountManager->read('local://' . $file['path'])
+                );
 
-                } catch (Exception_BadRequest $e) {
-                    // File was not uploaded
-                    // often because it is on the ignored file list
-                    \System::log(
-                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
-                        __METHOD__,
-                        TL_GENERAL
-                    );
-                } catch (Exception_NetworkIO $e) {
-                    // File was not uploaded
-                    // Connection refused
-                    \System::log(
-                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
-                        __METHOD__,
-                        TL_ERROR
-                    );
-                }
+            } catch (Exception_BadRequest $e) {
+                // File was not uploaded
+                // often because it is on the ignored file list
+                \System::log(
+                    sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
+                    __METHOD__,
+                    TL_GENERAL
+                );
+            } catch (Exception_NetworkIO $e) {
+                // File was not uploaded
+                // Connection refused
+                \System::log(
+                    sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
+                    __METHOD__,
+                    TL_ERROR
+                );
             }
         }
     }
 
     /**
      * Sync from remote dropbox by fetching the delta (last edited files in dropbox)
-     *
      */
     public function syncFromRemoteDropbox()
     {
@@ -256,6 +257,4 @@ class Dropbox implements FilesystemInterface
                 break;
         }
     }
-
-
 }
