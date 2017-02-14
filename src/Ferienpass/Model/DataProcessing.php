@@ -252,7 +252,7 @@ class DataProcessing extends Model
                 );
                 $adapter = new DropboxAdapter(
                     $client,
-                    $this->path_prefix ?: 'test123'
+                    rtrim('Ferienpass/' . $this->path_prefix, '/')
                 );
 
                 $this

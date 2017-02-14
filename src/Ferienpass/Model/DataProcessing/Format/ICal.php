@@ -116,18 +116,6 @@ class ICal implements FormatInterface
 
         // Walk each offer
         while (null !== $this->getOffers() && $this->getOffers()->next()) {
-            // Process published offers exclusively
-            //Fixme filter
-            if (!$this->getOffers()->getItem()->get('published')) {
-                continue;
-            }
-
-            // filter by host
-            // fixme filter
-            if ($this->getModel()->id == 7 && $this->getOffers()->getItem()->get('host')['id'] != 132) {
-                continue;
-            }
-
             $vEvent = new Event();
 
             /** @var array $arrProperty [ical_field] The property identifier
@@ -166,14 +154,6 @@ class ICal implements FormatInterface
                         );
                         break;
                 }
-            }
-
-            // skip events that pollute the calendar
-            //fixme filter
-            $objDateStart = new DateTime('@' . $this->getOffers()->getItem()->get('date'));
-            $objDateEnd   = new DateTime('@' . $this->getOffers()->getItem()->get('date_end'));
-            if ($objDateEnd->diff($objDateStart)->d > 1) {
-                continue;
             }
 
             $vEvent->setUseTimezone(true);

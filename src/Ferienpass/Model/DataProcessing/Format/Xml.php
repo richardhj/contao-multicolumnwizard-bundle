@@ -44,7 +44,6 @@ class Xml implements FormatInterface
      */
     public function __construct(DataProcessing $model, IItems $offers)
     {
-
         $this->model  = $model;
         $this->offers = $offers;
     }

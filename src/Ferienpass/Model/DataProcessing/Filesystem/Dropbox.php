@@ -66,7 +66,9 @@ class Dropbox implements FilesystemInterface
 
         foreach ($files as $file) {
             try {
+                // Trim tmp path from path
                 $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);
+
                 $mountManager->put(
                     'dropbox://' . $path,
                     $mountManager->read('local://' . $file['path'])
@@ -97,7 +99,7 @@ class Dropbox implements FilesystemInterface
      */
     public function syncFromRemoteDropbox()
     {
-        if (!$this->getModel()->sync || 'dropbox' !== $this->getModel()->filesystem) {
+        if (!$this->getModel()->sync) {
             return;
         }
 
@@ -117,144 +119,93 @@ class Dropbox implements FilesystemInterface
 
         //log_message(var_export($arrDelta, true), 'syncFromRemoteDropbox.log');
 
-        $files = [];
-
-        // Walk each changed files in dropbox
-        foreach ($delta['entries'] as $entry) {
-            if ('dir' === $entry[1]['type']) {
-                continue;
-            }
-
-            //@todo this is not nice
-            $files[dirname($entry[0])][] = $entry;
-        }
+        $files = $delta['entries'];
 
         // Process image folders
-        foreach (
-            [($this->getModel())::EXPORT_OFFER_IMAGES_PATH, ($this->getModel())::EXPORT_HOST_LOGOS_PATH] as
-            $directory
-        ) {
-            // Files in directory was not changed
-            if (!array_key_exists($directory, $files)) {
-                continue;
-            }
+        foreach (deserialize($this->getModel()->static_dirs, true) as $dirBin) {
+//            // Files in directory was not changed
+//            if (!array_key_exists($directory, $files)) {
+//                continue;
+//            }
+            $dir = (\FilesModel::findByPk($dirBin))->path;
 
-            $dbafs_path = $this->getLocalPathByRemotePath($directory);
-
-            foreach ($files[$directory] as $entry) {
-                // Remote file was deleted
-                if (null === $entry[1]) {
-                    if ($objMountManager->delete('dbafs://' . $dbafs_path . '/' . basename($entry[0]))) {
-                        \System::log(
-                            sprintf
-                            (
-                                'File "%s" was deleted by dropbox synchronisation. Data processing ID %u',
-                                $dbafs_path . '/' . basename($entry[0]),
-                                $this->id
-                            ),
-                            __METHOD__,
-                            TL_GENERAL
-                        );
-                    } else {
-                        \System::log(
-                            sprintf
-                            (
-                                'File "%s" could not be deleted although it was deleted in the user\'s dropbox. Data processing ID %u',
-                                $dbafs_path . '/' . basename($entry[0]),
-                                $this->id
-                            ),
-                            __METHOD__,
-                            TL_ERROR
-                        );
-                    }
-
+            foreach ($files as $entry) {
+                if ($dir !== $files['directory']) {
                     continue;
                 }
 
-                $entry = $entry[1];
-
-                if (!$objMountManager->has('dbafs://' . $dbafs_path . '/' . $entry['basename'])
-                    || $objMountManager->getTimestamp('dropbox://' . $directory . '/' . $entry['basename'])
-                       > $objMountManager->getTimestamp('dbafs://' . $dbafs_path . '/' . $entry['basename'])
-                ) {
-                    if ($objMountManager->put(
-                        'dbafs://' . $dbafs_path . '/' . $entry['basename'],
-                        $objMountManager->read('dropbox://' . $directory . '/' . $entry['basename'])
-                    )
-                    ) {
+                // Remote file was deleted
+                if (null === $entry[1]) {
+                    if ($objMountManager->delete('dbafs://' . $dir . '/' . basename($entry[0]))) {
                         \System::log(
-                            sprintf
-                            (
-                                'File "%s" was updated by dropbox synchronisation. Data processing ID %u',
-                                $dbafs_path . '/' . $entry['basename'],
-                                $this->id
+                            sprintf(
+                                'File "%s" was deleted by dropbox synchronisation. Data processing ID %u',
+                                $dir . '/' . basename($entry[0]),
+                                $this->getModel()->id
                             ),
                             __METHOD__,
                             TL_GENERAL
                         );
-                    } else {
-                        \System::log(
-                            sprintf
-                            (
-                                'File "%s" could not be updated although it was changed in the user\'s dropbox. Data processing ID %u',
-                                $dbafs_path . '/' . $entry['basename'],
-                                $this->id
-                            ),
-                            __METHOD__,
-                            TL_ERROR
-                        );
+
+                        continue;
+                    }
+
+                    $entry = $entry[1];
+
+                    if (!$objMountManager->has('dbafs://' . $entry['path'])
+                        || $objMountManager->getTimestamp('dropbox://' . $entry['path'])
+                           > $objMountManager->getTimestamp('dbafs://' . $entry['path'])
+                    ) {
+                        if ($objMountManager->put(
+                            'dbafs://' . $entry['path'],
+                            $objMountManager->read('dropbox://' . $entry['path'])
+                        )
+                        ) {
+                            \System::log(
+                                sprintf(
+                                    'File "%s" was updated by dropbox synchronisation. Data processing ID %u',
+                                    $entry['path'],
+                                    $this->getModel()->id
+                                ),
+                                __METHOD__,
+                                TL_GENERAL
+                            );
+                        } else {
+                            \System::log(
+                                sprintf
+                                (
+                                    'File "%s" could not be updated although it was changed in the user\'s dropbox. Data processing ID %u',
+                                    $entry['path'],
+                                    $this->getModel()->id
+                                ),
+                                __METHOD__,
+                                TL_ERROR
+                            );
+                        }
                     }
                 }
             }
         }
 
         // Sync xml files
-        if (array_key_exists(($this->getModel())::EXPORT_XML_FILES_PATH, $files)) {
+        /** @var DataProcessing\Format\Xml $xmlHandler */
+        if (($xmlHandler = $this->getModel()->getFormatHandler()) instanceof DataProcessing\Format\Xml) {
 
-            /** @var DataProcessing\Format\Xml $xmlHandler */
-            if (($xmlHandler = $this->getModel()->getFormatHandler()) instanceof DataProcessing\Format\Xml) {
-
-                # deleted xml files will not delete the offer
-                $xmlHandler->syncXmlFilesWithModel(
-                    array_map(
+            $xmlHandler->syncXmlFilesWithModel(
+                array_map(
+                    function ($value) {
+                        return $value[1];
+                    },
+                    array_filter(
+                        $files,
                         function ($value) {
-                            return $value[1];
-                        },
-                        $files[($this->getModel())::EXPORT_XML_FILES_PATH]
-                    ),
-                    'dropbox'
-                );
-            }
+                            return 'xml' === $value['qqqq'];
+                        }
+                    )
+                ),
+                'dropbox'
+            );
 
-        }
-    }
-
-    /**
-     * Get the local path of a folder that has a different path on the remote system
-     *
-     * @param string $strPath
-     *
-     * @return string
-     */
-    protected function getLocalPathByRemotePath($strPath)
-    {
-        // Remove trailing slashes
-        if ('/' === substr($strPath, -1)) {
-            $strPath = substr($strPath, 0, -1);
-        }
-
-        switch ($strPath) {
-            case ($this->getModel())::EXPORT_OFFER_IMAGES_PATH:
-                return \FilesModel::findByPk($this->getModel()->offer_image_path)->path;
-                break;
-
-            case ($this->getModel())::EXPORT_HOST_LOGOS_PATH:
-                return \FilesModel::findByPk($this->getModel()->host_logo_path)->path;
-                break;
-
-            default:
-                return '';
-                break;
         }
     }
 }
