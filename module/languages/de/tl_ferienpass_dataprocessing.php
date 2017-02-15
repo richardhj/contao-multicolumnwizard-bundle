@@ -14,10 +14,10 @@
  */
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['name'][0] = 'Name';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['name'][1] = 'Geben Sie einen Namen für die Datenverarbeitung an. Dieser wird nur im Backend benutzt.';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['format'][0] = 'Format';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['format'][1] = 'Wählen Sie das Dateiformat aus.';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_view'][0] = 'Render-Einstellung';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_view'][1] = 'Wählen Sie die MetaModels-Render-Einstellung, die für das Generieren der XML-Dateien benutzt werden soll.';
-$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['scope'][0] = 'Export-Bereich';
-$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['scope'][1] = 'Wählen Sie den Umfang der Datenverarbeitung bzw. des Exports.';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['filesystem'][0] = 'Dateisystem';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['filesystem'][1] = 'Wählen Sie das Dateisystem aus.';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['offer_image_path'][0] = 'Pfad zu Bildern';
@@ -32,7 +32,14 @@ $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['path_prefix'][0] = 'Pfad-Pr
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['path_prefix'][1] = 'Hier können Sie die Dateien in einen Unterordner exportieren lassen.';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['sync'][0] = 'Synchronisation';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['sync'][1] = 'Wählen Sie aus, ob die Dateien synchronisert werden sollen. Wenn Sie Dateien in der Dropbox löschen, werden sie auch im Websystem gelöscht!';
-
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['xml_single_file'][0] = 'Eine Datei für alle Elemente';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['xml_single_file'][1] = 'Wählen Sie, ob sie alle Elemente in einer Datei exportiert brauchen, oder für jedes Element eine einzelne Datei.';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['combine_variants'][0] = 'Varianten kombinieren';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['combine_variants'][1] = 'Wählen Sie, ob Sie die Varianten im gleichen Element exportiert haben möchten.';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_filtering'][0] = 'Fiter anwenden';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_filtering'][1] = 'Wenden Sie einen Filter auf die Elemente an.';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['static_dirs'][0] = 'Zusätzliche Ordner';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['static_dirs'][1] = 'Wählen Sie Ordner aus, die zusätzlich exportiert werden sollen.';
 
 /**
  * Options
@@ -60,4 +67,7 @@ $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['show'][1] = 'Details von Da
  * Legends
  */
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['title_legend'] = 'Name';
-$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['processing_legend'] = 'Konfiguration der Datenverarbeitung';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['format_legend'] = 'Dateiformat';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['filesystem_legend'] = 'Dateisystem';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['scope_legend'] = 'Export-Bereich';
+

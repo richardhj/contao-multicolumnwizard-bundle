@@ -86,34 +86,31 @@ $GLOBALS['TL_DCA'][$table] = [
             'title'      => [
                 'name',
             ],
-            'processing' => [
-                'type',
-                'filesystem',
+            'format'     => [
+                'format'
+            ],
+            'filesystem' => [
+                'filesystem'
+            ],
+            'scope'      => [
+                'metamodel_filtering',
                 'static_dirs',
-                'scope',
-                'metamodel_filtering'
+
             ],
         ],
     ],
     // Meta SubSelect Palettes
     'metasubselectpalettes' => [
-        'type'       => [
+        'format'     => [
             'xml'  => [
                 'metamodel_view',
+                'xml_single_file',
                 'combine_variants',
-                'xml_single_file'
             ],
             'ical' => [
                 'ical_fields',
             ],
         ],
-        //        'scope'      => [
-        //            'single' => [],
-        //            'full'   => [
-        //                'offer_image_path',
-        //                'host_logo_path',
-        //            ],
-        //        ],
         'filesystem' => [
             'local'         => [
                 'export_file_name',
@@ -149,18 +146,20 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'type'                 => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
+        'format'               => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['format'],
             'inputType' => 'select',
             'default'   => 'xml',
             'options'   => [
                 'xml',
                 'ical',
             ],
-            'reference' => &$GLOBALS['TL_LANG'][$table]['type_options'],
+            'reference' => &$GLOBALS['TL_LANG'][$table]['format_options'],
             'eval'      => [
-                'submitOnChange' => true,
-                'tl_class'       => 'w50',
+                'submitOnChange'     => true,
+                'includeBlankOption' => true,
+                'mandatory'          => true,
+                'tl_class'           => 'w50',
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
@@ -174,27 +173,14 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'              => "int(10) NOT NULL default '0'",
         ],
-        'metamodel_filtering'       => [
-            'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_filtering'],
-            'inputType'        => 'select',
-            'eval'             => [
+        'metamodel_filtering'  => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_filtering'],
+            'inputType' => 'select',
+            'eval'      => [
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
             ],
-            'sql'              => "int(10) NOT NULL default '0'",
-        ],
-        'scope'                => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['scope'],
-            'inputType' => 'select',
-            'options'   => [
-                'single',
-                'full',
-            ],
-            'eval'      => [
-                'submitOnChange' => true,
-                'tl_class'       => 'w50',
-            ],
-            'sql'       => "varchar(64) NOT NULL default ''",
+            'sql'       => "int(10) NOT NULL default '0'",
         ],
         'filesystem'           => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['filesystem'],
@@ -211,26 +197,6 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        //        'offer_image_path'     => [
-        //            'label'     => &$GLOBALS['TL_LANG'][$table]['offer_image_path'],
-        //            'inputType' => 'fileTree',
-        //            'eval'      => [
-        //                'fieldType' => 'radio',
-        //                'files'     => false,
-        //                'tl_class'  => 'w50 clr',
-        //            ],
-        //            'sql'       => "binary(16) NULL",
-        //        ],
-        //        'host_logo_path'       => [
-        //            'label'     => &$GLOBALS['TL_LANG'][$table]['host_logo_path'],
-        //            'inputType' => 'fileTree',
-        //            'eval'      => [
-        //                'fieldType' => 'radio',
-        //                'files'     => false,
-        //                'tl_class'  => 'w50',
-        //            ],
-        //            'sql'       => "binary(16) NULL",
-        //        ],
         'static_dirs'          => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['static_dirs'],
             'inputType' => 'fileTree',
@@ -238,7 +204,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'multiple'  => 'true',
                 'fieldType' => 'checkbox',
                 'files'     => false,
-                'tl_class'  => 'w50',
+                'tl_class'  => 'clr',
             ],
             'sql'       => "blob NULL",
         ],
@@ -250,7 +216,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'xml_single_file'     => [
+        'xml_single_file'      => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['xml_single_file'],
             'inputType' => 'checkbox',
             'eval'      => [

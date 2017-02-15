@@ -22,6 +22,7 @@ use Ferienpass\Model\DataProcessing\FormatInterface;
 use League\Flysystem\Dropbox\DropboxAdapter;
 use League\Flysystem\Filesystem;
 use League\Flysystem\MountManager;
+use MetaModels\Filter\IFilter;
 use MetaModels\IItems;
 use MetaModels\IMetaModel;
 
@@ -39,7 +40,7 @@ use MetaModels\IMetaModel;
  * @property string  $path_prefix
  * @property boolean $sync
  * @property mixed   $ical_fields
- * @property string  $type
+ * @property string  $format
  * @property boolean $combine_variants
  * @property boolean $xml_single_file
  * @property int     $metamodel_filtering
@@ -79,6 +80,12 @@ class DataProcessing extends Model
 
 
     /**
+     * @var IFilter
+     */
+    private $filter;
+
+
+    /**
      * @var string
      */
     private $tmpPath;
@@ -90,7 +97,7 @@ class DataProcessing extends Model
     public function getFormatHandler()
     {
         if (null === $this->formatHandler) {
-            switch ($this->type) {
+            switch ($this->format) {
                 case 'xml':
                     $this->formatHandler = new Xml($this, $this->getItems());
                     break;
@@ -148,31 +155,50 @@ class DataProcessing extends Model
         return $this->items;
     }
 
+    /**
+     * @return IFilter
+     */
+    public function getFilter()
+    {
+        if (null === $this->filter) {
+            $this->filter = $this
+                ->getMetaModel()
+                ->getEmptyFilter();
+        }
+
+        return $this->filter;
+    }
+
+    /**
+     * @param IFilter $filter
+     *
+     * @return DataProcessing
+     */
+    public function setFilter($filter)
+    {
+        $this->filter = $filter;
+
+        return $this;
+    }
+
 
     /**
      * Run data processing by its configuration
-     *
-     * @param array|string $arrOffers The offer to export
-     *
-     * @throws \Exception
      */
-    public function run($arrOffers = [])
+    public function run()
     {
         // Provide filter
-        $filter = $this
-            ->getMetaModel()
-            ->getEmptyFilter();
         $this
             ->getMetaModel()
             ->getServiceContainer()
             ->getFilterFactory()
             ->createCollection($this->metamodel_filtering)
-            ->addRules($filter, []);
+            ->addRules($this->getFilter(), []);
 
         // Find items by filter
         $this->items = $this
             ->getMetaModel()
-            ->findByFilter($filter);
+            ->findByFilter($this->getFilter());
 
         $files = $this
             ->getFormatHandler()
@@ -185,7 +211,7 @@ class DataProcessing extends Model
         );
 
 //                throw new \LogicException(
-//                    sprintf('Type "%s" is not implemented. Data processing ID %u', $this->type, $this->id)
+//                    sprintf('Type "%s" is not implemented. Data processing ID %u', $this->format, $this->id)
 //                );
 
         $this
@@ -260,7 +286,7 @@ class DataProcessing extends Model
                 );
                 $adapter = new DropboxAdapter(
                     $client,
-                    rtrim('ferienpass.online/' . $this->path_prefix, '/')
+                    'ferienpass.online/' . $this->path_prefix
                 );
 
                 $this

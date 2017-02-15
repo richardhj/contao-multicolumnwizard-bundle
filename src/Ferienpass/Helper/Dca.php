@@ -36,6 +36,8 @@ use MetaModels\DcGeneral\Data\Model;
 use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
 use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Factory;
+use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IItem;
 use MetaModels\MetaModelsEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -330,21 +332,6 @@ class Dca implements EventSubscriberInterface
 
 
     /**
-     * Get all data processings with "sync" activated
-     * @category options_callback
-     *
-     * @return array
-     */
-//	public function getDataProcessingChoices()
-//	{
-//		/** @var \Model\Collection $objModel */
-//		$objModel = DataProcessing::findBy('sync', 1);
-//
-//		return (null !== $objModel) ? $objModel->fetchEach('name') : array();
-//	}
-
-
-    /**
      * Get documents
      * @category options_callback
      *
@@ -572,25 +559,34 @@ class Dca implements EventSubscriberInterface
     {
         $model = $event->getModel();
 
-        if ($model instanceof Model && 'mm_ferienpass' === $model->getProviderName()) {
-            /** @type \Model\Collection|DataProcessing $processsings */
-            $processsings = DataProcessing::findBy('sync', '1');
+        if (!$model instanceof Model
+            || 'mm_ferienpass' !== $model->getProviderName()
+        ) {
+            return;
+        }
 
-            while (null !== $processsings && $processsings->next()) {
-                $processsings->current()->run([$model->getId()]);
+        /** @type \Model\Collection|DataProcessing $processing */
+        $processing = DataProcessing::findBy('sync', '1');
 
-                \System::log(
-                    sprintf
-                    (
-                        'Synchronisation for offer ID %u via data processing "%s" (ID %u) was processed.',
-                        $model->getId(),
-                        $processsings->current()->name,
-                        $processsings->current()->id
-                    ),
-                    __METHOD__,
-                    TL_GENERAL
+        while (null !== $processing && $processing->next()) {
+            if (!$processing->xml_single_file) {
+
+                $ids = array_map(
+                    function ($item) {
+                        /** @var IItem $item */
+                        return $item->get('id');
+                    },
+                    $model->getItem()->getVariants(null)
                 );
+                $ids = array_merge([$model->getId()], $ids);
+
+                $filterRule = new StaticIdList($ids);
+                $processing->current()
+                    ->getFilter()
+                    ->addFilterRule($filterRule);
             }
+
+            $processing->current()->run();
         }
     }
 
@@ -616,7 +612,7 @@ class Dca implements EventSubscriberInterface
     public function loadDataProcessingFilterOptions(GetPropertyOptionsEvent $event)
     {
         if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
-            || ('metamodel_filter' !== $event->getPropertyName())) {
+            || ('metamodel_filtering' !== $event->getPropertyName())) {
             return;
         }
 
