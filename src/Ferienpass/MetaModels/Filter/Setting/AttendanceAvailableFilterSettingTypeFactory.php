@@ -29,7 +29,7 @@ class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingT
         $this
             ->setTypeName('attendance_available')
             ->setTypeIcon('system/modules/metamodelsfilter_checkbox/html/filter_checkbox.png')
-            ->setTypeClass('MetaModels\Filter\Setting\AttendanceAvailable')
+            ->setTypeClass('Ferienpass\MetaModels\Filter\Setting\AttendanceAvailable')
             ->allowAttributeTypes('numeric');
     }
 }
