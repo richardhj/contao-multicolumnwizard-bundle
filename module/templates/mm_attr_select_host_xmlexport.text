@@ -6,17 +6,17 @@ $domRoot = $dom->createElement('HostData');
 
 // Host name
 $domLogo = $dom->createElement(
-    'Name',
-    htmlspecialchars(html_entity_decode($this->raw[$this->attribute->get('select_column')]), ENT_XML1) ?: ' '
-); # Prohibit empty value
+    'HostName',
+    htmlspecialchars(html_entity_decode($this->raw[$this->attribute->get('select_column')]), ENT_XML1)
+        ?: ' ' // Prohibit empty value
+);
 $domRoot->appendChild($domLogo);
 
 // Host logo
 $domLogo = $dom->createElement('Logo');
 $domFile = $dom->createElement('File');
 
-$file = \FilesModel::findByPk($this->raw['logo']);
-if (null !== $file) {
+if (null !== ($file = \FilesModel::findByPk($this->raw['logo']))) {
     $domFile->setAttribute(
         'href',
         'file://../' . $file->path

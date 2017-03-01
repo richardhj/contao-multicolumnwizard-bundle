@@ -247,13 +247,11 @@ class Xml implements FormatInterface
      *
      * @param string   $attributeParsed
      * @param \DOMNode $attributeNode
-     *
-     * @return bool True if xml was imported and appended to attribute False if nothing was changed
      */
     protected function importXmlToNode($attributeParsed, $attributeNode)
     {
         if (!$attributeParsed) {
-            return false;
+            return;
         }
 
         libxml_use_internal_errors(true);
@@ -273,11 +271,7 @@ class Xml implements FormatInterface
                 $node = $attributeNode->ownerDocument->importNode($element, true);
                 $attributeNode->appendChild($node);
             }
-
-            return true;
         }
-
-        return false;
     }
 
 
