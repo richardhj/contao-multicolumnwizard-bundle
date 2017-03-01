@@ -24,6 +24,7 @@ use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionI
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
+use ContaoCommunityAlliance\DcGeneral\Factory\Event\CreateDcGeneralEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
@@ -38,7 +39,9 @@ use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Factory;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
+use MetaModels\IMetaModelsServiceContainer;
 use MetaModels\MetaModelsEvents;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
@@ -81,8 +84,43 @@ class Dca implements EventSubscriberInterface
             ],
             GetPropertyOptionsEvent::NAME => [
                 'loadDataProcessingFilterOptions'
+            ],
+            CreateDcGeneralEvent::NAME => [
+                'buildFilterParamsForDataProcessing'
             ]
         ];
+    }
+
+    /**
+     * Retrieve the event dispatcher.
+     *
+     * @return EventDispatcherInterface
+     */
+    public function getEventDispatcher()
+    {
+        return $this->getServiceContainer()->getEventDispatcher();
+    }
+    /**
+     * Retrieve the service container.
+     *
+     * @return IMetaModelsServiceContainer
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
+     */
+    public function getServiceContainer()
+    {
+        return $GLOBALS['container']['metamodels-service-container'];
+    }
+
+    /**
+     * Retrieve the database instance.
+     *
+     * @return \Contao\Database
+     */
+    protected function getDatabase()
+    {
+        return $this->getServiceContainer()->getDatabase();
     }
 
 
@@ -621,5 +659,28 @@ class Dca implements EventSubscriberInterface
             ->execute(Offer::getInstance()->getMetaModel()->get('id'));
 
         $event->setOptions($filters->fetchEach('name'));
+    }
+
+    public function buildFilterParamsForDataProcessing(CreateDcGeneralEvent $event)
+    {
+//        if ('tl_ferienpass_dataprocessing' !== ($table =
+//                $event->getDcGeneral()->getEnvironment()->getDataDefinition()->getName())
+//        ) {
+//            return;
+//        }
+//        $container = $this->getServiceContainer();
+//        $element   = DataProcessing::findBy($event->getDcGeneral()->getEnvironment()->getInputProvider()->getParameter('id'));
+//
+//        if (!$element->metamodel_filtering) {
+//            unset($GLOBALS['TL_DCA'][$table]['fields']['metamodel_filterparams']);
+//            return;
+//        }
+//
+//        $objFilterSettings = $container->getFilterFactory()->createCollection(
+//            $element->metamodel_filtering
+//        );
+//
+//        $GLOBALS['TL_DCA'][$table]['fields']['metamodel_filterparams']['eval']['subfields'] =
+//            $objFilterSettings->getParameterDCA();
     }
 }

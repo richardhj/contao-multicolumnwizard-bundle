@@ -94,6 +94,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'scope'      => [
                 'metamodel_filtering',
+                'metamodel_filterparams',
                 'static_dirs',
 
             ],
@@ -130,13 +131,13 @@ $GLOBALS['TL_DCA'][$table] = [
 
     // Fields
     'fields'                => [
-        'id'                   => [
+        'id'                     => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'tstamp'               => [
+        'tstamp'                 => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'name'                 => [
+        'name'                   => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['name'],
             'inputType' => 'text',
             'eval'      => [
@@ -146,7 +147,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'format'               => [
+        'format'                 => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['format'],
             'inputType' => 'select',
             'default'   => 'xml',
@@ -163,7 +164,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'metamodel_view'       => [
+        'metamodel_view'         => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_view'],
             'inputType'        => 'select',
             'options_callback' => ['Ferienpass\Helper\Dca', 'getOffersMetaModelRenderSettings'],
@@ -173,7 +174,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'              => "int(10) NOT NULL default '0'",
         ],
-        'metamodel_filtering'  => [
+        'metamodel_filtering'    => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_filtering'],
             'inputType' => 'select',
             'eval'      => [
@@ -182,7 +183,15 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "int(10) NOT NULL default '0'",
         ],
-        'filesystem'           => [
+        'metamodel_filterparams' => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_filterparams'],
+            'exclude'   => true,
+            'inputType' => 'mm_subdca',
+            'eval'      => [
+                'tl_class' => 'clr m12',
+            ],
+        ],
+        'filesystem'             => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['filesystem'],
             'inputType' => 'select',
             'options'   => [
@@ -197,7 +206,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'static_dirs'          => [
+        'static_dirs'            => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['static_dirs'],
             'inputType' => 'fileTree',
             'eval'      => [
@@ -208,7 +217,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "blob NULL",
         ],
-        'combine_variants'     => [
+        'combine_variants'       => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['combine_variants'],
             'inputType' => 'checkbox',
             'eval'      => [
@@ -216,7 +225,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'xml_single_file'      => [
+        'xml_single_file'        => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['xml_single_file'],
             'inputType' => 'checkbox',
             'eval'      => [
@@ -224,7 +233,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'export_file_name'     => [
+        'export_file_name'       => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['export_file_name'],
             'inputType' => 'text',
             'eval'      => [
@@ -233,7 +242,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'dropbox_access_token' => [
+        'dropbox_access_token'   => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['dropbox_access_token'],
             'inputType' => 'request_access_token',
             'eval'      => [
@@ -241,13 +250,13 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NULL",
         ],
-        'dropbox_uid'          => [
+        'dropbox_uid'            => [
             'sql' => "int(10) NULL",
         ],
-        'dropbox_cursor'       => [
+        'dropbox_cursor'         => [
             'sql' => "varchar(255) NULL",
         ],
-        'path_prefix'          => [
+        'path_prefix'            => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['path_prefix'],
             'inputType' => 'text',
             'eval'      => [
@@ -256,7 +265,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'sync'                 => [
+        'sync'                   => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['sync'],
             'inputType' => 'checkbox',
             'eval'      => [
@@ -265,7 +274,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'ical_fields'          => [
+        'ical_fields'            => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['ical_fields'],
             'inputType' => 'multiColumnWizard',
             'eval'      => [
