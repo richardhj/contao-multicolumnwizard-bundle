@@ -1,1 +1,1 @@
-<span class="age<?php echo $this->additional_class; ?>"><?php echo $this->parsed; ?></span>
+<span class="age<?= $this->additional_class ?>"><?= $this->parsed ?></span>

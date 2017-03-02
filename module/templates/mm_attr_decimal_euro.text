@@ -1,0 +1,3 @@
+<?= (null !== $this->raw)
+    ? number_format($this->raw, 2, ',', '.') . ' €'
+    : 'siehe Text';

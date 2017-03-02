@@ -1,0 +1,1 @@
+<span class="text<?= $this->additional_class; ?>"><?= null !== $this->raw ? number_format($this->raw, 2, ',', '.') . ' €' : 'siehe Text' ?></span>

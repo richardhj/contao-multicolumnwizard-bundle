@@ -1,4 +1,4 @@
-<span class="offer_date<?php echo $this->additional_class; ?>">
+<span class="offer_date<?= $this->additional_class ?>">
 <?php echo implode(
     ' UND ',
     array_map(
@@ -7,6 +7,5 @@
         },
         $this->parsed
     )
-);
-?>
+) ?>
 </span>

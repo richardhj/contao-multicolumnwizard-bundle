@@ -1,4 +1,4 @@
-<?php echo implode(
+<?= implode(
     ' UND ',
     array_map(
         function ($item) {

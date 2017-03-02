@@ -1,33 +1,8 @@
-<?php
-
-// Generate nothing
-//if (!$this->raw)
-//{
-//	echo 'Das Angebot verwendet nicht das Online-Anmeldesystem.';
-//
-//	return;
-//}
-//
-//
-//$objDom = new \DOMDocument('1.0', 'utf-8');
-//
-//$node = $objDom->createElement(ucfirst($this->attribute->get('type')));
-//$node->nodeValue = 'Gehen Sie auf folgende Seite, um sich für das Angebot anzumelden:';
-//
-//$link = $objDom->createElement('OnlineLink');
-//$link->nodeValue = Environment::get('url') . '/' . $this->row['vargroup'];
-//
-//$node->appendChild($link);
-//
-//$objDom->appendChild($node);
-//
-//echo $objDom->saveXML();
-
-echo sprintf(
+<?= sprintf(
 	'%s/%s',
 	str_replace(
 		'http://',
-		'www.',
+		'',
 		Environment::get('url')
 	),
 	$this->row['vargroup']
