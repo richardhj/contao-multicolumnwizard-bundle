@@ -179,9 +179,10 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'select',
             'eval'      => [
                 'includeBlankOption' => true,
+                'submitOnChange'     => true,
                 'tl_class'           => 'w50',
             ],
-            'sql'       => "int(10) NOT NULL default '0'",
+            'sql' => "int(10) NOT NULL default '0'",
         ],
         'metamodel_filterparams' => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_filterparams'],
@@ -190,6 +191,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'eval'      => [
                 'tl_class' => 'clr m12',
             ],
+            'sql'       => "longblob NULL",
         ],
         'filesystem'             => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['filesystem'],

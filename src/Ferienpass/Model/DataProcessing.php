@@ -193,13 +193,14 @@ class DataProcessing extends Model
             ->getServiceContainer()
             ->getFilterFactory()
             ->createCollection($this->metamodel_filtering)
-            ->addRules($this->getFilter(), []);
+            ->addRules($this->getFilter(), $this->getFilterParams());
 
         // Find items by filter
         $this->items = $this
             ->getMetaModel()
             ->findByFilter($this->getFilter());
 
+        // Fetch files from format handler
         $files = $this
             ->getFormatHandler()
             ->processItems()
@@ -210,17 +211,10 @@ class DataProcessing extends Model
             $this->fetchStaticFiles()
         );
 
-//                throw new \LogicException(
-//                    sprintf('Type "%s" is not implemented. Data processing ID %u', $this->format, $this->id)
-//                );
-
+        // Process files
         $this
             ->getFileSystemHandler()
             ->processFiles($files);
-
-//                throw new \LogicException(
-//                    sprintf('Filesystem "%s" is not implemented. Data processing ID %u', $this->filesystem, $this->id)
-//                );
 
         // Delete xml tmp path
         $this->getMountManager()->deleteDir('local://' . $this->getTmpPath());
@@ -319,5 +313,15 @@ class DataProcessing extends Model
         }
 
         return $this->metaModel;
+    }
+
+
+    private function getFilterParams() {
+        return array_map(
+            function ($val) {
+                return $val['value'];
+            },
+            deserialize($this->metamodel_filterparams)
+        );
     }
 }

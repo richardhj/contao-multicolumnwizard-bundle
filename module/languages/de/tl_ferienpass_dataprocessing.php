@@ -38,6 +38,8 @@ $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['combine_variants'][0] = 'Va
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['combine_variants'][1] = 'Wählen Sie, ob Sie die Varianten im gleichen Element exportiert haben möchten.';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_filtering'][0] = 'Fiter anwenden';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_filtering'][1] = 'Wenden Sie einen Filter auf die Elemente an.';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_filterparams'][0] = 'Fiterparameter';
+$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['metamodel_filterparams'][1] = 'Setzen Sie die Parameter der statischen Filter.';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['static_dirs'][0] = 'Zusätzliche Ordner';
 $GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['static_dirs'][1] = 'Wählen Sie Ordner aus, die zusätzlich exportiert werden sollen.';
 

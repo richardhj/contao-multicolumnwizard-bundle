@@ -21,9 +21,11 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPr
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionInterface;
+use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\DefaultPropertiesDefinition;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
+use ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\CreateDcGeneralEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\Model\ApplicationSystem;
@@ -663,24 +665,42 @@ class Dca implements EventSubscriberInterface
 
     public function buildFilterParamsForDataProcessing(CreateDcGeneralEvent $event)
     {
-//        if ('tl_ferienpass_dataprocessing' !== ($table =
-//                $event->getDcGeneral()->getEnvironment()->getDataDefinition()->getName())
-//        ) {
-//            return;
-//        }
-//        $container = $this->getServiceContainer();
-//        $element   = DataProcessing::findBy($event->getDcGeneral()->getEnvironment()->getInputProvider()->getParameter('id'));
-//
-//        if (!$element->metamodel_filtering) {
-//            unset($GLOBALS['TL_DCA'][$table]['fields']['metamodel_filterparams']);
-//            return;
-//        }
-//
-//        $objFilterSettings = $container->getFilterFactory()->createCollection(
-//            $element->metamodel_filtering
-//        );
-//
-//        $GLOBALS['TL_DCA'][$table]['fields']['metamodel_filterparams']['eval']['subfields'] =
-//            $objFilterSettings->getParameterDCA();
+        if ('tl_ferienpass_dataprocessing' !== ($table =
+                $event->getDcGeneral()->getEnvironment()->getDataDefinition()->getName())
+        ) {
+            return;
+        }
+
+        // Todo We need another event which provides the model instance so we don't need to fetch the model id from the url
+        try {
+            $modelId = ModelId::fromSerialized(\Input::get('id'));
+        }
+        catch (DcGeneralRuntimeException $e){
+            return;
+        }
+
+        $container = $this->getServiceContainer();
+        $element   = DataProcessing::findByPk($modelId->getId());
+
+        /** @var DefaultPropertiesDefinition $propertiesDefinition */
+        $propertiesDefinition = $event
+            ->getDcGeneral()
+            ->getEnvironment()
+            ->getDataDefinition()
+            ->getDefinition('properties');
+
+        if (!$element->metamodel_filtering) {
+            $propertiesDefinition->removeProperty('metamodel_filterparams');
+            return;
+        }
+
+        $filterSettings = $container
+            ->getFilterFactory()
+            ->createCollection($element->metamodel_filtering);
+
+        $property           = $propertiesDefinition->getProperty('metamodel_filterparams');
+        $extra              = $property->getExtra();
+        $extra['subfields'] = $filterSettings->getParameterDCA();
+        $property->setExtra($extra);
     }
 }

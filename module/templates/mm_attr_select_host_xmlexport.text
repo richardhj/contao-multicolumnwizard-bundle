@@ -16,10 +16,10 @@ $domRoot->appendChild($domLogo);
 $domLogo = $dom->createElement('Logo');
 $domFile = $dom->createElement('File');
 
-if (null !== ($file = \FilesModel::findByPk($this->raw['logo']))) {
+if ('' !== ($path = $this->raw['logo'])) {
     $domFile->setAttribute(
         'href',
-        'file://../' . $file->path
+        'file://../' . $path
     );
 
     $domLogo->appendChild($domFile);
