@@ -103,30 +103,27 @@ class Dropbox implements FilesystemInterface
             return;
         }
 
-        $objMountManager = $this->getModel()->getMountManager('dropbox');
+        $mountManager = $this
+            ->getModel()
+            ->getMountManager('dropbox');
 
-        $dbx = $objMountManager->getFilesystem('dropbox');
+        $dbx = $mountManager->getFilesystem('dropbox');
         $dbx->addPlugin(new DropboxDelta());
 
         /** @noinspection PhpUndefinedMethodInspection */
         $delta = $dbx->getDelta($this->getModel()->dropbox_cursor ?: null);
 
         // Save current cursor if "reset" is not set in response
-        $this->getModel()->dropbox_cursor = !($this->getModel()->dropbox_cursor && $delta['reset'])
-            ? $delta['cursor']
-            : '';
+        $this->getModel()->dropbox_cursor =
+            !($this->getModel()->dropbox_cursor && $delta['reset'])
+                ? $delta['cursor']
+                : '';
         $this->getModel()->save();
-
-        //log_message(var_export($arrDelta, true), 'syncFromRemoteDropbox.log');
 
         $files = $delta['entries'];
 
         // Process image folders
         foreach (deserialize($this->getModel()->static_dirs, true) as $dirBin) {
-//            // Files in directory was not changed
-//            if (!array_key_exists($directory, $files)) {
-//                continue;
-//            }
             $dir = (\FilesModel::findByPk($dirBin))->path;
 
             foreach ($files as $entry) {
@@ -136,7 +133,7 @@ class Dropbox implements FilesystemInterface
 
                 // Remote file was deleted
                 if (null === $entry[1]) {
-                    if ($objMountManager->delete('dbafs://' . $dir . '/' . basename($entry[0]))) {
+                    if ($mountManager->delete('dbafs://' . $dir . '/' . basename($entry[0]))) {
                         \System::log(
                             sprintf(
                                 'File "%s" was deleted by dropbox synchronisation. Data processing ID %u',
@@ -152,15 +149,14 @@ class Dropbox implements FilesystemInterface
 
                     $entry = $entry[1];
 
-                    if (!$objMountManager->has('dbafs://' . $entry['path'])
-                        || $objMountManager->getTimestamp('dropbox://' . $entry['path'])
-                           > $objMountManager->getTimestamp('dbafs://' . $entry['path'])
+                    if (!$mountManager->has('dbafs://' . $entry['path'])
+                        || $mountManager->getTimestamp('dropbox://' . $entry['path'])
+                           > $mountManager->getTimestamp('dbafs://' . $entry['path'])
                     ) {
-                        if ($objMountManager->put(
+                        if ($mountManager->put(
                             'dbafs://' . $entry['path'],
-                            $objMountManager->read('dropbox://' . $entry['path'])
-                        )
-                        ) {
+                            $mountManager->read('dropbox://' . $entry['path'])
+                        )) {
                             \System::log(
                                 sprintf(
                                     'File "%s" was updated by dropbox synchronisation. Data processing ID %u',
@@ -172,8 +168,7 @@ class Dropbox implements FilesystemInterface
                             );
                         } else {
                             \System::log(
-                                sprintf
-                                (
+                                sprintf(
                                     'File "%s" could not be updated although it was changed in the user\'s dropbox. Data processing ID %u',
                                     $entry['path'],
                                     $this->getModel()->id

@@ -30,15 +30,6 @@ class Local implements FilesystemInterface
     private $offers;
 
     /**
-     * {@inheritdoc}
-     */
-    public function __construct(DataProcessing $model, IItems $items)
-    {
-        $this->model  = $model;
-        $this->offers = $items;
-    }
-
-    /**
      * @return DataProcessing|\Model
      */
     public function getModel()
@@ -49,27 +40,25 @@ class Local implements FilesystemInterface
     /**
      * {@inheritdoc}
      */
+    public function __construct(DataProcessing $model, IItems $items)
+    {
+        $this->model  = $model;
+        $this->offers = $items;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function processFiles(array $files)
     {
         $pathPrefix = ($this->getModel()->path_prefix) ? $this->getModel()->path_prefix . '/' : '';
 
-        if (array_is_assoc($files)) {
-            foreach ($files as $directory => $arrFiles) {
-                foreach ($arrFiles as $file) {
-                    $this->getModel()->getMountManager()->put(
-                        'local://share/' . $pathPrefix . $directory . '/' . $file['basename'],
-                        $this->getModel()->getMountManager()->read('local://' . $file['path'])
-                    );
-                }
-            }
-        } else {
-            foreach ($files as $file) {
-                $this->getModel()->getMountManager()->put(
-                    'local://share/' . $pathPrefix . $file['basename'],
-                    $this->getModel()->getMountManager()->read('local://' . $file['path'])
-                );
-            }
+        foreach ($files as $file) {
+            $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);
+            $this->getModel()->getMountManager()->put(
+                'local://share/' . $pathPrefix . $path,
+                $this->getModel()->getMountManager()->read('local://' . $file['path'])
+            );
         }
-
     }
 }

@@ -88,8 +88,7 @@ class Participant extends MetaModelBridge
         }
 
         return new SimpleQuery(
-            sprintf
-            (
+            sprintf(
                 'SELECT id FROM %1$s WHERE %2$s=?',
                 $this->getTableName(),
                 $ownerAttribute->getColName()

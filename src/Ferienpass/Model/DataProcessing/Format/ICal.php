@@ -38,17 +38,6 @@ class ICal implements FormatInterface
      */
     private $items;
 
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct(DataProcessing $model, IItems $items)
-    {
-        $this->model = $model;
-        $this->items = $items;
-    }
-
-
     /**
      * @return DataProcessing|\Model
      */
@@ -71,6 +60,15 @@ class ICal implements FormatInterface
     public function getFiles()
     {
         return $this->files;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct(DataProcessing $model, IItems $items)
+    {
+        $this->model = $model;
+        $this->items = $items;
     }
 
     /**

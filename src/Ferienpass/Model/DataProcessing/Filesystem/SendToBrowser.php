@@ -62,16 +62,9 @@ class SendToBrowser implements FilesystemInterface
         // Generate a zip file
         $zipWriter = new \ZipWriter($this->getModel()->getTmpPath() . '/export.zip');
 
-        if (array_is_assoc($files)) {
-            foreach ($files as $directory => $arrFiles) {
-                foreach ($arrFiles as $file) {
-                    $zipWriter->addFile($file['path'], $directory . '/' . $file['basename']);
-                }
-            }
-        } else {
-            foreach ($files as $file) {
-                $zipWriter->addFile($file['path'], $file['basename']);
-            }
+        foreach ($files as $file) {
+            $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);
+            $zipWriter->addFile($path);
         }
 
         $zipWriter->close();

@@ -144,6 +144,8 @@ class Xml implements FormatInterface
             }
 
             $dom->appendChild($root);
+
+            $return[] = $dom->saveXML();
         } else {
             foreach ($this->getItems() as $offer) {
                 $domClone = clone $dom;
@@ -153,8 +155,6 @@ class Xml implements FormatInterface
                 $return[$offer->get('id')] = $domClone->saveXML();
             }
         }
-
-        $return[] = $dom->saveXML();
 
         return $return;
     }
@@ -181,7 +181,6 @@ class Xml implements FormatInterface
         }
 
         $renderSetting = $offer->getMetaModel()->getView($this->getModel()->metamodel_view);
-
 
         $root = $dom->createElement('Offer');
         $root->setAttribute('id', $offer->get('id'));

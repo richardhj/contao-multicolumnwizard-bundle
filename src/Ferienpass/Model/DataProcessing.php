@@ -86,6 +86,12 @@ class DataProcessing extends Model
 
 
     /**
+     * @var array
+     */
+    private $filterParams;
+
+
+    /**
      * @var string
      */
     private $tmpPath;
@@ -135,6 +141,51 @@ class DataProcessing extends Model
         return $this->fileSystemHandler;
     }
 
+
+    /**
+     * @param array|string $varFilesystems The filesystem(s) you want to be mounted
+     *
+     * @return MountManager
+     */
+    public function getMountManager($varFilesystems = null)
+    {
+        global $container;
+
+        if (null !== $varFilesystems) {
+            foreach ((array) $varFilesystems as $filesystem) {
+                $this->mountFileSystem($filesystem);
+            }
+        }
+
+        return $container['flysystem.mount-manager'];
+    }
+
+    /**
+     * @param string $fileSystem
+     *
+     * @return \League\Flysystem\FilesystemInterface
+     */
+    public function getFileSystem($fileSystem)
+    {
+        return $this
+            ->getMountManager($fileSystem)
+            ->getFilesystem($fileSystem);
+    }
+
+
+    /**
+     * @return IMetaModel
+     */
+    public function getMetaModel()
+    {
+        if (null === $this->metaModel) {
+            $this->metaModel = Offer::getInstance()->getMetaModel();
+        }
+
+        return $this->metaModel;
+    }
+
+
     /**
      * @return string
      */
@@ -172,11 +223,43 @@ class DataProcessing extends Model
     /**
      * @param IFilter $filter
      *
-     * @return DataProcessing
+     * @return self
      */
-    public function setFilter($filter)
+    public function setFilter(IFilter $filter)
     {
         $this->filter = $filter;
+
+        return $this;
+    }
+
+    /**
+     * Process the widget value to MetaModels conform filter params
+     *
+     * @return array
+     */
+    public function getFilterParams()
+    {
+        if (null === $this->filterParams) {
+            $this->filterParams = array_map(
+                function ($param) {
+                    return $param['value'];
+                },
+                deserialize($this->metamodel_filterparams, true)
+            );
+        }
+
+        return $this->filterParams;
+    }
+
+
+    /**
+     * @param array $filterParams
+     *
+     * @return self
+     */
+    public function setFilterParams(array $filterParams)
+    {
+        $this->filterParams = $filterParams;
 
         return $this;
     }
@@ -216,27 +299,8 @@ class DataProcessing extends Model
             ->getFileSystemHandler()
             ->processFiles($files);
 
-        // Delete xml tmp path
+        // Delete tmp path
         $this->getMountManager()->deleteDir('local://' . $this->getTmpPath());
-    }
-
-
-    /**
-     * @param array|string $varFilesystems The filesystem(s) you want to be mounted
-     *
-     * @return MountManager
-     */
-    public function getMountManager($varFilesystems = null)
-    {
-        global $container;
-
-        if (null !== $varFilesystems) {
-            foreach ((array) $varFilesystems as $filesystem) {
-                $this->mountFileSystem($filesystem);
-            }
-        }
-
-        return $container['flysystem.mount-manager'];
     }
 
 
@@ -288,40 +352,5 @@ class DataProcessing extends Model
                     ->mountFilesystem($fileSystem, new Filesystem($adapter));
                 break;
         }
-    }
-
-
-    /**
-     * @param string $fileSystem
-     *
-     * @return \League\Flysystem\FilesystemInterface
-     */
-    protected function getFileSystem($fileSystem)
-    {
-        return $this
-            ->getMountManager($fileSystem)
-            ->getFilesystem($fileSystem);
-    }
-
-    /**
-     * @return IMetaModel
-     */
-    public function getMetaModel()
-    {
-        if (null === $this->metaModel) {
-            $this->metaModel = Offer::getInstance()->getMetaModel();
-        }
-
-        return $this->metaModel;
-    }
-
-
-    private function getFilterParams() {
-        return array_map(
-            function ($val) {
-                return $val['value'];
-            },
-            deserialize($this->metamodel_filterparams)
-        );
     }
 }
