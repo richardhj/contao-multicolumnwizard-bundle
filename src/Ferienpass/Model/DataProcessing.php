@@ -29,7 +29,6 @@ use MetaModels\IMetaModel;
 
 /**
  * @property string  $name
- * @property integer $metamodel_view
  * @property string  $scope
  * @property string  $filesystem
  * @property mixed   $static_dirs
@@ -43,7 +42,13 @@ use MetaModels\IMetaModel;
  * @property string  $format
  * @property boolean $combine_variants
  * @property boolean $xml_single_file
+ * @property integer $metamodel_view
  * @property int     $metamodel_filtering
+ * @property mixed   $metamodel_filterparams
+ * @property string  $metamodel_sortBy
+ * @property int     $metamodel_offset
+ * @property int     $metamodel_limit
+ * @property string  $metamodel_sortOrder
  */
 class DataProcessing extends Model
 {
@@ -281,7 +286,13 @@ class DataProcessing extends Model
         // Find items by filter
         $this->items = $this
             ->getMetaModel()
-            ->findByFilter($this->getFilter());
+            ->findByFilter(
+                $this->getFilter(),
+                $this->metamodel_sortBy,
+                $this->metamodel_offset,
+                $this->metamodel_limit,
+                $this->metamodel_sortOrder
+            );
 
         // Fetch files from format handler
         $files = $this

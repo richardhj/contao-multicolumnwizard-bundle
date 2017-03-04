@@ -95,6 +95,10 @@ $GLOBALS['TL_DCA'][$table] = [
             'scope'      => [
                 'metamodel_filtering',
                 'metamodel_filterparams',
+                'metamodel_sortBy',
+                'metamodel_offset',
+                'metamodel_limit',
+                'metamodel_sortOrder',
                 'static_dirs',
 
             ],
@@ -182,7 +186,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'submitOnChange'     => true,
                 'tl_class'           => 'w50',
             ],
-            'sql' => "int(10) NOT NULL default '0'",
+            'sql'       => "int(10) NOT NULL default '0'",
         ],
         'metamodel_filterparams' => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_filterparams'],
@@ -192,6 +196,47 @@ $GLOBALS['TL_DCA'][$table] = [
                 'tl_class' => 'clr m12',
             ],
             'sql'       => "longblob NULL",
+        ],
+        'metamodel_sortBy'       => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_sortBy'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'eval'      => [
+                'tl_class' => 'w50',
+            ],
+            'sql'       => "varchar(64) NOT NULL default '0'",
+        ],
+        'metamodel_limit'        => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_limit'],
+            'exclude'   => true,
+            'inputType' => 'text',
+            'eval'      => [
+                'tl_class' => 'w50',
+            ],
+            'sql'       => "int(10) NOT NULL default '0'",
+        ],
+        'metamodel_offset'       => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_offset'],
+            'exclude'   => true,
+            'inputType' => 'text',
+            'eval'      => [
+                'tl_class' => 'w50',
+            ],
+            'sql'       => "int(10) NOT NULL default '0'",
+        ],
+        'metamodel_sortOrder'    => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_sortOrder'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'options'   => [
+                'ASC',
+                'DESC'
+            ],
+            'default'   => 'ASC',
+            'eval'      => [
+                'tl_class' => 'w50',
+            ],
+            'sql'       => "varchar(4) NOT NULL default ''",
         ],
         'filesystem'             => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['filesystem'],
