@@ -60,6 +60,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Alter the front end editing labels ('edit', 'add new') in the list rendering corresponding to the MetaModel
+     *
+     * @param RenderItemListEvent $event
+     */
     public function alterFrontendEditingLabelInListRendering(RenderItemListEvent $event)
     {
         $caller = $event->getCaller();
@@ -86,6 +91,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Alter the host MetaModel list and add the buttons dynamically (buttons are registered via the event)
+     *
+     * @param RenderItemListEvent $renderEvent
+     */
     public function alterHostMetaModelList(RenderItemListEvent $renderEvent)
     {
         if (!($renderEvent->getCaller() instanceof HybridList) ||
@@ -126,6 +136,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Add the details link to the host list
+     *
+     * @param BuildMetaModelEditingListButtonsEvent $event
+     */
     public function addDetailsLink(BuildMetaModelEditingListButtonsEvent $event)
     {
         if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()) {
@@ -147,6 +162,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Add the edit link to the host list
+     *
+     * @param BuildMetaModelEditingListButtonsEvent $event
+     */
     public function addEditLink(BuildMetaModelEditingListButtonsEvent $event)
     {
         if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
@@ -167,6 +187,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Add the application list link to the host list
+     *
+     * @param BuildMetaModelEditingListButtonsEvent $event
+     */
     public function addApplicationListLink(BuildMetaModelEditingListButtonsEvent $event)
     {
         global $container;
@@ -195,6 +220,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Add the delete link to the host list
+     *
+     * @param BuildMetaModelEditingListButtonsEvent $event
+     */
     public function addDeleteLink(BuildMetaModelEditingListButtonsEvent $event)
     {
         if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
@@ -224,6 +254,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Add the copy link to the host list
+     *
+     * @param BuildMetaModelEditingListButtonsEvent $event
+     */
     public function addCopyLink(BuildMetaModelEditingListButtonsEvent $event)
     {
         global $container;
@@ -249,6 +284,11 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    /**
+     * Add the create variant link to the host list
+     *
+     * @param BuildMetaModelEditingListButtonsEvent $event
+     */
     public function addCreateVariantLink(BuildMetaModelEditingListButtonsEvent $event)
     {
         global $container;
