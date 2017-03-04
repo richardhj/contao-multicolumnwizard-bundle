@@ -49,6 +49,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Class Dca
+ *
  * @package Ferienpass\Helper
  */
 class Dca implements EventSubscriberInterface
@@ -84,10 +85,11 @@ class Dca implements EventSubscriberInterface
             EncodePropertyValueFromWidgetEvent::NAME => [
                 'triggerAttendanceStatusChange',
             ],
-            GetPropertyOptionsEvent::NAME => [
-                'loadDataProcessingFilterOptions'
+            GetPropertyOptionsEvent::NAME            => [
+                ['loadDataProcessingFilterOptions'],
+                ['loadDataProcessingSortAttributes']
             ],
-            CreateDcGeneralEvent::NAME => [
+            CreateDcGeneralEvent::NAME               => [
                 'buildFilterParamsForDataProcessing'
             ]
         ];
@@ -102,6 +104,7 @@ class Dca implements EventSubscriberInterface
     {
         return $this->getServiceContainer()->getEventDispatcher();
     }
+
     /**
      * Retrieve the service container.
      *
@@ -138,7 +141,7 @@ class Dca implements EventSubscriberInterface
         }
 
         /** @var Model $model */
-        $model = $event->getModel();
+        $model         = $event->getModel();
         $metaModelItem = $model->getItem();
 
         if ($metaModelItem->isVariantBase() && 0 !== $metaModelItem->getVariants(null)->getCount()) {
@@ -166,13 +169,13 @@ class Dca implements EventSubscriberInterface
         }
 
         /** @var Contao2BackendViewDefinitionInterface $view */
-        $view = $event->getContainer()->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
+        $view       = $event->getContainer()->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
         $collection = $view->getModelCommands();
 
         $command = new Command();
         $command->setName('edit_attendances');
 
-        $parameters = $command->getParameters();
+        $parameters          = $command->getParameters();
         $parameters['table'] = Attendance::getTable();
 
 //        if (!$command->getLabel()) {
@@ -189,10 +192,10 @@ class Dca implements EventSubscriberInterface
 //            }
 //        }
 
-        $extra = $command->getExtra();
-        $extra['icon'] = 'edit.gif';
+        $extra               = $command->getExtra();
+        $extra['icon']       = 'edit.gif';
         $extra['attributes'] = 'onclick="Backend.getScrollOffset();"';
-        $extra['idparam'] = 'pid';
+        $extra['idparam']    = 'pid';
 
         $collection->addCommand($command);
     }
@@ -209,12 +212,12 @@ class Dca implements EventSubscriberInterface
             try {
                 /** @var ViewCombinations $viewCombinations */
                 $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
-                $inputScreen = $viewCombinations->getInputScreenDetails($metaModelName);
-                $backendSection = $inputScreen->getBackendSection();
+                $inputScreen      = $viewCombinations->getInputScreenDetails($metaModelName);
+                $backendSection   = $inputScreen->getBackendSection();
                 \Controller::loadDataContainer($metaModelName);
 
                 // Add table name to back end module tables
-                $GLOBALS['BE_MOD'][$backendSection]['metamodel_'.$metaModelName]['tables'][] = Attendance::getTable();
+                $GLOBALS['BE_MOD'][$backendSection]['metamodel_' . $metaModelName]['tables'][] = Attendance::getTable();
 
             } catch (\RuntimeException $e) {
                 \System::log($e->getMessage(), __METHOD__, TL_ERROR);
@@ -230,8 +233,8 @@ class Dca implements EventSubscriberInterface
      */
     public function populateEnvironmentForAttendancesChildTable(PopulateEnvironmentEvent $event)
     {
-        $environment = $event->getEnvironment();
-        $definition = $environment->getDataDefinition();
+        $environment   = $event->getEnvironment();
+        $definition    = $environment->getDataDefinition();
         $inputProvider = $environment->getInputProvider() ?: new InputProvider(); // FIXME Why is inputProvider null?
 
         if ($definition->getName() !== Attendance::getTable()
@@ -270,7 +273,7 @@ class Dca implements EventSubscriberInterface
     public function prohibitDuplicateKeyOnSaveAttendance(PrePersistModelEvent $event)
     {
         $environment = $event->getEnvironment();
-        $definition = $environment->getDataDefinition();
+        $definition  = $environment->getDataDefinition();
 
         // Not attendances table
         if ($definition->getName() !== Attendance::getTable()) {
@@ -288,6 +291,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get MetaModel attributes grouped by MetaModel
+     *
      * @category options_callback
      *
      * @return array
@@ -308,6 +312,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get MetaModels
+     *
      * @category options_callback
      *
      * @return array
@@ -315,7 +320,7 @@ class Dca implements EventSubscriberInterface
     public function getMetaModels()
     {
         $factory = Factory::getDefaultFactory();
-        $return = [];
+        $return  = [];
 
         foreach ($factory->collectNames() as $table) {
             $return[$table] = $factory->getMetaModel($table)->getName();
@@ -336,7 +341,7 @@ class Dca implements EventSubscriberInterface
      */
     public function checkMetaModelAttributeType($value, $dc)
     {
-        $attributeType = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['metamodel_attribute_type'];
+        $attributeType      = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['metamodel_attribute_type'];
         $metaModelTableName = FerienpassConfig::getInstance()
             ->{$GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']};
 
@@ -358,6 +363,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get status change notifications
+     *
      * @category options_callback
      *
      * @return array
@@ -373,6 +379,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get documents
+     *
      * @category options_callback
      *
      * @return array
@@ -388,6 +395,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get all select attributes for the owner attribute
+     *
      * @category options_callback
      *
      * @param DcCompat $dc
@@ -408,6 +416,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get all metamodel render settings
+     *
      * @category options_callback
      *
      * @return array
@@ -426,6 +435,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get all the offer MetaModel's render settings
+     *
      * @category options_callback
      *
      * @return array
@@ -443,6 +453,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Get all front end editable member dca fields
+     *
      * @category options_callback
      *
      * @return array
@@ -466,13 +477,15 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Add default attendance status options if none are set
+     *
      * @category onload_callback
      */
     public function addDefaultStatus()
     {
         global $container;
 
-        if ('' !== Input::get('act') || AttendanceStatus::countAll() === count(
+        if ('' !== Input::get('act')
+            || AttendanceStatus::countAll() === count(
                 $container['ferienpass.attendance-status']
             )
         ) {
@@ -503,6 +516,7 @@ class Dca implements EventSubscriberInterface
 
     /**
      * Add default application systems if none are set
+     *
      * @category onload_callback
      */
     public function addDefaultApplicationSystems()
@@ -546,7 +560,7 @@ class Dca implements EventSubscriberInterface
         if ($model instanceof Model && 'mm_participant' === $model->getProviderName()) {
             $args = $event->getArgs();
 
-            $metaModel = $model->getItem()->getMetaModel();
+            $metaModel     = $model->getItem()->getMetaModel();
             $parentColName = $metaModel->getAttributeById($metaModel->get('owner_attribute'))->getColName();
 
             // No parent referenced
@@ -568,7 +582,7 @@ class Dca implements EventSubscriberInterface
                             // Member ID
                             $parentRaw['id'],
                             // Link
-                            '<i class="fa fa-external-link tl_gray"></i> '.$args[$k],
+                            '<i class="fa fa-external-link tl_gray"></i> ' . $args[$k],
                             // Member edit description
                             sprintf(
                                 $GLOBALS['TL_LANG']['tl_member']['edit'][1],
@@ -652,16 +666,38 @@ class Dca implements EventSubscriberInterface
     public function loadDataProcessingFilterOptions(GetPropertyOptionsEvent $event)
     {
         if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
-            || ('metamodel_filtering' !== $event->getPropertyName())) {
+            || ('metamodel_filtering' !== $event->getPropertyName())
+        ) {
             return;
         }
 
         $filters = \Database::getInstance()
-            ->prepare('SELECT * FROM tl_metamodel_filter WHERE pid=?')
+            ->prepare('SELECT id,name FROM tl_metamodel_filter WHERE pid=?')
             ->execute(Offer::getInstance()->getMetaModel()->get('id'));
 
         $event->setOptions($filters->fetchEach('name'));
     }
+
+    public function loadDataProcessingSortAttributes(GetPropertyOptionsEvent $event)
+    {
+        if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
+            || ('metamodel_sortby' !== $event->getPropertyName())
+        ) {
+            return;
+        }
+
+        $options    = [];
+        $attributes = \Database::getInstance()
+            ->prepare('SELECT colName,name FROM tl_metamodel_attribute WHERE pid=?')
+            ->execute(Offer::getInstance()->getMetaModel()->get('id'));
+
+        while ($attributes->next()) {
+            $options[$attributes->colName] = $attributes->name;
+        }
+
+        $event->setOptions($options);
+    }
+
 
     public function buildFilterParamsForDataProcessing(CreateDcGeneralEvent $event)
     {
@@ -674,8 +710,7 @@ class Dca implements EventSubscriberInterface
         // Todo We need another event which provides the model instance so we don't need to fetch the model id from the url
         try {
             $modelId = ModelId::fromSerialized(\Input::get('id'));
-        }
-        catch (DcGeneralRuntimeException $e){
+        } catch (DcGeneralRuntimeException $e) {
             return;
         }
 

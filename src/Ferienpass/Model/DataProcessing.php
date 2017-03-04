@@ -45,10 +45,10 @@ use MetaModels\IMetaModel;
  * @property integer $metamodel_view
  * @property int     $metamodel_filtering
  * @property mixed   $metamodel_filterparams
- * @property string  $metamodel_sortBy
+ * @property string  $metamodel_sortby
  * @property int     $metamodel_offset
  * @property int     $metamodel_limit
- * @property string  $metamodel_sortOrder
+ * @property string  $metamodel_sortby_direction
  */
 class DataProcessing extends Model
 {
@@ -291,10 +291,10 @@ class DataProcessing extends Model
             ->getMetaModel()
             ->findByFilter(
                 $this->getFilter(),
-                $this->metamodel_sortBy,
+                $this->metamodel_sortby,
                 $this->metamodel_offset,
                 $this->metamodel_limit,
-                $this->metamodel_sortOrder
+                $this->metamodel_sortby_direction
             );
 
         // Fetch files from format handler

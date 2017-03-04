@@ -95,10 +95,10 @@ $GLOBALS['TL_DCA'][$table] = [
             'scope'      => [
                 'metamodel_filtering',
                 'metamodel_filterparams',
-                'metamodel_sortBy',
+                'metamodel_sortby',
+                'metamodel_sortby_direction',
                 'metamodel_offset',
                 'metamodel_limit',
-                'metamodel_sortOrder',
                 'static_dirs',
 
             ],
@@ -197,12 +197,13 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "longblob NULL",
         ],
-        'metamodel_sortBy'       => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_sortBy'],
+        'metamodel_sortby'       => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_sortby'],
             'exclude'   => true,
             'inputType' => 'select',
             'eval'      => [
-                'tl_class' => 'w50',
+                'tl_class'           => 'w50',
+                'includeBlankOption' => true,
             ],
             'sql'       => "varchar(64) NOT NULL default '0'",
         ],
@@ -224,8 +225,8 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "int(10) NOT NULL default '0'",
         ],
-        'metamodel_sortOrder'    => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_sortOrder'],
+        'metamodel_sortby_direction'    => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['metamodel_sortby_direction'],
             'exclude'   => true,
             'inputType' => 'select',
             'options'   => [
