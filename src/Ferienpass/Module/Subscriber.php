@@ -169,11 +169,13 @@ class Subscriber implements EventSubscriberInterface
 
     public function addApplicationListLink(BuildMetaModelEditingListButtonsEvent $event)
     {
+        global $container;
+
         $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
         if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()
             || !$event->getItem()->get('applicationlist_active')
-            || 2 == $filterParams['pass_release']['value']
+            || $container['ferienpass.pass-release.edit-current'] == $filterParams['pass_release']['value']
         ) {
             return;
         }
@@ -224,9 +226,11 @@ class Subscriber implements EventSubscriberInterface
 
     public function addCopyLink(BuildMetaModelEditingListButtonsEvent $event)
     {
+        global $container;
+
         $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
-        if (2 != $filterParams['pass_release']['value']) {
+        if ($container['ferienpass.pass-release.edit-previous'] != $filterParams['pass_release']['value']) {
             return;
         }
 
@@ -247,9 +251,11 @@ class Subscriber implements EventSubscriberInterface
 
     public function addCreateVariantLink(BuildMetaModelEditingListButtonsEvent $event)
     {
+        global $container;
+
         $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
-        if (!(1 == $filterParams['pass_release']['value']
+        if (!($container['ferienpass.pass-release.edit-current'] == $filterParams['pass_release']['value']
             && $event->getItem()->isVariantBase()
             && $event->getItem()->getVariants(null)->getCount())
         ) {
