@@ -281,7 +281,10 @@ class DataProcessing extends Model
             ->getServiceContainer()
             ->getFilterFactory()
             ->createCollection($this->metamodel_filtering)
-            ->addRules($this->getFilter(), $this->getFilterParams());
+            ->addRules(
+                $this->getFilter(),
+                $this->getFilterParams()
+            );
 
         // Find items by filter
         $this->items = $this
@@ -311,7 +314,9 @@ class DataProcessing extends Model
             ->processFiles($files);
 
         // Delete tmp path
-        $this->getMountManager()->deleteDir('local://' . $this->getTmpPath());
+        $this
+            ->getMountManager()
+            ->deleteDir('local://' . $this->getTmpPath());
     }
 
 
