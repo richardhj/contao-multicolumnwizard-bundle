@@ -265,7 +265,8 @@ class Subscriber implements EventSubscriberInterface
 
         $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
-        if ($container['ferienpass.pass-release.edit-previous'] != $filterParams['pass_release']['value']) {
+        if ($container['ferienpass.pass-release.edit-previous'] != $filterParams['pass_release']['value']
+            || $event->getItem()->isVariant()) {
             return;
         }
 
