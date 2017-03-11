@@ -200,7 +200,7 @@ class Subscriber implements EventSubscriberInterface
 
         if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()
             || !$event->getItem()->get('applicationlist_active')
-            || $container['ferienpass.pass-release.edit-current'] == $filterParams['pass_release']['value']
+            || $container['ferienpass.pass-release.show-current'] != $filterParams['pass_release']['value']
         ) {
             return;
         }
