@@ -27,23 +27,24 @@ $container['ferienpass.applicationsystem'] = $container->share(
         /** @var \Database $database */
         $database = $container['database.connection'];
 
-        $time = time();
+        $time  = time();
         $table = Ferienpass\Model\ApplicationSystem::getTable();
 
         try {
             $result = $database
                 ->prepare(
                     "SELECT * "
-                    ."FROM {$table} "
-                    ."WHERE (start='' OR start<='$time') AND (stop='' OR stop>'".($time + 60)."') AND published='1'"
+                    . "FROM {$table} "
+                    . "WHERE (start='' OR start<='$time') AND (stop='' OR stop>'" . ($time + 60)
+                    . "') AND published='1'"
                 )
                 ->limit(1)
                 ->execute();
 
             if (1 === $result->numRows) {
                 /** @var AbstractApplicationSystem $applicationSystem */
-                $applicationSystem = $container['ferienpass.applicationsystem.'.$result->type];
-                $model = new ApplicationSystemModel($result);
+                $applicationSystem = $container['ferienpass.applicationsystem.' . $result->type];
+                $model             = new ApplicationSystemModel($result);
                 $applicationSystem->setModel($model);
 
                 return $applicationSystem;
@@ -57,7 +58,7 @@ $container['ferienpass.applicationsystem'] = $container->share(
     }
 );
 
-$container['ferienpass.pass-release.show-current'] = function () {
+$container['ferienpass.pass-release.show-current']  = function () {
     global $container;
     /** @var IMetaModelsServiceContainer $serviceContainer */
     $serviceContainer = $container['metamodels-service-container'];
@@ -65,11 +66,11 @@ $container['ferienpass.pass-release.show-current'] = function () {
     $filterRule = new SimpleQuery('SELECT id FROM mm_ferienpass_release WHERE show_current=1');
     $metaModel  = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass_release');
     $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
-    $metaModel->findByFilter($filter);
+    $release    = $metaModel->findByFilter($filter);
 
-    return $metaModel->get('id');
+    return $release->getItem()->get('id');
 };
-$container['ferienpass.pass-release.edit-current'] = function () {
+$container['ferienpass.pass-release.edit-current']  = function () {
     global $container;
     /** @var IMetaModelsServiceContainer $serviceContainer */
     $serviceContainer = $container['metamodels-service-container'];
@@ -77,9 +78,9 @@ $container['ferienpass.pass-release.edit-current'] = function () {
     $filterRule = new SimpleQuery('SELECT id FROM mm_ferienpass_release WHERE edit_current=1');
     $metaModel  = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass_release');
     $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
-    $metaModel->findByFilter($filter);
+    $release    = $metaModel->findByFilter($filter);
 
-    return $metaModel->get('id');
+    return $release->getItem()->get('id');
 };
 $container['ferienpass.pass-release.edit-previous'] = function () {
     global $container;
@@ -89,9 +90,9 @@ $container['ferienpass.pass-release.edit-previous'] = function () {
     $filterRule = new SimpleQuery('SELECT id FROM mm_ferienpass_release WHERE edit_previous=1');
     $metaModel  = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass_release');
     $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
-    $metaModel->findByFilter($filter);
+    $release    = $metaModel->findByFilter($filter);
 
-    return $metaModel->get('id');
+    return $release->getItem()->get('id');
 };
 
 $container['ferienpass.attendance-status'] = [
@@ -101,5 +102,5 @@ $container['ferienpass.attendance-status'] = [
     'error',
 ];
 
-$container['ferienpass.dropbox.appId'] = 'qgbgzoptvlpyofc';
-$container['ferienpass.dropbox.appSecret'] ='9fktiifz7cxhar6';
+$container['ferienpass.dropbox.appId']     = 'qgbgzoptvlpyofc';
+$container['ferienpass.dropbox.appSecret'] = '9fktiifz7cxhar6';
