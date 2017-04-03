@@ -10,6 +10,8 @@
 
 use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
 use Ferienpass\Model\ApplicationSystem as ApplicationSystemModel;
+use MetaModels\Filter\Rules\SimpleQuery;
+use MetaModels\IMetaModelsServiceContainer;
 
 
 $container['ferienpass.applicationsystem.firstcome'] = function () {
@@ -55,9 +57,42 @@ $container['ferienpass.applicationsystem'] = $container->share(
     }
 );
 
-$container['ferienpass.pass-release.show-current'] = 2;
-$container['ferienpass.pass-release.edit-current'] = 1;
-$container['ferienpass.pass-release.edit-previous'] = 1;
+$container['ferienpass.pass-release.show-current'] = function () {
+    global $container;
+    /** @var IMetaModelsServiceContainer $serviceContainer */
+    $serviceContainer = $container['metamodels-service-container'];
+
+    $filterRule = new SimpleQuery('SELECT id FROM mm_ferienpass_release WHERE show_current=1');
+    $metaModel  = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass_release');
+    $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
+    $metaModel->findByFilter($filter);
+
+    return $metaModel->get('id');
+};
+$container['ferienpass.pass-release.edit-current'] = function () {
+    global $container;
+    /** @var IMetaModelsServiceContainer $serviceContainer */
+    $serviceContainer = $container['metamodels-service-container'];
+
+    $filterRule = new SimpleQuery('SELECT id FROM mm_ferienpass_release WHERE edit_current=1');
+    $metaModel  = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass_release');
+    $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
+    $metaModel->findByFilter($filter);
+
+    return $metaModel->get('id');
+};
+$container['ferienpass.pass-release.edit-previous'] = function () {
+    global $container;
+    /** @var IMetaModelsServiceContainer $serviceContainer */
+    $serviceContainer = $container['metamodels-service-container'];
+
+    $filterRule = new SimpleQuery('SELECT id FROM mm_ferienpass_release WHERE edit_previous=1');
+    $metaModel  = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass_release');
+    $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
+    $metaModel->findByFilter($filter);
+
+    return $metaModel->get('id');
+};
 
 $container['ferienpass.attendance-status'] = [
     'confirmed',
