@@ -10,6 +10,7 @@
 
 namespace Ferienpass\Helper;
 
+use Contao\ContentModel;
 use Contao\Input;
 use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
@@ -39,6 +40,7 @@ use MetaModels\DcGeneral\Data\Model;
 use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
 use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Factory;
+use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
 use MetaModels\IMetaModelsServiceContainer;
@@ -81,6 +83,7 @@ class Dca implements EventSubscriberInterface
             ],
             PostPersistModelEvent::NAME              => [
                 'triggerSyncForOffer',
+                'handlePassReleaseChanges'
             ],
             EncodePropertyValueFromWidgetEvent::NAME => [
                 'triggerAttendanceStatusChange',
@@ -737,5 +740,50 @@ class Dca implements EventSubscriberInterface
         $extra              = $property->getExtra();
         $extra['subfields'] = $filterSettings->getParameterDCA();
         $property->setExtra($extra);
+    }
+
+
+    public function handlePassReleaseChanges(PostPersistModelEvent $event)
+    {
+        $model = $event->getModel();
+
+        if (!$model instanceof Model
+            || 'mm_ferienpass_release' !== $model->getProviderName()
+        ) {
+            return;
+        }
+
+        // Update the MetaModel list by setting the correct pass release filter param
+        if ($model->getProperty('show_current') !== $event->getOriginalModel()->getProperty('show_current')
+            && $model->getProperty('show_current')
+        ) {
+            /** @var ContentModel|\Model $listElement */
+            $listElement  = ContentModel::findById(20); // TODO hardcoded
+            $filterParams = deserialize($listElement->metamodel_filterparams);
+
+            $filterParams['pass_release']['value'] = $model->getId();
+            $listElement->metamodel_filterparams   = serialize($filterParams);
+            $listElement->save();
+
+            //TODO make subdca field readonly
+        }
+
+        // Switch edit_current and edit_previous
+        if ($model->getProperty('edit_current') !== $event->getOriginalModel()->getProperty('edit_current')
+            && $model->getProperty('edit_current')
+        ) {
+            $filterRule  = new SimpleQuery(
+                'SELECT id FROM mm_ferienpass_relase WHERE edit_current=1 AND id<>?',
+                [$model->getId()]
+            );
+            $filter      = $model->getItem()->getMetaModel()->getEmptyFilter()->addFilterRule($filterRule);
+            $passRelease = $model->getItem()->getMetaModel()->findByFilter($filter);
+
+            while ($passRelease->next()) {
+                $passRelease->getItem()->set('edit_current', '0');
+                $passRelease->getItem()->set('edit_previous', '1');
+                $passRelease->getItem()->save();
+            }
+        }
     }
 }
