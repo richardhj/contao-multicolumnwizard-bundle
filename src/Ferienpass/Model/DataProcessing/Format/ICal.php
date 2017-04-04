@@ -120,7 +120,7 @@ class ICal implements FormatInterface
              *                          [metamodel_attribute] The property assigned MetaModel attribute name */
             foreach ($iCalProperties as $arrProperty) {
                 switch ($arrProperty['ical_field']) {
-                    //TODO this most likely will not work for the date_period attribute
+                    //TODO #4 this most likely will not work for the date_period attribute
                     case 'dtStart':
                         try {
                             $objDate = new DateTime(
