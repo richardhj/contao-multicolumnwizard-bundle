@@ -68,7 +68,7 @@ $container['ferienpass.pass-release.show-current']  = function () {
     $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
     $release    = $metaModel->findByFilter($filter);
 
-    return $release->getItem()->get('id');
+    return $release->getItem();
 };
 $container['ferienpass.pass-release.edit-current']  = function () {
     global $container;
@@ -80,7 +80,7 @@ $container['ferienpass.pass-release.edit-current']  = function () {
     $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
     $release    = $metaModel->findByFilter($filter);
 
-    return $release->getItem()->get('id');
+    return $release->getItem();
 };
 $container['ferienpass.pass-release.edit-previous'] = function () {
     global $container;
@@ -92,7 +92,7 @@ $container['ferienpass.pass-release.edit-previous'] = function () {
     $filter     = $metaModel->getEmptyFilter()->addFilterRule($filterRule);
     $release    = $metaModel->findByFilter($filter);
 
-    return $release->getItem()->get('id');
+    return $release->getItem();
 };
 
 $container['ferienpass.attendance-status'] = [

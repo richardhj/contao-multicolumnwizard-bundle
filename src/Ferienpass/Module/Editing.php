@@ -81,7 +81,7 @@ class Editing extends Items
 
                 $itemToCopy = $this->metaModel->findById($modelId->getId());
                 $itemToCopy->set('vargroup', null);
-                $itemToCopy->set('pass_release', $container['ferienpass.pass-release.edit-current']);
+                $itemToCopy->set('pass_release', $container['ferienpass.pass-release.edit-current']->get('id'));
 
                 if (null === $itemToCopy) {
                     $this->exitWith404();
@@ -110,7 +110,7 @@ class Editing extends Items
                 switch ($this->metaModel->getTableName()) {
                     case 'mm_ferienpass':
                         $this->item->set('host', $this->User->ferienpass_host);
-                        $this->item->set('pass_release', $container['ferienpass.pass-release.edit-current']);
+                        $this->item->set('pass_release', $container['ferienpass.pass-release.edit-current']->get('id'));
                         break;
 
                     case 'mm_participant':
