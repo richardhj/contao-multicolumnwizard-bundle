@@ -196,7 +196,7 @@ class Dca implements EventSubscriberInterface
 //        }
 
         $extra               = $command->getExtra();
-        $extra['icon']       = 'edit.gif';
+        $extra['icon']       = 'assets/ferienpass/backend/img/users.png';
         $extra['attributes'] = 'onclick="Backend.getScrollOffset();"';
         $extra['idparam']    = 'pid';
 
