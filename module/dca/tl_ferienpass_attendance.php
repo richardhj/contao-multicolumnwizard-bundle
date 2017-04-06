@@ -251,13 +251,21 @@ $GLOBALS['TL_DCA'][$table] = [
                 'fieldType'        => 'radio',
                 'listFields'       => [
                     'name',
-                    'dateOfBirth',
+//                    'dateOfBirth',
                     \MemberModel::getTable().'.firstname',
                     \MemberModel::getTable().'.lastname',
 
                 ],
-                'searchFields'     => [
+                'customLabels' => [
+                    'Name des Teilnehmers',
+//                    'Geburtsdatum',
+                    'Vorname Eltern',
+                    'Nachname Eltern',
+                ],
+                'searchFields' => [
                     'name',
+                    \MemberModel::getTable().'.firstname',
+                    \MemberModel::getTable().'.lastname',
                 ],
                 'joins'            => [
                     \MemberModel::getTable() => [
