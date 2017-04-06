@@ -15,6 +15,7 @@ use Ferienpass\Event\BuildMetaModelEditingListButtonsEvent;
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\FrontendIntegration\HybridList;
+use MetaModels\Item;
 use MetaModels\MetaModelsEvents;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -198,9 +199,16 @@ class Subscriber implements EventSubscriberInterface
 
         $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
+        /** @var Item $passRelease */
+        $passRelease = $container['ferienpass.pass-release.show-current'];
+        if (null === $passRelease) {
+            // TODO overthink error handling
+            return;
+        }
+
         if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()
             || !$event->getItem()->get('applicationlist_active')
-            || $container['ferienpass.pass-release.show-current']->get('id') != $filterParams['pass_release']['value']
+            || $passRelease->get('id') != $filterParams['pass_release']['value']
         ) {
             return;
         }
@@ -265,7 +273,14 @@ class Subscriber implements EventSubscriberInterface
 
         $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
-        if ($container['ferienpass.pass-release.edit-previous']->get('id') != $filterParams['pass_release']['value']
+        /** @var Item $passRelease */
+        $passRelease = $container['ferienpass.pass-release.edit-previous'];
+        if (null === $passRelease) {
+            // TODO overthink error handling
+            return;
+        }
+
+        if ($passRelease->get('id') != $filterParams['pass_release']['value']
             || $event->getItem()->isVariant()) {
             return;
         }
@@ -296,7 +311,14 @@ class Subscriber implements EventSubscriberInterface
 
         $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
-        if (!($container['ferienpass.pass-release.edit-current']->get('id') == $filterParams['pass_release']['value']
+        /** @var Item $passRelease */
+        $passRelease = $container['ferienpass.pass-release.edit-current'];
+        if (null === $passRelease) {
+            // TODO overthink error handling
+            return;
+        }
+
+        if (!($passRelease->get('id') == $filterParams['pass_release']['value']
             && $event->getItem()->isVariantBase()
             && $event->getItem()->getVariants(null)->getCount())
         ) {
