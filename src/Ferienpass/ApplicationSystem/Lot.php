@@ -104,7 +104,7 @@ class Lot extends AbstractApplicationSystem
 
         $model = $event->getModel();
 
-        if (null !== $model->getProperty('status')) {
+        if ($model->getProperty('status')) {
             return;
         }
 
@@ -113,8 +113,10 @@ class Lot extends AbstractApplicationSystem
         $model->setProperty('status', $newStatus->id);
 
         // Update sorting afterwards
-        $lastAttendance =
-            Attendance::findLastByOfferAndStatus($model->getProperty('offer'), $model->getProperty('status'));
+        $lastAttendance = Attendance::findLastByOfferAndStatus(
+            $model->getProperty('offer'),
+            $model->getProperty('status')
+        );
         $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
         $sorting += 128;
         $model->setProperty('sorting', $sorting);

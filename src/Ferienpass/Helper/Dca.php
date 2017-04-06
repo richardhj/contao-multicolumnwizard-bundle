@@ -306,6 +306,7 @@ class Dca implements EventSubscriberInterface
 
         $model = $event->getModel();
 
+        // Set created timestamp
         if (null === $model->getProperty('created')) {
             $model->setProperty('created', time());
         }
