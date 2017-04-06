@@ -14,6 +14,7 @@ use Contao\Model\Event\PreSaveModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
+use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\DcGeneral\View\OfferAttendancesView;
 use Ferienpass\Event\UserSetApplicationEvent;
@@ -23,6 +24,7 @@ use Ferienpass\Model\AttendanceStatus;
 
 /**
  * Class Lot
+ *
  * @package Ferienpass\ApplicationSystem
  */
 class Lot extends AbstractApplicationSystem
@@ -39,6 +41,9 @@ class Lot extends AbstractApplicationSystem
             ],
             PreSaveModelEvent::NAME        => [
                 ['setAttendanceStatus'],
+            ],
+            PrePersistModelEvent::NAME     => [
+                ['setAttendanceStatusDcGeneral']
             ],
             PopulateEnvironmentEvent::NAME => [
                 ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY + 50],
@@ -66,15 +71,53 @@ class Lot extends AbstractApplicationSystem
         /** @var Attendance $attendance */
         $attendance = $event->getModel();
 
-        if (!$attendance instanceof Attendance || null !== ($oldStatus = $attendance->getStatus())) {
+        if (!$attendance instanceof Attendance || null !== $attendance->getStatus()) {
             return;
         }
 
-        $newStatus = AttendanceStatus::findWaiting();
-
         $data = $event->getData();
+
+        // Set status
+        $newStatus      = AttendanceStatus::findWaiting();
         $data['status'] = $newStatus->id;
+
+        // Update sorting afterwards
+        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
+        $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+        $sorting += 128;
+        $data['sorting'] = $sorting;
+
         $event->setData($data);
+    }
+
+
+    /**
+     * Save the "waiting" status for one attendance per default
+     *
+     * @param PrePersistModelEvent $event
+     */
+    public function setAttendanceStatusDcGeneral(PrePersistModelEvent $event)
+    {
+        if (Attendance::getTable() !== $event->getEnvironment()->getDataDefinition()->getName()) {
+            return;
+        }
+
+        $model = $event->getModel();
+
+        if (null !== $model->getProperty('status')) {
+            return;
+        }
+
+        // Set status
+        $newStatus = AttendanceStatus::findWaiting();
+        $model->setProperty('status', $newStatus->id);
+
+        // Update sorting afterwards
+        $lastAttendance =
+            Attendance::findLastByOfferAndStatus($model->getProperty('offer'), $model->getProperty('status'));
+        $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+        $sorting += 128;
+        $model->setProperty('sorting', $sorting);
     }
 
 
@@ -96,7 +139,7 @@ class Lot extends AbstractApplicationSystem
 
         // Not attendances for offer MetaModel
         if (!($definition->getName() === Attendance::getTable()
-                && 'mm_ferienpass' === $definition
+              && 'mm_ferienpass' === $definition
                     ->getBasicDefinition()
                     ->getParentDataProvider())
             || !$definition->hasBasicDefinition()
@@ -113,10 +156,10 @@ class Lot extends AbstractApplicationSystem
         // Add "attendances" property
         /** @var Contao2BackendViewDefinitionInterface $viewSection */
         $viewSection = $definition->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
-        $listing = $viewSection->getListingConfig();
-        $formatter = $listing->getLabelFormatter($definition->getName());
+        $listing     = $viewSection->getListingConfig();
+        $formatter   = $listing->getLabelFormatter($definition->getName());
 
-        $propertyNames = $formatter->getPropertyNames();
+        $propertyNames   = $formatter->getPropertyNames();
         $propertyNames[] = 'attendances';
         $formatter->setPropertyNames($propertyNames);
     }
@@ -129,12 +172,12 @@ class Lot extends AbstractApplicationSystem
      */
     public function addAttendancesEditLinkInOfferListView(ModelToLabelEvent $event)
     {
-        $model = $event->getModel();
+        $model      = $event->getModel();
         $definition = $event->getEnvironment()->getDataDefinition();
 
         // Not attendances for offer MetaModel
         if (!($definition->getName() === Attendance::getTable()
-                && 'mm_ferienpass' === $definition
+              && 'mm_ferienpass' === $definition
                     ->getBasicDefinition()
                     ->getParentDataProvider())
             || !$definition->hasBasicDefinition()
@@ -153,9 +196,9 @@ class Lot extends AbstractApplicationSystem
                         // Member ID
                         $model->getProperty('participant'),
                         // Link
-                        '<i class="fa fa-external-link tl_gray"></i> '.Attendance::countByParticipant(
+                        '<i class="fa fa-external-link tl_gray"></i> ' . Attendance::countByParticipant(
                             $model->getProperty('participant')
-                        ).' Anmeldungen gesamt',
+                        ) . ' Anmeldungen gesamt',
                         // Member edit description
                         sprintf(
                             $GLOBALS['TL_LANG']['tl_member']['edit'][1],

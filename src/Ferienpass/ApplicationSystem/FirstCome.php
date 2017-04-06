@@ -12,6 +12,7 @@ namespace Ferienpass\ApplicationSystem;
 
 use Contao\Model\Event\DeleteModelEvent;
 use Contao\Model\Event\PreSaveModelEvent;
+use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
 use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\ApplicationSystem;
@@ -22,6 +23,7 @@ use Ferienpass\Model\Participant;
 
 /**
  * Class FirstCome
+ *
  * @package Ferienpass\ApplicationSystem
  */
 class FirstCome extends AbstractApplicationSystem
@@ -38,6 +40,9 @@ class FirstCome extends AbstractApplicationSystem
             ],
             PreSaveModelEvent::NAME                              => [
                 ['setAttendanceStatus'],
+            ],
+            PrePersistModelEvent::NAME                           => [
+                ['setAttendanceStatusDcGeneral']
             ],
             DeleteModelEvent::NAME                               => [
                 'updateAllStatusByOffer',
@@ -76,8 +81,49 @@ class FirstCome extends AbstractApplicationSystem
         }
 
         $data = $event->getData();
+
+        // Set sorting
         $data['status'] = $newStatus->id;
+
+        // Update sorting afterwards
+        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
+        $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+        $sorting += 128;
+        $data['sorting'] = $sorting;
+
         $event->setData($data);
+    }
+
+
+    /**
+     * Save the attendance status corresponding to the current application list
+     *
+     * @param PrePersistModelEvent $event
+     */
+    public function setAttendanceStatusDcGeneral(PrePersistModelEvent $event)
+    {
+        if (Attendance::getTable() !== $event->getEnvironment()->getDataDefinition()->getName()) {
+            return;
+        }
+
+        $model      = $event->getModel();
+        $attendance = Attendance::findByPk($model->getId());
+        $newStatus  = self::findStatusForAttendance($attendance);
+        $oldStatus  = $attendance->getStatus();
+
+        if ($newStatus->id === $oldStatus->id) {
+            return;
+        }
+
+        // Set status
+        $model->setProperty('status', $newStatus->id);
+
+        // Update sorting afterwards
+        $lastAttendance =
+            Attendance::findLastByOfferAndStatus($model->getProperty('offer'), $model->getProperty('status'));
+        $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+        $sorting += 128;
+        $model->setProperty('sorting', $sorting);
     }
 
 
@@ -162,7 +208,7 @@ class FirstCome extends AbstractApplicationSystem
      */
     public function disableLimitReachedParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
     {
-        $options = $event->getResult();
+        $options               = $event->getResult();
         $maxApplicationsPerDay = ApplicationSystem::findFirstCome()->maxApplicationsPerDay;
 
         if (!$maxApplicationsPerDay) {
@@ -179,7 +225,7 @@ class FirstCome extends AbstractApplicationSystem
                 : false;
 
             if ($isLimitReached) {
-                $options[$k]['label'] = sprintf(
+                $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'],
                     $option['label']
                 );

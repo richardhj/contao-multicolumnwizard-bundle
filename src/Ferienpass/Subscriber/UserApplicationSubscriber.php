@@ -53,9 +53,6 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                 ['disableAlreadyAttendingParticipants'],
                 ['disableWrongAgeParticipants'],
             ],
-            PreSaveModelEvent::NAME                              => [
-                'setSorting',
-            ],
             PostSaveModelEvent::NAME                             => [
                 'addAttendanceStatusMessage',
             ],
@@ -128,32 +125,6 @@ class UserApplicationSubscriber implements EventSubscriberInterface
         }
 
         $event->setResult($options);
-    }
-
-
-    /**
-     * Set the sorting when saving an attendance made by the user
-     *
-     * @param PreSaveModelEvent $event
-     */
-    public function setSorting(PreSaveModelEvent $event)
-    {
-        // TODO refactor, AddAttendeeHost not in scope
-
-
-        $attendance = $event->getModel();
-
-        if (!$attendance instanceof Attendance || $attendance->sorting) {
-            return;
-        }
-
-        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
-        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
-        $sorting += 128;
-
-        $data = $event->getData();
-        $data['sorting'] = $sorting;
-        $event->setData($data);
     }
 
 

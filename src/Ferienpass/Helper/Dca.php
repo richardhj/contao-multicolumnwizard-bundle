@@ -74,6 +74,7 @@ class Dca implements EventSubscriberInterface
             ],
             PrePersistModelEvent::NAME               => [
                 ['prohibitDuplicateKeyOnSaveAttendance', -100],
+                ['alterNewAttendancePrePersist']
             ],
             PopulateEnvironmentEvent::NAME           => [
                 ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY + 100],
@@ -288,6 +289,25 @@ class Dca implements EventSubscriberInterface
         if (!Attendance::isNotExistent($model->getProperty('participant'), $model->getProperty('offer'))) {
             \Message::addError('Es besteht schon eine Anmeldung für diesen Benutzer und dieses Angebot');
             \Controller::reload();
+        }
+    }
+
+
+    /**
+     * Set required properties for a new attendance
+     *
+     * @param PrePersistModelEvent $event
+     */
+    public function alterNewAttendancePrePersist(PrePersistModelEvent $event)
+    {
+        if (Attendance::getTable() !== $event->getEnvironment()->getDataDefinition()->getName()) {
+            return;
+        }
+
+        $model = $event->getModel();
+
+        if (null === $model->getProperty('created')) {
+            $model->setProperty('created', time());
         }
     }
 
