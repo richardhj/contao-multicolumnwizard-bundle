@@ -30,26 +30,31 @@ class OfferDate extends \MultiColumnWizard
         Widget::__construct($attributes);
         \System::importStatic('Database');
 
-        $this->disableSorting = true;
-        $this->columnFields   = [
+        $columnFields = [
             'start' => [
                 'label'     => &$GLOBALS['TL_LANG']['MSC']['offer_date']['start'],
                 'inputType' => 'text',
                 'eval'      => [
-                    'rgxp'       => 'datim',
-                    'datepicker' => true,
-                    'style'      => 'width:150px'
+                    'rgxp'  => 'datim',
+                    'style' => 'width:150px'
                 ],
             ],
             'end'   => [
                 'label'     => &$GLOBALS['TL_LANG']['MSC']['offer_date']['end'],
                 'inputType' => 'text',
                 'eval'      => [
-                    'rgxp'       => 'datim',
-                    'datepicker' => true,
-                    'style'      => 'width:150px'
+                    'rgxp'  => 'datim',
+                    'style' => 'width:150px'
                 ],
             ],
         ];
+
+        if ('BE' === TL_MODE) {
+            $columnFields['start']['eval']['datepicker'] = true;
+            $columnFields['end']['eval']['datepicker']   = true;
+        }
+
+        $this->columnFields   = $columnFields;
+        $this->disableSorting = true;
     }
 }
