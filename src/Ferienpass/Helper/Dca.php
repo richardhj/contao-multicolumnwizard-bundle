@@ -10,12 +10,14 @@
 
 namespace Ferienpass\Helper;
 
+use Contao\BackendUser;
 use Contao\ContentModel;
 use Contao\Input;
 use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
 use ContaoCommunityAlliance\DcGeneral\Contao\InputProvider;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\BuildWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
@@ -95,6 +97,9 @@ class Dca implements EventSubscriberInterface
             ],
             CreateDcGeneralEvent::NAME               => [
                 'buildFilterParamsForDataProcessing'
+            ],
+            BuildWidgetEvent::NAME                   => [
+//                ['loadOfferDateWidget']
             ]
         ];
     }
@@ -806,5 +811,20 @@ class Dca implements EventSubscriberInterface
                 $passRelease->getItem()->save();
             }
         }
+    }
+
+
+    public function loadOfferDateWidget(BuildWidgetEvent $event)
+    {
+        global $container;
+
+        /** @var BackendUser $user */
+        $user = $container['user'];
+
+        if (!$user->offer_date_picker || 'offer_date' !== $event->getProperty()->getWidgetType()) {
+            return;
+        }
+
+        // TODO Add jQuery period picker assets
     }
 }

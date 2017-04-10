@@ -85,6 +85,8 @@ $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'] = [
 
 $GLOBALS['TL_LANG']['MSC']['yesno'][0] = 'Nein';
 $GLOBALS['TL_LANG']['MSC']['yesno'][1] = 'Ja';
+$GLOBALS['TL_LANG']['MSC']['offer_date']['start'][0] = 'Beginn';
+$GLOBALS['TL_LANG']['MSC']['offer_date']['end'][0] = 'Ende';
 
 /**
  * Errors

@@ -15,6 +15,7 @@ use Contao\Widget;
 
 /**
  * Class OfferDate
+ *
  * @package Ferienpass\Widget
  */
 class OfferDate extends \MultiColumnWizard
@@ -29,26 +30,24 @@ class OfferDate extends \MultiColumnWizard
         Widget::__construct($attributes);
         \System::importStatic('Database');
 
-//        if (TL_MODE == 'FE')
-//        {
-//            $this->strTemplate = 'form_widget';
-//            $this->loadDataContainer($attributes['strTable']);
-//        }
-
-//        $this->buttons = ['up' => false, 'down' => false, 'copy' => false];
         $this->disableSorting = true;
-
-        $this->columnFields = [
+        $this->columnFields   = [
             'start' => [
+                'label'     => &$GLOBALS['TL_LANG']['MSC']['offer_date']['start'],
                 'inputType' => 'text',
                 'eval'      => [
-                    'rgxp' => 'datim',
+                    'rgxp'       => 'datim',
+                    'datepicker' => true,
+                    'style'      => 'width:150px'
                 ],
             ],
             'end'   => [
+                'label'     => &$GLOBALS['TL_LANG']['MSC']['offer_date']['end'],
                 'inputType' => 'text',
                 'eval'      => [
-                    'rgxp' => 'datim',
+                    'rgxp'       => 'datim',
+                    'datepicker' => true,
+                    'style'      => 'width:150px'
                 ],
             ],
         ];
