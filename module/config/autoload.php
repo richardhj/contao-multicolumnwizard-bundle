@@ -55,6 +55,7 @@ TemplateLoader::addFiles(array
 
 	// Collection
     'fp_collection_applicationlist'                     => 'system/modules/ferienpass/templates/collection',
+    'applications_member_overview'                      => 'system/modules/ferienpass/templates/collection',
 
 	// Data Processing
     'dataprocessing_xml_comment'                        => 'system/modules/ferienpass/templates',

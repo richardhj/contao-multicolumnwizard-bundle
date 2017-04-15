@@ -11,8 +11,8 @@
 namespace Ferienpass\Subscriber;
 
 use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
-use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
 use Ferienpass\Model\Attendance;
+use MetaModels\IItem;
 use NotificationCenter\Model\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -70,18 +70,16 @@ class NotificationSubscriber implements EventSubscriberInterface
         }
 
         /** @var Notification $notification */
+        /** @noinspection PhpUndefinedMethodInspection */
         $notification = Notification::findByPk($attendance->getStatus()->notification_new);
 
         if (null !== $notification) {
-            global $container;
-
-            $participant = $attendance->getParticipant();
-            $offer = $attendance->getOffer();
-
-            /** @var AbstractApplicationSystem $applicationSystem */
-            $applicationSystem = $container['ferienpass.applicationsystem'];
-
-            $notification->send($applicationSystem->getNotificationTokens($participant, $offer));
+            $notification->send(
+                self::getNotificationTokens(
+                    $attendance->getParticipant(),
+                    $attendance->getOffer()
+                )
+            );
         }
     }
 
@@ -111,17 +109,55 @@ class NotificationSubscriber implements EventSubscriberInterface
 
         // Send the notification if one is set
         if (null !== $notification) {
-
-            global $container;
-            /** @var AbstractApplicationSystem $applicationSystem */
-            $applicationSystem = $container['ferienpass.applicationsystem'];
-
             $notification->send(
-                $applicationSystem->getNotificationTokens(
+                self::getNotificationTokens(
                     $attendance->getParticipant(),
                     $attendance->getOffer()
                 )
             );
         }
+    }
+
+
+    /**
+     * Get notification tokens
+     *
+     * @param IItem $participant
+     * @param IItem $offer
+     *
+     * @return array
+     */
+    private static function getNotificationTokens($participant, $offer)
+    {
+        $tokens = [];
+
+        // Add all offer fields
+        foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute) {
+            $tokens['offer_'.$name] = $offer->get($name);
+        }
+
+        // Add all the participant fields
+        foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute) {
+            $tokens['participant_'.$name] = $participant->get($name);
+        }
+
+        // Add all the parent's member fields
+        $ownerAttribute = $participant->getMetaModel()->getAttributeById(
+            $participant->getMetaModel()->get('owner_attribute')
+        );
+        foreach ($participant->get($ownerAttribute->getColName()) as $k => $v) {
+            $tokens['member_'.$k] = $v;
+        }
+
+        // Add the participant's email
+        $tokens['participant_email'] = $tokens['participant_email'] ?: $tokens['member_email'];
+
+        // Add the host's email
+        $tokens['host_email'] = $offer->get($offer->getMetaModel()->get('owner_attribute'))['email'];
+
+        // Add the admin's email
+        $tokens['admin_email'] = $GLOBALS['TL_ADMIN_EMAIL'];
+
+        return $tokens;
     }
 }
