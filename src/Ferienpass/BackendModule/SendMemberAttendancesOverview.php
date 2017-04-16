@@ -55,13 +55,15 @@ class SendMemberAttendancesOverview extends \BackendModule
             $this->sendMessages();
         }
 
-        $buttons[] = sprintf(
-            '<input type="submit" name="start" id="start" class="tl_submit" accesskey="s" value="%s" />',
-            'Benachrichtigungen sofort verschicken'
-        );
+        $output .= '<p>Dieses Tool versendet die Teilnahmestatus aus dem Losverfahren für die Anmeldungen, die noch nicht versandt wurden oder die sich nach dem letzen Versenden geändert haben.</p>';
 
+        $members   = self::getNotSentAttendancesGroupedByMember();
+        $noMembers = (0 === count($members));
 
-        $output .= <<<'HTML'
+        if ($noMembers) {
+            $output .= '<p class="tl_info">Es gibt keine Mitglieder mit noch nicht versandten Teilnehmerübersichten.</p>';
+        } else {
+            $output .= <<<'HTML'
 <table class="tl_show">
     <tbody>
     <tr>
@@ -72,40 +74,51 @@ class SendMemberAttendancesOverview extends \BackendModule
     </tr>
 HTML;
 
-        $m = 0;
-        foreach (self::getNotSentAttendancesGroupedByMember() as $memberId => $attendanceIds) {
-            $member = MemberModel::findByPk($memberId);
-            $class  = (++$m % 2) ? ' class="tl_bg"' : '';
-            foreach ($attendanceIds as $i => $attendanceId) {
-                $attendance = Attendance::findByPk($attendanceId);
+            $m = 0;
+            foreach ($members as $memberId => $attendanceIds) {
+                $member = MemberModel::findByPk($memberId);
+                $class  = (++$m % 2) ? ' class="tl_bg"' : '';
+                foreach ($attendanceIds as $a => $attendanceId) {
+                    $attendance = Attendance::findByPk($attendanceId);
 
-                $output .= '<tr>';
-                if (0 === $i) {
+                    $output .= '<tr>';
+                    if (0 === $a) {
+                        $output .= sprintf(
+                            '<td rowspan="%s"%s>%s %s</td>',
+                            count($attendanceIds),
+                            $class,
+                            $member->firstname,
+                            $member->lastname
+                        );
+                    }
                     $output .= sprintf(
-                        '<td rowspan="%s"%s>%s %s</td>',
-                        count($attendanceIds),
+                        '<td%s>%s</td>',
                         $class,
-                        $member->firstname,
-                        $member->lastname
+                        $attendance->getParticipant()->parseAttribute('name')['text']
                     );
+                    $output .= sprintf(
+                        '<td%s>%s</td>',
+                        $class,
+                        $attendance->getOffer()->parseAttribute('name')['text']
+                    );
+                    $output .= sprintf('<td%s>%s</td>', $class, $attendance->getStatus()->title);
+                    $output .= '</tr>';
                 }
-                $output .= sprintf(
-                    '<td%s>%s</td>',
-                    $class,
-                    $attendance->getParticipant()->parseAttribute('name')['text']
-                );
-                $output .= sprintf('<td%s>%s</td>', $class, $attendance->getOffer()->parseAttribute('name')['text']);
-                $output .= sprintf('<td%s>%s</td>', $class, $attendance->getStatus()->title);
-                $output .= '</tr>';
             }
-        }
 
-        $output .= <<<'HTML'
+            $output .= <<<'HTML'
     </tbody>
 </table>
 HTML;
+        }
 
-        $this->Template->subHeadline = 'Teilnahmebestätigung an Eltern verschicken';
+        $buttons[] = sprintf(
+            '<input type="submit" name="start" id="start" class="tl_submit" accesskey="s" value="%s"%s />',
+            'Benachrichtigungen sofort verschicken',
+            ($noMembers) ? ' disabled="disabled"' : ''
+        );
+
+        $this->Template->subHeadline = 'Teilnahmeübersicht an Eltern verschicken';
         $this->Template->table       = $formSubmit;
         $this->Template->editButtons = $buttons;
         $this->Template->fieldsets   = [
@@ -116,6 +129,12 @@ HTML;
         ];
     }
 
+
+    /**
+     * Fetch all attendances that were not sent already grouped by member
+     *
+     * @return array
+     */
     private static function getNotSentAttendancesGroupedByMember()
     {
         $attendances = [];
@@ -125,7 +144,7 @@ SELECT member.id AS member, attendance.id AS attendance
 FROM tl_member member
 INNER JOIN mm_participant participant ON participant.pmember=member.id
 INNER JOIN tl_ferienpass_attendance attendance ON attendance.participant=participant.id
-WHERE attendance.id NOT IN (SELECT notification.attendance FROM tl_ferienpass_attendance_notification notification WHERE notification.tstamp<>0)
+WHERE attendance.id NOT IN (SELECT notification.attendance FROM tl_ferienpass_attendance_notification notification WHERE notification.tstamp>attendance.tstamp)
 SQL
         );
 
@@ -137,6 +156,9 @@ SQL
     }
 
 
+    /**
+     * Trigger notification for all members
+     */
     private function sendMessages()
     {
         $notificationId = 6;
@@ -186,29 +208,31 @@ SQL
                 \Database::getInstance()->query(
                     'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)' .
                     ' VALUES ' . implode(', ', $values) .
-                    ' ON DUPLICATE KEY UPDATE notification=notification'
+                    ' ON DUPLICATE KEY UPDATE tstamp=' . $time
                 );
 
                 $successful++;
             } else {
                 $failed++;
             }
+        }
 
-            // Add confirmation messages
-            if ($successful) {
-                // todo lang
-                \Message::addConfirmation(sprintf('%s Eltern wurden erfolgreich benachrichtigt.', $successful));
-            }
-            if ($failed) {
-                \Message::addError(
-                    sprintf('%s Eltern konnten nicht benachrichtigt werden! Details im System-Log.', $failed)
-                );
-            }
+        // Add confirmation messages
+        if ($successful) {
+            // todo lang
+            \Message::addConfirmation(sprintf('%s Eltern wurden erfolgreich benachrichtigt.', $successful));
+        }
+        if ($failed) {
+            \Message::addError(
+                sprintf('%s Eltern konnten nicht benachrichtigt werden! Details im System-Log.', $failed)
+            );
         }
     }
 
 
     /**
+     * Build tokens array for notification
+     *
      * @param MemberModel|\Model $member
      * @param Attendance[]       $attendances
      *
@@ -225,7 +249,7 @@ SQL
         $data   = [
             'attendances'               => $attendances,
             'member'                    => $member,
-            'offerRenderSettings'       => $serviceContainer->getFactory()->getMetaModel('mm_ferienpass')->getView(0),
+            'offerRenderSettings'       => $serviceContainer->getFactory()->getMetaModel('mm_ferienpass')->getView(4),
             'participantRenderSettings' => $serviceContainer->getFactory()->getMetaModel('mm_participant')->getView(0)
         ];
 

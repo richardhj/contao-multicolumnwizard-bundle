@@ -19,6 +19,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Class NotificationSubscriber
+ *
  * @package Ferienpass\Event
  */
 class NotificationSubscriber implements EventSubscriberInterface
@@ -65,7 +66,10 @@ class NotificationSubscriber implements EventSubscriberInterface
         /** @var Attendance $originalAttendance */
         $originalAttendance = $event->getOriginalModel();
 
-        if (!$attendance instanceof Attendance || null !== $originalAttendance->getStatus() || null === $attendance->getStatus()) {
+        if (!$attendance instanceof Attendance
+            || null !== $originalAttendance->getStatus()
+            || null === $attendance->getStatus()
+        ) {
             return;
         }
 
@@ -133,12 +137,12 @@ class NotificationSubscriber implements EventSubscriberInterface
 
         // Add all offer fields
         foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['offer_'.$name] = $offer->get($name);
+            $tokens['offer_' . $name] = $offer->get($name);
         }
 
         // Add all the participant fields
         foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['participant_'.$name] = $participant->get($name);
+            $tokens['participant_' . $name] = $participant->get($name);
         }
 
         // Add all the parent's member fields
@@ -146,7 +150,7 @@ class NotificationSubscriber implements EventSubscriberInterface
             $participant->getMetaModel()->get('owner_attribute')
         );
         foreach ($participant->get($ownerAttribute->getColName()) as $k => $v) {
-            $tokens['member_'.$k] = $v;
+            $tokens['member_' . $k] = $v;
         }
 
         // Add the participant's email
