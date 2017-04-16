@@ -135,7 +135,52 @@ class UserApplicationSubscriber implements EventSubscriberInterface
      */
     public function disableDoubleBookingParticipants(BuildOptionsEvent $event)
     {
-        $options = $event->getResult();
+        $options    = $event->getResult();
+        $offerDates = $event->getOffer()->get('date_period');
+
+        foreach ($options as $k => $option) {
+            $participantDates = $event->getOffer()->getMetaModel()->getServiceContainer()->getDatabase()
+                ->prepare(
+                    <<<'SQL'
+SELECT start,end
+FROM tl_metamodel_offer_date
+WHERE att_id=?
+AND item_id IN (
+  SELECT id
+  FROM mm_ferienpass
+  WHERE id IN(
+    SELECT offer
+    FROM tl_ferienpass_attendance
+    WHERE participant=?
+  )
+)
+SQL
+                )
+                ->execute(
+                    $event->getOffer()->getAttribute('date_period')->get('id'),
+                    $option['value']
+                )
+                ->fetchAllAssoc();
+
+            foreach ($participantDates as $participantDate) {
+                foreach ($offerDates as $offerDate) {
+                    // Check for overlap
+                    if (($offerDate['end'] >= $participantDate['start'])
+                        && ($participantDate['end'] >= $offerDate['start'])
+                    ) {
+                        // Disable option
+                        $options[$k]['label']    = sprintf(
+                            $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'],
+                            $option['label']
+                        );
+                        $options[$k]['disabled'] = true;
+
+                        continue 2;
+                    }
+                }
+            }
+
+        }
 
         $event->setResult($options);
     }
