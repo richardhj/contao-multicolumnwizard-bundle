@@ -11,8 +11,7 @@
 namespace Ferienpass\Subscriber;
 
 use Contao\Model\Event\PostSaveModelEvent;
-use Contao\Model\Event\PreSaveModelEvent;
-use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent;
+use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent as BuildOptionsEvent;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
@@ -49,7 +48,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            BuildParticipantOptionsForUserApplicationEvent::NAME => [
+            BuildOptionsEvent::NAME => [
                 ['disableAlreadyAttendingParticipants'],
                 ['disableWrongAgeParticipants'],
             ],
@@ -63,9 +62,9 @@ class UserApplicationSubscriber implements EventSubscriberInterface
     /**
      * Disable participants from options that are already attending
      *
-     * @param BuildParticipantOptionsForUserApplicationEvent $event
+     * @param BuildOptionsEvent $event
      */
-    public function disableAlreadyAttendingParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function disableAlreadyAttendingParticipants(BuildOptionsEvent $event)
     {
         $options = $event->getResult();
 
@@ -90,9 +89,9 @@ class UserApplicationSubscriber implements EventSubscriberInterface
     /**
      * Disable participants from options that have a wrong age
      *
-     * @param BuildParticipantOptionsForUserApplicationEvent $event
+     * @param BuildOptionsEvent $event
      */
-    public function disableWrongAgeParticipants(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function disableWrongAgeParticipants(BuildOptionsEvent $event)
     {
         if (null === ($offerStart = ToolboxOfferDate::offerStart($event->getOffer()))) {
             return;
