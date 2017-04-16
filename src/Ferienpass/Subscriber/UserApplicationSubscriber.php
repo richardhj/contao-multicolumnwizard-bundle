@@ -74,6 +74,11 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             ->getMatchingIds();
 
         foreach ($options as $k => $option) {
+            // Skip if already disabled
+            if ($options[$k]['disabled']) {
+                continue;
+            }
+
             if (in_array($option['value'], $participantIds)) {
                 $options[$k]['label'] = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'],
@@ -102,6 +107,11 @@ class UserApplicationSubscriber implements EventSubscriberInterface
         $dateOffer = new DateTime('@'.$offerStart);
 
         foreach ($options as $k => $option) {
+            // Skip if already disabled
+            if ($options[$k]['disabled']) {
+                continue;
+            }
+
             $dateOfBirth = new DateTime(
                 '@'.Participant::getInstance()
                     ->findById($option['value'])
@@ -139,6 +149,11 @@ class UserApplicationSubscriber implements EventSubscriberInterface
         $offerDates = $event->getOffer()->get('date_period');
 
         foreach ($options as $k => $option) {
+            // Skip if already disabled
+            if ($options[$k]['disabled']) {
+                continue;
+            }
+
             $participantDates = $event->getOffer()->getMetaModel()->getServiceContainer()->getDatabase()
                 ->prepare(
                     <<<'SQL'
@@ -175,7 +190,7 @@ SQL
                         );
                         $options[$k]['disabled'] = true;
 
-                        continue 2;
+                        break 2;
                     }
                 }
             }
