@@ -164,9 +164,9 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             $attendances = Attendance::findByParticipant($option['value']);
 
             // Fetch each offer the participant is already attending
-            $offers = null;
+            $participateOffers = null;
             if (null !== $attendances) {
-                $offers = $event
+                $participateOffers = $event
                     ->getOffer()
                     ->getMetaModel()
                     ->findByFilter(
@@ -180,9 +180,10 @@ class UserApplicationSubscriber implements EventSubscriberInterface
 
             // Fetch all date periods the participant is already attending
             $participantDates = [];
-            if (null !== $offers) {
-                while ($offers->next()) {
-                    $participantDates = array_merge($participantDates, $offers->getItem()->get('date_period'));
+            if (null !== $participateOffers) {
+                while ($participateOffers->next()) {
+                    $participantDates =
+                        array_merge($participantDates, $participateOffers->getItem()->get('date_period'));
                 }
             }
 
