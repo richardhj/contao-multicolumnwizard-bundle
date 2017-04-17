@@ -83,11 +83,11 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             }
 
             if (in_array($option['value'], $participantIds)) {
+                $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'],
                     $option['label']
                 );
-                $options[$k]['disabled'] = true;
             }
         }
 
@@ -116,7 +116,10 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             }
 
             $dateOfBirth = new DateTime(
-                '@' . Participant::getInstance()
+                '@' . $event
+                    ->getParticipants()
+                    ->getItem()
+                    ->getMetaModel()
                     ->findById($option['value'])
                     ->get('dateOfBirth')
             );
@@ -129,11 +132,11 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             );
 
             if (!$isAgeAllowed) {
+                $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'],
                     $option['label']
                 );
-                $options[$k]['disabled'] = true;
             }
         }
 
@@ -183,11 +186,11 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                         && ($participantDate['end'] >= $offerDate['start'])
                     ) {
                         // Disable option
+                        $options[$k]['disabled'] = true;
                         $options[$k]['label']    = sprintf(
                             $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['double_booking'],
                             $option['label']
                         );
-                        $options[$k]['disabled'] = true;
 
                         break 2;
                     }
