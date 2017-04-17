@@ -18,7 +18,6 @@ use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
 use Haste\DateTime\DateTime;
 use MetaModels\Filter\Rules\StaticIdList;
-use MetaModels\IItem;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
@@ -194,11 +193,17 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                     if (($offerDate['end'] >= $participantDate['start'])
                         && ($participantDate['end'] >= $offerDate['start'])
                     ) {
+                        $overlappingOffer = $event
+                            ->getOffer()
+                            ->getMetaModel()
+                            ->findById($participantDate['item_id']);
+
                         // Disable option
                         $options[$k]['disabled'] = true;
                         $options[$k]['label']    = sprintf(
                             $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['double_booking'],
-                            $option['label']
+                            $option['label'],
+                            $overlappingOffer->parseAttribute('name')['text']
                         );
 
                         break 2;
