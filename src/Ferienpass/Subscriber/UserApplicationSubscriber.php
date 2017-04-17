@@ -118,6 +118,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             $dateOfBirth = new DateTime(
                 '@' . $event
                     ->getParticipants()
+                    ->reset()
                     ->getItem()
                     ->getMetaModel()
                     ->findById($option['value'])
