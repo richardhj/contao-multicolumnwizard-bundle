@@ -24,6 +24,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Class UserApplicationSubscriber
+ *
  * @package Ferienpass\Event
  */
 class UserApplicationSubscriber implements EventSubscriberInterface
@@ -50,12 +51,12 @@ class UserApplicationSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            BuildOptionsEvent::NAME => [
+            BuildOptionsEvent::NAME  => [
                 ['disableAlreadyAttendingParticipants'],
                 ['disableWrongAgeParticipants'],
                 ['disableDoubleBookingParticipants'],
             ],
-            PostSaveModelEvent::NAME                             => [
+            PostSaveModelEvent::NAME => [
                 'addAttendanceStatusMessage',
             ],
         ];
@@ -82,7 +83,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             }
 
             if (in_array($option['value'], $participantIds)) {
-                $options[$k]['label'] = sprintf(
+                $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'],
                     $option['label']
                 );
@@ -105,8 +106,8 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $options = $event->getResult();
-        $dateOffer = new DateTime('@'.$offerStart);
+        $options   = $event->getResult();
+        $dateOffer = new DateTime('@' . $offerStart);
 
         foreach ($options as $k => $option) {
             // Skip if already disabled
@@ -115,7 +116,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             }
 
             $dateOfBirth = new DateTime(
-                '@'.Participant::getInstance()
+                '@' . Participant::getInstance()
                     ->findById($option['value'])
                     ->get('dateOfBirth')
             );
@@ -128,7 +129,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             );
 
             if (!$isAgeAllowed) {
-                $options[$k]['label'] = sprintf(
+                $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'],
                     $option['label']
                 );
@@ -212,10 +213,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $participantName = $attendance
-            ->getParticipant()
-            ->parseAttribute('name')['text'];
-
+        $participantName = $attendance->getParticipant()->parseAttribute('name')['text'];
         $status = $attendance->getStatus();
 
         Message::add(
