@@ -161,28 +161,35 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            $attendances      = Attendance::findByParticipant($option['value']);
-            $offers           = $event
-                ->getOffer()
-                ->getMetaModel()
-                ->findByFilter(
-                    $event
-                        ->getOffer()
-                        ->getMetaModel()
-                        ->getEmptyFilter()
-                        ->addFilterRule(new StaticIdList($attendances->fetchEach('offer')))
-                );
-            $participantDates = (null !== $offers) ? array_map(
-                function ($offer) {
-                    /** @var IItem $offer */
-                    $offer->get('date_period');
-                },
-                iterator_to_array($offers)
-            ) : [];
+            $attendances = Attendance::findByParticipant($option['value']);
 
+            // Fetch each offer the participant is already attending
+            $offers = null;
+            if (null !== $attendances) {
+                $offers = $event
+                    ->getOffer()
+                    ->getMetaModel()
+                    ->findByFilter(
+                        $event
+                            ->getOffer()
+                            ->getMetaModel()
+                            ->getEmptyFilter()
+                            ->addFilterRule(new StaticIdList($attendances->fetchEach('offer')))
+                    );
+            }
+
+            // Fetch all date periods the participant is already attending
+            $participantDates = [];
+            if (null !== $offers) {
+                while ($offers->next()) {
+                    $participantDates = array_merge($participantDates, $offers->getItem()->get('date_period'));
+                }
+            }
+
+            // Walk every date the participant is already attending to…
             foreach ($participantDates as $participantDate) {
                 foreach ($offerDates as $offerDate) {
-                    // Check for overlap
+                    // …check for an overlap
                     if (($offerDate['end'] >= $participantDate['start'])
                         && ($participantDate['end'] >= $offerDate['start'])
                     ) {
@@ -218,7 +225,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
         }
 
         $participantName = $attendance->getParticipant()->parseAttribute('name')['text'];
-        $status = $attendance->getStatus();
+        $status          = $attendance->getStatus();
 
         Message::add(
             sprintf(
