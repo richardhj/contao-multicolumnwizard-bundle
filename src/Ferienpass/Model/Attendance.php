@@ -124,6 +124,30 @@ class Attendance extends Model
     }
 
 
+    /**
+     * Find attendances by offer
+     *
+     * @param integer $participantId
+     * @param array   $options
+     *
+     * @return Attendance|\Model\Collection|null
+     */
+    public static function findByParticipant($participantId, array $options = [])
+    {
+        return static::findBy(
+            'participant',
+            $participantId,
+            array_merge
+            (
+                [
+                    'order' => static::getOrderBy(),
+                ],
+                $options
+            )
+        );
+    }
+
+
     public static function findLastByOfferAndStatus($offerId, $statusId, array $options = [])
     {
         return static::findOneBy(

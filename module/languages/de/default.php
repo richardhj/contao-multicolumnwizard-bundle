@@ -23,6 +23,7 @@ $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label'][
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'] = '%s (bereits angemeldet)';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'] = '%s (ungeignet für das Alter)';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'] = '%s (Pro-Tag-Limit erreicht)';
+$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['double_booking'] = '%s (Terminüberschneidung)';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'] = 'Anmelden';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['message']['confirmed'] = '%s ist angemeldet für dieses Angebot.';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['message']['waiting'] = '%s steht auf der Warteliste für dieses Angebot';

@@ -18,7 +18,6 @@ use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Participant;
 
 
 /**
@@ -216,15 +215,12 @@ class FirstCome extends AbstractApplicationSystem
         }
 
         foreach ($options as $k => $option) {
-            $isLimitReached = Attendance::countByParticipantAndDay(
-                Participant::getInstance()
-                    ->findById($option['value'])
-                    ->get('id')
-            ) >= $maxApplicationsPerDay
-                ? true
-                : false;
+            // Skip if already disabled
+            if ($option['disabled']) {
+                continue;
+            }
 
-            if ($isLimitReached) {
+            if (Attendance::countByParticipantAndDay($option['value']) >= $maxApplicationsPerDay) {
                 $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'],
                     $option['label']
