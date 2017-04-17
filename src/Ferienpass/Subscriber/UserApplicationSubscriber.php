@@ -183,7 +183,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                     ) {
                         // Disable option
                         $options[$k]['label']    = sprintf(
-                            '%s hier',
+                            $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['double_booking'],
                             $option['label']
                         );
                         $options[$k]['disabled'] = true;
