@@ -216,6 +216,11 @@ class FirstCome extends AbstractApplicationSystem
         }
 
         foreach ($options as $k => $option) {
+            // Skip if already disabled
+            if ($option['disabled']) {
+                continue;
+            }
+
             $isLimitReached = Attendance::countByParticipantAndDay(
                 Participant::getInstance()
                     ->findById($option['value'])

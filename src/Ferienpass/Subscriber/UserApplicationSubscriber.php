@@ -77,7 +77,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
 
         foreach ($options as $k => $option) {
             // Skip if already disabled
-            if ($options[$k]['disabled']) {
+            if ($option['disabled']) {
                 continue;
             }
 
@@ -110,7 +110,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
 
         foreach ($options as $k => $option) {
             // Skip if already disabled
-            if ($options[$k]['disabled']) {
+            if ($option['disabled']) {
                 continue;
             }
 
@@ -152,7 +152,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
 
         foreach ($options as $k => $option) {
             // Skip if already disabled
-            if ($options[$k]['disabled']) {
+            if ($option['disabled']) {
                 continue;
             }
 
