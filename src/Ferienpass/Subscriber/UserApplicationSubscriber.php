@@ -70,7 +70,6 @@ class UserApplicationSubscriber implements EventSubscriberInterface
     public function disableAlreadyAttendingParticipants(BuildOptionsEvent $event)
     {
         $options = $event->getResult();
-
         $participantIds = Participant::getInstance()
             ->byParentAndOfferFilter(\FrontendUser::getInstance()->id, $event->getOffer()->get('id'))
             ->getMatchingIds();
@@ -82,6 +81,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             }
 
             if (in_array($option['value'], $participantIds)) {
+                // Disable option
                 $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'],
@@ -124,14 +124,15 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                     ->get('dateOfBirth')
             );
 
+            // Calculate age at offer's date
             $age = $dateOfBirth->getAge($dateOffer);
-
             $isAgeAllowed = in_array(
                 $event->getOffer()->get('id'),
                 $event->getOffer()->getAttribute('age')->searchFor($age)
             );
 
             if (!$isAgeAllowed) {
+                // Disable option
                 $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
                     $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'],
@@ -223,9 +224,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
      */
     public function addAttendanceStatusMessage(PostSaveModelEvent $event)
     {
-        /** @var Attendance $attendance */
         $attendance = $event->getModel();
-
         if (!$attendance instanceof Attendance) {
             return;
         }
