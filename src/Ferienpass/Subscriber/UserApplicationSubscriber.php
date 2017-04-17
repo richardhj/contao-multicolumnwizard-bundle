@@ -17,6 +17,8 @@ use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Participant;
 use Haste\DateTime\DateTime;
+use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IItem;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
@@ -154,28 +156,24 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            $participantDates = $event->getOffer()->getMetaModel()->getServiceContainer()->getDatabase()
-                ->prepare(
-                    <<<'SQL'
-SELECT start,end
-FROM tl_metamodel_offer_date
-WHERE att_id=?
-AND item_id IN (
-  SELECT id
-  FROM mm_ferienpass
-  WHERE id IN(
-    SELECT offer
-    FROM tl_ferienpass_attendance
-    WHERE participant=?
-  )
-)
-SQL
-                )
-                ->execute(
-                    $event->getOffer()->getAttribute('date_period')->get('id'),
-                    $option['value']
-                )
-                ->fetchAllAssoc();
+            $attendances      = Attendance::findByParticipant($option['value']);
+            $offers           = $event
+                ->getOffer()
+                ->getMetaModel()
+                ->findByFilter(
+                    $event
+                        ->getOffer()
+                        ->getMetaModel()
+                        ->getEmptyFilter()
+                        ->addFilterRule(new StaticIdList($attendances->fetchEach('offer')))
+                );
+            $participantDates = (null !== $offers) ? array_map(
+                function ($offer) {
+                    /** @var IItem $offer */
+                    $offer->get('date_period');
+                },
+                iterator_to_array($offers)
+            ) : [];
 
             foreach ($participantDates as $participantDate) {
                 foreach ($offerDates as $offerDate) {
@@ -185,7 +183,7 @@ SQL
                     ) {
                         // Disable option
                         $options[$k]['label']    = sprintf(
-                            $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'],
+                            '%s hier',
                             $option['label']
                         );
                         $options[$k]['disabled'] = true;
@@ -194,7 +192,6 @@ SQL
                     }
                 }
             }
-
         }
 
         $event->setResult($options);
