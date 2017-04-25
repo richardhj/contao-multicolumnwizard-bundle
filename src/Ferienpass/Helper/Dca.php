@@ -327,10 +327,16 @@ class Dca implements EventSubscriberInterface
      */
     public function getMetaModelsAttributes()
     {
+        global $container;
+
         $return = [];
 
+        /** @var IMetaModelsServiceContainer $serviceContainer */
+        $serviceContainer = $container['metamodels-service-container'];
+
         foreach ($this->getMetaModels() as $table => $metaModelTitle) {
-            foreach (Factory::getDefaultFactory()->getMetaModel($table)->getAttributes() as $attrName => $attribute) {
+            foreach ($serviceContainer->getFactory()->getMetaModel($table)->getAttributes() as $attrName => $attribute)
+            {
                 $return[$table][$attrName] = $attribute->getName();
             }
         }
@@ -348,11 +354,15 @@ class Dca implements EventSubscriberInterface
      */
     public function getMetaModels()
     {
-        $factory = Factory::getDefaultFactory();
+        global $container;
+
+        /** @var IMetaModelsServiceContainer $serviceContainer */
+        $serviceContainer = $container['metamodels-service-container'];
+
         $return  = [];
 
-        foreach ($factory->collectNames() as $table) {
-            $return[$table] = $factory->getMetaModel($table)->getName();
+        foreach ($serviceContainer->getFactory()->collectNames() as $table) {
+            $return[$table] = $serviceContainer->getFactory()->getMetaModel($table)->getName();
         }
 
         return $return;

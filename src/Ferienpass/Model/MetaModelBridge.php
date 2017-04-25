@@ -11,10 +11,10 @@
 namespace Ferienpass\Model;
 
 use MetaModels\Attribute\IAttribute;
-use MetaModels\Factory;
 use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IMetaModel;
+use MetaModels\IMetaModelsServiceContainer;
 
 
 /**
@@ -69,8 +69,13 @@ abstract class MetaModelBridge
      */
     public function __construct()
     {
+        global $container;
+
+        /** @var IMetaModelsServiceContainer $serviceContainer */
+        $serviceContainer = $container['metamodels-service-container'];
+
         // Get MetaModel object
-        $this->metaModel = Factory::getDefaultFactory()->getMetaModel(static::$tableName);
+        $this->metaModel = $serviceContainer->getFactory()->getMetaModel(static::$tableName);
 
         // Exit if MetaModel object could not be created
         if (null === $this->metaModel) {

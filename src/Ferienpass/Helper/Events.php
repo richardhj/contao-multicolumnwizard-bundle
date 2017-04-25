@@ -11,7 +11,7 @@
 namespace Ferienpass\Helper;
 
 use Haste\Util\Format;
-use MetaModels\Factory;
+use MetaModels\IMetaModelsServiceContainer;
 
 
 /**
@@ -92,7 +92,10 @@ class Events extends \Controller
     public function getMetaModelAsEvents($events, $calendars)
     {
         /** @type \Model $objPage */
-        global $objPage;
+        global $objPage, $container;
+
+        /** @var IMetaModelsServiceContainer $serviceContainer */
+        $serviceContainer = $container['metamodels-service-container'];
 
         // Walk each calendar selected in module
         foreach ($calendars as $calendarId) {
@@ -104,7 +107,7 @@ class Events extends \Controller
             }
 
             // Get MetaModel object
-            $metaModel = Factory::getDefaultFactory()->getMetaModel($calendar->metamodel);
+            $metaModel = $serviceContainer->getFactory()->getMetaModel($calendar->metamodel);
 
             // Skip if MetaModel not found
             if (null === $metaModel) {
