@@ -11,18 +11,23 @@
 namespace Ferienpass\Module;
 
 
-use Ferienpass\Event\BuildMetaModelEditingListButtonsEvent;
 use MetaModels\Attribute\Select\MetaModelSelect;
+use MetaModels\Events\ParseItemEvent;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\FrontendIntegration\HybridList;
 use MetaModels\Item;
 use MetaModels\MetaModelsEvents;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
 class Subscriber implements EventSubscriberInterface
 {
+
+    /**
+     * This property will get set on the render setting collection.
+     */
+    const FILTER_PARAMS_FLAG = '$filter-params';
+
 
     /**
      * Returns an array of event names this subscriber wants to listen to.
@@ -45,13 +50,13 @@ class Subscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            MetaModelsEvents::RENDER_ITEM_LIST          => [
+            MetaModelsEvents::RENDER_ITEM_LIST => [
                 ['alterHostMetaModelList'],
                 ['alterFrontendEditingLabelInListRendering'],
             ],
-            BuildMetaModelEditingListButtonsEvent::NAME => [
-                ['addDetailsLink'],
-                ['addEditLink'],
+            MetaModelsEvents::PARSE_ITEM       => [
+                ['alterDetailsLink'],
+                ['alterEditLink'],
                 ['addApplicationListLink'],
                 ['addDeleteLink'],
                 ['addCopyLink'],
@@ -77,12 +82,12 @@ class Subscriber implements EventSubscriberInterface
         switch ($event->getList()->getMetaModel()->getTableName()) {
             case 'mm_ferienpass':
                 $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editOffer'];
-                $caller->Template->addNewLabel = $GLOBALS['TL_LANG']['MSC']['addNewOffer'];
+                $caller->Template->addNewLabel   = $GLOBALS['TL_LANG']['MSC']['addNewOffer'];
                 break;
 
             case 'mm_participant':
                 $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editParticipant'];
-                $caller->Template->addNewLabel = $GLOBALS['TL_LANG']['MSC']['addNewParticipant'];
+                $caller->Template->addNewLabel   = $GLOBALS['TL_LANG']['MSC']['addNewParticipant'];
                 break;
 
             case 'mm_host':
@@ -93,111 +98,85 @@ class Subscriber implements EventSubscriberInterface
 
 
     /**
-     * Alter the host MetaModel list and add the buttons dynamically (buttons are registered via the event)
+     * Alter the host MetaModel list
      *
-     * @param RenderItemListEvent $renderEvent
+     * @param RenderItemListEvent $event
      */
-    public function alterHostMetaModelList(RenderItemListEvent $renderEvent)
+    public function alterHostMetaModelList(RenderItemListEvent $event)
     {
-        if (!($renderEvent->getCaller() instanceof HybridList) ||
-            'metamodel_multiple_buttons' !== $renderEvent->getTemplate()->getName()
-        ) {
+        $caller = $event->getCaller();
+        if (!($caller instanceof HybridList)) {
             return;
         }
+        //@TODO check for host metamodel list
 
-        $renderEvent->getTemplate()->getButtons = function ($itemData) use ($renderEvent) {
-            global $container;
-
-            /** @var EventDispatcher $dispatcher */
-            $dispatcher = $container['event-dispatcher'];
-
-            $item = $renderEvent
-                ->getList()
-                ->getServiceContainer()
-                ->getFactory()
-                ->getMetaModel(
-                    $renderEvent
-                        ->getList()
-                        ->getServiceContainer()
-                        ->getFactory()
-                        ->translateIdToMetaModelName($renderEvent->getCaller()->metamodel)
-                )
-                ->findById($itemData['raw']['id']);
-
-            if (null === $item) {
-                var_dump($itemData);
-                return [];
-            }
-
-            $event = new BuildMetaModelEditingListButtonsEvent($item, [], $itemData, $renderEvent->getCaller());
-            $dispatcher->dispatch(BuildMetaModelEditingListButtonsEvent::NAME, $event);
-
-            return $event->getButtons();
-        };
+        $filterParams = deserialize($caller->metamodel_filterparams);
+        $event->getList()->getView()->set(self::FILTER_PARAMS_FLAG, $filterParams);
     }
 
 
     /**
      * Add the details link to the host list
      *
-     * @param BuildMetaModelEditingListButtonsEvent $event
+     * @param ParseItemEvent $event
      */
-    public function addDetailsLink(BuildMetaModelEditingListButtonsEvent $event)
+    public function alterDetailsLink(ParseItemEvent $event)
     {
-        if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()) {
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
             return;
         }
 
-        $buttons = $event->getButtons();
+        $result = $event->getResult();
 
-        $button = [
-            'link'      => $GLOBALS['TL_LANG']['MSC']['detailsLink'][0],
-            'title'     => $GLOBALS['TL_LANG']['MSC']['detailsLink'][1],
-            'class'     => 'details',
-            'href'      => $event->getItemData()['jumpTo']['url'],
-            'attribute' => 'data-lightbox',
-        ];
-        $buttons[] = $button;
+        if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()) {
+            unset($result['actions']['jumpTo']);
+        } else {
+            $result['actions']['jumpTo']['attribute'] = 'data-lightbox';
+        }
 
-        $event->setButtons($buttons);
+        $event->setResult($result);
     }
 
 
     /**
      * Add the edit link to the host list
      *
-     * @param BuildMetaModelEditingListButtonsEvent $event
+     * @param ParseItemEvent $event
      */
-    public function addEditLink(BuildMetaModelEditingListButtonsEvent $event)
+    public function alterEditLink(ParseItemEvent $event)
     {
-        if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
             return;
         }
 
-        $buttons = $event->getButtons();
+        $result = $event->getResult();
+        if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
+            unset($result['actions']['jumpTo']);
+        }
 
-        $button = [
-            'link'  => $GLOBALS['TL_LANG']['MSC']['editLink'][0],
-            'title' => $GLOBALS['TL_LANG']['MSC']['editLink'][1],
-            'class' => 'edit',
-            'href'  => $event->getItemData()['editUrl'],
-        ];
-        $buttons[] = $button;
-
-        $event->setButtons($buttons);
+        $event->setResult($result);
     }
 
 
     /**
      * Add the application list link to the host list
      *
-     * @param BuildMetaModelEditingListButtonsEvent $event
+     * @param ParseItemEvent $event
      */
-    public function addApplicationListLink(BuildMetaModelEditingListButtonsEvent $event)
+    public function addApplicationListLink(ParseItemEvent $event)
     {
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
+            return;
+        }
+
         global $container;
 
-        $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
+        $settings = $event->getRenderSettings();
+        if (!$settings->get(self::FILTER_PARAMS_FLAG)) {
+            return;
+        }
+
+        $parsed = $event->getResult();
 
         /** @var Item $passRelease */
         $passRelease = $container['ferienpass.pass-release.show-current'];
@@ -208,70 +187,72 @@ class Subscriber implements EventSubscriberInterface
 
         if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()
             || !$event->getItem()->get('applicationlist_active')
-            || $passRelease->get('id') != $filterParams['pass_release']['value']
+            || $passRelease->get('id') != $settings->get(self::FILTER_PARAMS_FLAG)['pass_release']['value']
         ) {
             return;
         }
 
-        $buttons = $event->getButtons();
         $v = 19; // todo configurable
 
-        $button = [
+        $parsed['actions'][] = [
             'link'  => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][0],
             'title' => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][1],
             'class' => 'applicationlist',
-            'href'  => $this->generateJumpToLink($v, $event->getItemData()['raw']['alias']),
+            'href'  => $this->generateJumpToLink($v, $parsed['raw']['alias']),
         ];
-        $buttons[] = $button;
 
-        $event->setButtons($buttons);
+        $event->setResult($parsed);
     }
 
 
     /**
      * Add the delete link to the host list
      *
-     * @param BuildMetaModelEditingListButtonsEvent $event
+     * @param ParseItemEvent $event
      */
-    public function addDeleteLink(BuildMetaModelEditingListButtonsEvent $event)
+    public function addDeleteLink(ParseItemEvent $event)
     {
-        if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
+        $a = $event->getItem()->get('pass_release');
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
+            || time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']
+        ) {
             return;
         }
 
-        $buttons = $event->getButtons();
-
-        $button = [
+        $result              = $event->getResult();
+        $result['actions'][] = [
             'link'      => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][1],
             'class'     => 'delete',
-            'href'      => strtok(\Environment::get('request'), '?').
-                sprintf(
-                    '?action=delete::%u::%s',
-                    $event->getItemData()['raw']['id'],
-                    REQUEST_TOKEN
-                ),
-            'attribute' => 'onclick="return confirm(\''.sprintf(
+            'href'      => strtok(\Environment::get('request'), '?') .
+                           sprintf(
+                               '?action=delete::%u::%s',
+                               $result['raw']['id'],
+                               REQUEST_TOKEN
+                           ),
+            'attribute' => 'onclick="return confirm(\'' . sprintf(
                     $GLOBALS['TL_LANG']['MSC']['itemConfirmDeleteLink'],
-                    $event->getItemData()['raw']['name']
-                ).'\')"',
+                    $result['raw']['name']
+                ) . '\')"',
         ];
-        $buttons[] = $button;
 
-        $event->setButtons($buttons);
+        $event->setResult($result);
     }
 
 
     /**
      * Add the copy link to the host list
      *
-     * @param BuildMetaModelEditingListButtonsEvent $event
+     * @param ParseItemEvent $event
      */
-    public function addCopyLink(BuildMetaModelEditingListButtonsEvent $event)
+    public function addCopyLink(ParseItemEvent $event)
     {
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
+            return;
+        }
+
         global $container;
 
-        $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
 
         /** @var Item $passRelease */
         $passRelease = $container['ferienpass.pass-release.edit-previous'];
@@ -280,36 +261,50 @@ class Subscriber implements EventSubscriberInterface
             return;
         }
 
-        if ($passRelease->get('id') != $filterParams['pass_release']['value']
-            || $event->getItem()->isVariant()) {
+        $settings = $event->getRenderSettings();
+        if (!$settings->get(self::FILTER_PARAMS_FLAG)) {
             return;
         }
 
-        $buttons = $event->getButtons();
+        $filterParams = $settings->get(self::FILTER_PARAMS_FLAG);
 
-        $button = [
+        if ($passRelease->get('id') != $filterParams['pass_release']['value']
+            || $event->getItem()->isVariant()
+        ) {
+            return;
+        }
+
+        $parsed              = $event->getResult();
+        $parsed['actions'][] = [
             'link'      => $GLOBALS['TL_LANG']['MSC']['copyLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['copyLink'][1],
             'class'     => 'copy',
-            'href'      => str_replace('act=edit', 'act=copy', $event->getItemData()['editUrl']),
+            'href'      => str_replace('act=edit', 'act=copy', $parsed['editUrl']),
             'attribute' => '',
         ];
-        $buttons[] = $button;
 
-        $event->setButtons($buttons);
+        $event->setResult($parsed);
     }
 
 
     /**
      * Add the create variant link to the host list
      *
-     * @param BuildMetaModelEditingListButtonsEvent $event
+     * @param ParseItemEvent $event
      */
-    public function addCreateVariantLink(BuildMetaModelEditingListButtonsEvent $event)
+    public function addCreateVariantLink(ParseItemEvent $event)
     {
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
+            return;
+        }
+
         global $container;
 
-        $filterParams = deserialize($event->getCaller()->metamodel_filterparams);
+        $settings = $event->getRenderSettings();
+        if (!$settings->get(self::FILTER_PARAMS_FLAG)) {
+            return;
+        }
+        $filterParams = $settings->get(self::FILTER_PARAMS_FLAG);
 
         /** @var Item $passRelease */
         $passRelease = $container['ferienpass.pass-release.edit-current'];
@@ -319,28 +314,26 @@ class Subscriber implements EventSubscriberInterface
         }
 
         if (!($passRelease->get('id') == $filterParams['pass_release']['value']
-            && $event->getItem()->isVariantBase()
-            && $event->getItem()->getVariants(null)->getCount())
+              && $event->getItem()->isVariantBase()
+              && $event->getItem()->getVariants(null)->getCount())
         ) {
             return;
         }
 
-        $buttons = $event->getButtons();
-
-        $button = [
+        $parsed              = $event->getResult();
+        $parsed['actions'][] = [
             'link'      => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][1],
             'class'     => 'createVariant',
             'href'      => str_replace(
                 ['act=edit', 'id'],
                 ['act=create', 'vargroup'],
-                $event->getItemData()['editUrl']
+                $parsed['editUrl']
             ),
             'attribute' => '',
         ];
-        $buttons[] = $button;
 
-        $event->setButtons($buttons);
+        $event->setResult($parsed);
     }
 
 

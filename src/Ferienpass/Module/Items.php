@@ -13,8 +13,8 @@ namespace Ferienpass\Module;
 use Contao\Module;
 use Haste\Input\Input;
 use MetaModels\Attribute\Select\MetaModelSelect;
-use MetaModels\Factory;
 use MetaModels\IMetaModel;
+use MetaModels\IMetaModelsServiceContainer;
 
 
 /**
@@ -75,11 +75,20 @@ abstract class Items extends Module
      */
     public function __construct($module, $column = 'main')
     {
+        global $container;
         parent::__construct($module, $column);
 
+        /** @var IMetaModelsServiceContainer $serviceContainer */
+        $serviceContainer = $container['metamodels-service-container'];
+
         // Get MetaModel object
-        $factory = Factory::getDefaultFactory();
-        $this->metaModel = $factory->getMetaModel($factory->translateIdToMetaModelName($this->metamodel));
+        $this->metaModel = $serviceContainer
+            ->getFactory()
+            ->getMetaModel(
+                $serviceContainer
+                    ->getFactory()
+                    ->translateIdToMetaModelName($this->metamodel)
+            );
 
         // Throw exception if MetaModel not found
         if (null === $this->metaModel) {
