@@ -41,7 +41,7 @@ class SendToBrowser implements FilesystemInterface
     /**
      * @return DataProcessing|\Model
      */
-    public function getModel()
+    public function getModel(): DataProcessing
     {
         return $this->model;
     }
@@ -49,7 +49,7 @@ class SendToBrowser implements FilesystemInterface
     /**
      * @return IItems
      */
-    public function getOffers()
+    public function getOffers(): IItems
     {
         return $this->offers;
     }
@@ -57,7 +57,7 @@ class SendToBrowser implements FilesystemInterface
     /**
      * {@inheritdoc}
      */
-    public function processFiles(array $files)
+    public function processFiles(array $files): void
     {
         // Generate a zip file
         $zipWriter = new \ZipWriter($this->getModel()->getTmpPath() . '/export.zip');

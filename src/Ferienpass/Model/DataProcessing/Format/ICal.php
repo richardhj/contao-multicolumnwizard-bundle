@@ -41,7 +41,7 @@ class ICal implements FormatInterface
     /**
      * @return DataProcessing|\Model
      */
-    public function getModel()
+    public function getModel(): DataProcessing
     {
         return $this->model;
     }
@@ -49,7 +49,7 @@ class ICal implements FormatInterface
     /**
      * @return IItems
      */
-    public function getItems()
+    public function getItems(): IItems
     {
         return $this->items;
     }
@@ -57,7 +57,7 @@ class ICal implements FormatInterface
     /**
      * @return array
      */
-    public function getFiles()
+    public function getFiles(): array
     {
         return $this->files;
     }
@@ -74,7 +74,7 @@ class ICal implements FormatInterface
     /**
      * {@inheritdoc}
      */
-    public function processItems()
+    public function processItems(): self
     {
         $files = [];
         $path = sprintf(
@@ -106,7 +106,7 @@ class ICal implements FormatInterface
      *
      * @return string
      */
-    protected function createICal()
+    protected function createICal(): string
     {
         $vCalendar = new Calendar(\Environment::get('httpHost'));
 

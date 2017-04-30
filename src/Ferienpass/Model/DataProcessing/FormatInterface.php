@@ -36,12 +36,12 @@ interface FormatInterface
      *
      * @return self
      */
-    public function processItems();
+    public function processItems(): self;
 
     /**
      * Get the files in the expected format as an array
      *
      * @return array The file information in the format of `listContents`
      */
-    public function getFiles();
+    public function getFiles(): array;
 }

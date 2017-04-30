@@ -16,6 +16,7 @@ use MetaModels\IItem;
 
 /**
  * Class Attendance
+ *
  * @property integer $tstamp
  * @property integer $created
  * @property integer $offer
@@ -70,10 +71,10 @@ class Attendance extends Model
 
         /** @var \Database\Result $result */
         $result = \Database::getInstance()->query(
-            "SELECT * FROM ".static::$strTable." WHERE participant IN(".implode(
+            "SELECT * FROM " . static::$strTable . " WHERE participant IN(" . implode(
                 ',',
                 $participantIds
-            ).") ORDER BY ".static::getOrderBy()
+            ) . ") ORDER BY " . static::getOrderBy()
         );
 
         return static::createCollectionFromDbResult($result, static::$strTable);
@@ -181,7 +182,7 @@ class Attendance extends Model
      *
      * @return int
      */
-    public static function countParticipants($offerId)
+    public static function countParticipants($offerId): int
     {
         return static::countByOffer($offerId);
     }
@@ -194,7 +195,7 @@ class Attendance extends Model
      *
      * @return int
      */
-    public static function countByOffer($offerId)
+    public static function countByOffer($offerId): int
     {
         return static::countBy('offer', $offerId);
     }
@@ -207,7 +208,7 @@ class Attendance extends Model
      *
      * @return int
      */
-    public static function countByParticipant($participantId)
+    public static function countByParticipant($participantId): int
     {
         return static::countBy('participant', $participantId);
     }
@@ -221,7 +222,7 @@ class Attendance extends Model
      *
      * @return int
      */
-    public static function countByOfferAndStatus($offerId, $statusId)
+    public static function countByOfferAndStatus($offerId, $statusId): int
     {
         return static::countBy(['offer=?', 'status=?'], [$offerId, $statusId]);
     }
@@ -236,7 +237,7 @@ class Attendance extends Model
      *
      * @return int
      */
-    public static function countByParticipantAndDay($participantId, $timestamp = null, $status = 0)
+    public static function countByParticipantAndDay($participantId, $timestamp = null, $status = 0): int
     {
         if (null === $timestamp) {
             $timestamp = time();
@@ -251,7 +252,7 @@ class Attendance extends Model
 
         if (0 !== $status) {
             $options['column'][] = 'status=?';
-            $options['value'][] = $status;
+            $options['value'][]  = $status;
         }
 
         return static::countBy(null, null, $options);
@@ -267,7 +268,7 @@ class Attendance extends Model
     public static function isNotExistent($participantId, $offerId)
     {
         return !(\Database::getInstance()
-            ->prepare("SELECT id FROM ".static::$strTable." WHERE participant=? AND offer=?")
+            ->prepare("SELECT id FROM " . static::$strTable . " WHERE participant=? AND offer=?")
             ->execute($participantId, $offerId)
             ->numRows);
     }
@@ -276,7 +277,7 @@ class Attendance extends Model
     /**
      * @return string
      */
-    public static function getOrderBy()
+    public static function getOrderBy(): string
     {
         return self::$orderBy;
     }
@@ -284,9 +285,10 @@ class Attendance extends Model
 
     /**
      * Get attendance's current position
+     *
      * @return integer|null if participant not in attendance list (yet) or has error status
      */
-    public function getPosition()
+    public function getPosition(): int
     {
         /** @var Attendance|\Model\Collection $attendances */
         $attendances = static::findByOffer($this->offer); // Collection is already ordered
@@ -313,7 +315,7 @@ class Attendance extends Model
     /**
      * @return AttendanceStatus
      */
-    public function getStatus()
+    public function getStatus(): AttendanceStatus
     {
         /** @var AttendanceStatus $this ->getRelated('status') */
         return $this->getRelated('status');
@@ -323,7 +325,7 @@ class Attendance extends Model
     /**
      * @return IItem
      */
-    public function getOffer()
+    public function getOffer(): IItem
     {
         return Offer::getInstance()->findById($this->offer);
     }
@@ -332,7 +334,7 @@ class Attendance extends Model
     /**
      * @return IItem|null
      */
-    public function getParticipant()
+    public function getParticipant(): IItem
     {
         return Participant::getInstance()->findById($this->participant);
     }

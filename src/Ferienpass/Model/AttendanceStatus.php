@@ -15,6 +15,7 @@ use Contao\Model;
 
 /**
  * Class AttendanceStatus
+ *
  * @property string  $name
  * @property string  $cssClass
  * @property string  $type
@@ -44,7 +45,7 @@ class AttendanceStatus extends Model
      *
      * @return AttendanceStatus
      */
-    public static function findConfirmed()
+    public static function findConfirmed(): AttendanceStatus
     {
         return static::findByType('confirmed');
     }
@@ -55,7 +56,7 @@ class AttendanceStatus extends Model
      *
      * @return AttendanceStatus
      */
-    public static function findWaiting()
+    public static function findWaiting(): AttendanceStatus
     {
         return static::findByType('waiting');
     }
@@ -66,7 +67,7 @@ class AttendanceStatus extends Model
      *
      * @return AttendanceStatus
      */
-    public static function findWaitlisted()
+    public static function findWaitlisted(): AttendanceStatus
     {
         return static::findByType('waitlisted');
     }
@@ -77,7 +78,7 @@ class AttendanceStatus extends Model
      *
      * @return AttendanceStatus
      */
-    public static function findError()
+    public static function findError(): AttendanceStatus
     {
         return static::findByType('error');
     }
@@ -90,7 +91,7 @@ class AttendanceStatus extends Model
      *
      * @return AttendanceStatus
      */
-    public static function findByType($type)
+    public static function findByType($type): AttendanceStatus
     {
         return static::findOneBy('type', $type);
     }

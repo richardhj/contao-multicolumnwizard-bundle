@@ -14,11 +14,13 @@ use MetaModels\Filter\IFilter;
 use MetaModels\Filter\IFilterRule;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IItems;
 use MetaModels\Item;
 
 
 /**
  * Class Participant
+ *
  * @package Ferienpass\Model
  */
 class Participant extends MetaModelBridge
@@ -47,7 +49,7 @@ class Participant extends MetaModelBridge
      *
      * @return \MetaModels\IItem[]|\MetaModels\IItems
      */
-    public function findByParent($parentId)
+    public function findByParent(int $parentId): IItems
     {
         return $this->metaModel->findByFilter($this->byParentFilter($parentId));
     }
@@ -60,7 +62,7 @@ class Participant extends MetaModelBridge
      *
      * @return IFilter
      */
-    public function byParentFilter($parentId)
+    public function byParentFilter(int $parentId): IFilter
     {
         $filter = $this->metaModel->getEmptyFilter();
         $filter->addFilterRule($this->byParentFilterRule($parentId));
@@ -77,7 +79,7 @@ class Participant extends MetaModelBridge
      * @return IFilterRule
      * @throws \LogicException
      */
-    protected function byParentFilterRule($parentId)
+    protected function byParentFilterRule(int $parentId): IFilterRule
     {
         $ownerAttribute = $this->metaModel->getAttributeById($this->metaModel->get('owner_attribute'));
 
@@ -106,7 +108,7 @@ class Participant extends MetaModelBridge
      *
      * @return \MetaModels\IItem[]|\MetaModels\IItems
      */
-    public function findByParentAndOffer($parentId, $offerId)
+    public function findByParentAndOffer(int $parentId, int $offerId): IItems
     {
         return $this->metaModel->findByFilter($this->byParentAndOfferFilter($parentId, $offerId));
     }
@@ -120,7 +122,7 @@ class Participant extends MetaModelBridge
      *
      * @return IFilter
      */
-    public function byParentAndOfferFilter($parentId, $offerId)
+    public function byParentAndOfferFilter(int $parentId, int $offerId): IFilter
     {
         $filter = $this->metaModel->getEmptyFilter();
         $filter->addFilterRule($this->byParentFilterRule($parentId));
@@ -137,7 +139,7 @@ class Participant extends MetaModelBridge
      *
      * @return IFilterRule
      */
-    protected function byOfferFilterRule($offerId)
+    protected function byOfferFilterRule(int $offerId): IFilterRule
     {
         $attendances = Attendance::findByOffer($offerId);
 
@@ -158,10 +160,10 @@ class Participant extends MetaModelBridge
      * @return bool
      * @throws \LogicException
      */
-    public function isProperChild($childId, $parentId)
+    public function isProperChild(int $childId, int $parentId): bool
     {
         /** @var Item|null $child */
-        $child = $this->metaModel->findById($childId);
+        $child          = $this->metaModel->findById($childId);
         $ownerAttribute = $this->metaModel->getAttributeById($this->metaModel->get('owner_attribute'));
 
         if (null === $child) {

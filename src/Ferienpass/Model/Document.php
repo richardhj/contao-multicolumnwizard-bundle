@@ -45,7 +45,7 @@ class Document extends Model
      *
      * @param Model\Collection|\MetaModels\IItems $collection
      */
-    public function outputToBrowser($collection)
+    public function outputToBrowser($collection): void
     {
         $this->prepareEnvironment($collection);
 
@@ -68,7 +68,7 @@ class Document extends Model
      *
      * @return string Absolute path to the file
      */
-    public function outputToFile($collection, $path)
+    public function outputToFile($collection, $path): string
     {
         $this->prepareEnvironment($collection);
 
@@ -93,7 +93,7 @@ class Document extends Model
      *
      * @return \TCPDF
      */
-    protected function generatePDF(array $tokens)
+    protected function generatePDF(array $tokens): \TCPDF
     {
         // TCPDF configuration
         $l = [];
@@ -154,7 +154,7 @@ class Document extends Model
      *
      * @return string
      */
-    protected function generateTemplate(array $tokens)
+    protected function generateTemplate(array $tokens): string
     {
         //$objPage = \PageModel::findWithDetails($objCollection->page_id);
         global $objPage;
@@ -236,7 +236,7 @@ class Document extends Model
      *
      * @param \Template $template
      */
-    public function addCollectionToTemplate($template)
+    public function addCollectionToTemplate($template): void
     {
         $this->addItemsToCollectionTemplate($template);
 
@@ -253,7 +253,7 @@ class Document extends Model
      *               are accessible too
      * @todo We have to sort the items by $this->orderCollectionBy
      */
-    protected function addItemsToCollectionTemplate($template)
+    protected function addItemsToCollectionTemplate($template): array
     {
         $items = [];
 
@@ -322,7 +322,7 @@ class Document extends Model
      *
      * @param Model\Collection|\MetaModels\IItems $collection
      */
-    protected function prepareEnvironment($collection)
+    protected function prepareEnvironment($collection): void
     {
         $this->collection = $collection;
 
@@ -342,7 +342,7 @@ class Document extends Model
      *
      * @return array
      */
-    protected function prepareCollectionTokens()
+    protected function prepareCollectionTokens(): array
     {
         $tokens = [];
 
@@ -370,7 +370,7 @@ class Document extends Model
      *
      * @return string Sanitized file name
      */
-    protected function prepareFileName($name, $tokens = [], $path = '')
+    protected function prepareFileName($name, $tokens = [], $path = ''): string
     {
         // Replace simple tokens
         $name = StringUtil::parseSimpleTokens($name, $tokens);
@@ -395,7 +395,7 @@ class Document extends Model
      *
      * @return string Sanitized file name
      */
-    protected function sanitizeFileName($name, $preserveUppercase = true)
+    protected function sanitizeFileName($name, $preserveUppercase = true): string
     {
         return standardize(ampersand($name, false), $preserveUppercase);
     }

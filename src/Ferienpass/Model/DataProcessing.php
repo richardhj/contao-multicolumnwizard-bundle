@@ -105,7 +105,7 @@ class DataProcessing extends Model
     /**
      * @return FormatInterface
      */
-    public function getFormatHandler()
+    public function getFormatHandler(): FormatInterface
     {
         if (null === $this->formatHandler) {
             switch ($this->format) {
@@ -125,7 +125,7 @@ class DataProcessing extends Model
     /**
      * @return FilesystemInterface
      */
-    public function getFileSystemHandler()
+    public function getFileSystemHandler(): FilesystemInterface
     {
         if (null === $this->fileSystemHandler) {
             switch ($this->filesystem) {
@@ -152,7 +152,7 @@ class DataProcessing extends Model
      *
      * @return MountManager
      */
-    public function getMountManager($varFilesystems = null)
+    public function getMountManager($varFilesystems = null): MountManager
     {
         global $container;
 
@@ -170,7 +170,7 @@ class DataProcessing extends Model
      *
      * @return \League\Flysystem\FilesystemInterface
      */
-    public function getFileSystem($fileSystem)
+    public function getFileSystem($fileSystem): \League\Flysystem\FilesystemInterface
     {
         return $this
             ->getMountManager($fileSystem)
@@ -181,7 +181,7 @@ class DataProcessing extends Model
     /**
      * @return IMetaModel
      */
-    public function getMetaModel()
+    public function getMetaModel(): IMetaModel
     {
         if (null === $this->metaModel) {
             $this->metaModel = Offer::getInstance()->getMetaModel();
@@ -194,7 +194,7 @@ class DataProcessing extends Model
     /**
      * @return string
      */
-    public function getTmpPath()
+    public function getTmpPath(): string
     {
         if (null === $this->tmpPath) {
             $this->tmpPath = 'system/tmp/' . time();
@@ -206,7 +206,7 @@ class DataProcessing extends Model
     /**
      * @return IItems
      */
-    public function getItems()
+    public function getItems(): IItems
     {
         return $this->items;
     }
@@ -214,7 +214,7 @@ class DataProcessing extends Model
     /**
      * @return IFilter
      */
-    public function getFilter()
+    public function getFilter(): IFilter
     {
         if (null === $this->filter) {
             $this->filter = $this
@@ -230,7 +230,7 @@ class DataProcessing extends Model
      *
      * @return self
      */
-    public function setFilter(IFilter $filter)
+    public function setFilter(IFilter $filter): self
     {
         $this->filter = $filter;
 
@@ -242,7 +242,7 @@ class DataProcessing extends Model
      *
      * @return array
      */
-    public function getFilterParams()
+    public function getFilterParams(): array
     {
         if (null === $this->filterParams) {
             $this->filterParams = array_map(
@@ -262,7 +262,7 @@ class DataProcessing extends Model
      *
      * @return self
      */
-    public function setFilterParams(array $filterParams)
+    public function setFilterParams(array $filterParams): self
     {
         $this->filterParams = $filterParams;
 
@@ -273,7 +273,7 @@ class DataProcessing extends Model
     /**
      * Run data processing by its configuration
      */
-    public function run()
+    public function run(): void
     {
         // Provide filter
         $this
@@ -323,7 +323,7 @@ class DataProcessing extends Model
     /**
      * @return array
      */
-    protected function fetchStaticFiles()
+    protected function fetchStaticFiles(): array
     {
         $files      = [];
         $fileSystem = $this->getFileSystem('local');
@@ -344,7 +344,7 @@ class DataProcessing extends Model
     /**
      * @param string $fileSystem
      */
-    protected function mountFileSystem($fileSystem)
+    protected function mountFileSystem($fileSystem): void
     {
         global $container;
 

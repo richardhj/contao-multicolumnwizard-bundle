@@ -13,9 +13,10 @@ namespace Ferienpass\Model;
 
 /**
  * Class ApplicationSystem
+ *
  * @property string $title
  * @property string $type
- * @property mixed $maxApplicationsPerDay
+ * @property mixed  $maxApplicationsPerDay
  * @package Ferienpass\Model
  */
 class ApplicationSystem extends \Model
@@ -34,7 +35,7 @@ class ApplicationSystem extends \Model
      *
      * @return ApplicationSystem
      */
-    public static function findFirstCome()
+    public static function findFirstCome(): ApplicationSystem
     {
         return static::findByType('firstcome');
     }
@@ -45,7 +46,7 @@ class ApplicationSystem extends \Model
      *
      * @return ApplicationSystem
      */
-    public static function findLot()
+    public static function findLot(): ApplicationSystem
     {
         return static::findByType('lot');
     }
@@ -56,9 +57,9 @@ class ApplicationSystem extends \Model
      *
      * @param $type
      *
-     * @return static
+     * @return ApplicationSystem
      */
-    public static function findByType($type)
+    public static function findByType($type): ApplicationSystem
     {
         return static::findOneBy('type', $type);
     }
@@ -69,13 +70,14 @@ class ApplicationSystem extends \Model
      *
      * @return ApplicationSystem
      */
-    public static function findCurrent()
+    public static function findCurrent(): ApplicationSystem
     {
-        $t = static::$strTable;
+        $t       = static::$strTable;
         $columns = [];
 
-        $time = \Date::floorToMinute();
-        $columns[] = "($t.start='' OR $t.start<='$time') AND ($t.stop='' OR $t.stop>'".($time + 60)."') AND $t.published='1'";
+        $time      = \Date::floorToMinute();
+        $columns[] = "($t.start='' OR $t.start<='$time') AND ($t.stop='' OR $t.stop>'" . ($time + 60)
+                     . "') AND $t.published='1'";
 
         return static::findOneBy($columns, []);
     }
@@ -84,7 +86,7 @@ class ApplicationSystem extends \Model
     /**
      * @return array
      */
-    public static function getApplicationSystemNames()
+    public static function getApplicationSystemNames(): array
     {
         global $container;
 

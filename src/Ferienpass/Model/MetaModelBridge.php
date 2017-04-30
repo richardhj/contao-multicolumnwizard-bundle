@@ -13,12 +13,15 @@ namespace Ferienpass\Model;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IItem;
+use MetaModels\IItems;
 use MetaModels\IMetaModel;
 use MetaModels\IMetaModelsServiceContainer;
 
 
 /**
  * Class MetaModelBridge
+ *
  * @package Ferienpass\Model
  */
 abstract class MetaModelBridge
@@ -95,7 +98,7 @@ abstract class MetaModelBridge
     public static function getInstance()
     {
         if (static::$instance === null) {
-            $class = get_called_class();
+            $class            = get_called_class();
             static::$instance = new $class();
         }
 
@@ -108,7 +111,7 @@ abstract class MetaModelBridge
      *
      * @return \MetaModels\IMetaModel|null
      */
-    public function getMetaModel()
+    public function getMetaModel(): IMetaModel
     {
         return $this->metaModel;
     }
@@ -119,7 +122,7 @@ abstract class MetaModelBridge
      *
      * @return string
      */
-    public function getTableName()
+    public function getTableName(): string
     {
         return static::$tableName;
     }
@@ -130,7 +133,7 @@ abstract class MetaModelBridge
      *
      * @return IAttribute
      */
-    public function getOwnerAttribute()
+    public function getOwnerAttribute(): IAttribute
     {
         $this->fetchOwnerAttribute();
 
@@ -141,7 +144,7 @@ abstract class MetaModelBridge
     /**
      * Set MetaModel's owner attribute
      */
-    protected function fetchOwnerAttribute()
+    protected function fetchOwnerAttribute(): void
     {
         if (null !== $this->ownerAttribute) {
             return;
@@ -162,7 +165,7 @@ abstract class MetaModelBridge
      *
      * @return \MetaModels\IItem|null
      */
-    public function findById($id)
+    public function findById(int $id): IItem
     {
         return $this->metaModel->findById($id);
     }
@@ -173,7 +176,7 @@ abstract class MetaModelBridge
      *
      * @return \MetaModels\IItem[]|\MetaModels\IItems
      */
-    public function findAll()
+    public function findAll(): IItems
     {
         if (null === $this->metaModel) {
             return null;
@@ -190,7 +193,7 @@ abstract class MetaModelBridge
      *
      * @return \MetaModels\IItem[]|\MetaModels\IItems
      */
-    public function findMultipleByIds($ids)
+    public function findMultipleByIds(array $ids): IItems
     {
         $filter = new Filter($this->metaModel);
         $filter->addFilterRule(new StaticIdList($ids));

@@ -43,7 +43,7 @@ class Dropbox implements FilesystemInterface
     /**
      * @return DataProcessing|\Model
      */
-    public function getModel()
+    public function getModel(): DataProcessing
     {
         return $this->model;
     }
@@ -51,7 +51,7 @@ class Dropbox implements FilesystemInterface
     /**
      * @return IItems
      */
-    public function getItems()
+    public function getItems(): IItems
     {
         return $this->items;
     }
@@ -59,7 +59,7 @@ class Dropbox implements FilesystemInterface
     /**
      * {@inheritdoc}
      */
-    public function processFiles(array $files)
+    public function processFiles(array $files): void
     {
         // Make sure to mount dropbox
         $mountManager = $this->getModel()->getMountManager('dropbox');
@@ -97,7 +97,7 @@ class Dropbox implements FilesystemInterface
     /**
      * Sync from remote dropbox by fetching the delta (last edited files in dropbox)
      */
-    public function syncFromRemoteDropbox()
+    public function syncFromRemoteDropbox(): void
     {
         if (!$this->getModel()->sync) {
             return;
@@ -156,7 +156,8 @@ class Dropbox implements FilesystemInterface
                         if ($mountManager->put(
                             'dbafs://' . $entry['path'],
                             $mountManager->read('dropbox://' . $entry['path'])
-                        )) {
+                        )
+                        ) {
                             \System::log(
                                 sprintf(
                                     'File "%s" was updated by dropbox synchronisation. Data processing ID %u',

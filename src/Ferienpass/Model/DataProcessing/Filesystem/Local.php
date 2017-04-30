@@ -49,7 +49,7 @@ class Local implements FilesystemInterface
     /**
      * {@inheritdoc}
      */
-    public function processFiles(array $files)
+    public function processFiles(array $files): void
     {
         $pathPrefix = ($this->getModel()->path_prefix) ? $this->getModel()->path_prefix . '/' : '';
 

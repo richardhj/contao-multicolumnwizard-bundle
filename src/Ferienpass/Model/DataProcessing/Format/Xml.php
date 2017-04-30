@@ -51,7 +51,7 @@ class Xml implements FormatInterface
     /**
      * {@inheritdoc}
      */
-    public function getFiles()
+    public function getFiles(): array
     {
         return $this->files;
     }
@@ -59,7 +59,7 @@ class Xml implements FormatInterface
     /**
      * @return DataProcessing
      */
-    public function getModel()
+    public function getModel(): DataProcessing
     {
         return $this->model;
     }
@@ -68,7 +68,7 @@ class Xml implements FormatInterface
     /**
      * @return IItems
      */
-    public function getItems()
+    public function getItems(): IItems
     {
         return $this->items;
     }
@@ -76,7 +76,7 @@ class Xml implements FormatInterface
     /**
      * {@inheritdoc}
      */
-    public function processItems()
+    public function processItems(): self
     {
         if (null === $this->getItems()) {
             $this->files = [];
@@ -114,7 +114,7 @@ class Xml implements FormatInterface
      *
      * @return string
      */
-    public static function camelCase($value)
+    public static function camelCase($value): string
     {
         return preg_replace('/[\s\_\-]/', '', ucwords($value, ' _-'));
     }
@@ -122,7 +122,7 @@ class Xml implements FormatInterface
     /**
      * @return array
      */
-    protected function getXml()
+    protected function getXml(): array
     {
         $return = [];
 
@@ -167,7 +167,7 @@ class Xml implements FormatInterface
      *
      * @return \DOMElement|null
      */
-    protected function offerAsDomNode(IItem $offer, \DOMDocument $dom)
+    protected function offerAsDomNode(IItem $offer, \DOMDocument $dom): \DOMElement
     {
         $variants = null;
 
@@ -247,7 +247,7 @@ class Xml implements FormatInterface
      * @param string   $attributeParsed
      * @param \DOMNode $attributeNode
      */
-    protected function importXmlToNode($attributeParsed, $attributeNode)
+    protected function importXmlToNode(string $attributeParsed, \DOMNode $attributeNode): void
     {
         if (!$attributeParsed) {
             return;
@@ -280,7 +280,7 @@ class Xml implements FormatInterface
      * @param array  $files      The xml files. An array formatted like Filesystem->listContents() does
      * @param string $filesystem The filesystem the xml files come from
      */
-    public function syncXmlFilesWithModel($files, $filesystem = 'local')
+    public function syncXmlFilesWithModel(array $files, string $filesystem = 'local'): void
     {
         /** @var MountManager $manager */
         $manager = $this->getModel()->getMountManager($filesystem);
@@ -557,7 +557,7 @@ class Xml implements FormatInterface
      *
      * @return mixed|null The attribute's data in the same format as the attribute's "raw" data
      */
-    protected function domElementToNativeWidget($element, $attribute, $itemId)
+    protected function domElementToNativeWidget(\DOMElement $element, IAttribute $attribute, int $itemId): mixed
     {
         switch ($attribute->get('type')) {
             case 'alias':
