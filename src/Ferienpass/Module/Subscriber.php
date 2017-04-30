@@ -12,6 +12,8 @@ namespace Ferienpass\Module;
 
 
 use Contao\Environment;
+use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
+use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Events\ParseItemEvent;
@@ -70,6 +72,7 @@ class Subscriber implements EventSubscriberInterface
                 ['alterFrontendEditingLabelInListRendering'],
             ],
             MetaModelsEvents::PARSE_ITEM       => [
+                ['addVariantCssClass'],
                 ['alterDetailsLink'],
                 ['alterEditLink'],
                 ['addApplicationListLink'],
@@ -131,6 +134,26 @@ class Subscriber implements EventSubscriberInterface
     }
 
 
+    public function addVariantCssClass(ParseItemEvent $event)
+    {
+        $settings = $event->getRenderSettings();
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
+            || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
+        ) {
+            return;
+        }
+
+        $parsed = $event->getResult();
+        if (!$event->getItem()->isVariantBase()) {
+            $parsed['class'] .= ' isvariant';
+        } elseif ($event->getItem()->getVariants(null)->getCount()) {
+            $parsed['class'] .= ' isvariantbase';
+        }
+
+        $event->setResult($parsed);
+    }
+
+
     /**
      * Add the details link to the host list
      *
@@ -145,15 +168,15 @@ class Subscriber implements EventSubscriberInterface
             return;
         }
 
-        $result = $event->getResult();
+        $parsed = $event->getResult();
 
         if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()) {
-            unset($result['actions']['jumpTo']);
+            unset($parsed['actions']['jumpTo']);
         } else {
-            $result['actions']['jumpTo']['attribute'] = 'data-lightbox';
+            $parsed['actions']['jumpTo']['attribute'] = 'data-lightbox';
         }
 
-        $event->setResult($result);
+        $event->setResult($parsed);
     }
 
 
@@ -167,13 +190,13 @@ class Subscriber implements EventSubscriberInterface
         $settings = $event->getRenderSettings();
         if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
             || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
-            || !self::offerIsEditableForHost($event->getItem())
+            || self::offerIsEditableForHost($event->getItem())
         ) {
             return;
         }
 
         $result = $event->getResult();
-        unset($result['actions']['edit']);
+        $result['actions']['edit']['class'] .= ' disabled';
 
         $event->setResult($result);
     }
@@ -234,14 +257,12 @@ class Subscriber implements EventSubscriberInterface
         $settings = $event->getRenderSettings();
         if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
             || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
-            || !self::offerIsEditableForHost($event->getItem())
         ) {
             return;
         }
 
         $result = $event->getResult();
-
-        $result['actions'][] = [
+        $button = [
             'link'      => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][1],
             'class'     => 'delete',
@@ -257,6 +278,11 @@ class Subscriber implements EventSubscriberInterface
                 ) . '\')"',
         ];
 
+        if (!self::offerIsEditableForHost($event->getItem())) {
+            $button['class'] .= ' disabled';
+        }
+
+        $result['actions'][] = $button;
         $event->setResult($result);
     }
 
@@ -280,20 +306,24 @@ class Subscriber implements EventSubscriberInterface
             || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
             || $passRelease->get('id') !== $filterParams['pass_release']['value']
             || $event->getItem()->isVariant()
-            || !self::offerIsEditableForHost($event->getItem())
         ) {
             return;
         }
 
-        $parsed = $event->getResult();
 
-        $parsed['actions'][] = [
-            'link'      => $GLOBALS['TL_LANG']['MSC']['copyLink'][0],
-            'title'     => $GLOBALS['TL_LANG']['MSC']['copyLink'][1],
-            'class'     => 'copy',
-            'href'      => str_replace('act=edit', 'act=copy', $parsed['editUrl']),
+        $parsed = $event->getResult();
+        $button = [
+            'link'  => $GLOBALS['TL_LANG']['MSC']['copyLink'][0],
+            'title' => $GLOBALS['TL_LANG']['MSC']['copyLink'][1],
+            'class' => 'copy',
+            'href'  => str_replace('act=edit', 'act=copy', $parsed['editUrl']),
         ];
 
+        if (!self::offerIsEditableForHost($event->getItem())) {
+            $button['class'] .= ' disabled';
+        }
+
+        $parsed['actions'][] = $button;
         $event->setResult($parsed);
     }
 
@@ -326,16 +356,21 @@ class Subscriber implements EventSubscriberInterface
         $urlBuilder = UrlBuilder::fromUrl($parsed['actions']['edit']['href']);
         $urlBuilder
             ->setQueryParameter('act', 'create')
-            ->setQueryParameter('vargroup', $event->getItem()->get('id'))
+            ->setQueryParameter('vargroup', $urlBuilder->getQueryParameter('id'))
             ->unsetQueryParameter('id');
 
-        $parsed['actions'][] = [
-            'link'      => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][0],
-            'title'     => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][1],
-            'class'     => 'createVariant',
-            'href'      => $urlBuilder->getUrl(),
+        $button = [
+            'link'  => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][0],
+            'title' => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][1],
+            'class' => 'createVariant',
+            'href'  => $urlBuilder->getUrl(),
         ];
 
+        if (!self::offerIsEditableForHost($event->getItem())) {
+            $button['class'] .= ' disabled';
+        }
+
+        $parsed['actions'][] = $button;
         $event->setResult($parsed);
     }
 
@@ -362,6 +397,22 @@ class Subscriber implements EventSubscriberInterface
      */
     private static function getHostEditEnd(IItem $offer)
     {
-        return $offer->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end'];
+        $passRelease = $offer->get('pass_release');
+        if (null === $passRelease) {
+            $offer->getMetaModel()->getServiceContainer()->getEventDispatcher()->dispatch(
+                ContaoEvents::SYSTEM_LOG,
+                new LogEvent(
+                    sprintf(
+                        'Could not access the pass_release property.'
+                    ),
+                    __METHOD__,
+                    TL_ERROR
+                )
+            );
+
+            return null;
+        }
+
+        return $passRelease[MetaModelSelect::SELECT_RAW]['host_edit_end'];
     }
 }
