@@ -36,7 +36,6 @@ TemplateLoader::addFiles(array
 
 	// MetaModel
     'metamodel_details_in_lightbox'                     => 'system/modules/ferienpass/templates',
-    'metamodel_multiple_buttons'                        => 'system/modules/ferienpass/templates',
     'metamodel_table'                                   => 'system/modules/ferienpass/templates',
     'mm_attr_age'                                       => 'system/modules/ferienpass/templates',
     'mm_attr_tabletext_xmlexport'                       => 'system/modules/ferienpass/templates',
