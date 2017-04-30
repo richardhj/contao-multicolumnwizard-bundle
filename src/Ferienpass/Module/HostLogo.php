@@ -11,6 +11,7 @@
 namespace Ferienpass\Module;
 
 
+use Contao\FrontendUser;
 use Haste\Form\Form;
 
 
@@ -34,7 +35,11 @@ class HostLogo extends Items
      */
     protected function compile()
     {
-        $this->fetchItem(\FrontendUser::getInstance()->ferienpass_host);
+        global $container;
+
+        /** @var FrontendUser $user */
+        $user = $container['user'];
+        $this->fetchItem($user->ferienpass_host);
 
         $form = new Form(
             $this->type.'_'.$this->id, 'POST', function ($haste) {
