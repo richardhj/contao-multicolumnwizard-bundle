@@ -98,17 +98,17 @@ class Subscriber implements EventSubscriberInterface
 
         switch ($event->getList()->getMetaModel()->getTableName()) {
             case 'mm_ferienpass':
-                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editOffer'];
+//                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editOffer'];
                 $caller->Template->addNewLabel   = $GLOBALS['TL_LANG']['MSC']['addNewOffer'];
                 break;
 
             case 'mm_participant':
-                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editParticipant'];
+//                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editParticipant'];
                 $caller->Template->addNewLabel   = $GLOBALS['TL_LANG']['MSC']['addNewParticipant'];
                 break;
 
             case 'mm_host':
-                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editHost'];
+//                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editHost'];
                 break;
         }
     }
@@ -403,7 +403,7 @@ class Subscriber implements EventSubscriberInterface
                 ContaoEvents::SYSTEM_LOG,
                 new LogEvent(
                     sprintf(
-                        'Could not access the pass_release property.'
+                        'Could not access the pass_release property'
                     ),
                     __METHOD__,
                     TL_ERROR
