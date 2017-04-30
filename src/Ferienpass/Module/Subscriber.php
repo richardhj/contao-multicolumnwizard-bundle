@@ -99,12 +99,12 @@ class Subscriber implements EventSubscriberInterface
         switch ($event->getList()->getMetaModel()->getTableName()) {
             case 'mm_ferienpass':
 //                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editOffer'];
-                $caller->Template->addNewLabel   = $GLOBALS['TL_LANG']['MSC']['addNewOffer'];
+                $caller->Template->addNewLabel = $GLOBALS['TL_LANG']['MSC']['addNewOffer'];
                 break;
 
             case 'mm_participant':
 //                $event->getTemplate()->editLabel = $GLOBALS['TL_LANG']['MSC']['editParticipant'];
-                $caller->Template->addNewLabel   = $GLOBALS['TL_LANG']['MSC']['addNewParticipant'];
+                $caller->Template->addNewLabel = $GLOBALS['TL_LANG']['MSC']['addNewParticipant'];
                 break;
 
             case 'mm_host':
@@ -237,7 +237,7 @@ class Subscriber implements EventSubscriberInterface
         $urlBuilder->setQueryParameter('items', $parsed['raw']['alias']);
 
         $parsed['actions'][] = [
-            'link'  => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][0],
+            'label' => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][0],
             'title' => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][1],
             'class' => 'applicationlist',
             'href'  => $urlBuilder->getUrl(),
@@ -263,7 +263,7 @@ class Subscriber implements EventSubscriberInterface
 
         $result = $event->getResult();
         $button = [
-            'link'      => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
+            'label'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][1],
             'class'     => 'delete',
             'href'      => strtok(\Environment::get('request'), '?') .
@@ -313,7 +313,7 @@ class Subscriber implements EventSubscriberInterface
 
         $parsed = $event->getResult();
         $button = [
-            'link'  => $GLOBALS['TL_LANG']['MSC']['copyLink'][0],
+            'label' => $GLOBALS['TL_LANG']['MSC']['copyLink'][0],
             'title' => $GLOBALS['TL_LANG']['MSC']['copyLink'][1],
             'class' => 'copy',
             'href'  => str_replace('act=edit', 'act=copy', $parsed['editUrl']),
@@ -360,7 +360,7 @@ class Subscriber implements EventSubscriberInterface
             ->unsetQueryParameter('id');
 
         $button = [
-            'link'  => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][0],
+            'label' => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][0],
             'title' => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][1],
             'class' => 'createVariant',
             'href'  => $urlBuilder->getUrl(),
