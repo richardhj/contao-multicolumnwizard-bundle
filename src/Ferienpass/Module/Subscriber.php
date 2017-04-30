@@ -11,10 +11,13 @@
 namespace Ferienpass\Module;
 
 
+use Contao\Environment;
+use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Events\ParseItemEvent;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\FrontendIntegration\HybridList;
+use MetaModels\IItem;
 use MetaModels\Item;
 use MetaModels\MetaModelsEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -27,6 +30,18 @@ class Subscriber implements EventSubscriberInterface
      * This property will get set on the render setting collection.
      */
     const FILTER_PARAMS_FLAG = '$filter-params';
+
+
+    /**
+     * This property will get set on the render setting collection.
+     */
+    const HOST_EDITING_ENABLED_FLAG = '$host-editing';
+
+
+    /**
+     * This property will get set on the render setting collection.
+     */
+    const JUMP_TO_APPLICATION_LIST_FLAG = '$jump-to-application-list';
 
 
     /**
@@ -74,7 +89,6 @@ class Subscriber implements EventSubscriberInterface
     public function alterFrontendEditingLabelInListRendering(RenderItemListEvent $event)
     {
         $caller = $event->getCaller();
-
         if (!($caller instanceof HybridList)) {
             return;
         }
@@ -105,13 +119,15 @@ class Subscriber implements EventSubscriberInterface
     public function alterHostMetaModelList(RenderItemListEvent $event)
     {
         $caller = $event->getCaller();
-        if (!($caller instanceof HybridList)) {
+        if ('mm_ferienpass' !== $event->getList()->getMetaModel()->getTableName()
+            || !($caller instanceof HostEditingList)
+        ) {
             return;
         }
-        //@TODO check for host metamodel list
 
-        $filterParams = deserialize($caller->metamodel_filterparams);
-        $event->getList()->getView()->set(self::FILTER_PARAMS_FLAG, $filterParams);
+        $event->getList()->getView()->set(self::HOST_EDITING_ENABLED_FLAG, true);
+        $event->getList()->getView()->set(self::FILTER_PARAMS_FLAG, deserialize($caller->metamodel_filterparams));
+        $event->getList()->getView()->set(self::JUMP_TO_APPLICATION_LIST_FLAG, $caller->jumpTo_application_list);
     }
 
 
@@ -122,7 +138,10 @@ class Subscriber implements EventSubscriberInterface
      */
     public function alterDetailsLink(ParseItemEvent $event)
     {
-        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
+        $settings = $event->getRenderSettings();
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
+            || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
+        ) {
             return;
         }
 
@@ -145,14 +164,16 @@ class Subscriber implements EventSubscriberInterface
      */
     public function alterEditLink(ParseItemEvent $event)
     {
-        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
+        $settings = $event->getRenderSettings();
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
+            || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
+            || !self::offerIsEditableForHost($event->getItem())
+        ) {
             return;
         }
 
         $result = $event->getResult();
-        if (time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']) {
-            unset($result['actions']['jumpTo']);
-        }
+        unset($result['actions']['edit']);
 
         $event->setResult($result);
     }
@@ -165,40 +186,38 @@ class Subscriber implements EventSubscriberInterface
      */
     public function addApplicationListLink(ParseItemEvent $event)
     {
-        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
-            return;
-        }
-
         global $container;
 
-        $settings = $event->getRenderSettings();
-        if (!$settings->get(self::FILTER_PARAMS_FLAG)) {
-            return;
-        }
-
-        $parsed = $event->getResult();
-
         /** @var Item $passRelease */
-        $passRelease = $container['ferienpass.pass-release.show-current'];
-        if (null === $passRelease) {
-            // TODO overthink error handling
-            return;
-        }
+        $passRelease  = $container['ferienpass.pass-release.show-current'];
+        $settings     = $event->getRenderSettings();
+        $filterParams = $settings->get(self::FILTER_PARAMS_FLAG);
+        /** @var \Model\Collection $jumpTo */
+        $jumpTo = \PageModel::findByPk($settings->get(self::JUMP_TO_APPLICATION_LIST_FLAG));
 
-        if ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount()
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
+            || null === $passRelease
+            || null === $jumpTo
+            || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
             || !$event->getItem()->get('applicationlist_active')
-            || $passRelease->get('id') != $settings->get(self::FILTER_PARAMS_FLAG)['pass_release']['value']
+            || $passRelease->get('id') !== $filterParams['pass_release']['value']
+            || !($event->getItem()->isVariantBase() && !$event->getItem()->getVariants(null)->getCount())
         ) {
             return;
         }
 
-        $v = 19; // todo configurable
+        /** @var Environment $environment */
+        $environment = $container['environment'];
+        $parsed      = $event->getResult();
+
+        $urlBuilder = UrlBuilder::fromUrl($environment->get('uri'));
+        $urlBuilder->setQueryParameter('items', $parsed['raw']['alias']);
 
         $parsed['actions'][] = [
             'link'  => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][0],
             'title' => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][1],
             'class' => 'applicationlist',
-            'href'  => $this->generateJumpToLink($v, $parsed['raw']['alias']),
+            'href'  => $urlBuilder->getUrl(),
         ];
 
         $event->setResult($parsed);
@@ -212,14 +231,16 @@ class Subscriber implements EventSubscriberInterface
      */
     public function addDeleteLink(ParseItemEvent $event)
     {
-        $a = $event->getItem()->get('pass_release');
+        $settings = $event->getRenderSettings();
         if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
-            || time() > $event->getItem()->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end']
+            || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
+            || !self::offerIsEditableForHost($event->getItem())
         ) {
             return;
         }
 
-        $result              = $event->getResult();
+        $result = $event->getResult();
+
         $result['actions'][] = [
             'link'      => $GLOBALS['TL_LANG']['MSC']['deleteLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['deleteLink'][1],
@@ -247,40 +268,30 @@ class Subscriber implements EventSubscriberInterface
      */
     public function addCopyLink(ParseItemEvent $event)
     {
-        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
-            return;
-        }
-
         global $container;
 
-
         /** @var Item $passRelease */
-        $passRelease = $container['ferienpass.pass-release.edit-previous'];
-        if (null === $passRelease) {
-            // TODO overthink error handling
-            return;
-        }
-
-        $settings = $event->getRenderSettings();
-        if (!$settings->get(self::FILTER_PARAMS_FLAG)) {
-            return;
-        }
-
+        $passRelease  = $container['ferienpass.pass-release.edit-previous'];
+        $settings     = $event->getRenderSettings();
         $filterParams = $settings->get(self::FILTER_PARAMS_FLAG);
 
-        if ($passRelease->get('id') != $filterParams['pass_release']['value']
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
+            || null === $passRelease
+            || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
+            || $passRelease->get('id') !== $filterParams['pass_release']['value']
             || $event->getItem()->isVariant()
+            || !self::offerIsEditableForHost($event->getItem())
         ) {
             return;
         }
 
-        $parsed              = $event->getResult();
+        $parsed = $event->getResult();
+
         $parsed['actions'][] = [
             'link'      => $GLOBALS['TL_LANG']['MSC']['copyLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['copyLink'][1],
             'class'     => 'copy',
             'href'      => str_replace('act=edit', 'act=copy', $parsed['editUrl']),
-            'attribute' => '',
         ];
 
         $event->setResult($parsed);
@@ -294,43 +305,35 @@ class Subscriber implements EventSubscriberInterface
      */
     public function addCreateVariantLink(ParseItemEvent $event)
     {
-        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()) {
-            return;
-        }
-
         global $container;
 
-        $settings = $event->getRenderSettings();
-        if (!$settings->get(self::FILTER_PARAMS_FLAG)) {
-            return;
-        }
+        /** @var Item $passRelease */
+        $passRelease  = $container['ferienpass.pass-release.edit-current'];
+        $settings     = $event->getRenderSettings();
         $filterParams = $settings->get(self::FILTER_PARAMS_FLAG);
 
-        /** @var Item $passRelease */
-        $passRelease = $container['ferienpass.pass-release.edit-current'];
-        if (null === $passRelease) {
-            // TODO overthink error handling
-            return;
-        }
-
-        if (!($passRelease->get('id') == $filterParams['pass_release']['value']
-              && $event->getItem()->isVariantBase()
-              && $event->getItem()->getVariants(null)->getCount())
+        if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
+            || null === $passRelease
+            || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
+            || $passRelease->get('id') !== $filterParams['pass_release']['value']
+            || !($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount())
         ) {
             return;
         }
 
-        $parsed              = $event->getResult();
+        $parsed = $event->getResult();
+
+        $urlBuilder = UrlBuilder::fromUrl($parsed['actions']['edit']['href']);
+        $urlBuilder
+            ->setQueryParameter('act', 'create')
+            ->setQueryParameter('vargroup', $event->getItem()->get('id'))
+            ->unsetQueryParameter('id');
+
         $parsed['actions'][] = [
             'link'      => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][0],
             'title'     => $GLOBALS['TL_LANG']['MSC']['createVariantLink'][1],
             'class'     => 'createVariant',
-            'href'      => str_replace(
-                ['act=edit', 'id'],
-                ['act=create', 'vargroup'],
-                $parsed['editUrl']
-            ),
-            'attribute' => '',
+            'href'      => $urlBuilder->getUrl(),
         ];
 
         $event->setResult($parsed);
@@ -338,33 +341,27 @@ class Subscriber implements EventSubscriberInterface
 
 
     /**
-     * Create link by given id and item alias
+     * Check whether one offer is editable for the host by checking the edit deadline
      *
-     * @param  integer $pageId
-     * @param  string  $alias
+     * @param IItem $offer
      *
-     * @return string
+     * @return bool
      */
-    protected function generateJumpToLink($pageId, $alias)
+    private static function offerIsEditableForHost(IItem $offer)
     {
-        if ($pageId < 1) {
-            return '';
-        }
+        return (time() <= self::getHostEditEnd($offer));
+    }
 
-        $url = ampersand(\Environment::get('request'), true);
 
-        /** @var \Model\Collection $target */
-        $target = \PageModel::findByPk($pageId);
-
-        if (null !== $target) {
-            $url = ampersand(
-                \Controller::generateFrontendUrl(
-                    $target->row(),
-                    ((\Config::get('useAutoItem') && !\Config::get('disableAlias')) ? '/%s' : '/items/%s')
-                )
-            );
-        }
-
-        return sprintf($url, $alias);
+    /**
+     * Get the host edit deadline for a pacific offer
+     *
+     * @param IItem $offer
+     *
+     * @return mixed
+     */
+    private static function getHostEditEnd(IItem $offer)
+    {
+        return $offer->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end'];
     }
 }
