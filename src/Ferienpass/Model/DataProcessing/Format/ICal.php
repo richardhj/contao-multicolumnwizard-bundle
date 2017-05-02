@@ -107,7 +107,7 @@ class ICal implements FormatInterface
      */
     public function backSyncFiles(array $files, string $filesystem): void
     {
-        // TODO: Implement backSyncFiles() method.
+        // Back sync is not allowed. Nothing to do here.
     }
 
     /**
