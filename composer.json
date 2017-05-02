@@ -15,7 +15,7 @@
     "email": "richard@ferienpass.online"
   },
   "require": {
-    "php": "^5.4 || ^7.0",
+    "php": "^7.0",
     "codefog/contao-haste": "~4.11",
     "contao-community-alliance/dependency-container": "~1.8",
     "contao-community-alliance/event-dispatcher": "~1.3",
