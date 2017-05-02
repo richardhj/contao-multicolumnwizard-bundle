@@ -183,24 +183,20 @@ class Dropbox implements FilesystemInterface
             }
         }
 
-        // Sync xml files
-        /** @var DataProcessing\Format\Xml $xmlHandler */
-        if (($xmlHandler = $this->getModel()->getFormatHandler()) instanceof DataProcessing\Format\Xml) {
-
-            $xmlHandler->syncXmlFilesWithModel(
-                array_map(
+        $formatHandler = $this->getModel()->getFormatHandler();
+        $formatHandler->backSyncFiles(
+            array_map(
+                function ($value) {
+                    return $value[1];
+                },
+                array_filter(
+                    $files,
                     function ($value) {
-                        return $value[1];
-                    },
-                    array_filter(
-                        $files,
-                        function ($value) {
-                            return 'xml' === $value['qqqq'];
-                        }
-                    )
-                ),
-                'dropbox'
-            );
-        }
+                        return 'xml' === $value['qqqq'];
+                    }
+                )
+            ),
+            'dropbox'
+        );
     }
 }

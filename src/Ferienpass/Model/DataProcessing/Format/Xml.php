@@ -33,7 +33,6 @@ class Xml implements FormatInterface
      */
     private $model;
 
-
     /**
      * @var IItems
      */
@@ -74,9 +73,23 @@ class Xml implements FormatInterface
     }
 
     /**
+     * @return bool
+     */
+    public function isCombineVariants(): bool
+    {
+        return $this->getModel()->combine_variants;
+    }
+
+
+    public function getVariantDelimiter(): string
+    {
+        return self::VARIANT_DELIMITER;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function processItems(): self
+    public function processItems(): FormatInterface
     {
         if (null === $this->getItems()) {
             $this->files = [];
@@ -105,6 +118,16 @@ class Xml implements FormatInterface
             ->listContents(sprintf('local://%s/xml', $this->getModel()->getTmpPath()));
 
         return $this;
+    }
+
+
+    /**
+     * @param array  $files
+     * @param string $filesystem
+     */
+    public function backSyncFiles(array $files, string $filesystem = 'local'): void
+    {
+        $this->syncXmlFilesWithModel($files, $filesystem);
     }
 
     /**
@@ -171,9 +194,9 @@ class Xml implements FormatInterface
     {
         $variants = null;
 
-        // If we combine variants, only variant bases will be exported
-        if ($this->getModel()->combine_variants) {
+        if ($this->isCombineVariants()) {
             if ($offer->isVariant()) {
+                // If we combine variants, only variant bases will be exported
                 return null;
             }
 
@@ -185,54 +208,70 @@ class Xml implements FormatInterface
         $root = $dom->createElement('Offer');
         $root->setAttribute('id', $offer->get('id'));
 
-        // Add variant ids (order will be important for following processings)
+        // Add variant ids
         if (null !== $variants && $variants->getCount()) {
-            $variantIds = [];
-
-            while ($variants->next()) {
-                $variantIds[] = $variants->getItem()->get('id');
-            }
-
-            $root->setAttribute('variant_ids', implode(',', $variantIds));
+            $root->setAttribute(
+                'variant_ids',
+                implode(
+                    ',',
+                    array_map(
+                        function (IItem $variant) {
+                            return $variant->get('id');
+                        },
+                        iterator_to_array($variants)
+                    )
+                )
+            );
         }
 
         // Walk each attribute in render setting
         foreach ($renderSetting->getSettingNames() as $colName) {
             $attribute = $offer->getAttribute($colName);
 
+            // Prepare attribute node by setting attribute id
+            $domAttribute = $dom->createElement(static::camelCase($colName));
+            $domAttribute->setAttribute('attr_id', $attribute->get('id'));
+
             // It is a variant attribute
-            if ($this->getModel()->combine_variants && $variants->getCount() && $attribute->get('isvariant')) {
+            if ($this->isCombineVariants() && $variants->getCount() && $attribute->get('isvariant')) {
                 // Fetch variants
-                $parsed = [];
+//                $parsed = [];
                 $variants->reset();
 
                 // Parse each attribute with render setting
                 while ($variants->next()) {
-                    $parsed[] = $variants->getItem()->parseAttribute($colName, 'text', $renderSetting)['text'];
+//                    $parsed[] = $variants->getItem()->parseAttribute($colName, 'text', $renderSetting)['text'];
+                    //TODO: This will not work for xml parsed attributes
+                    $domVariant = $dom->createElement(
+                        'VariantValue',
+                        $variants->getItem()->parseAttribute($colName, 'text', $renderSetting)['text']
+                    );
+                    $domVariant->setAttribute('variant_id', $variants->getItem()->get('id'));
+                    $domAttribute->appendChild($domVariant);
+
+                    if ($variants->offsetExists($variants->key() + 1)) {
+                        $domAttribute->nodeValue .= $this->getVariantDelimiter();
+                    }
                 }
 
-                // Combine variant attributes
-                $parsed = implode(self::VARIANT_DELIMITER, $parsed);
+//                // Combine variant attributes
+//                $parsed = implode(self::VARIANT_DELIMITER, $parsed);
             } // Default procedure for non-variant attributes
             else {
                 // Parse attribute with render setting
                 $parsed = $offer->parseAttribute($colName, 'text', $renderSetting);
                 $parsed = $parsed['text'];
+
+                // Set the attribute node's value
+                $domAttribute->nodeValue = htmlspecialchars(
+                    html_entity_decode($parsed),
+                    ENT_XML1
+                ) ?: ' '; // Prohibit empty string
+
+                // Check if parsed attribute is an xml to import
+                // This will override the nodeValue defined before
+                $this->importXmlToNode($parsed, $domAttribute);
             }
-
-            // Prepare attribute node by setting attribute id
-            $domAttribute = $dom->createElement(static::camelCase($colName));
-            $domAttribute->setAttribute('attr_id', $attribute->get('id'));
-
-            // Set the attribute node's value
-            $domAttribute->nodeValue = htmlspecialchars(
-                html_entity_decode($parsed),
-                ENT_XML1
-            ) ?: ' '; // Prohibit empty string
-
-            // Check if parsed attribute is an xml to import
-            // This will override the nodeValue defined before
-            $this->importXmlToNode($parsed, $domAttribute);
 
             $root->appendChild($domAttribute);
         }
@@ -280,7 +319,7 @@ class Xml implements FormatInterface
      * @param array  $files      The xml files. An array formatted like Filesystem->listContents() does
      * @param string $filesystem The filesystem the xml files come from
      */
-    public function syncXmlFilesWithModel(array $files, string $filesystem = 'local'): void
+    protected function syncXmlFilesWithModel(array $files, string $filesystem): void
     {
         /** @var MountManager $manager */
         $manager = $this->getModel()->getMountManager($filesystem);

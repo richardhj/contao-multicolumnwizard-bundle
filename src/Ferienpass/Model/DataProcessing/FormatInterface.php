@@ -44,4 +44,11 @@ interface FormatInterface
      * @return array The file information in the format of `listContents`
      */
     public function getFiles(): array;
+
+
+    /**
+     * @param array  $files
+     * @param string $filesystem
+     */
+    public function backSyncFiles(array $files, string $filesystem): void;
 }

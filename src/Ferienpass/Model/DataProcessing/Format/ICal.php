@@ -74,7 +74,7 @@ class ICal implements FormatInterface
     /**
      * {@inheritdoc}
      */
-    public function processItems(): self
+    public function processItems(): FormatInterface
     {
         $files = [];
         $path = sprintf(
@@ -99,6 +99,15 @@ class ICal implements FormatInterface
         $this->files = $files;
 
         return $this;
+    }
+
+    /**
+     * @param array  $files
+     * @param string $filesystem
+     */
+    public function backSyncFiles(array $files, string $filesystem): void
+    {
+        // TODO: Implement backSyncFiles() method.
     }
 
     /**
