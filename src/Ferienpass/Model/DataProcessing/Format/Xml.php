@@ -14,13 +14,14 @@ namespace Ferienpass\Model\DataProcessing\Format;
 
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\FormatInterface;
+use Ferienpass\Model\DataProcessing\FormatTwoWaySyncInterface;
 use Ferienpass\Model\Offer;
 use League\Flysystem\MountManager;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\IItem;
 use MetaModels\IItems;
 
-class Xml implements FormatInterface
+class Xml implements FormatInterface, FormatTwoWaySyncInterface
 {
     const VARIANT_DELIMITER = ', ';
     /**
