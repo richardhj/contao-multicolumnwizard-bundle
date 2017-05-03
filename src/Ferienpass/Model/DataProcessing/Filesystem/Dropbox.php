@@ -17,7 +17,7 @@ use Dropbox\Exception_NetworkIO;
 use Ferienpass\Flysystem\Plugin\DropboxDelta;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\FilesystemInterface;
-use Ferienpass\Model\DataProcessing\FormatTwoWaySyncInterface;
+use Ferienpass\Model\DataProcessing\Format;
 use MetaModels\IItems;
 
 class Dropbox implements FilesystemInterface
@@ -185,7 +185,7 @@ class Dropbox implements FilesystemInterface
         }
 
         $formatHandler = $this->getModel()->getFormatHandler();
-        if ($formatHandler instanceof FormatTwoWaySyncInterface) {
+        if ($formatHandler instanceof Format\TwoWaySyncInterface) {
             $formatHandler->backSyncFiles(
                 array_map(
                     function ($value) {

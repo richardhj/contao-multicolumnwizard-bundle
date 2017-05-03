@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-namespace Ferienpass\Model\DataProcessing;
+namespace Ferienpass\Model\DataProcessing\Format;
 
 
 /**
@@ -16,7 +16,7 @@ namespace Ferienpass\Model\DataProcessing;
  *
  * @package Ferienpass\Model\DataProcessing
  */
-interface FormatTwoWaySyncInterface
+interface TwoWaySyncInterface
 {
 
     /**
