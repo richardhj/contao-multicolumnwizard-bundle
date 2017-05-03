@@ -68,8 +68,8 @@ class DropboxWebhook
         while (null !== $processings && $processings->next()) {
             $fileSystemHandler = $processings->current()->getFileSystemHandler();
 
-            if ($fileSystemHandler instanceof DataProcessing\Filesystem\Dropbox) {
-                $fileSystemHandler->syncFromRemoteDropbox();
+            if ($fileSystemHandler instanceof DataProcessing\Filesystem\TwoWaySyncInterface) {
+                $fileSystemHandler->triggerBackSync();
             }
         }
     }

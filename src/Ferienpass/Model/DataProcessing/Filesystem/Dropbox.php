@@ -18,9 +18,10 @@ use Ferienpass\Flysystem\Plugin\DropboxDelta;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\FilesystemInterface;
 use Ferienpass\Model\DataProcessing\Format;
+use Ferienpass\Model\DataProcessing\Filesystem;
 use MetaModels\IItems;
 
-class Dropbox implements FilesystemInterface
+class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
 {
     /**
      * @var DataProcessing|\Model $model
@@ -95,10 +96,16 @@ class Dropbox implements FilesystemInterface
         }
     }
 
+
+    public function triggerBackSync(): void
+    {
+        $this->syncFromRemoteDropbox();
+    }
+
     /**
      * Sync from remote dropbox by fetching the delta (last edited files in dropbox)
      */
-    public function syncFromRemoteDropbox(): void
+    protected function syncFromRemoteDropbox(): void
     {
         if (!$this->getModel()->sync) {
             return;
