@@ -19,5 +19,8 @@ namespace Ferienpass\Model\DataProcessing\Filesystem;
 interface TwoWaySyncInterface
 {
 
+    /**
+     * @return void
+     */
     public function triggerBackSync();
 }

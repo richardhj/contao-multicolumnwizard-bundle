@@ -8,7 +8,6 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-
 namespace Ferienpass\Model\DataProcessing\Format;
 
 
@@ -22,7 +21,14 @@ use MetaModels\Attribute\IAttribute;
 use MetaModels\IItem;
 use MetaModels\IItems;
 use MetaModels\IMetaModelsServiceContainer;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+
+/**
+ * Class Xml
+ *
+ * @package Ferienpass\Model\DataProcessing\Format
+ */
 class Xml implements FormatInterface, Format\TwoWaySyncInterface
 {
     const VARIANT_DELIMITER = ', ';
@@ -65,7 +71,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     {
         return $this->model;
     }
-
 
     /**
      * @return IItems
@@ -221,7 +226,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         $root = $dom->createElement('Offer');
         $root->setAttribute('item_id', $offer->get('id'));
 
-        // Add variant ids
         if (null !== $variants && $variants->getCount()) {
             $root->setAttribute(
                 'variant_ids',
@@ -237,30 +241,23 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             );
         }
 
-        // Walk each attribute in render setting
         foreach ($renderSetting->getSettingNames() as $colName) {
             $attribute    = $offer->getAttribute($colName);
             $domAttribute = $dom->createElement(static::camelCase($colName));
             $domAttribute->setAttribute('attr_id', $attribute->get('id'));
 
-            if ($this->isCombineVariants() && $variants->getCount() && $attribute->get('isvariant')) {
+            if (!($this->isCombineVariants() && $variants->getCount() && $attribute->get('isvariant'))) {
+                $parsed = $offer->parseAttribute($colName, 'text', $renderSetting);
+                $this->addParsedToDomAttribute($parsed['text'], $domAttribute);
+            } else {
                 $variants->reset();
 
-                // Parse each attribute with render setting
                 while ($variants->next()) {
                     $domVariantValue = $dom->createElement('_variantValue');
                     $domVariantValue->setAttribute('item_id', $variants->getItem()->get('id'));
 
                     $parsed = $variants->getItem()->parseAttribute($colName, 'text', $renderSetting);
-                    try {
-                        $this->importXmlToNode($parsed['text'], $domVariantValue);
-                    } catch (\RuntimeException $e) {
-                        $domVariantValue->nodeValue = htmlspecialchars(
-                            html_entity_decode($parsed['text']),
-                            ENT_XML1
-                        ) ?: ' '; // Prohibit empty string
-                    }
-
+                    $this->addParsedToDomAttribute($parsed['text'], $domVariantValue);
                     $domAttribute->appendChild($domVariantValue);
 
                     if ($variants->offsetExists($variants->key() + 1)) {
@@ -269,22 +266,25 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                         );
                     }
                 }
-            } else {
-                $parsed = $offer->parseAttribute($colName, 'text', $renderSetting);
-                try {
-                    $this->importXmlToNode($parsed['text'], $domAttribute);
-                } catch (\RuntimeException $e) {
-                    $domAttribute->nodeValue = htmlspecialchars(
-                        html_entity_decode($parsed['text']),
-                        ENT_XML1
-                    ) ?: ' '; // Prohibit empty string
-                }
             }
 
             $root->appendChild($domAttribute);
         }
 
         return $root;
+    }
+
+
+    protected function addParsedToDomAttribute(string $parsed, \DOMElement $domAttribute)
+    {
+        try {
+            $this->importXmlToNode($parsed, $domAttribute);
+        } catch (\RuntimeException $e) {
+            $domAttribute->nodeValue = htmlspecialchars(
+                html_entity_decode($parsed),
+                ENT_XML1
+            ) ?: ' '; // Prohibit empty string
+        }
     }
 
 
@@ -331,19 +331,15 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     {
         global $container;
 
+        /** @var EventDispatcherInterface $dispatcher */
+        $dispatcher = $container['event-dispatcher'];
         /** @var MountManager $mountManager */
         $mountManager = $this->getModel()->getMountManager($filesystem);
         /** @var IMetaModelsServiceContainer $serviceContainer */
         $serviceContainer = $container['metamodels-service-container'];
         $metaModel        = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass');
 
-        // Skip if no files are handed over
-        if (empty($files)) {
-            return;
-        }
-
         foreach ($files as $file) {
-            // Only process xml files
             if ('application/xml' !== $file['mimetype']) {
                 continue;
             }
@@ -353,9 +349,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $dom->loadXML($mountManager->read($filesystem . '://' . $file['path']));
 
             /** @type \DOMElement $root */
-            $root = $dom->getElementsByTagName('Offer')->item(0);
-            $item = $metaModel->findById($root->getAttribute('item_id'));
-            $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',',$root->getAttribute('variant_ids')));
+            $root            = $dom->getElementsByTagName('Offer')->item(0);
+            $item            = $metaModel->findById($root->getAttribute('item_id'));
+            $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',', $root->getAttribute('variant_ids')));
 
 //            // Existing offer was edited
 //            if ($file['timestamp'] < $offer->get('tstamp')) {
@@ -402,7 +398,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
                         // Check for a proper variant
                         if ($variant->get('vargroup') !== $item->get('id')) {
-                            $metaModel->getServiceContainer()->getEventDispatcher()->dispatch(
+                            $dispatcher->dispatch(
                                 ContaoEvents::SYSTEM_LOG,
                                 new LogEvent(
                                     sprintf(

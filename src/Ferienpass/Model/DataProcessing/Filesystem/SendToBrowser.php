@@ -16,6 +16,12 @@ use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\FilesystemInterface;
 use MetaModels\IItems;
 
+
+/**
+ * Class SendToBrowser
+ *
+ * @package Ferienpass\Model\DataProcessing\Filesystem
+ */
 class SendToBrowser implements FilesystemInterface
 {
 
