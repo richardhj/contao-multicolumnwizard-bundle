@@ -144,7 +144,7 @@ abstract class MetaModelBridge
     /**
      * Set MetaModel's owner attribute
      */
-    protected function fetchOwnerAttribute(): void
+    protected function fetchOwnerAttribute()
     {
         if (null !== $this->ownerAttribute) {
             return;

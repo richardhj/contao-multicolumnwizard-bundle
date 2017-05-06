@@ -55,6 +55,18 @@ class ICal implements FormatInterface
     }
 
     /**
+     * @param IItems $items
+     *
+     * @return FormatInterface
+     */
+    public function setItems(IItems $items): FormatInterface
+    {
+        $this->items = $items;
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getFiles(): array
@@ -65,10 +77,9 @@ class ICal implements FormatInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $items)
+    public function __construct(DataProcessing $model)
     {
         $this->model = $model;
-        $this->items = $items;
     }
 
     /**

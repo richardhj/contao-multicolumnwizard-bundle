@@ -359,7 +359,7 @@ class Dca implements EventSubscriberInterface
         /** @var IMetaModelsServiceContainer $serviceContainer */
         $serviceContainer = $container['metamodels-service-container'];
 
-        $return  = [];
+        $return = [];
 
         foreach ($serviceContainer->getFactory()->collectNames() as $table) {
             $return[$table] = $serviceContainer->getFactory()->getMetaModel($table)->getName();
@@ -410,7 +410,9 @@ class Dca implements EventSubscriberInterface
     public function getNotificationChoices()
     {
         $notifications = \Database::getInstance()
-            ->query("SELECT id,title FROM tl_nc_notification WHERE type='application_list_status_change' ORDER BY title");
+            ->query(
+                "SELECT id,title FROM tl_nc_notification WHERE type='application_list_status_change' ORDER BY title"
+            );
 
         return $notifications->fetchEach('title');
     }
@@ -664,15 +666,22 @@ class Dca implements EventSubscriberInterface
         while (null !== $processing && $processing->next()) {
             if (!$processing->xml_single_file) {
 
-                $ids = array_map(
-                    function ($item) {
-                        /** @var IItem $item */
-                        return $item->get('id');
-                    },
-                    $model->getItem()->getVariants(null)
-                );
+                $variants = $model->getItem()->getVariants(null);
+
+                $ids = [];
+                if (null !== $variants) {
+                    $ids = array_map(
+                        function ($item) {
+                            /** @var IItem $item */
+                            return $item->get('id');
+                        },
+                        iterator_to_array($variants)
+                    );
+                }
+
                 $ids = array_merge([$model->getId()], $ids);
 
+                // FIXME getting troubles when using single_xml_file
                 $filterRule = new StaticIdList($ids);
                 $processing->current()
                     ->getFilter()
@@ -764,7 +773,7 @@ class Dca implements EventSubscriberInterface
             ->getDefinition('properties');
 
         if (!$element->metamodel_filtering) {
-            $propertiesDefinition->removeProperty('metamodel_filterparams');
+//            $propertiesDefinition->removeProperty('metamodel_filterparams');
             return;
         }
 
@@ -772,8 +781,9 @@ class Dca implements EventSubscriberInterface
             ->getFilterFactory()
             ->createCollection($element->metamodel_filtering);
 
-        $property           = $propertiesDefinition->getProperty('metamodel_filterparams');
-        $extra              = $property->getExtra();
+        $property = $propertiesDefinition->getProperty('metamodel_filterparams');
+        $extra    = $property->getExtra();
+
         $extra['subfields'] = $filterSettings->getParameterDCA();
         $property->setExtra($extra);
     }
@@ -794,32 +804,33 @@ class Dca implements EventSubscriberInterface
             && $model->getProperty('show_current')
         ) {
             /** @var ContentModel|\Model $listElement */
-            $listElement  = ContentModel::findById(20); // TODO hardcoded
+            $listElements = ContentModel::findBy(['type=?', 'is_offer_list=1'], ['metamodel_content']);
             $filterParams = deserialize($listElement->metamodel_filterparams);
 
             $filterParams['pass_release']['value'] = $model->getId();
-            $listElement->metamodel_filterparams   = serialize($filterParams);
-            $listElement->save();
+            while ($listElements->next()) {
+                $listElements->metamodel_filterparams = serialize($filterParams);
+                $listElements->save();
+            }
 
             //TODO #3 make subdca field readonly
         }
+
+        //todo change is_edit_list
 
         // Switch edit_current and edit_previous
         if ($model->getProperty('edit_current') !== $event->getOriginalModel()->getProperty('edit_current')
             && $model->getProperty('edit_current')
         ) {
-            $filterRule  = new SimpleQuery(
-                'SELECT id FROM mm_ferienpass_relase WHERE edit_current=1 AND id<>?',
-                [$model->getId()]
-            );
-            $filter      = $model->getItem()->getMetaModel()->getEmptyFilter()->addFilterRule($filterRule);
-            $passRelease = $model->getItem()->getMetaModel()->findByFilter($filter);
-
-            while ($passRelease->next()) {
-                $passRelease->getItem()->set('edit_current', '0');
-                $passRelease->getItem()->set('edit_previous', '1');
-                $passRelease->getItem()->save();
-            }
+            $model
+                ->getItem()
+                ->getMetaModel()
+                ->getServiceContainer()
+                ->getDatabase()
+                ->prepare(
+                    "UPDATE mm_ferienpass_release SET edit_current=0, edit_previous=1 WHERE edit_current=1 AND id=?"
+                )
+                ->execute($model->getId());
         }
     }
 

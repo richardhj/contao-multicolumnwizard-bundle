@@ -27,9 +27,15 @@ interface FormatInterface
      * FormatInterface constructor.
      *
      * @param DataProcessing $model
-     * @param IItems         $items
      */
-    public function __construct(DataProcessing $model, IItems $items);
+    public function __construct(DataProcessing $model);
+
+    /**
+     * @param IItems $items
+     *
+     * @return FormatInterface
+     */
+    public function setItems(IItems $items): self;
 
     /**
      * Process the items and provide the files in the expected format

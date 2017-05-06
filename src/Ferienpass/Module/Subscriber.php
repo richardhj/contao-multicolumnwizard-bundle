@@ -123,11 +123,12 @@ class Subscriber implements EventSubscriberInterface
     {
         $caller = $event->getCaller();
         if ('mm_ferienpass' !== $event->getList()->getMetaModel()->getTableName()
-            || !($caller instanceof HostEditingList)
+            || 'host_edit' !== $caller->ferienpass_metamodel_list
         ) {
             return;
         }
 
+        //TODO Same instance of render settings results in same settings for different lists with these settings
         $event->getList()->getView()->set(self::HOST_EDITING_ENABLED_FLAG, true);
         $event->getList()->getView()->set(self::FILTER_PARAMS_FLAG, deserialize($caller->metamodel_filterparams));
         $event->getList()->getView()->set(self::JUMP_TO_APPLICATION_LIST_FLAG, $caller->jumpTo_application_list);

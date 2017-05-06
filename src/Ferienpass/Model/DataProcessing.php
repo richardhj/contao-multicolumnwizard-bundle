@@ -110,13 +110,17 @@ class DataProcessing extends Model
         if (null === $this->formatHandler) {
             switch ($this->format) {
                 case 'xml':
-                    $this->formatHandler = new Xml($this, $this->getItems());
+                    $this->formatHandler = new Xml($this);
                     break;
 
                 case 'ical':
-                    $this->formatHandler = new ICal($this, $this->getItems());
+                    $this->formatHandler = new ICal($this);
                     break;
             }
+        }
+
+        if (null !== $this->items) {
+            $this->formatHandler->setItems($this->getItems());
         }
 
         return $this->formatHandler;
@@ -130,17 +134,21 @@ class DataProcessing extends Model
         if (null === $this->fileSystemHandler) {
             switch ($this->filesystem) {
                 case 'local':
-                    $this->fileSystemHandler = new Local($this, $this->getItems());
+                    $this->fileSystemHandler = new Local($this);
                     break;
 
                 case 'sendToBrowser':
-                    $this->fileSystemHandler = new SendToBrowser($this, $this->getItems());
+                    $this->fileSystemHandler = new SendToBrowser($this);
                     break;
 
                 case 'dropbox':
-                    $this->fileSystemHandler = new Dropbox($this, $this->getItems());
+                    $this->fileSystemHandler = new Dropbox($this);
                     break;
             }
+        }
+
+        if (null !== $this->items) {
+            $this->fileSystemHandler->setItems($this->getItems());
         }
 
         return $this->fileSystemHandler;
@@ -273,7 +281,7 @@ class DataProcessing extends Model
     /**
      * Run data processing by its configuration
      */
-    public function run(): void
+    public function run()
     {
         // Provide filter
         $this
@@ -344,7 +352,7 @@ class DataProcessing extends Model
     /**
      * @param string $fileSystem
      */
-    protected function mountFileSystem($fileSystem): void
+    protected function mountFileSystem($fileSystem)
     {
         global $container;
 

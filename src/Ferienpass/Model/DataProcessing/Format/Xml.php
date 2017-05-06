@@ -12,18 +12,21 @@
 namespace Ferienpass\Model\DataProcessing\Format;
 
 
+use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
+use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\Format;
 use Ferienpass\Model\DataProcessing\FormatInterface;
-use Ferienpass\Model\Offer;
 use League\Flysystem\MountManager;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\IItem;
 use MetaModels\IItems;
+use MetaModels\IMetaModelsServiceContainer;
 
 class Xml implements FormatInterface, Format\TwoWaySyncInterface
 {
     const VARIANT_DELIMITER = ', ';
+
     /**
      * @var array
      */
@@ -42,10 +45,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $items)
+    public function __construct(DataProcessing $model)
     {
         $this->model = $model;
-        $this->items = $items;
     }
 
     /**
@@ -74,6 +76,18 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
     /**
+     * @param IItems $items
+     *
+     * @return FormatInterface
+     */
+    public function setItems(IItems $items): FormatInterface
+    {
+        $this->items = $items;
+
+        return $this;
+    }
+
+    /**
      * @return bool
      */
     public function isCombineVariants(): bool
@@ -81,7 +95,17 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         return $this->getModel()->combine_variants;
     }
 
+    /**
+     * @return bool
+     */
+    public function isXmlSingleFile(): bool
+    {
+        return $this->getModel()->xml_single_file;
+    }
 
+    /**
+     * @return string
+     */
     public function getVariantDelimiter(): string
     {
         return self::VARIANT_DELIMITER;
@@ -98,13 +122,11 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         }
 
         foreach ($this->getXml() as $i => $xml) {
-            $path = ($this->getModel()->xml_single_file)
-                ? $this->getModel()->getTmpPath() . '/xml/offers.xml'
-                : sprintf(
-                    '%s/xml/offer_%s.xml',
-                    $this->getModel()->getTmpPath(),
-                    $i
-                );
+            $path = sprintf(
+                '%s/xml/%s.xml',
+                $this->getModel()->getTmpPath(),
+                ($this->isXmlSingleFile() ? 'offers' : 'offer_' . $i)
+            );
 
             // Save xml in tmp path
             $this
@@ -114,7 +136,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         }
 
         // Fetch all files in xml tmp path
-        $this->files = $this->getModel()
+        $this->files = $this
+            ->getModel()
             ->getMountManager()
             ->listContents(sprintf('local://%s/xml', $this->getModel()->getTmpPath()));
 
@@ -124,27 +147,16 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
     /**
      * @param array  $files
-     * @param string $filesystem
+     * @param string $originFileSystem
      */
-    public function backSyncFiles(array $files, string $filesystem = 'local'): void
+    public function backSyncFiles(array $files, string $originFileSystem = 'local')
     {
-        $this->syncXmlFilesWithModel($files, $filesystem);
+        $this->syncXmlFilesWithModel($files, $originFileSystem);
     }
 
     /**
-     * Camel Case (with first case uppercase) a column name
-     *
-     * @param string $value
-     *
-     * @return string
-     */
-    public static function camelCase($value): string
-    {
-        return preg_replace('/[\s\_\-]/', '', ucwords($value, ' _-'));
-    }
-
-    /**
-     * @return array
+     * @return array The xml contents as array in the format ['item_id'=>'xml'] or simply ['xml'] when creating a
+     *               single xml file
      */
     protected function getXml(): array
     {
@@ -153,13 +165,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         // Create DOM
         $dom = new \DOMDocument('1.0', 'utf-8');
 
-        // Create comment
+        // Add comment
         $commentTemplate = new \FrontendTemplate('dataprocessing_xml_comment');
         $commentTemplate->setData($this->getModel()->row());
         $dom->appendChild($dom->createComment($commentTemplate->parse()));
 
-
-        if ($this->getModel()->xml_single_file) {
+        if ($this->isXmlSingleFile()) {
             $root = $dom->createElement('Offers');
 
             foreach ($this->getItems() as $offer) {
@@ -174,9 +185,10 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             foreach ($this->getItems() as $offer) {
                 $domClone = clone $dom;
                 $domOffer = $this->offerAsDomNode($offer, $domClone);
-                $domClone->appendChild($domOffer);
-
-                $return[$offer->get('id')] = $domClone->saveXML();
+                if (null !== $domOffer) {
+                    $domClone->appendChild($domOffer);
+                    $return[$offer->get('id')] = $domClone->saveXML();
+                }
             }
         }
 
@@ -191,7 +203,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      *
      * @return \DOMElement|null
      */
-    protected function offerAsDomNode(IItem $offer, \DOMDocument $dom): \DOMElement
+    protected function offerAsDomNode(IItem $offer, \DOMDocument $dom)
     {
         $variants = null;
 
@@ -207,7 +219,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         $renderSetting = $offer->getMetaModel()->getView($this->getModel()->metamodel_view);
 
         $root = $dom->createElement('Offer');
-        $root->setAttribute('id', $offer->get('id'));
+        $root->setAttribute('item_id', $offer->get('id'));
 
         // Add variant ids
         if (null !== $variants && $variants->getCount()) {
@@ -227,51 +239,46 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
         // Walk each attribute in render setting
         foreach ($renderSetting->getSettingNames() as $colName) {
-            $attribute = $offer->getAttribute($colName);
-
-            // Prepare attribute node by setting attribute id
+            $attribute    = $offer->getAttribute($colName);
             $domAttribute = $dom->createElement(static::camelCase($colName));
             $domAttribute->setAttribute('attr_id', $attribute->get('id'));
 
-            // It is a variant attribute
             if ($this->isCombineVariants() && $variants->getCount() && $attribute->get('isvariant')) {
-                // Fetch variants
-//                $parsed = [];
                 $variants->reset();
 
                 // Parse each attribute with render setting
                 while ($variants->next()) {
-//                    $parsed[] = $variants->getItem()->parseAttribute($colName, 'text', $renderSetting)['text'];
-                    //TODO: This will not work for xml parsed attributes
-                    $domVariant = $dom->createElement(
-                        'VariantValue',
-                        $variants->getItem()->parseAttribute($colName, 'text', $renderSetting)['text']
-                    );
-                    $domVariant->setAttribute('variant_id', $variants->getItem()->get('id'));
-                    $domAttribute->appendChild($domVariant);
+                    $domVariantValue = $dom->createElement('_variantValue');
+                    $domVariantValue->setAttribute('item_id', $variants->getItem()->get('id'));
+
+                    $parsed = $variants->getItem()->parseAttribute($colName, 'text', $renderSetting);
+                    try {
+                        $this->importXmlToNode($parsed['text'], $domVariantValue);
+                    } catch (\RuntimeException $e) {
+                        $domVariantValue->nodeValue = htmlspecialchars(
+                            html_entity_decode($parsed['text']),
+                            ENT_XML1
+                        ) ?: ' '; // Prohibit empty string
+                    }
+
+                    $domAttribute->appendChild($domVariantValue);
 
                     if ($variants->offsetExists($variants->key() + 1)) {
-                        $domAttribute->nodeValue .= $this->getVariantDelimiter();
+                        $domAttribute->appendChild(
+                            $dom->createElement('_variantDelimiter', $this->getVariantDelimiter())
+                        );
                     }
                 }
-
-//                // Combine variant attributes
-//                $parsed = implode(self::VARIANT_DELIMITER, $parsed);
-            } // Default procedure for non-variant attributes
-            else {
-                // Parse attribute with render setting
+            } else {
                 $parsed = $offer->parseAttribute($colName, 'text', $renderSetting);
-                $parsed = $parsed['text'];
-
-                // Set the attribute node's value
-                $domAttribute->nodeValue = htmlspecialchars(
-                    html_entity_decode($parsed),
-                    ENT_XML1
-                ) ?: ' '; // Prohibit empty string
-
-                // Check if parsed attribute is an xml to import
-                // This will override the nodeValue defined before
-                $this->importXmlToNode($parsed, $domAttribute);
+                try {
+                    $this->importXmlToNode($parsed['text'], $domAttribute);
+                } catch (\RuntimeException $e) {
+                    $domAttribute->nodeValue = htmlspecialchars(
+                        html_entity_decode($parsed['text']),
+                        ENT_XML1
+                    ) ?: ' '; // Prohibit empty string
+                }
             }
 
             $root->appendChild($domAttribute);
@@ -282,14 +289,16 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
 
     /**
-     * Check whether the parsed attribute string is in XML and import the nodes if so
+     * Take an XML string and import the nodes as children to a given node
      *
      * @param string   $attributeParsed
      * @param \DOMNode $attributeNode
+     *
+     * @throws \RuntimeException If $attributeParsed is not a valid xml string
      */
-    protected function importXmlToNode(string $attributeParsed, \DOMNode $attributeNode): void
+    protected function importXmlToNode(string $attributeParsed, \DOMNode $attributeNode)
     {
-        if (!$attributeParsed) {
+        if ('' === $attributeParsed) {
             return;
         }
 
@@ -301,15 +310,13 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
         libxml_clear_errors();
 
-        // It is a xml string
-        if (empty($errors)) {
-            // Reset node
-            $attributeNode->nodeValue = '';
+        if (!empty($errors)) {
+            throw new \RuntimeException('Invalid xml passed');
+        }
 
-            foreach ($dom->childNodes as $element) {
-                $node = $attributeNode->ownerDocument->importNode($element, true);
-                $attributeNode->appendChild($node);
-            }
+        foreach ($dom->childNodes as $element) {
+            $node = $attributeNode->ownerDocument->importNode($element, true);
+            $attributeNode->appendChild($node);
         }
     }
 
@@ -318,12 +325,17 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * Synchronize given xml files with the MetaModel
      *
      * @param array  $files      The xml files. An array formatted like Filesystem->listContents() does
-     * @param string $filesystem The filesystem the xml files come from
+     * @param string $filesystem The filesystem the xml files originate from
      */
-    protected function syncXmlFilesWithModel(array $files, string $filesystem): void
+    protected function syncXmlFilesWithModel(array $files, string $filesystem)
     {
-        /** @var MountManager $manager */
-        $manager = $this->getModel()->getMountManager($filesystem);
+        global $container;
+
+        /** @var MountManager $mountManager */
+        $mountManager = $this->getModel()->getMountManager($filesystem);
+        /** @var IMetaModelsServiceContainer $serviceContainer */
+        $serviceContainer = $container['metamodels-service-container'];
+        $metaModel        = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass');
 
         // Skip if no files are handed over
         if (empty($files)) {
@@ -336,257 +348,161 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 continue;
             }
 
-            $changed = false;
-
             // Load xml document
             $dom = new \DOMDocument('1.0', 'utf-8');
-            $dom->loadXML($manager->read($filesystem . '://' . $file['path']));
+            $dom->loadXML($mountManager->read($filesystem . '://' . $file['path']));
 
             /** @type \DOMElement $root */
             $root = $dom->getElementsByTagName('Offer')->item(0);
+            $item = $metaModel->findById($root->getAttribute('item_id'));
+            $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',',$root->getAttribute('variant_ids')));
 
-            $offer    = Offer::getInstance()->findById($root->getAttribute('id'));
-            $variants = null;
-
-            // Fetch possible variants
-            if ($this->getModel()->combine_variants) {
-                if ($root->hasAttribute('variant_ids')) {
-                    $variants = Offer::getInstance()->findMultipleByIds(
-                        trimsplit(',', $root->getAttribute('variant_ids'))
-                    );
-                }
-            }
-
-            // Existing offer was edited
-            if ($file['timestamp'] < $offer->get('tstamp')) {
-                // Override foreign xml from database
-                $manager->put(
-                    $filesystem . '://' . $file['path'],
-                    $this->generateOfferXml($offer->get('id'))
-                );
-
-                \System::log(
-                    sprintf(
-                        'Could not sync XML file "%s" because offer ID %u was edited afterwards',
-                        $file['path'],
-                        $offer->get('id')
-                    ),
-                    __METHOD__,
-                    TL_ERROR
-                );
-
-                continue;
-            }
+//            // Existing offer was edited
+//            if ($file['timestamp'] < $offer->get('tstamp')) {
+//                $a = $this->setItems($metaModel->findById($offer->get('id')))->processItems()->getFiles();
+//                // Override foreign xml from database
+//                $mountManager->put(
+//                    $filesystem . '://' . $file['path'],
+//                    $this->generateOfferXml($offer->get('id'))
+//                );
+//
+//                \System::log(
+//                    sprintf(
+//                        'Could not sync XML file "%s" because offer ID %u was edited afterwards',
+//                        $file['path'],
+//                        $offer->get('id')
+//                    ),
+//                    __METHOD__,
+//                    TL_ERROR
+//                );
+//
+//                continue;
+//            }
 
             /** @var \DOMElement $element */
             foreach ($root->getElementsByTagName('*') as $element) {
-                // Child nodes are passed too
-                // We only want nodes parsed by an attribute here
+                // Child nodes irrespectively hierarchy are here too, skip them
                 if (!$element->hasAttribute('attr_id')) {
                     continue;
                 }
 
-                $attribute = $offer
+                $attribute = $item
                     ->getMetaModel()
-                    ->getAttributeById((int) $element->getAttribute('attr_id'));
-
+                    ->getAttributeById($element->getAttribute('attr_id'));
                 if (null === $attribute) {
                     continue;
                 }
 
-                // Attribute is variant attribute
-                if ($this->getModel()->combine_variants && $variants !== null && $attribute->get('isvariant')) {
-                    $variantValues = trimsplit(static::VARIANT_DELIMITER, $element->nodeValue);
-
-                    if ($variants->getCount() !== count($variantValues)) {
-                        \System::log(
-                            sprintf(
-                                'Cannot import attribute "%s" (type "%s") for offer ID %u as the delimited variant values are not assignable. Variant IDs by xml attribute: %s. Resolved variant values: %s. Data processing ID %u',
-                                $attribute->getColName(),
-                                $attribute->get('type'),
-                                $offer->get('id'),
-                                $element->nodeValue,
-                                var_export(trimsplit(',', $root->getAttribute('variant_ids')), true),
-                                var_export($variantValues, true),
-                                $this->getModel()->id
-                            ),
-                            __METHOD__,
-                            TL_ERROR
-                        );
-
-                        continue;
-                    }
-
-                    $variants->reset();
-
-                    foreach ($variants as $i => $variant) {
-                        $changedVariant = false;
+                if (!($itemHasVariants && $attribute->get('isvariant'))) {
+                    $this->trackAttributeChange($element, $attribute, $item, $file);
+                } else {
+                    /** @var \DOMElement $variantValue */
+                    foreach ($element->getElementsByTagName('_variantValue') as $variantValue) {
+                        $variant = $metaModel->findById($variantValue->getAttribute('item_id'));
 
                         // Check for a proper variant
-                        if ($variant->get('vargroup') !== $offer->get('id')) {
-                            \System::log(
-                                sprintf(
-                                    'Offer ID %u is not a proper variant of offer ID %u. Rough changes between database and xml file make the processing unable to synchronize attribute ID %u. Data processing ID %u',
-                                    $variant->get('id'),
-                                    $offer->get('id'),
-                                    $attribute->get('id'),
-                                    $this->id
-                                ),
-                                __METHOD__,
-                                TL_ERROR
+                        if ($variant->get('vargroup') !== $item->get('id')) {
+                            $metaModel->getServiceContainer()->getEventDispatcher()->dispatch(
+                                ContaoEvents::SYSTEM_LOG,
+                                new LogEvent(
+                                    sprintf(
+                                        'Offer ID %u is not a proper variant of offer ID %u. Rough changes between database and xml file make the processing unable to synchronize attribute ID %u. Data processing ID %u',
+                                        $variant->get('id'),
+                                        $item->get('id'),
+                                        $attribute->get('id'),
+                                        $this->getModel()->id
+                                    ),
+                                    __METHOD__,
+                                    TL_ERROR
+                                )
                             );
 
                             continue;
                         }
 
-                        $parsed = $variant->parseAttribute(
-                            $attribute->getColName(),
-                            'text',
-                            $variant->getMetaModel()->getView($this->getModel()->metamodel_view)
-                        );
-
-                        // Check for change
-                        if ($variantValues[$i] !== $parsed['text']) {
-                            //@todo whats with date?
-                            $changedVariant = true;
-
-                            $variant->set(
-                                $attribute->getColName(),
-                                $attribute->widgetToValue($variantValues[$i], $variant->get('id'))
-                            );
-                        }
-
-                        if ($changedVariant) {
-                            $variant->save();
-
-                            \System::log(
-                                sprintf(
-                                    'Attribute "%s" for offer variant ID %u was synced from xml file "%s". Data processing ID %u',
-                                    $attribute->getColName(),
-                                    $variant->get('id'),
-                                    $file['path'],
-                                    $this->getModel()->id
-                                ),
-                                __METHOD__,
-                                TL_GENERAL
-                            );
-                        }
+                        $this->trackAttributeChange($variantValue, $attribute, $variant, $file);
                     }
-                } // Attribute is not a variant attribute
-                else {
-                    // $widget will contain the data in the same format as attribute's 'raw' data will
-                    try {
-                        $widget = $this->domElementToNativeWidget(
-                            $element,
-                            $attribute,
-                            $offer->get('id')
-                        );
-                    } catch (\RuntimeException $e) {
-                        \System::log(
-                            sprintf
-                            (
-                                'Could not sync XML file "%s" for offer ID %u. Error message: %s. Data processing ID %u',
-                                $file['path'],
-                                $offer->get('id'),
-                                $e->getMessage(),
-                                $this->id
-                            ),
-                            __METHOD__,
-                            TL_ERROR
-                        );
-
-                        continue;
-                    }
-
-                    $parsed = $offer->parseAttribute(
-                        $attribute->getColName(),
-                        'text',
-                        $offer->getMetaModel()->getView($this->getModel()->metamodel_view)
-                    );
-
-                    // Widget can not be converted back because of its attribute type
-                    if (null === $widget) {
-                        // Do an approximative check
-                        $testDom     = new \DOMDocument('1.0', 'utf-8');
-                        $testElement = $testDom->createElement($element->nodeName, $element->nodeValue);
-                        $this->importXmlToNode($element->nodeValue, $testElement);
-
-                        if ($element->nodeValue != $testElement->nodeValue) {
-                            \System::log(
-                                sprintf
-                                (
-                                    'Attribute "%s" (type "%s") for offer ID %u can not be updated although it was changed. XML value: "%s". Xml parsed database value: "%s". Raw database value: "%s". Data processing ID %u',
-                                    $attribute->getColName(),
-                                    $attribute->get('type'),
-                                    $offer->get('id'),
-                                    $element->nodeValue,
-                                    $testElement->nodeValue,
-                                    var_export($parsed['raw'], true),
-                                    $this->id
-                                ),
-                                __METHOD__,
-                                TL_ERROR
-                            );
-                        }
-                    } // Check for change
-                    elseif ($widget !== $parsed['raw']) {
-                        $changed = true;
-
-                        $offer->set(
-                            $attribute->getColName(),
-                            $widget
-                        );
-                    }
-                }
-            }
-
-            if ($changed) {
-                $offer->save();
-
-                \System::log(
-                    sprintf(
-                        'Offer ID %u was synced from xml file "%s". Data processing ID %u',
-                        $offer->get('id'),
-                        $file['path'],
-                        $this->getModel()->id
-                    ),
-                    __METHOD__,
-                    TL_GENERAL
-                );
-
-                // Trigger sync for other linked dropboxes
-                /** @var DataProcessing|\Model\Collection $objProcessings */
-                $objProcessings = ($this->getModel())::findBy(
-                    [
-                        'filesystem=?',
-                        'sync=1',
-                        'id<>?',
-                    ],
-                    [
-                        'dropbox',
-                        $this->getModel()->id,
-                    ]
-                );
-
-                while (null !== $objProcessings && $objProcessings->next()) {
-                    $objProcessings->current()->run(
-                        array_merge
-                        (
-                            [$offer->get('id')],
-                            array_map(
-                                function ($variant) {
-                                    /** @noinspection PhpUndefinedMethodInspection */
-                                    return $variant->get('id');
-                                },
-                                $variants
-                            ) ?: []
-                        )
-                    );
                 }
             }
         }
     }
 
+
+    /**
+     * Check whether an attribute dom node differs from the attribute's database value, track change and save item
+     *
+     * @param \DOMElement $domAttribute
+     * @param IAttribute  $attribute
+     * @param IItem       $item
+     * @param array       $file
+     */
+    protected function trackAttributeChange(\DOMElement $domAttribute, IAttribute $attribute, IItem $item, array $file)
+    {
+        $widget = $this->domElementToNativeWidget(
+            $domAttribute,
+            $attribute,
+            $item->get('id')
+        );
+        $parsed = $item->parseAttribute(
+            $attribute->getColName(),
+            'text',
+            $item->getMetaModel()->getView($this->getModel()->metamodel_view)
+        );
+
+        // Widget can not be converted back because of its attribute type
+        if (null === $widget) {
+            // Do a check by approximation
+            $testDom     = new \DOMDocument('1.0', 'utf-8');
+            $testElement = $testDom->createElement($domAttribute->nodeName);
+            try {
+                $this->importXmlToNode($parsed['text'], $testElement);
+            } catch (\RuntimeException $e) {
+                $testElement->nodeValue = $parsed['text'];
+            }
+
+            if ($domAttribute->nodeValue != $testElement->nodeValue) {
+                $attribute->getMetaModel()->getServiceContainer()->getEventDispatcher()->dispatch(
+                    ContaoEvents::SYSTEM_LOG,
+                    new LogEvent(
+                        sprintf(
+                            'Attribute "%s" (type "%s") for offer ID %u can not be updated although it was changed. XML value: "%s". Xml parsed database value: "%s". Raw database value: "%s". Data processing ID %u',
+                            $attribute->getColName(),
+                            $attribute->get('type'),
+                            $item->get('id'),
+                            $domAttribute->nodeValue,
+                            $testElement->nodeValue,
+                            var_export($parsed['raw'], true),
+                            $this->getModel()->id
+                        ),
+                        __METHOD__,
+                        TL_ERROR
+                    )
+                );
+            }
+        } // Check for change
+        elseif ($widget !== $parsed['raw']) {
+            $item->set(
+                $attribute->getColName(),
+                $widget
+            );
+            $item->save();
+
+            $attribute->getMetaModel()->getServiceContainer()->getEventDispatcher()->dispatch(
+                ContaoEvents::SYSTEM_LOG,
+                new LogEvent(
+                    sprintf(
+                        'Attribute "%s" for offer variant ID %u was synced from xml file "%s". Data processing ID %u',
+                        $attribute->getColName(),
+                        $item->get('id'),
+                        $file['path'],
+                        $this->getModel()->id
+                    ),
+                    __METHOD__,
+                    TL_GENERAL
+                )
+            );
+        }
+    }
 
     /**
      * Try to convert the DOMElement's content to a widget's raw data by the widget type
@@ -597,7 +513,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      *
      * @return mixed|null The attribute's data in the same format as the attribute's "raw" data
      */
-    protected function domElementToNativeWidget(\DOMElement $element, IAttribute $attribute, int $itemId): mixed
+    protected function domElementToNativeWidget(\DOMElement $element, IAttribute $attribute, int $itemId)
     {
         switch ($attribute->get('type')) {
             case 'alias':
@@ -627,12 +543,19 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
                     // Local file does not exist therefore the remote file was not uploaded
                     if (null === $file) {
-                        throw new \RuntimeException(
-                            sprintf(
-                                'File "%s" does not exist on local system. Sync files beforehand.',
-                                $path
+                        $attribute->getMetaModel()->getServiceContainer()->getEventDispatcher()->dispatch(
+                            ContaoEvents::SYSTEM_LOG,
+                            new LogEvent(
+                                sprintf(
+                                    'File "%s" does not exist on local system. Sync files beforehand.',
+                                    $path
+                                ),
+                                __METHOD__,
+                                TL_GENERAL
                             )
                         );
+
+                        return null;
                     }
 
                     $widget[] = $file->uuid;
@@ -674,5 +597,18 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
         // Convert the widget value to native MetaModel data
         return $attribute->widgetToValue($widget, $itemId);
+    }
+
+
+    /**
+     * Camel Case (with first case uppercase) a column name
+     *
+     * @param string $value
+     *
+     * @return string
+     */
+    public static function camelCase($value): string
+    {
+        return preg_replace('/[\s\_\-]/', '', ucwords($value, ' _-'));
     }
 }
