@@ -220,7 +220,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 return null;
             }
 
-            $variants = $offer->getVariants(null);
+            // Use the filter to apply sorting
+            $variants = $offer->getVariants($this->getModel()->getFilter());
         }
 
         $renderSetting = $offer->getMetaModel()->getView($this->getModel()->metamodel_view);
@@ -242,6 +243,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 )
             );
         }
+        $variants->reset();
 
         foreach ($renderSetting->getSettingNames() as $colName) {
             $attribute    = $offer->getAttribute($colName);
@@ -252,8 +254,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 $parsed = $offer->parseAttribute($colName, 'text', $renderSetting);
                 $this->addParsedToDomAttribute($parsed['text'], $domAttribute);
             } else {
-                $variants->reset();
-
                 while ($variants->next()) {
                     $domVariantValue = $dom->createElement('_variantValue');
                     $domVariantValue->setAttribute('item_id', $variants->getItem()->get('id'));
@@ -277,6 +277,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
 
+    /**
+     * Try to import a parsed attribute to a dom node if it is a valid xml string or set the dom node value otherwise
+     *
+     * @param string      $parsed
+     * @param \DOMElement $domAttribute
+     */
     protected function addParsedToDomAttribute(string $parsed, \DOMElement $domAttribute)
     {
         try {
