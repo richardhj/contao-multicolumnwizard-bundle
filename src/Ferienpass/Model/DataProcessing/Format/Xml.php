@@ -180,7 +180,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
             foreach ($this->getItems() as $offer) {
                 $domOffer = $this->offerAsDomNode($offer, $dom);
-                $root->appendChild($domOffer);
+                if (null !== $domOffer) {
+                    $root->appendChild($domOffer);
+                }
             }
 
             $dom->appendChild($root);
