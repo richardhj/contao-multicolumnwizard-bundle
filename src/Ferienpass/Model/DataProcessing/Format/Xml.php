@@ -220,7 +220,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 return null;
             }
 
-            // Use the filter to apply sorting
+            // Fetch variants by using the filter to apply sorting
             $variants = $offer->getVariants($this->getModel()->getFilter());
         }
 
@@ -242,8 +242,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                     )
                 )
             );
+            $variants->reset();
         }
-        $variants->reset();
 
         foreach ($renderSetting->getSettingNames() as $colName) {
             $attribute    = $offer->getAttribute($colName);
