@@ -45,7 +45,7 @@ class Document extends Model
      *
      * @param Model\Collection|\MetaModels\IItems $collection
      */
-    public function outputToBrowser($collection): void
+    public function outputToBrowser($collection)
     {
         $this->prepareEnvironment($collection);
 
@@ -236,7 +236,7 @@ class Document extends Model
      *
      * @param \Template $template
      */
-    public function addCollectionToTemplate($template): void
+    public function addCollectionToTemplate($template)
     {
         $this->addItemsToCollectionTemplate($template);
 
@@ -322,7 +322,7 @@ class Document extends Model
      *
      * @param Model\Collection|\MetaModels\IItems $collection
      */
-    protected function prepareEnvironment($collection): void
+    protected function prepareEnvironment($collection)
     {
         $this->collection = $collection;
 

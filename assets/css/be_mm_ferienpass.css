@@ -3,7 +3,7 @@
 /* FONT PATH -------------------------- */
 @font-face { font-family: 'FontAwesome'; src: url("../../../components/font-awesome/fonts/fontawesome-webfont.eot?v=4.7.0"); src: url("../../../components/font-awesome/fonts/fontawesome-webfont.eot?#iefix&v=4.7.0") format("embedded-opentype"), url("../../../components/font-awesome/fonts/fontawesome-webfont.woff2?v=4.7.0") format("woff2"), url("../../../components/font-awesome/fonts/fontawesome-webfont.woff?v=4.7.0") format("woff"), url("../../../components/font-awesome/fonts/fontawesome-webfont.ttf?v=4.7.0") format("truetype"), url("../../../components/font-awesome/fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular") format("svg"); font-weight: normal; font-style: normal; }
 /* =========================================== Styles ======================================== */
-.table_mm_ferienpass a.folding { position: absolute; }
+.table_mm_ferienpass a.folding { position: absolute; z-index: 100; }
 .table_mm_ferienpass .tl_tree_xtnd .tl_file .tl_left { margin-left: 0; text-indent: 0; }
 .table_mm_ferienpass .tl_folder { background: none; }
 .table_mm_ferienpass .tl_file { background: #f6f6f6; }

@@ -12,6 +12,8 @@
 namespace Ferienpass\Model\DataProcessing\Filesystem;
 
 
+use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
+use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use Dropbox\Exception_BadRequest;
 use Dropbox\Exception_NetworkIO;
 use Ferienpass\Flysystem\Plugin\DropboxDelta;
@@ -20,7 +22,14 @@ use Ferienpass\Model\DataProcessing\FilesystemInterface;
 use Ferienpass\Model\DataProcessing\Format;
 use Ferienpass\Model\DataProcessing\Filesystem;
 use MetaModels\IItems;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
+
+/**
+ * Class Dropbox
+ *
+ * @package Ferienpass\Model\DataProcessing\Filesystem
+ */
 class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
 {
     /**
@@ -36,10 +45,9 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $items)
+    public function __construct(DataProcessing $model)
     {
         $this->model = $model;
-        $this->items = $items;
     }
 
     /**
@@ -59,9 +67,21 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
     }
 
     /**
+     * @param IItems $items
+     *
+     * @return FilesystemInterface
+     */
+    public function setItems(IItems $items): FilesystemInterface
+    {
+        $this->items = $items;
+
+        return $this;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function processFiles(array $files): void
+    public function processFiles(array $files)
     {
         // Make sure to mount dropbox
         $mountManager = $this->getModel()->getMountManager('dropbox');
@@ -79,25 +99,33 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
             } catch (Exception_BadRequest $e) {
                 // File was not uploaded
                 // often because it is on the ignored file list
-                \System::log(
-                    sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
-                    __METHOD__,
-                    TL_GENERAL
+                $this->getEventDispatcher()->dispatch(
+                    ContaoEvents::SYSTEM_LOG,
+                    new LogEvent(
+                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
+                        __METHOD__,
+                        TL_GENERAL
+                    )
                 );
             } catch (Exception_NetworkIO $e) {
                 // File was not uploaded
                 // Connection refused
-                \System::log(
-                    sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
-                    __METHOD__,
-                    TL_ERROR
+                $this->getEventDispatcher()->dispatch(
+                    ContaoEvents::SYSTEM_LOG,
+                    new LogEvent(
+                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
+                        __METHOD__,
+                        TL_ERROR
+                    )
                 );
             }
         }
     }
 
-
-    public function triggerBackSync(): void
+    /**
+     * {@inheritdoc}
+     */
+    public function triggerBackSync()
     {
         $this->syncFromRemoteDropbox();
     }
@@ -105,7 +133,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
     /**
      * Sync from remote dropbox by fetching the delta (last edited files in dropbox)
      */
-    protected function syncFromRemoteDropbox(): void
+    protected function syncFromRemoteDropbox()
     {
         if (!$this->getModel()->sync) {
             return;
@@ -130,7 +158,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
 
         $files = $delta['entries'];
 
-        // Process image folders
+        // Process static dirs
         foreach (deserialize($this->getModel()->static_dirs, true) as $dirBin) {
             $dir = (\FilesModel::findByPk($dirBin))->path;
 
@@ -142,14 +170,17 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                 // Remote file was deleted
                 if (null === $entry[1]) {
                     if ($mountManager->delete('dbafs://' . $dir . '/' . basename($entry[0]))) {
-                        \System::log(
-                            sprintf(
-                                'File "%s" was deleted by dropbox synchronisation. Data processing ID %u',
-                                $dir . '/' . basename($entry[0]),
-                                $this->getModel()->id
-                            ),
-                            __METHOD__,
-                            TL_GENERAL
+                        $this->getEventDispatcher()->dispatch(
+                            ContaoEvents::SYSTEM_LOG,
+                            new LogEvent(
+                                sprintf(
+                                    'File "%s" was deleted by dropbox synchronisation. Data processing ID %u',
+                                    $dir . '/' . basename($entry[0]),
+                                    $this->getModel()->id
+                                ),
+                                __METHOD__,
+                                TL_GENERAL
+                            )
                         );
 
                         continue;
@@ -161,12 +192,13 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                         || $mountManager->getTimestamp('dropbox://' . $entry['path'])
                            > $mountManager->getTimestamp('dbafs://' . $entry['path'])
                     ) {
-                        if ($mountManager->put(
+                        $mountManager->put(
                             'dbafs://' . $entry['path'],
                             $mountManager->read('dropbox://' . $entry['path'])
-                        )
-                        ) {
-                            \System::log(
+                        );
+                        $this->getEventDispatcher()->dispatch(
+                            ContaoEvents::SYSTEM_LOG,
+                            new LogEvent(
                                 sprintf(
                                     'File "%s" was updated by dropbox synchronisation. Data processing ID %u',
                                     $entry['path'],
@@ -174,23 +206,14 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                                 ),
                                 __METHOD__,
                                 TL_GENERAL
-                            );
-                        } else {
-                            \System::log(
-                                sprintf(
-                                    'File "%s" could not be updated although it was changed in the user\'s dropbox. Data processing ID %u',
-                                    $entry['path'],
-                                    $this->getModel()->id
-                                ),
-                                __METHOD__,
-                                TL_ERROR
-                            );
-                        }
+                            )
+                        );
                     }
                 }
             }
         }
 
+        // Trigger format handler sync
         $formatHandler = $this->getModel()->getFormatHandler();
         if ($formatHandler instanceof Format\TwoWaySyncInterface) {
             $formatHandler->backSyncFiles(
@@ -198,15 +221,21 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                     function ($value) {
                         return $value[1];
                     },
-                    array_filter(
-                        $files,
-                        function ($value) {
-                            return 'xml' === $value['qqqq'];
-                        }
-                    )
+                    $files
                 ),
                 'dropbox'
             );
         }
+    }
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    private function getEventDispatcher(): EventDispatcherInterface
+    {
+        global $container;
+
+        /** @var EventDispatcherInterface $dispatcher */
+        return $container['event-dispatcher'];
     }
 }

@@ -21,7 +21,7 @@ interface TwoWaySyncInterface
 
     /**
      * @param array  $files
-     * @param string $filesystem
+     * @param string $originFileSystem
      */
-    public function backSyncFiles(array $files, string $filesystem): void;
+    public function backSyncFiles(array $files, string $originFileSystem);
 }

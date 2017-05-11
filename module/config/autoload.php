@@ -41,7 +41,6 @@ TemplateLoader::addFiles(array
     'mm_attr_tabletext_xmlexport'                       => 'system/modules/ferienpass/templates',
     'mm_attr_file_xmlexport'                            => 'system/modules/ferienpass/templates',
     'mm_attr_checkbox_applicationlist_active_xmlexport' => 'system/modules/ferienpass/templates',
-    'mm_attr_combinedvalues_date_xmlexport'             => 'system/modules/ferienpass/templates',
     'mm_attr_select_host_xmlexport'                     => 'system/modules/ferienpass/templates',
     'mm_attr_offer_date'                                => 'system/modules/ferienpass/templates',
 

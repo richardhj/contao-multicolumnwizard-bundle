@@ -19,7 +19,7 @@ class DropboxWebhook
     /**
      * Handle the dropbox webhook request
      */
-    public function handle(): void
+    public function handle()
     {
         global $container;
 

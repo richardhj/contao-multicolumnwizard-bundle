@@ -21,14 +21,20 @@ interface FilesystemInterface
      * FilesystemInterface constructor.
      *
      * @param DataProcessing $model
-     * @param IItems         $items
      */
-    public function __construct(DataProcessing $model, IItems $items);
+    public function __construct(DataProcessing $model);
+
+    /**
+     * @param IItems $items
+     *
+     * @return FilesystemInterface
+     */
+    public function setItems(IItems $items): self;
 
     /**
      * @param array $files
      *
      * @return void
      */
-    public function processFiles(array $files): void;
+    public function processFiles(array $files);
 }

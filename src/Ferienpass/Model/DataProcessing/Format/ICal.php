@@ -8,17 +8,23 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-
 namespace Ferienpass\Model\DataProcessing\Format;
 
-
+use DateTime;
 use Eluceo\iCal\Component\Calendar;
 use Eluceo\iCal\Component\Event;
+use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\FormatInterface;
-use Haste\DateTime\DateTime;
+use MetaModels\IItem;
 use MetaModels\IItems;
 
+
+/**
+ * Class ICal
+ *
+ * @package Ferienpass\Model\DataProcessing\Format
+ */
 class ICal implements FormatInterface
 {
 
@@ -31,7 +37,6 @@ class ICal implements FormatInterface
      * @var DataProcessing|\Model
      */
     private $model;
-
 
     /**
      * @var IItems
@@ -55,6 +60,18 @@ class ICal implements FormatInterface
     }
 
     /**
+     * @param IItems $items
+     *
+     * @return FormatInterface
+     */
+    public function setItems(IItems $items): FormatInterface
+    {
+        $this->items = $items;
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getFiles(): array
@@ -65,10 +82,9 @@ class ICal implements FormatInterface
     /**
      * {@inheritdoc}
      */
-    public function __construct(DataProcessing $model, IItems $items)
+    public function __construct(DataProcessing $model)
     {
         $this->model = $model;
-        $this->items = $items;
     }
 
     /**
@@ -77,7 +93,7 @@ class ICal implements FormatInterface
     public function processItems(): FormatInterface
     {
         $files = [];
-        $path = sprintf(
+        $path  = sprintf(
             '%s/%s.ics',
             $this->getModel()->getTmpPath(),
             $this->getModel()->export_file_name
@@ -108,57 +124,47 @@ class ICal implements FormatInterface
      */
     protected function createICal(): string
     {
-        $vCalendar = new Calendar(\Environment::get('httpHost'));
-
+        $calendar       = new Calendar(\Environment::get('httpHost'));
         $iCalProperties = deserialize($this->getModel()->ical_fields);
 
-        // Walk each item
-        while (null !== $this->getItems() && $this->getItems()->next()) {
-            $vEvent = new Event();
+        /** @var IItem $item */
+        foreach ($this->getItems() as $item) {
+            $dateAttribute = ToolboxOfferDate::fetchDateAttribute($item);
 
-            /** @var array $arrProperty [ical_field] The property identifier
-             *                          [metamodel_attribute] The property assigned MetaModel attribute name */
-            foreach ($iCalProperties as $arrProperty) {
-                switch ($arrProperty['ical_field']) {
-                    //TODO #4 this most likely will not work for the date_period attribute
-                    case 'dtStart':
-                        try {
-                            $objDate = new DateTime(
-                                '@' . $this->getItems()->getItem()->get($arrProperty['metamodel_attribute'])
-                            );
-                            $vEvent->setDtStart($objDate);
-                        } catch (\Exception $e) {
-                            continue 3;
-                        }
-                        break;
-
-                    case 'dtEnd':
-                        try {
-                            $objDate = new DateTime(
-                                '@' . $this->getItems()->getItem()->get($arrProperty['metamodel_attribute'])
-                            );
-                            $vEvent->setDtEnd($objDate);
-                        } catch (\Exception $e) {
-                            continue 3;
-                        }
-                        break;
-
-                    case 'summary':
-                        $vEvent->setSummary($this->getItems()->getItem()->get($arrProperty['metamodel_attribute']));
-                        break;
-
-                    case 'description':
-                        $vEvent->setDescription(
-                            $this->getItems()->getItem()->get($arrProperty['metamodel_attribute'])
-                        );
-                        break;
-                }
+            $date = $item->get($dateAttribute->getColName());
+            if (null === $date) {
+                continue;
             }
 
-            $vEvent->setUseTimezone(true);
-            $vCalendar->addComponent($vEvent);
+            foreach ($date as $period) {
+                $event = new Event();
+
+                $dateTime = new DateTime('@' . $period['start']);
+                $event->setDtStart($dateTime);
+                $dateTime = new DateTime('@' . $period['end']);
+                $event->setDtEnd($dateTime);
+
+                /**
+                 * @var array $property [ical_field]          The property identifier
+                 *                      [metamodel_attribute] The property assigned MetaModel attribute name
+                 */
+                foreach ($iCalProperties as $property) {
+                    switch ($property['ical_field']) {
+                        case 'summary':
+                            $event->setSummary($item->get($property['metamodel_attribute']));
+                            break;
+
+                        case 'description':
+                            $event->setDescription($item->get($property['metamodel_attribute']));
+                            break;
+                    }
+                }
+
+                $event->setUseTimezone(true);
+                $calendar->addComponent($event);
+            }
         }
 
-        return $vCalendar->render();
+        return $calendar->render();
     }
 }

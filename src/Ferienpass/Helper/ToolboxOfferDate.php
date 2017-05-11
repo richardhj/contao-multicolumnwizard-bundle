@@ -72,6 +72,17 @@ class ToolboxOfferDate
 
 
     /**
+     * @param IItem $item
+     *
+     * @return IAttribute
+     */
+    public static function fetchDateAttribute(IItem $item)
+    {
+        return $item->getAttribute('date_period');
+    }
+
+
+    /**
      * @param IItem|int $offer
      *
      * @return IItem|null
@@ -87,16 +98,5 @@ class ToolboxOfferDate
         }
 
         return $offer = Offer::getInstance()->findById($offer);
-    }
-
-
-    /**
-     * @param IItem $item
-     *
-     * @return IAttribute
-     */
-    protected static function fetchDateAttribute(IItem $item)
-    {
-        return $item->getAttribute('date_period');
     }
 }

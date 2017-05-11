@@ -16,6 +16,12 @@ use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\DataProcessing\FilesystemInterface;
 use MetaModels\IItems;
 
+
+/**
+ * Class Local
+ *
+ * @package Ferienpass\Model\DataProcessing\Filesystem
+ */
 class Local implements FilesystemInterface
 {
 
@@ -25,9 +31,9 @@ class Local implements FilesystemInterface
     private $model;
 
     /**
-     * @var IItems $offers
+     * @var IItems $items
      */
-    private $offers;
+    private $items;
 
     /**
      * @return DataProcessing|\Model
@@ -38,18 +44,29 @@ class Local implements FilesystemInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @param IItems $items
+     *
+     * @return FilesystemInterface
      */
-    public function __construct(DataProcessing $model, IItems $items)
+    public function setItems(IItems $items): FilesystemInterface
     {
-        $this->model  = $model;
-        $this->offers = $items;
+        $this->items = $items;
+
+        return $this;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function processFiles(array $files): void
+    public function __construct(DataProcessing $model)
+    {
+        $this->model  = $model;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function processFiles(array $files)
     {
         $pathPrefix = ($this->getModel()->path_prefix) ? $this->getModel()->path_prefix . '/' : '';
 
