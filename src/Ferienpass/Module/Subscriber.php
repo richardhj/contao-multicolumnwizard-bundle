@@ -11,8 +11,8 @@
 namespace Ferienpass\Module;
 
 
-use Contao\Environment;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
+use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\GenerateFrontendUrlEvent;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use MetaModels\Attribute\Select\MetaModelSelect;
@@ -22,6 +22,8 @@ use MetaModels\FrontendIntegration\HybridList;
 use MetaModels\IItem;
 use MetaModels\Item;
 use MetaModels\MetaModelsEvents;
+use PageModel;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
@@ -216,7 +218,7 @@ class Subscriber implements EventSubscriberInterface
         $settings     = $event->getRenderSettings();
         $filterParams = $settings->get(self::FILTER_PARAMS_FLAG);
         /** @var \Model\Collection $jumpTo */
-        $jumpTo = \PageModel::findByPk($settings->get(self::JUMP_TO_APPLICATION_LIST_FLAG));
+        $jumpTo = PageModel::findByPk($settings->get(self::JUMP_TO_APPLICATION_LIST_FLAG));
 
         if ('mm_ferienpass' !== $event->getItem()->getMetaModel()->getTableName()
             || null === $passRelease
@@ -229,18 +231,23 @@ class Subscriber implements EventSubscriberInterface
             return;
         }
 
-        /** @var Environment $environment */
-        $environment = $container['environment'];
-        $parsed      = $event->getResult();
+        /** @var EventDispatcherInterface $dispatcher */
+        $dispatcher = $container['event-dispatcher'];
 
-        $urlBuilder = UrlBuilder::fromUrl($environment->get('uri'));
-        $urlBuilder->setQueryParameter('items', $parsed['raw']['alias']);
+        $parsed = $event->getResult();
+
+        $generateFrontendUrlEvent = new GenerateFrontendUrlEvent($jumpTo->row(), '/' . $parsed['raw']['alias']);
+        $dispatcher->dispatch(
+            ContaoEvents::CONTROLLER_GENERATE_FRONTEND_URL,
+            $generateFrontendUrlEvent
+        );
+        $url = $generateFrontendUrlEvent->getUrl();
 
         $parsed['actions'][] = [
             'label' => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][0],
             'title' => $GLOBALS['TL_LANG']['MSC']['applicationlistLink'][1],
             'class' => 'applicationlist',
-            'href'  => $urlBuilder->getUrl(),
+            'href'  => $url,
         ];
 
         $event->setResult($parsed);
