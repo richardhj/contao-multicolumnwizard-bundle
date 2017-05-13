@@ -1,8 +1,8 @@
 <?= sprintf(
 	'%s/%s',
-	str_replace(
-		'http://',
-		'',
+	preg_replace(
+		'/https?\:\/\/(www\.)?(.+)/',
+		'www.$2',
 		Environment::get('url')
 	),
 	$this->row['vargroup']

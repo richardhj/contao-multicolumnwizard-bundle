@@ -161,6 +161,7 @@ SQL
      */
     private function sendMessages()
     {
+        //@todo
         $notificationId = 6;
         /** @var Notification $notification */
         /** @noinspection PhpUndefinedMethodInspection */
@@ -246,6 +247,7 @@ SQL
         $serviceContainer = $container['metamodels-service-container'];
 
         $tokens = [];
+        //@todo
         $data   = [
             'attendances'               => $attendances,
             'member'                    => $member,

@@ -22,9 +22,9 @@ if ('' !== ($path = $this->raw['logo'])) {
         'file://../' . $path
     );
 
-    $domLogo->appendChild($domFile);
 }
 
+$domLogo->appendChild($domFile);
 $domRoot->appendChild($domLogo);
 $dom->appendChild($domRoot);
 

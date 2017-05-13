@@ -18,6 +18,7 @@ use MetaModels\Render\Template;
 
 /**
  * Class OfferDate
+ *
  * @package MetaModels\Attribute\OfferDate
  */
 class OfferDate extends BaseComplex
@@ -75,8 +76,8 @@ class OfferDate extends BaseComplex
     public function getFieldDefinition($arrOverrides = [])
     {
 //        $arrColLabels                        = deserialize($this->get('tabletext_cols'), true);
-        $arrFieldDef = parent::getFieldDefinition($arrOverrides);
-        $arrFieldDef['inputType'] = 'offer_date';
+        $arrFieldDef                         = parent::getFieldDefinition($arrOverrides);
+        $arrFieldDef['inputType']            = 'offer_date';
         $arrFieldDef['eval']['columnFields'] = [];
 
 //        $count = count($arrColLabels);
@@ -107,7 +108,7 @@ class OfferDate extends BaseComplex
         }
 
         // Get the ids.
-        $ids = array_keys($values);
+        $ids      = array_keys($values);
         $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
 
         // Insert or update the cells.
@@ -119,18 +120,59 @@ class OfferDate extends BaseComplex
                 ->execute($this->get('id'), $id);
 
             // Walk every row.
-            foreach ((array)$values[$id] as $period) {
+            foreach ((array) $values[$id] as $period) {
                 if (null === ($setValues = $this->getSetValues($period, $id))) {
                     continue;
                 }
 
                 // Walk every column and update / insert the value.
                 $database
-                    ->prepare('INSERT INTO '.$this->getValueTable().' %s')
+                    ->prepare('INSERT INTO ' . $this->getValueTable() . ' %s')
                     ->set($setValues)
                     ->execute();
             }
         }
+    }
+
+
+    /**
+     * Sorts the given array list by field value in the given direction.
+     *
+     * @param string[] $idList    A list of Ids from the MetaModel table.
+     *
+     * @param string   $direction The direction for sorting. either 'ASC' or 'DESC', as in plain SQL.
+     *
+     * @return string[] The sorted array.
+     */
+    public function sortIds($idList, $direction)
+    {
+        switch ($direction) {
+            case 'ASC';
+                $function = 'MAX(end)';
+                break;
+
+            case 'DESC':
+                $function = 'MIN(start)';
+                break;
+
+            default:
+                throw new \InvalidArgumentException(sprintf('Invalid direction "%s" given', $direction));
+        }
+
+        $idList = $this->getMetaModel()->getServiceContainer()->getDatabase()
+            ->prepare(
+                sprintf(
+                    'SELECT item_id FROM %s WHERE att_id=%s AND item_id IN (%s) GROUP BY item_id ORDER BY %s %s',
+                    $this->getValueTable(),
+                    $this->get('id'),
+                    $this->parameterMask($idList),
+                    $function,
+                    $direction
+                )
+            )
+            ->execute($idList)
+            ->fetchEach('item_id');
+        return $idList;
     }
 
 
@@ -153,8 +195,8 @@ class OfferDate extends BaseComplex
             'tstamp'  => time(),
             'att_id'  => $this->get('id'),
             'item_id' => $id,
-            'start'   => (int)$period['start'],
-            'end'     => (int)$period['end'],
+            'start'   => (int) $period['start'],
+            'end'     => (int) $period['end'],
         ];
     }
 
@@ -222,7 +264,7 @@ class OfferDate extends BaseComplex
      */
     public function getDataFor($ids)
     {
-        $where = $this->getWhere($ids);
+        $where  = $this->getWhere($ids);
         $result = $this
             ->getMetaModel()
             ->getServiceContainer()
@@ -231,7 +273,7 @@ class OfferDate extends BaseComplex
                 sprintf(
                     'SELECT * FROM %1$s%2$s',
                     $this->getValueTable(),
-                    ($where ? ' WHERE '.$where['procedure'] : '')
+                    ($where ? ' WHERE ' . $where['procedure'] : '')
                 )
             )
             ->execute(($where ? $where['params'] : null));
@@ -243,6 +285,11 @@ class OfferDate extends BaseComplex
         }
 
         return $return;
+    }
+
+    public function getPeriodDelimiter(): string
+    {
+        return ' — ';
     }
 
 
@@ -259,14 +306,14 @@ class OfferDate extends BaseComplex
 
         if ($ids) {
             if (is_array($ids)) {
-                $whereIds = ' AND item_id IN ('.implode(',', $ids).')';
+                $whereIds = ' AND item_id IN (' . implode(',', $ids) . ')';
             } else {
-                $whereIds = ' AND item_id='.$ids;
+                $whereIds = ' AND item_id=' . $ids;
             }
         }
 
         $return = [
-            'procedure' => 'att_id=?'.$whereIds,
+            'procedure' => 'att_id=?' . $whereIds,
             'params'    => [$this->get('id')],
         ];
 
@@ -289,7 +336,7 @@ class OfferDate extends BaseComplex
                 sprintf(
                     'DELETE FROM %1$s%2$s',
                     $this->getValueTable(),
-                    ($where ? ' WHERE '.$where['procedure'] : '')
+                    ($where ? ' WHERE ' . $where['procedure'] : '')
                 )
             )
             ->execute(($where ? $where['params'] : null));
@@ -309,7 +356,7 @@ class OfferDate extends BaseComplex
 
         foreach ($value as $i => $period) {
             $widgetValue[$i]['start'] = $period['start'];
-            $widgetValue[$i]['end'] = $period['end'];
+            $widgetValue[$i]['end']   = $period['end'];
         }
 
         return $widgetValue;
@@ -334,7 +381,7 @@ class OfferDate extends BaseComplex
 
         $parsedDates = [];
 
-        foreach ((array)$template->raw as $period) {
+        foreach ((array) $template->raw as $period) {
             $parsedDate = [];
 
             if ((new \Date($period['start']))->dayBegin !== (new \Date($period['end']))->dayBegin) {
@@ -342,7 +389,7 @@ class OfferDate extends BaseComplex
                     $period['start'],
                     $settings->get('timeformatStart') ?: $this->getDateTimeFormatString()
                 );
-                $parsedDate['end'] = $this->parseDate(
+                $parsedDate['end']   = $this->parseDate(
                     $period['end'],
                     $settings->get('timeformatEnd') ?: $this->getDateTimeFormatString()
                 );
@@ -351,13 +398,19 @@ class OfferDate extends BaseComplex
                     $period['start'],
                     $settings->get('timeformatStartEqualDay') ?: $this->getDateTimeFormatString()
                 );
-                $parsedDate['end'] = $this->parseDate(
+                $parsedDate['end']   = $this->parseDate(
                     $period['end'],
                     $settings->get('timeformatEndEqualDay') ?: $this->getDateTimeFormatString()
                 );
             }
 
-            $parsedDate['combined'] = sprintf('%s — %s', $parsedDate['start'], $parsedDate['end']);
+            $parsedDate['combined'] = sprintf(
+                '%1$s%3$s%2$s',
+                $parsedDate['start'],
+                $parsedDate['end'],
+                $this->getPeriodDelimiter()
+            );
+
             $parsedDates[] = $parsedDate;
         }
 
@@ -387,7 +440,7 @@ class OfferDate extends BaseComplex
         global $objPage;
 
         $format = 'datimFormat';
-        $page = $objPage;
+        $page   = $objPage;
 
         if (null !== $page && $page->$format) {
             return $page->$format;

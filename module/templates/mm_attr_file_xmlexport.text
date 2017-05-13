@@ -1,39 +1,39 @@
 <?php
 
 // Generate nothing
-if (empty($this->raw['bin'])) {
-    return;
-}
+//if (empty($this->raw['value'])) {
+//    return;
+//}
 
 $i = 0;
 
 $dom      = new \DOMDocument('1.0', 'utf-8');
-$domFiles = $dom->createElement('Files');
+$domFiles = $dom->createElement('_files');
 
-//// Add default img
-//if (empty($this->raw['bin'])) {
-//    $this->raw['bin'][] = FilesModel::findByHash('03369c2124686b9855702dc85bc06cc8')->uuid;
-//}
+// Add default img
+if (empty($this->raw['value'])) {
+    $this->raw['value'][] = FilesModel::findByHash('e1144c32e6ea7b9ee07257295d40161c')->uuid;
+}
 
-//log_message(var_export($this->src, true), 'xmlexport_file_template.log');
+//log_message(var_export($this->raw, true), 'xmlexport_file_template.log');
 
-foreach ($this->raw['bin'] as $fileBin) {
+foreach ($this->raw['value'] as $fileUuid) {
 //	log_message(var_export($fileBin, true), 'xmlexport_file_template.log');
 //	log_message(var_export($i, true), 'xmlexport_file_template.log');
-    $domFile = $dom->createElement('File');
+    $domFile = $dom->createElement('_file');
 
-    $domLink = $dom->createElement('Link');
+    $domLink = $dom->createElement('_link');
     $domLink->setAttribute(
         'href',
-        'file://../' . \FilesModel::findByPk($fileBin)->path
+        'file://../' . \FilesModel::findByPk($fileUuid)->path
     );
 
-    $meta = $dom->createElement('Meta');
+    $meta = $dom->createElement('_meta');
+//    $meta->appendChild(
+//        $dom->createElement('_title', $this->src[$i]['title'] ?: ' ')
+//    );
     $meta->appendChild(
-        $dom->createElement('Title', $this->src[$i]['title'] ?: ' ')
-    );
-    $meta->appendChild(
-        $dom->createElement('Caption', $this->src[$i]['caption'] ?: ' ')
+        $dom->createElement('_caption', $this->src[$i]['caption'] ?: ' ')
     );
 
     $domFile->appendChild($domLink);
