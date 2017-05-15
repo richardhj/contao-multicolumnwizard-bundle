@@ -25,41 +25,6 @@ class OfferDate extends BaseComplex
 {
 
     /**
-     * {@inheritdoc}
-     */
-    public function searchFor($parttern)
-    {
-        return [];
-
-        $result = $this
-            ->getMetaModel()
-            ->getServiceContainer()
-            ->getDatabase()
-            ->prepare(
-                sprintf(
-                    'SELECT DISTINCT item_id FROM %1$s WHERE value LIKE ? AND att_id = ?',
-                    $this->getValueTable()
-                )
-            )
-            ->execute(
-                str_replace(['*', '?'], ['%', '_'], $parttern),
-                $this->get('id')
-            );
-
-        return $result->fetchEach('item_id');
-    }
-
-//    /**
-//     * {@inheritdoc}
-//     */
-//    public function getAttributeSettingNames()
-//    {
-//        return array_merge(parent::getAttributeSettingNames(), array(
-//            'tabletext_cols',
-//        ));
-//    }
-
-    /**
      * Return the table we are operating on.
      *
      * @return string
@@ -75,23 +40,10 @@ class OfferDate extends BaseComplex
      */
     public function getFieldDefinition($arrOverrides = [])
     {
-//        $arrColLabels                        = deserialize($this->get('tabletext_cols'), true);
-        $arrFieldDef                         = parent::getFieldDefinition($arrOverrides);
+        $arrFieldDef = parent::getFieldDefinition($arrOverrides);
+
         $arrFieldDef['inputType']            = 'offer_date';
         $arrFieldDef['eval']['columnFields'] = [];
-
-//        $count = count($arrColLabels);
-//        for ($i = 0; $i < $count; $i++) {
-//            $arrFieldDef['eval']['columnFields']['col_' . $i] = array(
-//                'label'     => $arrColLabels[$i]['rowLabel'],
-//                'inputType' => 'text',
-//                'eval'      => array(),
-//            );
-//            if ($arrColLabels[$i]['rowStyle']) {
-//                $arrFieldDef['eval']['columnFields']['col_' . $i]['eval']['style'] =
-//                    'width:' . $arrColLabels[$i]['rowStyle'];
-//            }
-//        }
 
         return $arrFieldDef;
     }
@@ -148,23 +100,37 @@ class OfferDate extends BaseComplex
     {
         switch ($direction) {
             case 'ASC';
-                $function = 'MAX(end)';
+                $function = 'MIN(start)';
                 break;
 
             case 'DESC':
-                $function = 'MIN(start)';
+                $function = 'MAX(start)';
                 break;
 
             default:
                 throw new \InvalidArgumentException(sprintf('Invalid direction "%s" given', $direction));
         }
 
+        // The IFNULL statement will use the next variant's date for sorting when the varbase's date is not present
         $idList = $this->getMetaModel()->getServiceContainer()->getDatabase()
             ->prepare(
                 sprintf(
-                    'SELECT item_id FROM %s WHERE att_id=%s AND item_id IN (%s) GROUP BY item_id ORDER BY %s %s',
+                    <<<'SQL'
+SELECT
+  item.id as item_id,
+  IFNULL(
+    date.start,
+    (SELECT %4$s FROM %2$s WHERE item_id IN (SELECT id FROM %1$s WHERE vargroup=item.id))
+  ) as sortdate
+FROM %1$s item
+LEFT JOIN %2$s date ON date.item_id=item.id
+WHERE item.id IN (%3$s)
+GROUP BY item.id
+ORDER BY sortdate %5$s
+SQL
+                    ,
+                    $this->getMetaModel()->getTableName(),
                     $this->getValueTable(),
-                    $this->get('id'),
                     $this->parameterMask($idList),
                     $function,
                     $direction
@@ -172,7 +138,35 @@ class OfferDate extends BaseComplex
             )
             ->execute($idList)
             ->fetchEach('item_id');
+
         return $idList;
+    }
+
+
+    /**
+     * Retrieve the filter options of this attribute.
+     *
+     * Retrieve values for use in filter options, that will be understood by DC_ filter
+     * panels and frontend filter select boxes.
+     * One can influence the amount of returned entries with the two parameters.
+     * For the id list, the value "null" represents (as everywhere in MetaModels) all entries.
+     * An empty array will return no entries at all.
+     * The parameter "used only" determines, if only really attached values shall be returned.
+     * This is only relevant, when using "null" as id list for attributes that have pre configured
+     * values like select lists and tags i.e.
+     *
+     * @param string[]|null $idList   The ids of items that the values shall be fetched from
+     *                                (If empty or null, all items).
+     *
+     * @param bool          $usedOnly Determines if only "used" values shall be returned.
+     *
+     * @param array|null    $arrCount Array for the counted values.
+     *
+     * @return array All options matching the given conditions as name => value.
+     */
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
+    {
+        return [];
     }
 
 
@@ -198,64 +192,6 @@ class OfferDate extends BaseComplex
             'start'   => (int) $period['start'],
             'end'     => (int) $period['end'],
         ];
-    }
-
-
-    /**
-     * {@inheritdoc}
-     *
-     * Fetch filter options from foreign table.
-     */
-    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
-    {
-        return [];
-
-        if ($idList) {
-            $objRow = $this
-                ->getMetaModel()
-                ->getServiceContainer()
-                ->getDatabase()
-                ->prepare(
-                    sprintf(
-                        'SELECT value, COUNT(value) as mm_count
-                        FROM %1$s
-                        WHERE item_id IN (%2$s) AND att_id = ?
-                        GROUP BY value
-                        ORDER BY FIELD(id,%2$s)',
-                        $this->getValueTable(),
-                        $this->parameterMask($idList)
-                    )
-                )
-                ->execute(array_merge($idList, [$this->get('id')], $idList));
-        } else {
-            $objRow = $this
-                ->getMetaModel()
-                ->getServiceContainer()
-                ->getDatabase()
-                ->prepare(
-                    sprintf(
-                        'SELECT value, COUNT(value) as mm_count
-                        FROM %s
-                        WHERE att_id = ?
-                        GROUP BY value',
-                        $this->getValueTable()
-                    )
-                )
-                ->execute($this->get('id'));
-        }
-
-        $arrResult = [];
-        while ($objRow->next()) {
-            $strValue = $objRow->value;
-
-            if (is_array($arrCount)) {
-                $arrCount[$strValue] = $objRow->mm_count;
-            }
-
-            $arrResult[$strValue] = $strValue;
-        }
-
-        return $arrResult;
     }
 
 
@@ -287,6 +223,10 @@ class OfferDate extends BaseComplex
         return $return;
     }
 
+
+    /**
+     * @return string
+     */
     public function getPeriodDelimiter(): string
     {
         return ' — ';
@@ -418,7 +358,13 @@ class OfferDate extends BaseComplex
     }
 
 
-    protected function parseDate($date, $format)
+    /**
+     * @param int    $date
+     * @param string $format
+     *
+     * @return string
+     */
+    protected function parseDate(int $date, string $format)
     {
         $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
 
@@ -451,7 +397,13 @@ class OfferDate extends BaseComplex
 
 
     /**
-     * {@inheritdoc}
+     * Filter all values greater than the passed value.
+     *
+     * @param mixed $value     The value to use as lower end.
+     *
+     * @param bool  $inclusive If true, the passed value will be included, if false, it will be excluded.
+     *
+     * @return string[]|null The list of item ids of all items matching the condition or null if all match.
      */
     public function filterGreaterThan($value, $inclusive = false)
     {
@@ -460,7 +412,13 @@ class OfferDate extends BaseComplex
 
 
     /**
-     * {@inheritdoc}
+     * Filter all values less than the passed value.
+     *
+     * @param mixed $value     The value to use as upper end.
+     *
+     * @param bool  $inclusive If true, the passed value will be included, if false, it will be excluded.
+     *
+     * @return string[]|null The list of item ids of all items matching the condition or null if all match.
      */
     public function filterLessThan($value, $inclusive = false)
     {
