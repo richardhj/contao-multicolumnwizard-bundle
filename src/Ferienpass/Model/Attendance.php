@@ -265,7 +265,7 @@ class Attendance extends Model
      *
      * @return bool
      */
-    public static function isNotExistent($participantId, $offerId)
+    public static function isNotExistent($participantId, $offerId): bool
     {
         return !(\Database::getInstance()
             ->prepare("SELECT id FROM " . static::$strTable . " WHERE participant=? AND offer=?")
@@ -288,7 +288,7 @@ class Attendance extends Model
      *
      * @return integer|null if participant not in attendance list (yet) or has error status
      */
-    public function getPosition(): int
+    public function getPosition()
     {
         /** @var Attendance|\Model\Collection $attendances */
         $attendances = static::findByOffer($this->offer); // Collection is already ordered
@@ -313,9 +313,9 @@ class Attendance extends Model
 
 
     /**
-     * @return AttendanceStatus
+     * @return AttendanceStatus|null
      */
-    public function getStatus(): AttendanceStatus
+    public function getStatus()
     {
         /** @var AttendanceStatus $this ->getRelated('status') */
         return $this->getRelated('status');
