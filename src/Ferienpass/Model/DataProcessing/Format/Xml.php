@@ -150,7 +150,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $path = sprintf(
                 '%s/xml/%s.xml',
                 $this->getModel()->getTmpPath(),
-                ($this->isXmlSingleFile() ? 'offers' : 'offer_' . $k)
+                ($this->isXmlSingleFile() ? 'items' : 'item_' . $k)
             );
 
             // Save xml in tmp path
@@ -195,12 +195,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         $dom->appendChild($dom->createComment($commentTemplate->parse()));
 
         if ($this->isXmlSingleFile()) {
-            $root = $dom->createElement('Offers');
+            $root = $dom->createElement('Items');
 
-            foreach ($this->getItems() as $offer) {
-                $domOffer = $this->offerAsDomNode($offer, $dom);
-                if (null !== $domOffer) {
-                    $root->appendChild($domOffer);
+            foreach ($this->getItems() as $item) {
+                $domItem = $this->itemAsDomNode($item, $dom);
+                if (null !== $domItem) {
+                    $root->appendChild($domItem);
                 }
             }
 
@@ -208,12 +208,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
             $return[] = $dom->saveXML();
         } else {
-            foreach ($this->getItems() as $offer) {
+            foreach ($this->getItems() as $item) {
                 $domClone = clone $dom;
-                $domOffer = $this->offerAsDomNode($offer, $domClone);
-                if (null !== $domOffer) {
-                    $domClone->appendChild($domOffer);
-                    $return[$offer->get('id')] = $domClone->saveXML();
+                $domItem = $this->itemAsDomNode($item, $domClone);
+                if (null !== $domItem) {
+                    $domClone->appendChild($domItem);
+                    $return[$item->get('id')] = $domClone->saveXML();
                 }
             }
         }
@@ -222,31 +222,31 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
     /**
-     * Get the dom node for a particular offer
+     * Get the dom node for a particular item
      *
-     * @param IItem       $offer
+     * @param IItem       $item
      * @param DOMDocument $dom
      *
      * @return DOMElement|null
      */
-    protected function offerAsDomNode(IItem $offer, DOMDocument $dom)
+    protected function itemAsDomNode(IItem $item, DOMDocument $dom)
     {
         $variants = null;
 
         if ($this->isCombineVariants()) {
-            if ($offer->isVariant()) {
+            if ($item->isVariant()) {
                 // If we combine variants, only variant bases will be exported
                 return null;
             }
 
             // Fetch variants by using the filter to apply sorting
-            $variants = $offer->getVariants($this->getModel()->getFilter());
+            $variants = $item->getVariants($this->getModel()->getFilter());
         }
 
-        $renderSetting = $offer->getMetaModel()->getView($this->getModel()->metamodel_view);
+        $renderSetting = $item->getMetaModel()->getView($this->getModel()->metamodel_view);
 
-        $root = $dom->createElement('Offer');
-        $root->setAttribute('item_id', $offer->get('id'));
+        $root = $dom->createElement('Item');
+        $root->setAttribute('item_id', $item->get('id'));
 
         if (null !== $variants && $variants->getCount()) {
             $root->setAttribute(
@@ -265,12 +265,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         }
 
         foreach ($renderSetting->getSettingNames() as $colName) {
-            $attribute    = $offer->getAttribute($colName);
+            $attribute    = $item->getAttribute($colName);
             $domAttribute = $dom->createElement(static::camelCase($colName));
             $domAttribute->setAttribute('attr_id', $attribute->get('id'));
 
             if (!($this->isCombineVariants() && $variants->getCount() && $attribute->get('isvariant'))) {
-                $parsed = $offer->parseAttribute($colName, 'text', $renderSetting);
+                $parsed = $item->parseAttribute($colName, 'text', $renderSetting);
                 $this->addParsedToDomAttribute($parsed['text'], $domAttribute);
             } else {
                 while ($variants->next()) {
@@ -376,7 +376,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $dom->loadXML($mountManager->read($filesystem . '://' . $file['path']));
 
             /** @type DOMElement $root */
-            $root            = $dom->getElementsByTagName('Offer')->item(0);
+            $root            = $dom->getElementsByTagName('Item')->item(0);
             $item            = $metaModel->findById($root->getAttribute('item_id'));
             $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',', $root->getAttribute('variant_ids')));
 
@@ -429,7 +429,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                                 ContaoEvents::SYSTEM_LOG,
                                 new LogEvent(
                                     sprintf(
-                                        'Offer ID %u is not a proper variant of offer ID %u. Rough changes between database and xml file make the processing unable to synchronize attribute ID %u. Data processing ID %u',
+                                        'Item ID %u is not a proper variant of item ID %u. Rough changes between database and xml file make the processing unable to synchronize attribute ID %u. Data processing ID %u',
                                         $variant->get('id'),
                                         $item->get('id'),
                                         $attribute->get('id'),
@@ -484,7 +484,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                     ContaoEvents::SYSTEM_LOG,
                     new LogEvent(
                         sprintf(
-                            'Attribute "%s" (type "%s") for offer ID %u can not be updated although it was changed. XML value: "%s". Xml parsed database value: "%s". Raw database value: "%s". Data processing ID %u',
+                            'Attribute "%s" (type "%s") for item ID %u can not be updated although it was changed. XML value: "%s". Xml parsed database value: "%s". Raw database value: "%s". Data processing ID %u',
                             $attribute->getColName(),
                             $attribute->get('type'),
                             $item->get('id'),
@@ -510,7 +510,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 ContaoEvents::SYSTEM_LOG,
                 new LogEvent(
                     sprintf(
-                        'Attribute "%s" for offer variant ID %u was synced from xml file "%s". Data processing ID %u',
+                        'Attribute "%s" for item variant ID %u was synced from xml file "%s". Data processing ID %u',
                         $attribute->getColName(),
                         $item->get('id'),
                         $file['path'],
