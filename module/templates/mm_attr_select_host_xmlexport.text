@@ -2,29 +2,29 @@
 
 $dom = new \DOMDocument('1.0', 'utf-8');
 
-$domRoot = $dom->createElement('HostData');
+$domRoot = $dom->createElement('_data');
 
 // Host name
 $domLogo = $dom->createElement(
-    'HostName',
+    '_name',
     htmlspecialchars(html_entity_decode($this->raw[$this->attribute->get('select_column')]), ENT_XML1)
         ?: ' ' // Prohibit empty value
 );
 $domRoot->appendChild($domLogo);
 
 // Host logo
-$domLogo = $dom->createElement('Logo');
-$domFile = $dom->createElement('File');
+$domLogo = $dom->createElement('_logo');
+$domFile = $dom->createElement('_link');
 
 if ('' !== ($path = $this->raw['logo'])) {
     $domFile->setAttribute(
         'href',
         'file://../' . $path
     );
-
 }
 
 $domLogo->appendChild($domFile);
+
 $domRoot->appendChild($domLogo);
 $dom->appendChild($domRoot);
 
