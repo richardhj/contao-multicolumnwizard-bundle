@@ -9,6 +9,8 @@
  */
 
 
+use MetaModels\IMetaModelsServiceContainer;
+
 $table = Ferienpass\Model\DataProcessing::getTable();
 
 
@@ -87,10 +89,10 @@ $GLOBALS['TL_DCA'][$table] = [
                 'name',
             ],
             'format'     => [
-                'format'
+                'format',
             ],
             'filesystem' => [
-                'filesystem'
+                'filesystem',
             ],
             'scope'      => [
                 'metamodel_filtering',
@@ -103,6 +105,11 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
         ],
     ],
+    // Meta Sub Palettes
+    'metasubpalettes'       => [
+        'combine_variants' => [
+        ]
+    ],
     // Meta SubSelect Palettes
     'metasubselectpalettes' => [
         'format'     => [
@@ -110,6 +117,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'metamodel_view',
                 'xml_single_file',
                 'combine_variants',
+                'variant_delimiters'
             ],
             'ical' => [
                 'ical_fields',
@@ -268,9 +276,72 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'     => &$GLOBALS['TL_LANG'][$table]['combine_variants'],
             'inputType' => 'checkbox',
             'eval'      => [
-                'tl_class' => 'w50 m12',
+                'tl_class'       => 'w50 m12',
+                'submitOnChange' => true,
             ],
             'sql'       => "char(1) NOT NULL default ''",
+        ],
+        'variant_delimiters'         => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['variant_delimiters'],
+            'inputType' => 'multiColumnWizard',
+            'eval'      => [
+                'columnFields' => [
+                    'metamodel_attribute' => [
+                        'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_attribute'],
+                        'inputType'        => 'conditionalselect',
+                        'options_callback' => function () {
+                            global $container;
+
+                            $return = [];
+
+                            /** @var IMetaModelsServiceContainer $serviceContainer */
+                            $serviceContainer = $container['metamodels-service-container'];
+                            $metaModel        = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass');
+
+                            foreach ($metaModel->getAttributes() as $attrName => $attribute) {
+                                $return[$attrName] = $attribute->getName();
+                            }
+
+                            return $return;
+                        },
+                        'eval'             => [
+                            'condition'          => 'mm_ferienpass',
+                            'chosen'             => true,
+                            'includeBlankOption' => true,
+                            'style'              => 'width:250px',
+                        ],
+                    ],
+                    'delimiter'           => [
+                        'label'     => &$GLOBALS['TL_LANG'][$table]['delimiter'],
+                        'inputType' => 'text',
+                        'eval'      => [
+                            'style' => 'width:50px',
+                        ],
+                    ],
+                    'newline'             => [
+                        'label'     => &$GLOBALS['TL_LANG'][$table]['newline'],
+                        'inputType' => 'checkbox',
+                        'eval'      => [
+//                            'style'     => 'width:250px',
+                        ],
+                    ],
+                    'newline_position'    => [
+                        'label'     => &$GLOBALS['TL_LANG'][$table]['newline_position'],
+                        'reference' => &$GLOBALS['TL_LANG'][$table]['newline_positions'],
+                        'inputType' => 'select',
+                        'default'   => 'after',
+                        'options'   => [
+                            'before',
+                            'after',
+                        ],
+                        'eval'      => [
+                            'style'     => 'width:50px',
+                        ],
+                    ],
+                ],
+                'tl_class'     => 'clr',
+            ],
+            'sql'       => "text NULL",
         ],
         'xml_single_file'            => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['xml_single_file'],

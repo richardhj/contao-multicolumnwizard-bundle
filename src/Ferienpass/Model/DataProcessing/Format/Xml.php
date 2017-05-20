@@ -35,7 +35,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class Xml implements FormatInterface, Format\TwoWaySyncInterface
 {
-    const VARIANT_DELIMITER = ','.PHP_EOL;
 
     /**
      * @var array
@@ -113,11 +112,28 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
     /**
+     * @param IAttribute $attribute
+     *
      * @return string
      */
-    public function getVariantDelimiter(): string
+    public function getVariantDelimiter(IAttribute $attribute): string
     {
-        return self::VARIANT_DELIMITER;
+        $delimiter = '';
+
+        $delimiterConfigs = deserialize($this->getModel()->variant_delimiters, true);
+        foreach ($delimiterConfigs as $delimiterConfig) {
+            if ($delimiterConfig['metamodel_attribute'] === $attribute->getColName() || '' === $delimiterConfig['metamodel_attribute']) {
+                $delimiter = sprintf(
+                    '%2$s%1$s%3$s',
+                    $delimiterConfig['delimiter'],
+                    'before' === $delimiterConfig['newline_position'] ? PHP_EOL : '',
+                    'after' === $delimiterConfig['newline_position'] ? PHP_EOL : ''
+                );
+                break;
+            }
+        }
+
+        return $delimiter;
     }
 
     /**
@@ -130,11 +146,11 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             return $this;
         }
 
-        foreach ($this->getXml() as $i => $xml) {
+        foreach ($this->getXml() as $k => $xml) {
             $path = sprintf(
                 '%s/xml/%s.xml',
                 $this->getModel()->getTmpPath(),
-                ($this->isXmlSingleFile() ? 'offers' : 'offer_' . $i)
+                ($this->isXmlSingleFile() ? 'offers' : 'offer_' . $k)
             );
 
             // Save xml in tmp path
@@ -152,7 +168,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
         return $this;
     }
-
 
     /**
      * @param array  $files
@@ -268,7 +283,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
                     if ($variants->offsetExists($variants->key() + 1)) {
                         $domAttribute->appendChild(
-                            $dom->createElement('_variantDelimiter', $this->getVariantDelimiter())
+                            $dom->createElement('_variantDelimiter', $this->getVariantDelimiter($attribute))
                         );
                     }
                 }

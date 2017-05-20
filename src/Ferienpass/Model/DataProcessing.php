@@ -41,6 +41,7 @@ use MetaModels\IMetaModel;
  * @property mixed   $ical_fields
  * @property string  $format
  * @property boolean $combine_variants
+ * @property mixed   $variant_delimiters
  * @property boolean $xml_single_file
  * @property integer $metamodel_view
  * @property int     $metamodel_filtering

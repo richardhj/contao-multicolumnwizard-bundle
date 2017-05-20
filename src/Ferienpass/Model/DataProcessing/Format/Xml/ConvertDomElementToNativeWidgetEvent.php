@@ -47,8 +47,8 @@ class ConvertDomElementToNativeWidgetEvent
      * ConvertDomElementToNativeWidgetEvent constructor.
      *
      * @param DOMElement $domElement
-     * @param IAttribute  $attribute
-     * @param IItem       $item
+     * @param IAttribute $attribute
+     * @param IItem      $item
      */
     public function __construct(DOMElement $domElement, IAttribute $attribute, IItem $item)
     {
