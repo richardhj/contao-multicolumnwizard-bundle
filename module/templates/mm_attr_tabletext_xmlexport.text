@@ -1,34 +1,34 @@
 <?php
 
-$objDom = new \DOMDocument('1.0', 'utf-8');
+$dom = new \DOMDocument('1.0', 'utf-8');
 
-$table = $objDom->createElement(\Ferienpass\Model\DataProcessing\Format\Xml::camelCase($this->attribute->get('type')));
+$table = $dom->createElement('_' . $this->attribute->get('type'));
 $table->setAttribute('xmlns:aid', 'http://ns.adobe.com/AdobeInDesign/4.0/');
 $table->setAttribute('aid:table', 'table');
 
-$rc = 0;
-$cc = 0;
+$countCol = count($this->attribute->get('tabletext_cols'));
+$countRow = count($this->raw);
 
-foreach ((array) $this->raw as $row) {
-    $rc++;
-    $cc = 0;
+$originCell = $dom->createElement('_cell');
+$originCell->setAttribute('aid:table', 'cell');
+$originCell->setAttribute('aid:crows', '1');
+$originCell->setAttribute('aid:ccols', '1');
+$originCell->setAttribute('aid:ccolwidth', '150');
 
-    foreach ($row as $col) {
-        $cc++;
-
-        $cell = $objDom->createElement('Cell', htmlspecialchars(html_entity_decode($col['value']), ENT_XML1));
-        $cell->setAttribute('aid:table', 'cell');
-        $cell->setAttribute('aid:crows', '1');
-        $cell->setAttribute('aid:ccols', '1');
-        $cell->setAttribute('aid:ccolwidth', '150');
+foreach ((array) $this->raw as $k => $row) {
+    for ($kk = 0; $kk < $countCol; $kk++) {
+        $i    = array_search($kk, array_column($row, 'col'));
+        $cell = clone $originCell;
+        if ($i !== false) {
+            $cell->nodeValue = htmlspecialchars(html_entity_decode($row[$i]['value']), ENT_XML1);
+        }
 
         $table->appendChild($cell);
     }
 }
 
-$table->setAttribute('aid:trows', $rc);
-$table->setAttribute('aid:tcols', $cc);
+$table->setAttribute('aid:trows', $countRow);
+$table->setAttribute('aid:tcols', $countCol);
+$dom->appendChild($table);
 
-$objDom->appendChild($table);
-
-echo $objDom->saveXML();
+echo $dom->saveXML();
