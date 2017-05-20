@@ -122,7 +122,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
         $delimiterConfigs = deserialize($this->getModel()->variant_delimiters, true);
         foreach ($delimiterConfigs as $delimiterConfig) {
-            if ($delimiterConfig['metamodel_attribute'] === $attribute->getColName() || '' === $delimiterConfig['metamodel_attribute']) {
+            if ($delimiterConfig['metamodel_attribute'] === $attribute->getColName()
+                || $delimiterConfig['metamodel_attribute'] === ''
+            ) {
                 $delimiter = sprintf(
                     '%2$s%1$s%3$s',
                     $delimiterConfig['delimiter'],
@@ -210,7 +212,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         } else {
             foreach ($this->getItems() as $item) {
                 $domClone = clone $dom;
-                $domItem = $this->itemAsDomNode($item, $domClone);
+                $domItem  = $this->itemAsDomNode($item, $domClone);
                 if (null !== $domItem) {
                     $domClone->appendChild($domItem);
                     $return[$item->get('id')] = $domClone->saveXML();

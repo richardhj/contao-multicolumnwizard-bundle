@@ -42,7 +42,8 @@ class OfferDate extends BaseComplex
     {
         $arrFieldDef = parent::getFieldDefinition($arrOverrides);
 
-        $arrFieldDef['inputType']            = 'offer_date';
+        $arrFieldDef['inputType'] = 'offer_date';
+
         $arrFieldDef['eval']['columnFields'] = [];
 
         return $arrFieldDef;
@@ -117,13 +118,13 @@ class OfferDate extends BaseComplex
                 sprintf(
                     <<<'SQL'
 SELECT
-  item.id as item_id,
+  item.id AS item_id,
   IFNULL(
     date.start,
     (SELECT %4$s FROM %2$s WHERE item_id IN (SELECT id FROM %1$s WHERE vargroup=item.id))
-  ) as sortdate
+  ) AS sortdate
 FROM %1$s item
-LEFT JOIN %2$s date ON date.item_id=item.id
+LEFT JOIN %2$s DATE ON DATE.item_id=item.id
 WHERE item.id IN (%3$s)
 GROUP BY item.id
 ORDER BY sortdate %5$s
