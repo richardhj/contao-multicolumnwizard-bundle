@@ -28,7 +28,7 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
         parent::__construct();
 
         $this->typeName = 'age';
-        $this->typeIcon = 'assets/ferienpass/backend/img/fp_age.png';
+        $this->typeIcon = 'assets/ferienpass/core/img/fp_age.png';
         $this->typeClass = 'Ferienpass\MetaModels\Attribute\Age\Age';
     }
 }

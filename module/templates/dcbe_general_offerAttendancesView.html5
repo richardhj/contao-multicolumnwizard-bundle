@@ -68,7 +68,7 @@
                 </div>
             <?php endforeach ?>
         </div>
-        <script src="<?php echo TL_ASSETS_URL ?>/assets/ferienpass/backend/js/html.sortable.min.js"></script>
+        <script src="<?php echo TL_ASSETS_URL ?>/assets/ferienpass/core/js/html.sortable.min.js"></script>
         <script>
             sortable('.status-assignment ul', {
                 connectWith: '.status-assignment ul',

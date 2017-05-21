@@ -162,7 +162,7 @@ $GLOBALS['TL_DCA'][$table] = [
 //                    'options' => [
 //                        [
 //                            'value' => '1',
-//                            'icon'  => 'assets/ferienpass/backend/img/equalizer.png',
+//                            'icon'  => 'assets/ferienpass/core/img/equalizer.png',
 //                        ],
 //                        [
 //                            'value' => '2',

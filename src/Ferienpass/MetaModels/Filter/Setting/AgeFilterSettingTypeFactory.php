@@ -28,7 +28,7 @@ class AgeFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 
         $this
             ->setTypeName('age')
-            ->setTypeIcon('assets/ferienpass/backend/img/filter_fp_age.png')
+            ->setTypeIcon('assets/ferienpass/core/img/filter_fp_age.png')
             ->setTypeClass('Ferienpass\MetaModels\Filter\Setting\Age')
             ->allowAttributeTypes('age');
     }

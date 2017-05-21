@@ -36,15 +36,13 @@
   },
   "autoload": {
     "psr-0": {
-      "Ferienpass\\": "src/",
-      "MetaModels\\": "src/",
-      "League\\": "src/"
+      "Ferienpass\\": "src/"
     }
   },
   "extra": {
     "contao": {
       "sources": {
-        "assets": "assets/ferienpass/backend",
+        "assets": "assets/ferienpass/core",
         "module": "system/modules/ferienpass"
       }
     }

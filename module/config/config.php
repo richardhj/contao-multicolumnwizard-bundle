@@ -20,14 +20,14 @@ array_insert(
             'ferienpass_management'  => [
                 'callback' => 'Ferienpass\BackendModule\Management',
                 'tables'   => [],
-                'icon'     => 'assets/ferienpass/backend/img/equalizer.png',
+                'icon'     => 'assets/ferienpass/core/img/equalizer.png',
             ],
             'ferienpass_attendances' => [
                 'tables' => [
                     Ferienpass\Model\Attendance::getTable(),
                     'mm_ferienpass',
                 ],
-                'icon'   => 'assets/ferienpass/backend/img/equalizer.png',
+                'icon'   => 'assets/ferienpass/core/img/equalizer.png',
             ],
         ],
     ]
@@ -115,9 +115,9 @@ if ($_GET['do'] == 'ferienpass_management') {
  * Back end styles
  */
 if (TL_MODE == 'BE') {
-    $GLOBALS['TL_CSS'][] = 'assets/ferienpass/backend/css/backend.css|static';
-    $GLOBALS['TL_CSS'][] = 'assets/ferienpass/backend/css/be_mm_ferienpass.css|static';
-    $GLOBALS['TL_JAVASCRIPT'][] = 'assets/ferienpass/backend/js/be_mm_ferienpass.js|static';
+    $GLOBALS['TL_CSS'][] = 'assets/ferienpass/core/css/backend.css|static';
+    $GLOBALS['TL_CSS'][] = 'assets/ferienpass/core/css/be_mm_ferienpass.css|static';
+    $GLOBALS['TL_JAVASCRIPT'][] = 'assets/ferienpass/core/js/be_mm_ferienpass.js|static';
 }
 
 
