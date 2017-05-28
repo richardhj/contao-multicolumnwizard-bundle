@@ -10,6 +10,8 @@
 
 namespace Ferienpass\Model;
 
+use Contao\Model;
+
 
 /**
  * Class ApplicationSystem
@@ -19,7 +21,7 @@ namespace Ferienpass\Model;
  * @property mixed  $maxApplicationsPerDay
  * @package Ferienpass\Model
  */
-class ApplicationSystem extends \Model
+class ApplicationSystem extends Model
 {
 
     /**
@@ -33,9 +35,9 @@ class ApplicationSystem extends \Model
     /**
      * Find the application system whose type is "firstcome"
      *
-     * @return ApplicationSystem
+     * @return ApplicationSystem|null
      */
-    public static function findFirstCome(): ApplicationSystem
+    public static function findFirstCome()
     {
         return static::findByType('firstcome');
     }
@@ -44,9 +46,9 @@ class ApplicationSystem extends \Model
     /**
      * Find the application system whose type is "lot"
      *
-     * @return ApplicationSystem
+     * @return ApplicationSystem|null
      */
-    public static function findLot(): ApplicationSystem
+    public static function findLot()
     {
         return static::findByType('lot');
     }
@@ -57,9 +59,9 @@ class ApplicationSystem extends \Model
      *
      * @param $type
      *
-     * @return ApplicationSystem
+     * @return ApplicationSystem|null
      */
-    public static function findByType($type): ApplicationSystem
+    public static function findByType($type)
     {
         return static::findOneBy('type', $type);
     }
@@ -68,9 +70,9 @@ class ApplicationSystem extends \Model
     /**
      * Find the application system model that is active currently
      *
-     * @return ApplicationSystem
+     * @return ApplicationSystem|null
      */
-    public static function findCurrent(): ApplicationSystem
+    public static function findCurrent()
     {
         $t       = static::$strTable;
         $columns = [];
