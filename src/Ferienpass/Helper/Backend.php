@@ -12,6 +12,7 @@ namespace Ferienpass\Helper;
 
 
 use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
+use Ferienpass\ApplicationSystem\NoOp;
 
 
 /**
@@ -34,12 +35,12 @@ class Backend
         /** @var AbstractApplicationSystem $applicationSystem */
         $applicationSystem = $container['ferienpass.applicationsystem'];
 
-        if (null !== $applicationSystem) {
+        if (!$applicationSystem instanceof NoOp) {
             $name = $applicationSystem->getModel()->title;
             return sprintf('<p class="tl_info">Es läuft aktuell das Anmeldesystem <strong>%s</strong></p>', $name);
 
         } else {
-            return '<p class="tl_error">Es läuft aktuell <strong>kein</strong> Anmeldesystem. Anmeldungen sind <strong>nicht möglich</strong></p>';
+            return '<p class="tl_error">Es läuft aktuell <strong>kein</strong> Anmeldesystem. Anmeldungen sind <strong>nicht möglich.</strong></p>';
         }
     }
 }
