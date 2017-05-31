@@ -10,6 +10,7 @@
 
 namespace Ferienpass\Subscriber;
 
+use Contao\Date;
 use Contao\Model\Event\PostSaveModelEvent;
 use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent as BuildOptionsEvent;
 use Ferienpass\Helper\Message;
@@ -105,8 +106,8 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $options   = $event->getResult();
-        $dateOffer = new DateTime('@' . $offerStart);
+        $options       = $event->getResult();
+        $dateTimeOffer = new DateTime('@' . $offerStart);
 
         foreach ($options as $k => $option) {
             // Skip if already disabled
@@ -114,7 +115,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            $dateOfBirth = new DateTime(
+            $dateTimeOfBirth = new DateTime(
                 '@' . $event
                     ->getParticipants()
                     ->reset()
@@ -125,10 +126,25 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             );
 
             // Calculate age at offer's date
-            $age = $dateOfBirth->getAge($dateOffer);
+            $ageOnOffer = $dateTimeOfBirth->getAge($dateTimeOffer);
+
+            $checkStrictAge = true;
+            if ($checkStrictAge) {
+                $offersWithAgeAllowed = $event->getOffer()->getAttribute('age')->searchFor($ageOnOffer);
+            } else {
+                $dateOffer            = new Date($offerStart);
+                $offersWithAgeAllowed = [];
+                $ageOnYearBegin       = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearBegin)));
+                $ageOnYearEnd         = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearEnd)));
+                foreach (array_unique([$ageOnOffer, $ageOnYearBegin, $ageOnYearEnd]) as $age) {
+                    $offersWithAgeAllowed =
+                        array_merge($event->getOffer()->getAttribute('age')->searchFor($age), $offersWithAgeAllowed);
+                }
+            }
+
             $isAgeAllowed = in_array(
                 $event->getOffer()->get('id'),
-                $event->getOffer()->getAttribute('age')->searchFor($age)
+                $offersWithAgeAllowed
             );
 
             if (!$isAgeAllowed) {
