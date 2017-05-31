@@ -2,7 +2,7 @@
 /**
  * FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension
  *
- * Copyright (c) 2015-2016 Richard Henkenjohann
+ * Copyright (c) 2015-2017 Richard Henkenjohann
  *
  * @package Ferienpass
  * @author  Richard Henkenjohann <richard@ferienpass.online>
@@ -13,14 +13,19 @@ use Ferienpass\Model\ApplicationSystem as ApplicationSystemModel;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\IMetaModelsServiceContainer;
 
+/** @var Pimple $container */
 
-$container['ferienpass.applicationsystem.firstcome'] = function () {
-    return new Ferienpass\ApplicationSystem\FirstCome();
-};
+$container['ferienpass.applicationsystem.firstcome'] = $container->share(
+    function () {
+        return new Ferienpass\ApplicationSystem\FirstCome();
+    }
+);
 
-$container['ferienpass.applicationsystem.lot'] = function () {
-    return new Ferienpass\ApplicationSystem\Lot();
-};
+$container['ferienpass.applicationsystem.lot'] = $container->share(
+    function () {
+        return new Ferienpass\ApplicationSystem\Lot();
+    }
+);
 
 $container['ferienpass.applicationsystem'] = $container->share(
     function ($container) {
