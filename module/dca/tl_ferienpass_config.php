@@ -20,7 +20,7 @@ $table = Config::getTable();
 $GLOBALS['TL_DCA'][$table] = [
 
     // Config
-    'config' => [
+    'config'       => [
         'dataContainer' => 'General',
         'forceEdit'     => true,
     ],
@@ -38,24 +38,24 @@ $GLOBALS['TL_DCA'][$table] = [
     // Meta Palettes
     'metapalettes' => [
         'default' => [
-            'restrictions'    => [
+            'restrictions' => [
                 'registrationAllowedZipCodes',
                 'registrationRequiredFields',
+                'ageCheckMethod',
             ],
-            'data_processing' => [],
         ],
     ],
 
     // Fields
     'fields'       => [
-        'registrationAllowedZipCodes'           => [
+        'registrationAllowedZipCodes' => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['registrationAllowedZipCodes'],
             'inputType' => 'text',
             'eval'      => [
                 'tl_class' => 'w50',
             ],
         ],
-        'registrationRequiredFields' => [
+        'registrationRequiredFields'  => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['registrationRequiredFields'],
             'inputType'        => 'checkboxWizard',
             'options_callback' => function () {
@@ -75,6 +75,19 @@ $GLOBALS['TL_DCA'][$table] = [
             'eval'             => [
                 'multiple' => true,
                 'csv'      => ',',
+            ],
+        ],
+        'ageCheckMethod'             => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['ageCheckMethod'],
+            'inputType' => 'select',
+            'default'   => 'exact',
+            'reference' => &$GLOBALS['TL_LANG'][$table]['ageCheckMethodOptions'],
+            'options'   => [
+                'exact',
+                'vagueOnYear',
+            ],
+            'eval'      => [
+                'tl_class' => 'w50',
             ],
         ],
     ],

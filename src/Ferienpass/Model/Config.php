@@ -47,4 +47,9 @@ class Config extends AbstractSingleModel
     {
         return trimsplit(',', $this->getProperty('registrationRequiredFields'));
     }
+
+    public function getAgeCheckMethod()
+    {
+        return $this->getProperty('ageCheckMethod');
+    }
 }

@@ -13,7 +13,6 @@ namespace Ferienpass\Helper;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -24,6 +23,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class UserAccount extends \Frontend
 {
+
+    use GetFerienpassConfigTrait;
 
     /**
      * Check the postal code on user registration
@@ -126,13 +127,6 @@ class UserAccount extends \Frontend
         @define('FE_USER_LOGGED_IN', $this->getLoginStatus('FE_USER_AUTH'));
         /** @noinspection PhpUndefinedMethodInspection */
         @\MemberModel::findByPk($id)->delete();
-    }
-
-    /**
-     * @return FerienpassConfig
-     */
-    private function getFerienpassConfig(): FerienpassConfig {
-        return FerienpassConfig::getInstance();
     }
 
     /**

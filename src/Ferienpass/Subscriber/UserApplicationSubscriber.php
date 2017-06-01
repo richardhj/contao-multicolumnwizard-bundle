@@ -13,6 +13,7 @@ namespace Ferienpass\Subscriber;
 use Contao\Date;
 use Contao\Model\Event\PostSaveModelEvent;
 use Ferienpass\Event\BuildParticipantOptionsForUserApplicationEvent as BuildOptionsEvent;
+use Ferienpass\Helper\GetFerienpassConfigTrait;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\ToolboxOfferDate;
 use Ferienpass\Model\Attendance;
@@ -29,6 +30,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  */
 class UserApplicationSubscriber implements EventSubscriberInterface
 {
+
+    use GetFerienpassConfigTrait;
 
     /**
      * Returns an array of event names this subscriber wants to listen to.
@@ -70,7 +73,7 @@ class UserApplicationSubscriber implements EventSubscriberInterface
      */
     public function disableAlreadyAttendingParticipants(BuildOptionsEvent $event)
     {
-        $options = $event->getResult();
+        $options        = $event->getResult();
         $participantIds = Participant::getInstance()
             ->byParentAndOfferFilter(\FrontendUser::getInstance()->id, $event->getOffer()->get('id'))
             ->getMatchingIds();
@@ -126,20 +129,26 @@ class UserApplicationSubscriber implements EventSubscriberInterface
             );
 
             // Calculate age at offer's date
-            $ageOnOffer = $dateTimeOfBirth->getAge($dateTimeOffer);
+            $ageOnOffer           = $dateTimeOfBirth->getAge($dateTimeOffer);
+            $offersWithAgeAllowed = [];
 
-            $checkStrictAge = true;
-            if ($checkStrictAge) {
-                $offersWithAgeAllowed = $event->getOffer()->getAttribute('age')->searchFor($ageOnOffer);
-            } else {
-                $dateOffer            = new Date($offerStart);
-                $offersWithAgeAllowed = [];
-                $ageOnYearBegin       = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearBegin)));
-                $ageOnYearEnd         = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearEnd)));
-                foreach (array_unique([$ageOnOffer, $ageOnYearBegin, $ageOnYearEnd]) as $age) {
-                    $offersWithAgeAllowed =
-                        array_merge($event->getOffer()->getAttribute('age')->searchFor($age), $offersWithAgeAllowed);
-                }
+            switch ($this->getFerienpassConfig()->getAgeCheckMethod()) {
+                case 'vagueOnYear':
+                    $dateOffer      = new Date($offerStart);
+                    $ageOnYearBegin = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearBegin)));
+                    $ageOnYearEnd   = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearEnd)));
+                    foreach (array_unique([$ageOnOffer, $ageOnYearBegin, $ageOnYearEnd]) as $age) {
+                        $offersWithAgeAllowed = array_unique(array_merge(
+                            $event->getOffer()->getAttribute('age')->searchFor($age),
+                            $offersWithAgeAllowed
+                        ));
+                    }
+                    break;
+
+                case 'exact':
+                default:
+                    $offersWithAgeAllowed = $event->getOffer()->getAttribute('age')->searchFor($ageOnOffer);
+                    break;
             }
 
             $isAgeAllowed = in_array(
