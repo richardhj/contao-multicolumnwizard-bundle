@@ -64,6 +64,12 @@ class Editing extends Items
                     $this->exitWith404();
                 }
 
+                if ('mm_ferienpass' === $this->metaModel->getTableName()) {
+                    if ($this->item->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end'] < time()) {
+                        $this->exitWith403();
+                    }
+                }
+
                 $this->checkPermission();
                 break;
 

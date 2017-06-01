@@ -79,6 +79,11 @@ class EditingActions extends Items
                     Message::addError($GLOBALS['TL_LANG']['XPT']['itemDeleteMissingPermission']);
                 } // Delete
                 else {
+
+                    if ($this->item->get('pass_release')[MetaModelSelect::SELECT_RAW]['host_edit_end'] < time()) {
+                        $this->exitWith403();
+                    }
+
                     $this->metaModel->delete($this->item);
 
                     Message::addConfirmation($GLOBALS['TL_LANG']['MSC']['itemDeleteConfirmation']);
