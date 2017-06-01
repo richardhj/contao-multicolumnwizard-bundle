@@ -10,9 +10,12 @@
 
 namespace Ferienpass\Helper;
 
+use Ferienpass\ApplicationSystem\FirstCome;
+
 
 /**
  * Class InsertTags
+ *
  * @package Ferienpass\Helper
  */
 class InsertTags
@@ -25,12 +28,16 @@ class InsertTags
      */
     public function replaceInsertTags($tag)
     {
+        global $container;
+
         $elements = trimsplit('::', $tag);
 
         if ($elements[0] == 'ferienpass') {
             switch ($elements[1]) {
                 case 'max_applications_per_day':
-                    return ''; // todo
+                    /** @var FirstCome $applicationSystem */
+                    $applicationSystem = $container['ferienpass.applicationsystem.firstcome'];
+                    return $applicationSystem->getModel()->maxApplicationsPerDay;
                     break;
             }
         }
