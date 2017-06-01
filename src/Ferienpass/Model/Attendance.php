@@ -154,8 +154,7 @@ class Attendance extends Model
         return static::findOneBy(
             ['offer=?', 'status=?'],
             [$offerId, $statusId],
-            array_merge
-            (
+            array_merge(
                 [
                     'order' => 'sorting DESC',
                 ],

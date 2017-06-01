@@ -85,7 +85,7 @@ class FirstCome extends AbstractApplicationSystem
         $data['status'] = $newStatus->id;
 
         // Update sorting afterwards
-        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
+        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $data['status']);
         $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
         $sorting += 128;
         $data['sorting'] = $sorting;
@@ -120,7 +120,8 @@ class FirstCome extends AbstractApplicationSystem
         // Update sorting afterwards
         $lastAttendance =
             Attendance::findLastByOfferAndStatus($model->getProperty('offer'), $model->getProperty('status'));
-        $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+
+        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
         $sorting += 128;
         $model->setProperty('sorting', $sorting);
     }
@@ -145,10 +146,10 @@ class FirstCome extends AbstractApplicationSystem
             return AttendanceStatus::findError();
         }
 
+        $max = $attendance->getOffer()->get('applicationlist_max');
+
         // Offers without usage of application list or without limit
-        if (!$attendance->getOffer()->get('applicationlist_active')
-            || !($max = $attendance->getOffer()->get('applicationlist_max'))
-        ) {
+        if (!$attendance->getOffer()->get('applicationlist_active') || !$max) {
             return AttendanceStatus::findConfirmed();
         }
 

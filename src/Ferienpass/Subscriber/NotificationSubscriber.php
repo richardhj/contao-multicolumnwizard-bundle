@@ -10,8 +10,9 @@
 
 namespace Ferienpass\Subscriber;
 
-use ContaoCommunityAlliance\DcGeneral\Event\PostPersistModelEvent;
+use Contao\Model\Event\PostSaveModelEvent;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\AttendanceStatus;
 use MetaModels\IItem;
 use NotificationCenter\Model\Notification;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -46,7 +47,7 @@ class NotificationSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            PostPersistModelEvent::NAME => [
+            PostSaveModelEvent::NAME => [
                 ['sendNewAttendanceStatusNotification'],
                 ['sendChangedAttendanceStatusNotification'],
             ],
@@ -57,25 +58,29 @@ class NotificationSubscriber implements EventSubscriberInterface
     /**
      * Send the corresponding notification if the attendance status is assigned newly
      *
-     * @param PostPersistModelEvent $event
+     * @param PostSaveModelEvent $event
      */
-    public function sendNewAttendanceStatusNotification(PostPersistModelEvent $event)
+    public function sendNewAttendanceStatusNotification(PostSaveModelEvent $event)
     {
         /** @var Attendance $attendance */
         $attendance = $event->getModel();
+        $attendance->refresh(); // TODO: check why we need to refresh
         /** @var Attendance $originalAttendance */
         $originalAttendance = $event->getOriginalModel();
 
+        //TODO Cannot use getStatus() because of cache shit
+        $originalStatus = AttendanceStatus::findByPk($originalAttendance->status);
+        $currentStatus = AttendanceStatus::findByPk($attendance->status);
+
         if (!$attendance instanceof Attendance
-            || null !== $originalAttendance->getStatus()
-            || null === $attendance->getStatus()
+            || null !== $originalStatus
+            || null === $currentStatus
         ) {
             return;
         }
 
         /** @var Notification $notification */
-        /** @noinspection PhpUndefinedMethodInspection */
-        $notification = Notification::findByPk($attendance->getStatus()->notification_new);
+        $notification = Notification::findByPk($currentStatus->notification_new);
 
         if (null !== $notification) {
             $notification->send(
@@ -91,25 +96,29 @@ class NotificationSubscriber implements EventSubscriberInterface
     /**
      * Send the corresponding notification if the attendance status was changed
      *
-     * @param PostPersistModelEvent $event
+     * @param PostSaveModelEvent $event
      */
-    public function sendChangedAttendanceStatusNotification(PostPersistModelEvent $event)
+    public function sendChangedAttendanceStatusNotification(PostSaveModelEvent $event)
     {
         /** @var Attendance $attendance */
         $attendance = $event->getModel();
+        $attendance->refresh(); // TODO: check why we need to refresh
         /** @var Attendance $originalAttendance */
         $originalAttendance = $event->getOriginalModel();
 
+        //TODO Cannot use getStatus() because of cache shit
+        $originalStatus = AttendanceStatus::findByPk($originalAttendance->status);
+        $currentStatus = AttendanceStatus::findByPk($attendance->status);
+
         if (!$attendance instanceof Attendance
-            || null === $originalAttendance->getStatus()
-            || $originalAttendance->getStatus() === $attendance->getStatus()
+            || null === $originalStatus
+            || $originalStatus === $currentStatus
         ) {
             return;
         }
 
         /** @var Notification $notification */
-        /** @noinspection PhpUndefinedMethodInspection */
-        $notification = Notification::findByPk($event->getAttendance()->getStatus()->notification_onChange);
+        $notification = Notification::findByPk($currentStatus->notification_onChange);
 
         // Send the notification if one is set
         if (null !== $notification) {
@@ -137,12 +146,12 @@ class NotificationSubscriber implements EventSubscriberInterface
 
         // Add all offer fields
         foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['offer_' . $name] = $offer->get($name);
+            $tokens['offer_' . $name] = $offer->parseAttribute($name)['text'];
         }
 
         // Add all the participant fields
         foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['participant_' . $name] = $participant->get($name);
+            $tokens['participant_' . $name] = $participant->parseAttribute($name)['text'];
         }
 
         // Add all the parent's member fields
