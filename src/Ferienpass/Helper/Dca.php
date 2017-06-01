@@ -155,14 +155,15 @@ class Dca implements EventSubscriberInterface
 
         if ($metaModelItem->isVariantBase() && 0 !== $metaModelItem->getVariants(null)->getCount()) {
             $event->setDisabled(true);
-        } elseif (0 === Attendance::countByOfferAndStatus(
-                $model->getProperty('id'),
-                AttendanceStatus::findWaiting()->id
-            )
-        ) {
-            //todo
-//            $event->setHtml('<p>test</p>'.$event->getHtml());
         }
+//        elseif (0 === Attendance::countByOfferAndStatus(
+//                $model->getProperty('id'),
+//                AttendanceStatus::findWaiting()->id
+//            )
+//        ) {
+//            //todo
+////            $event->setHtml('<p>test</p>'.$event->getHtml());
+//        }
     }
 
 
