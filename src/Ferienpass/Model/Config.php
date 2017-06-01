@@ -15,74 +15,36 @@ use DcGeneral\Contao\Model\AbstractSingleModel;
 
 /**
  * Class Config
- * @property $offer_model
- * @property $participant_model
- * @property $offer_attribute_name
- * @property $offer_attribute_applicationlist_active
- * @property $offer_attribute_applicationlist_max
- * @property $offer_attribute_age
- * @property $offer_attribute_date
- * @property $participant_attribute_name
- * @property $participant_attribute_dateofbirth
- * @property $participant_attribute_agreement_photos
- * @property $registration_allowed_zip_codes
- * @property $registration_required_fields
+ *
  * @package Ferienpass\Model
  */
 class Config extends AbstractSingleModel
 {
 
     /**
-     * MetaModels
-     */
-    const OFFER_MODEL = 'offer_model';
-
-
-    const PARTICIPANT_MODEL = 'participant_model';
-
-
-    /**
-     * Attributes
-     */
-    const OFFER_ATTRIBUTE_NAME = 'offer_attribute_name';
-
-
-    const OFFER_ATTRIBUTE_APPLICATIONLIST_ACTIVE = 'offer_attribute_applicationlist_active';
-
-
-    const OFFER_ATTRIBUTE_APPLICATIONLIST_MAX = 'offer_attribute_applicationlist_max';
-
-
-    const OFFER_ATTRIBUTE_AGE = 'offer_attribute_age';
-
-
-    const OFFER_ATTRIBUTE_DATE = 'offer_attribute_date';
-
-
-    const PARTICIPANT_ATTRIBUTE_NAME = 'participant_attribute_name';
-
-
-    const PARTICIPANT_ATTRIBUTE_DATEOFBIRTH = 'participant_attribute_dateofbirth';
-
-
-    const PARTICIPANT_ATTRIBUTE_AGREEMENT_PHOTOS = 'participant_attribute_agreement_photos';
-
-
-    /**
-     * Restrictions
-     */
-    const PARTICIPANT_ALLOWED_ZIP_CODES = 'registration_allowed_zip_codes';
-
-
-    const PARTICIPANT_REGISTRATION_REQUIRED_FIELDS = 'registration_required_fields';
-
-
-    /**
      * Table name
+     *
      * @var string
      */
-    protected static $strTable = 'tl_ferienpass_config';
-
+    protected static $table = 'tl_ferienpass_config';
 
     protected static $objInstance;
+
+
+    /**
+     * @return array
+     */
+    public function getRegistrationAllowedZipCodes()
+    {
+        return trimsplit(',', $this->getProperty('registrationAllowedZipCodes'));
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getRegistrationRequiredFields()
+    {
+        return trimsplit(',', $this->getProperty('registrationRequiredFields'));
+    }
 }

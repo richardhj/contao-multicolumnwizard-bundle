@@ -370,37 +370,6 @@ class Dca implements EventSubscriberInterface
 
 
     /**
-     * Check whether the type of the selected attribute fits with the one assumed
-     *
-     * @param mixed          $value
-     * @param \DataContainer $dc
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    public function checkMetaModelAttributeType($value, $dc)
-    {
-        $attributeType      = $GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['metamodel_attribute_type'];
-        $metaModelTableName = FerienpassConfig::getInstance()
-            ->{$GLOBALS['TL_DCA'][$dc->table]['fields'][$dc->field]['eval']['conditionField']};
-
-        $metaModel = Factory::getDefaultFactory()->getMetaModel($metaModelTableName);
-
-        if (null === $metaModel) {
-            return '';
-        }
-
-        $attribute = $metaModel->getAttribute($value);
-
-        if (null !== $attribute && $attributeType != $attribute->get('type')) {
-            throw new \Exception(sprintf('Selected attribute is not type "%s"', $attributeType));
-        }
-
-        return $value;
-    }
-
-
-    /**
      * Get status change notifications
      *
      * @category options_callback
@@ -489,30 +458,6 @@ class Dca implements EventSubscriberInterface
 
         // Sort the render settings.
         return $renderSettings->fetchEach('name');
-    }
-
-
-    /**
-     * Get all front end editable member dca fields
-     *
-     * @category options_callback
-     *
-     * @return array
-     */
-    public function getEditableMemberProperties()
-    {
-        $return = [];
-
-        \System::loadLanguageFile('tl_member');
-        \Controller::loadDataContainer('tl_member');
-
-        foreach ($GLOBALS['TL_DCA']['tl_member']['fields'] as $k => $v) {
-            if ($v['eval']['feEditable']) {
-                $return[$k] = $GLOBALS['TL_DCA']['tl_member']['fields'][$k]['label'][0];
-            }
-        }
-
-        return $return;
     }
 
 

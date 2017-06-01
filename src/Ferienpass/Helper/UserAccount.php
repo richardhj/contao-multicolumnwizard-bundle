@@ -8,12 +8,14 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-
 namespace Ferienpass\Helper;
 
+use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
+use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\Participant;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
 /**
@@ -34,13 +36,11 @@ class UserAccount extends \Frontend
      */
     public function createNewUser($id, $data)
     {
-        $allowedZipCodes = trimsplit(',', FerienpassConfig::getInstance()->registration_allowed_zip_codes);
-
+        $allowedZipCodes = $this->getFerienpassConfig()->getRegistrationAllowedZipCodes();
         if (empty($allowedZipCodes)) {
             return;
         }
 
-        // Check for allowed zip code
         if (!in_array($data['postal'], $allowedZipCodes)) {
             // Add error as message
             // !!! You have to include the message in registration template (member_…)
@@ -54,21 +54,6 @@ class UserAccount extends \Frontend
             return;
         }
     }
-
-
-    /**
-     * Delete a user by id
-     *
-     * @param integer $id
-     */
-    protected function deleteUser($id)
-    {
-        @\FrontendUser::getInstance()->logout();
-        @define('FE_USER_LOGGED_IN', $this->getLoginStatus('FE_USER_AUTH'));
-        /** @noinspection PhpUndefinedMethodInspection */
-        @\MemberModel::findByPk($id)->delete();
-    }
-
 
     /**
      * Delete a member's participants and attendances
@@ -101,18 +86,20 @@ class UserAccount extends \Frontend
             Participant::getInstance()->getMetaModel()->delete($participants->getItem());
         }
 
-        \System::log(
-            sprintf(
-                '%u participants and %u attendances for member ID %u has been deleted',
-                $countParticipants,
-                $countAttendances,
-                $userId
-            ),
-            __METHOD__,
-            TL_GENERAL
+        $this->getEventDispatcher()->dispatch(
+            ContaoEvents::SYSTEM_LOG,
+            new LogEvent(
+                sprintf(
+                    '%u participants and %u attendances for member ID %u has been deleted',
+                    $countParticipants,
+                    $countAttendances,
+                    $userId
+                ),
+                __METHOD__,
+                TL_GENERAL
+            )
         );
     }
-
 
     /**
      * Set fields configured in the ferienpass config as mandatory in the dca
@@ -122,9 +109,38 @@ class UserAccount extends \Frontend
     {
         // It is a front end call without a dc
         if (0 === func_num_args()) {
-            foreach (trimsplit(',', FerienpassConfig::getInstance()->registration_required_fields) as $field) {
+            foreach ($this->getFerienpassConfig()->getRegistrationRequiredFields() as $field) {
                 $GLOBALS['TL_DCA']['tl_member']['fields'][$field]['eval']['mandatory'] = true;
             }
         }
+    }
+
+    /**
+     * Delete a user by id
+     *
+     * @param integer $id
+     */
+    private function deleteUser($id)
+    {
+        @\FrontendUser::getInstance()->logout();
+        @define('FE_USER_LOGGED_IN', $this->getLoginStatus('FE_USER_AUTH'));
+        /** @noinspection PhpUndefinedMethodInspection */
+        @\MemberModel::findByPk($id)->delete();
+    }
+
+    /**
+     * @return FerienpassConfig
+     */
+    private function getFerienpassConfig(): FerienpassConfig {
+        return FerienpassConfig::getInstance();
+    }
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    private function getEventDispatcher(): EventDispatcherInterface {
+        global $container;
+
+        return $container['event-dispatcher'];
     }
 }
