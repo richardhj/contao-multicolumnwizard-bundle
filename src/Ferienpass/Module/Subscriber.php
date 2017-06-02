@@ -227,7 +227,7 @@ class Subscriber implements EventSubscriberInterface
             || !$settings->get(self::HOST_EDITING_ENABLED_FLAG)
             || !$event->getItem()->get('applicationlist_active')
             || $passRelease->get('id') !== $filterParams['pass_release']['value']
-            || !($event->getItem()->isVariantBase() && !$event->getItem()->getVariants(null)->getCount())
+            || ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount())
         ) {
             return;
         }
