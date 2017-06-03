@@ -61,7 +61,7 @@ class RedirectShortUrl
         if (null !== $item) {
             $variants = $item->getVariants($filterVariants);
 
-            if ($item instanceof Item && 0 === $variants->getCount()) {
+            if ($item instanceof Item && (null === $variants || 0 === $variants->getCount())) {
                 // Redirect directly to the reader page
                 $url = $item->buildJumpToLink($item->getMetaModel()->getView($viewId))['url'];
                 $dispatcher->dispatch(ContaoEvents::CONTROLLER_REDIRECT, new RedirectEvent($url, 301));
