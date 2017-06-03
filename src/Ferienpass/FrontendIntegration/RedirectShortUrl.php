@@ -43,9 +43,9 @@ class RedirectShortUrl
         $metaModel  = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass');
 
         // TODO fill this vars properly
-        $viewId     = 4;
-        $listPageId = 10;
-        $filter     = $metaModel->getEmptyFilter();
+        $viewId         = 4;
+        $listPageId     = 10;
+        $filter         = $metaModel->getEmptyFilter();
         $filterVariants = clone $filter;
 
         $urlBuilder = UrlBuilder::fromUrl(Environment::get('uri'));
