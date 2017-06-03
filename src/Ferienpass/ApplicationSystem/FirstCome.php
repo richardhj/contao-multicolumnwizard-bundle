@@ -83,6 +83,7 @@ class FirstCome extends AbstractApplicationSystem
 
         // Set sorting
         $data['status'] = $newStatus->id;
+        $data['tstamp'] = time();
 
         // Update sorting afterwards
         $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $data['status']);
