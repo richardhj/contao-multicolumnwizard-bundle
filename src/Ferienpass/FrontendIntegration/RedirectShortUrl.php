@@ -46,6 +46,7 @@ class RedirectShortUrl
         $viewId     = 4;
         $listPageId = 10;
         $filter     = $metaModel->getEmptyFilter();
+        $filterVariants = clone $filter;
 
         $urlBuilder = UrlBuilder::fromUrl(Environment::get('uri'));
         $itemId     = $urlBuilder->getQueryParameter('item_id');
@@ -58,7 +59,7 @@ class RedirectShortUrl
         $item = $metaModel->findByFilter($filter)->getItem();
 
         if (null !== $item) {
-            $variants = $item->getVariants($filter);
+            $variants = $item->getVariants($filterVariants);
 
             if ($item instanceof Item && 0 === $variants->getCount()) {
                 // Redirect directly to the reader page
