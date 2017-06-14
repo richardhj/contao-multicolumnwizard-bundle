@@ -208,7 +208,7 @@ SQL
             ->getDatabase()
             ->prepare(
                 sprintf(
-                    'SELECT * FROM %1$s%2$s',
+                    'SELECT * FROM %1$s%2$s ORDER BY start',
                     $this->getValueTable(),
                     ($where ? ' WHERE ' . $where['procedure'] : '')
                 )
