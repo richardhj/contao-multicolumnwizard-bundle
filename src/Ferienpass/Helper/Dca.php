@@ -85,11 +85,9 @@ class Dca implements EventSubscriberInterface
                 ['addMemberEditLinkForParticipantListView', -10],
             ],
             PostPersistModelEvent::NAME              => [
-                'triggerSyncForOffer',
-                'handlePassReleaseChanges'
-            ],
-            EncodePropertyValueFromWidgetEvent::NAME => [
-                'triggerAttendanceStatusChange',
+                ['triggerSyncForOffer'],
+                ['handleApplicationListMaxChange'],
+                ['handlePassReleaseChanges']
             ],
             GetPropertyOptionsEvent::NAME            => [
                 ['loadDataProcessingFilterOptions'],
@@ -640,20 +638,38 @@ class Dca implements EventSubscriberInterface
 
 
     /**
-     * Update the attendances when changing the "applicationlist max" value
+     * Update the attendances when changing the "applicationlist_max" value
      *
-     * @param EncodePropertyValueFromWidgetEvent $event
+     * @param PostPersistModelEvent $event
      */
-    public function triggerAttendanceStatusChange(EncodePropertyValueFromWidgetEvent $event)
+    public function handleApplicationListMaxChange(PostPersistModelEvent $event)
     {
-        if (('mm_ferienpass' !== $event->getEnvironment()->getDataDefinition()->getName())
-            || ('applicationlist_max' !== $event->getProperty())
+        $model         = $event->getModel();
+        $originalModel = $event->getOriginalModel();
+        if (!$model instanceof Model
+            || 'mm_ferienpass' !== $event->getModel()->getProviderName()
+            || $model->getProperty('applicationlist_max') === $originalModel->getProperty('applicationlist_max')
         ) {
             return;
         }
-//fixme
-        // Trigger attendance status update
-//        Attendance::updateStatusByOffer($event->getModel()->getProperty('id'));
+
+        $ids = [$model->getId()];
+        if ($model->getItem()->isVariantBase()) {
+            $variants = $model->getItem()->getVariants(null);
+            $ids      = array_merge(
+                array_map(
+                    function (IItem $item) {
+                        return $item->get('id');
+                    },
+                    iterator_to_array($variants)
+                ),
+                $ids
+            );
+        }
+
+        foreach ($ids as $id) {
+            Attendance::updateStatusByOffer($id);
+        }
     }
 
 

@@ -281,6 +281,25 @@ class Attendance extends Model
         return self::$orderBy;
     }
 
+    /**
+     * Update all attendance status for a given offer
+     *
+     * @param int $offerId
+     */
+    public static function updateStatusByOffer(int $offerId)
+    {
+        $attendances = self::findByOffer($offerId);
+
+        // Stop if the last attendance was deleted
+        if (null === $attendances) {
+            return;
+        }
+
+        // todo does this produces a loop overload?
+        while ($attendances->next()) {
+            $attendances->save();
+        }
+    }
 
     /**
      * Get attendance's current position

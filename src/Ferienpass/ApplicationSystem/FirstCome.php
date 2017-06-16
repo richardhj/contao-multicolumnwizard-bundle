@@ -183,22 +183,11 @@ class FirstCome extends AbstractApplicationSystem
     public function updateAllStatusByOffer(DeleteModelEvent $event)
     {
         $attendance = $event->getModel();
-
         if (!$attendance instanceof Attendance) {
             return;
         }
 
-        $attendances = Attendance::findByOffer($attendance->getOffer()->get('id'));
-
-        // Stop if the last attendance was deleted
-        if (null === $attendances) {
-            return;
-        }
-
-        // todo does this produces a loop overload?
-        while ($attendances->next()) {
-            $attendances->save();
-        }
+        Attendance::updateStatusByOffer($attendance->getOffer()->get('id'));
     }
 
 
