@@ -365,7 +365,7 @@ SQL
      *
      * @return string
      */
-    protected function parseDate(int $date, string $format)
+    protected function parseDate($date, string $format)
     {
         $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
 
