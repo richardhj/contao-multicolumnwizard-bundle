@@ -52,8 +52,7 @@ class Document extends Model
         $tokens = $this->prepareCollectionTokens();
         $pdf = $this->generatePDF($tokens);
 
-        $pdf->Output
-        (
+        $pdf->Output(
             $this->prepareFileName($this->fileTitle, $tokens).'.pdf',
             'D'
         );
@@ -76,8 +75,7 @@ class Document extends Model
         $pdf = $this->generatePDF($tokens);
         $fileName = $this->prepareFileName($this->fileTitle, $tokens, $path).'.pdf';
 
-        $pdf->Output
-        (
+        $pdf->Output(
             $fileName,
             'F'
         );
@@ -268,18 +266,18 @@ class Document extends Model
                     $item[$attr] = $value;
 
                     // Load auxiliary data (if using the col name scheme "xxx_id")
-                    if (substr($attr, -3) == '_id') {
-                        $field = substr($attr, 0, -3);
+                    if (in_array($attr, ['offer', 'participant'])) {
+
 
                         /** @type MetaModelBridge $class */
-                        $class = __NAMESPACE__.'\\'.ucfirst($field);
+                        $class = __NAMESPACE__.'\\'.ucfirst($attr);
 
                         // Try to find model
                         if (class_exists($class)) {
                             $objRelated = $class::getInstance()->findById($value);
 
                             foreach ($objRelated->getMetaModel()->getAttributes() as $attrRelatedName => $attrRelated) {
-                                $item[$field.'_'.$attrRelatedName] = $objRelated->get($attrRelatedName);
+                                $item[$attr.'_'.$attrRelatedName] = $objRelated->get($attrRelatedName);
                             }
                         }
                     }
