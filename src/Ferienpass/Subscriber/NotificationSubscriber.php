@@ -118,6 +118,7 @@ class NotificationSubscriber implements EventSubscriberInterface
         }
 
         /** @var Notification $notification */
+        /** @noinspection PhpUndefinedMethodInspection */
         $notification = Notification::findByPk($currentStatus->notification_onChange);
 
         // Send the notification if one is set
