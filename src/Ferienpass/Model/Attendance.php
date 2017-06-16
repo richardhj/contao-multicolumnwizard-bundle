@@ -37,7 +37,6 @@ class Attendance extends Model
      */
     protected static $strTable = 'tl_ferienpass_attendance';
 
-
     /**
      * The participant model
      *
@@ -45,9 +44,65 @@ class Attendance extends Model
      */
     protected static $participant;
 
-
+    /**
+     * Fields used for "ORDER BY" sorting
+     *
+     * @var string
+     */
     protected static $orderBy = 'offer,status,sorting';
 
+    /**
+     * Get attendance's current position
+     *
+     * @return integer|null if participant not in attendance list (yet) or has error status
+     */
+    public function getPosition()
+    {
+        /** @var Attendance|\Model\Collection $attendances */
+        $attendances = static::findByOffer($this->offer); // Collection is already ordered
+
+        if (null === $attendances) {
+            return null;
+        }
+
+        for ($i = 0; $attendances->next(); $i++) {
+            if (!$attendances->current()->getStatus()->increasesCount) {
+                --$i;
+                continue;
+            }
+
+            if ($attendances->current()->participant == $this->participant) {
+                return $i;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return AttendanceStatus|null
+     */
+    public function getStatus()
+    {
+        /** @var AttendanceStatus $this ->getRelated('status') */
+        return $this->getRelated('status');
+    }
+
+    /**
+     * @return IItem
+     */
+    public function getOffer(): IItem
+    {
+        return Offer::getInstance()->findById($this->offer);
+    }
+
+    /**
+     * @return IItem|null
+     */
+    public function getParticipant(): IItem
+    {
+        return Participant::getInstance()->findById($this->participant);
+    }
 
     /**
      * Find attendances by participant's parent
@@ -80,7 +135,6 @@ class Attendance extends Model
         return static::createCollectionFromDbResult($result, static::$strTable);
     }
 
-
     /**
      * Find attendance by its position
      *
@@ -99,7 +153,6 @@ class Attendance extends Model
             ]
         );
     }
-
 
     /**
      * Find attendances by offer
@@ -124,7 +177,6 @@ class Attendance extends Model
         );
     }
 
-
     /**
      * Find attendances by offer
      *
@@ -148,8 +200,16 @@ class Attendance extends Model
         );
     }
 
-
-    public static function findLastByOfferAndStatus($offerId, $statusId, array $options = [])
+    /**
+     * Find the last attendance with a given status made for an offer respecting the sorting
+     *
+     * @param int   $offerId
+     * @param int   $statusId
+     * @param array $options
+     *
+     * @return static
+     */
+    public static function findLastByOfferAndStatus(int $offerId, int $statusId, array $options = [])
     {
         return static::findOneBy(
             ['offer=?', 'status=?'],
@@ -163,7 +223,13 @@ class Attendance extends Model
         );
     }
 
-
+    /**
+     * Find the attendances no notification was sent already
+     *
+     * @param array $options
+     *
+     * @return \Model\Collection|null|static
+     */
     public static function findNotSent(array $options = [])
     {
         return static::findBy(
@@ -172,7 +238,6 @@ class Attendance extends Model
             $options
         );
     }
-
 
     /**
      * Count participants in application list
@@ -186,7 +251,6 @@ class Attendance extends Model
         return static::countByOffer($offerId);
     }
 
-
     /**
      * Count participants for one particular offer
      *
@@ -198,7 +262,6 @@ class Attendance extends Model
     {
         return static::countBy('offer', $offerId);
     }
-
 
     /**
      * Count attendances for one particular participant
@@ -212,7 +275,6 @@ class Attendance extends Model
         return static::countBy('participant', $participantId);
     }
 
-
     /**
      * Count the attendances of a offer with a particular status
      *
@@ -225,7 +287,6 @@ class Attendance extends Model
     {
         return static::countBy(['offer=?', 'status=?'], [$offerId, $statusId]);
     }
-
 
     /**
      * Count the attendances of a participant made on a particular day and optionally with a particular status
@@ -257,7 +318,6 @@ class Attendance extends Model
         return static::countBy(null, null, $options);
     }
 
-
     /**
      * @param integer $participantId
      * @param integer $offerId
@@ -271,7 +331,6 @@ class Attendance extends Model
             ->execute($participantId, $offerId)
             ->numRows);
     }
-
 
     /**
      * @return string
@@ -299,61 +358,5 @@ class Attendance extends Model
         while ($attendances->next()) {
             $attendances->save();
         }
-    }
-
-    /**
-     * Get attendance's current position
-     *
-     * @return integer|null if participant not in attendance list (yet) or has error status
-     */
-    public function getPosition()
-    {
-        /** @var Attendance|\Model\Collection $attendances */
-        $attendances = static::findByOffer($this->offer); // Collection is already ordered
-
-        if (null === $attendances) {
-            return null;
-        }
-
-        for ($i = 0; $attendances->next(); $i++) {
-            if (!$attendances->current()->getStatus()->increasesCount) {
-                --$i;
-                continue;
-            }
-
-            if ($attendances->current()->participant == $this->participant) {
-                return $i;
-            }
-        }
-
-        return null;
-    }
-
-
-    /**
-     * @return AttendanceStatus|null
-     */
-    public function getStatus()
-    {
-        /** @var AttendanceStatus $this ->getRelated('status') */
-        return $this->getRelated('status');
-    }
-
-
-    /**
-     * @return IItem
-     */
-    public function getOffer(): IItem
-    {
-        return Offer::getInstance()->findById($this->offer);
-    }
-
-
-    /**
-     * @return IItem|null
-     */
-    public function getParticipant(): IItem
-    {
-        return Participant::getInstance()->findById($this->participant);
     }
 }
