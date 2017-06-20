@@ -10,7 +10,10 @@
 
 namespace Ferienpass\Subscriber;
 
+use Contao\Model\Collection;
 use Contao\Model\Event\PostSaveModelEvent;
+use ContaoCommunityAlliance\Contao\Events\Cron\CronEvent;
+use ContaoCommunityAlliance\Contao\Events\Cron\CronEvents;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 use MetaModels\IItem;
@@ -51,6 +54,9 @@ class NotificationSubscriber implements EventSubscriberInterface
                 ['sendNewAttendanceStatusNotification'],
                 ['sendChangedAttendanceStatusNotification'],
             ],
+            CronEvents::DAILY        => [
+                ['checkForRemindersToSend'],
+            ]
         ];
     }
 
@@ -134,7 +140,57 @@ class NotificationSubscriber implements EventSubscriberInterface
 
 
     /**
-     * Get notification tokens
+     * Check for attendance reminders to send and trigger the sending afterwards
+     *
+     * @param CronEvent $event
+     */
+    public function checkForRemindersToSend(CronEvent $event)
+    {
+        $time        = time();
+        $plusOneDay  = $time + 60 * 60 * 24;
+        $attendances = Attendance::findBy(
+            ["offer IN(SELECT id FROM mm_ferienpass WHERE id IN (SELECT item_id FROM tl_metamodel_offer_date WHERE start > {$time} AND start <= {$plusOneDay}))"],
+            []
+        );
+
+        if (null === $attendances) {
+            return;
+        }
+
+        $this->sendAttendanceReminderNotifications($attendances);
+    }
+
+
+    /**
+     * Send the attendance reminders. Trigger the notification for each attendance
+     *
+     * @param Attendance|Collection $attendances
+     */
+    private function sendAttendanceReminderNotifications(Collection $attendances)
+    {
+        while ($attendances->next()) {
+            /** @var Notification $notification */
+            /** @noinspection PhpUndefinedMethodInspection */
+            // TODO use correct notification
+            $notification = Notification::findByPk(9);
+
+            // Send the notification if one is set
+            if (null !== $notification) {
+                $notification->send(
+                    self::getNotificationTokens(
+                        $attendances->current()->getParticipant(),
+                        $attendances->current()->getOffer()
+                    )
+                );
+            }
+        }
+    }
+
+
+    /**
+     * Get notification tokens for notifications with type:
+     * * application_list_status_change
+     * * application_list_reminder
      *
      * @param IItem $participant
      * @param IItem $offer
