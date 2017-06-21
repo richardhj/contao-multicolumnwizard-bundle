@@ -158,8 +158,8 @@ class NotificationSubscriber implements EventSubscriberInterface
             $timeEnd      = strtotime(sprintf('+%d %s', $remindBefore['value'], $remindBefore['unit']));
             $attendances  = Attendance::findBy(
                 [
-                    "offer IN(SELECT id FROM mm_ferienpass WHERE id IN (SELECT item_id FROM tl_metamodel_offer_date WHERE start > {$time} AND start <= {$timeEnd})) "
-                    . "AND id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0 AND notification=?)"
+                    "offer IN(SELECT id FROM mm_ferienpass WHERE id IN (SELECT item_id FROM tl_metamodel_offer_date WHERE start > {$time} AND start <= {$timeEnd}))" .
+                    " AND id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0 AND notification=?)"
                 ],
                 [$reminders->nc_notification]
             );
