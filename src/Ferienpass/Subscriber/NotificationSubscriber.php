@@ -12,9 +12,9 @@ namespace Ferienpass\Subscriber;
 
 use Contao\Model\Collection;
 use Contao\Model\Event\PostSaveModelEvent;
-use ContaoCommunityAlliance\Contao\Events\Cron\CronEvent;
 use ContaoCommunityAlliance\Contao\Events\Cron\CronEvents;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\AttendanceReminder;
 use Ferienpass\Model\AttendanceStatus;
 use MetaModels\IItem;
 use NotificationCenter\Model\Notification;
@@ -54,7 +54,7 @@ class NotificationSubscriber implements EventSubscriberInterface
                 ['sendNewAttendanceStatusNotification'],
                 ['sendChangedAttendanceStatusNotification'],
             ],
-            CronEvents::DAILY        => [
+            CronEvents::HOURLY       => [
                 ['checkForRemindersToSend'],
             ]
         ];
@@ -76,7 +76,7 @@ class NotificationSubscriber implements EventSubscriberInterface
 
         //TODO Cannot use getStatus() because of cache shit
         $originalStatus = AttendanceStatus::findByPk($originalAttendance->status);
-        $currentStatus = AttendanceStatus::findByPk($attendance->status);
+        $currentStatus  = AttendanceStatus::findByPk($attendance->status);
 
         if (!$attendance instanceof Attendance
             || null !== $originalStatus
@@ -114,7 +114,7 @@ class NotificationSubscriber implements EventSubscriberInterface
 
         //TODO Cannot use getStatus() because of cache shit
         $originalStatus = AttendanceStatus::findByPk($originalAttendance->status);
-        $currentStatus = AttendanceStatus::findByPk($attendance->status);
+        $currentStatus  = AttendanceStatus::findByPk($attendance->status);
 
         if (!$attendance instanceof Attendance
             || null === $originalStatus
@@ -140,24 +140,36 @@ class NotificationSubscriber implements EventSubscriberInterface
 
 
     /**
-     * Check for attendance reminders to send and trigger the sending afterwards
+     * Check for attendance upcoming this day and trigger the reminder sending
      *
-     * @param CronEvent $event
+     * @internal param CronEvent $event
      */
-    public function checkForRemindersToSend(CronEvent $event)
+    public function checkForRemindersToSend()
     {
-        $time        = time();
-        $plusOneDay  = $time + 60 * 60 * 24;
-        $attendances = Attendance::findBy(
-            ["offer IN(SELECT id FROM mm_ferienpass WHERE id IN (SELECT item_id FROM tl_metamodel_offer_date WHERE start > {$time} AND start <= {$plusOneDay}))"],
-            []
-        );
-
-        if (null === $attendances) {
+        /** @var Collection|Attendance $reminders */
+        $reminders = AttendanceReminder::findBy(['published=1'], []);
+        if (null === $reminders) {
             return;
         }
 
-        $this->sendAttendanceReminderNotifications($attendances);
+        while ($reminders->next()) {
+            $remindBefore = deserialize($reminders->remind_before);
+            $time         = time();
+            $timeEnd      = strtotime(sprintf('+%d %s', $remindBefore['value'], $remindBefore['unit']));
+            $attendances  = Attendance::findBy(
+                [
+                    "offer IN(SELECT id FROM mm_ferienpass WHERE id IN (SELECT item_id FROM tl_metamodel_offer_date WHERE start > {$time} AND start <= {$timeEnd})) "
+                    . "AND id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0 AND notification=?)"
+                ],
+                [$reminders->nc_notification]
+            );
+
+            if (null === $attendances) {
+                return;
+            }
+
+            $this->sendAttendanceReminderNotifications($attendances, $reminders->nc_notification);
+        }
     }
 
 
@@ -165,23 +177,33 @@ class NotificationSubscriber implements EventSubscriberInterface
      * Send the attendance reminders. Trigger the notification for each attendance
      *
      * @param Attendance|Collection $attendances
+     * @param int                   $notificationId
      */
-    private function sendAttendanceReminderNotifications(Collection $attendances)
+    private function sendAttendanceReminderNotifications(Collection $attendances, int $notificationId)
     {
-        while ($attendances->next()) {
-            /** @var Notification $notification */
-            /** @noinspection PhpUndefinedMethodInspection */
-            // TODO use correct notification
-            $notification = Notification::findByPk(9);
+        /** @var Notification $notification */
+        /** @noinspection PhpUndefinedMethodInspection */
+        $notification = Notification::findByPk($notificationId);
 
-            // Send the notification if one is set
-            if (null !== $notification) {
-                $notification->send(
+        if (null !== $notification) {
+            while ($attendances->next()) {
+                $sent = $notification->send(
                     self::getNotificationTokens(
                         $attendances->current()->getParticipant(),
                         $attendances->current()->getOffer()
                     )
                 );
+
+                // Mark attendance notification as sent
+                if (in_array(true, $sent)) {
+                    $time = time();
+
+                    \Database::getInstance()->query(
+                        "INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification) " .
+                        " VALUES ({$time}, {$attendances->id}, {$notificationId})" .
+                        " ON DUPLICATE KEY UPDATE tstamp={$time}"
+                    );
+                }
             }
         }
     }

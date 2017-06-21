@@ -138,6 +138,7 @@ HTML;
     private static function getNotSentAttendancesGroupedByMember()
     {
         $attendances = [];
+        //Todo check for notification id
         $query       = \Database::getInstance()->query(
             <<<'SQL'
 SELECT member.id AS member, attendance.id AS attendance

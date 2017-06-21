@@ -224,22 +224,6 @@ class Attendance extends Model
     }
 
     /**
-     * Find the attendances no notification was sent already
-     *
-     * @param array $options
-     *
-     * @return \Model\Collection|null|static
-     */
-    public static function findNotSent(array $options = [])
-    {
-        return static::findBy(
-            ['id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0)'],
-            [],
-            $options
-        );
-    }
-
-    /**
      * Count participants in application list
      *
      * @param int $offerId
