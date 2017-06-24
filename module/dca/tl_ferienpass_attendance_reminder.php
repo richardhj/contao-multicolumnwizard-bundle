@@ -9,6 +9,8 @@
  */
 
 
+use Ferienpass\Model\AttendanceStatus;
+
 $table = Ferienpass\Model\AttendanceReminder::getTable();
 
 
@@ -86,6 +88,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 //'title',
                 'remind_before',
                 'nc_notification',
+                'attendance_status',
             ],
             'published' => [
                 'published',
@@ -101,16 +104,6 @@ $GLOBALS['TL_DCA'][$table] = [
         'tstamp'          => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        //        'title'           => [
-        //            'label'     => &$GLOBALS['TL_LANG'][$table]['title'],
-        //            'exclude'   => true,
-        //            'inputType' => 'text',
-        //            'eval'      => [
-        //                'maxlength' => 255,
-        //                'tl_class'  => 'w50',
-        //            ],
-        //            'sql'       => "varchar(255) NOT NULL default ''",
-        //        ],
         'remind_before'   => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['remind_before'],
             'exclude'   => true,
@@ -119,6 +112,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'eval'      => [
                 //'submitOnChange' => true,
                 'doNotCopy' => true,
+                'tl_class' => 'w50',
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
@@ -174,6 +168,25 @@ $GLOBALS['TL_DCA'][$table] = [
                 'type' => 'hasOne',
                 'load' => 'eager'
             ]
+        ],
+        'attendance_status'      => [
+            'label'     => &$GLOBALS['TL_LANG'][$table]['attendance_status'],
+            'exclude'   => true,
+            'inputType' => 'select',
+            'options'   => array_reduce(
+                iterator_to_array(AttendanceStatus::findAll()),
+                function (array $carry, AttendanceStatus $status) {
+                    $carry[$status->id] = $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'][$status->type];
+
+                    return $carry;
+                },
+                []
+            ),
+            'eval'      => [
+                'includeBlankOption' => true,
+                'tl_class'           => 'w50',
+            ],
+            'sql'       => "varchar(255) NOT NULL default ''",
         ],
         'published'       => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['published'],

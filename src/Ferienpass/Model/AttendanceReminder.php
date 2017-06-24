@@ -18,6 +18,7 @@ use Contao\Model;
  *
  * @property int $nc_notification
  * @property mixed $remind_before
+ * @property int $attendance_status
  *
  * @package Ferienpass\Model
  */
