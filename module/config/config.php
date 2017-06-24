@@ -80,7 +80,7 @@ $GLOBALS['FERIENPASS_MOD'] = [
         ],
         'attendance_reminders' => [
             'tables' => [\Ferienpass\Model\AttendanceReminder::getTable()],
-            'icon'   => 'th-list',
+            'icon'   => 'clock-o',
         ],
         'ferienpass_config' => [
             'tables' => ['tl_ferienpass_config'],

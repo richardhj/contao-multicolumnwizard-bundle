@@ -59,6 +59,8 @@ $GLOBALS['TL_LANG']['FPMD']['application_system'][0] = 'Anmeldesysteme';
 $GLOBALS['TL_LANG']['FPMD']['application_system'][1] = 'Die verschiedenen Anmeldesysteme konfigurieren';
 $GLOBALS['TL_LANG']['FPMD']['attendance_status'][0] = 'Teilnahme-Status';
 $GLOBALS['TL_LANG']['FPMD']['attendance_status'][1] = 'Die möglichen Status einer Teilnahme konfigurieren';
+$GLOBALS['TL_LANG']['FPMD']['attendance_reminders'][0] = 'Anmelde-Erinnerungen';
+$GLOBALS['TL_LANG']['FPMD']['attendance_reminders'][1] = 'Die Anmelde-Erinnerungen (cron-gesteuert) konfigurieren';
 $GLOBALS['TL_LANG']['FPMD']['ferienpass_config'][0] = 'Konfiguration';
 $GLOBALS['TL_LANG']['FPMD']['ferienpass_config'][1] = 'Die grundlegende Konfiguration vornehmen';
 
