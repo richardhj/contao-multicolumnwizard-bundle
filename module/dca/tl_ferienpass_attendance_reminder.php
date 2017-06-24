@@ -189,7 +189,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
             ],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'sql'       => "int(10) NOT NULL default '0'",
         ],
         'published'         => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['published'],
