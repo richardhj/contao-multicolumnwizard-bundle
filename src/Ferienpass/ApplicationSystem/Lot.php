@@ -82,7 +82,7 @@ class Lot extends AbstractApplicationSystem
         $data['status'] = $newStatus->id;
 
         // Update sorting afterwards
-        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $attendance->status);
+        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $data['status']);
         $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
         $sorting += 128;
         $data['sorting'] = $sorting;

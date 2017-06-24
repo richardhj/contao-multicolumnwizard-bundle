@@ -18,6 +18,7 @@ use MetaModels\IItem;
  * Class Attendance
  *
  * @property integer $tstamp
+ * @property integer $sorting
  * @property integer $created
  * @property integer $offer
  * @property integer $participant
