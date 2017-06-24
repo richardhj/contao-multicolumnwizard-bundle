@@ -26,7 +26,8 @@ $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label'][
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['double_booking'] = '%s (Terminüberschneidung mit "%s")';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'] = 'Anmelden';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['message']['confirmed'] = '%s ist angemeldet für dieses Angebot.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['message']['waiting'] = '%s steht auf der Warteliste für dieses Angebot';
+$GLOBALS['TL_LANG']['MSC']['applicationList']['message']['waiting'] = '%s ist vorgemerkt und wartet auf die Zuteilung für dieses Angebot.';
+$GLOBALS['TL_LANG']['MSC']['applicationList']['message']['waiting-list'] = '%s steht auf der Warteliste für dieses Angebot.';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['message']['error'] = '%s ist für dieses Angebot nicht angemeldet.';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['error'] = 'Ein Fehler ist aufgetreten.';
 // Add attendee as host
