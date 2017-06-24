@@ -98,25 +98,28 @@ $GLOBALS['TL_DCA'][$table] = [
 
     // Fields
     'fields'       => [
-        'id'              => [
+        'id'                => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
         ],
-        'tstamp'          => [
+        'tstamp'            => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'remind_before'   => [
+        'remind_before'     => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['remind_before'],
             'exclude'   => true,
             'inputType' => 'inputUnit',
-            'options'   => ['hours', 'days'],
+            'options'   => [
+                'hours',
+                'days'
+            ],
             'eval'      => [
-                //'submitOnChange' => true,
                 'doNotCopy' => true,
-                'tl_class' => 'w50',
+                'mandatory' => true,
+                'tl_class'  => 'w50',
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'nc_notification' => [
+        'nc_notification'   => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['nc_notification'],
             'exclude'          => true,
             'inputType'        => 'select',
@@ -169,7 +172,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'load' => 'eager'
             ]
         ],
-        'attendance_status'      => [
+        'attendance_status' => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['attendance_status'],
             'exclude'   => true,
             'inputType' => 'select',
@@ -188,7 +191,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'published'       => [
+        'published'         => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['published'],
             'exclude'   => true,
             'inputType' => 'checkbox',
