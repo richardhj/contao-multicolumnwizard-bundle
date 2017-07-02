@@ -39,7 +39,6 @@ use MetaModels\BackendIntegration\ViewCombinations;
 use MetaModels\DcGeneral\Data\Model;
 use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
 use MetaModels\Events\MetaModelsBootEvent;
-use MetaModels\Factory;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
 use MetaModels\IMetaModelsServiceContainer;
@@ -64,17 +63,17 @@ class Dca implements EventSubscriberInterface
     {
         return [
             GetOperationButtonEvent::NAME            => [
-                'createAttendancesButtonInOfferView',
+                ['createAttendancesButtonInOfferView'],
             ],
             BuildMetaModelOperationsEvent::NAME      => [
-                'addAttendancesOperationToMetaModelView',
+                ['addAttendancesOperationToMetaModelView'],
             ],
             MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND => [
-                'addAttendancesToMetaModelModuleTables',
+                ['addAttendancesToMetaModelModuleTables'],
             ],
             PrePersistModelEvent::NAME               => [
                 ['prohibitDuplicateKeyOnSaveAttendance', -100],
-                ['alterNewAttendancePrePersist']
+                ['alterNewAttendancePrePersist'],
             ],
             PopulateEnvironmentEvent::NAME           => [
                 ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY + 100],
@@ -85,14 +84,14 @@ class Dca implements EventSubscriberInterface
             PostPersistModelEvent::NAME              => [
                 ['triggerSyncForOffer'],
                 ['handleApplicationListMaxChange'],
-                ['handlePassReleaseChanges']
+                ['handlePassReleaseChanges'],
             ],
             GetPropertyOptionsEvent::NAME            => [
                 ['loadDataProcessingFilterOptions'],
-                ['loadDataProcessingSortAttributes']
+                ['loadDataProcessingSortAttributes'],
             ],
             CreateDcGeneralEvent::NAME               => [
-                'buildFilterParamsForDataProcessing'
+                ['buildFilterParamsForDataProcessing'],
             ],
             BuildWidgetEvent::NAME                   => [
 //                ['loadOfferDateWidget']
