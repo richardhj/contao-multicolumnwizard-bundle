@@ -10,6 +10,7 @@
 
 namespace Ferienpass\ApplicationSystem;
 
+use Contao\MemberModel;
 use Contao\Model\Event\PreSaveModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
@@ -20,6 +21,8 @@ use Ferienpass\DcGeneral\View\OfferAttendancesView;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
+use Haste\DateTime\DateTime;
+use MetaModels\IMetaModelsServiceContainer;
 
 
 /**
@@ -208,6 +211,35 @@ class Lot extends AbstractApplicationSystem
                         ),
                         REQUEST_TOKEN
                     );
+                    break;
+                case 'participant':
+                    global $container;
+
+                    // Wrap current content
+                    $args[$k] = sprintf('<span class="name">%s</span>', $v);
+
+                    /** @var IMetaModelsServiceContainer $serviceContainer */
+                    $serviceContainer = $container['metamodels-service-container'];
+                    $metaModel        = $serviceContainer->getFactory()->getMetaModel('mm_participant');
+                    $participant      = $metaModel->findById($model->getProperty('participant'));
+                    $date             = new DateTime('@' . $participant->get('dateOfBirth'));
+                    $member           = MemberModel::findById($participant->get('pmember'));
+
+                    // Add age
+                    $args[$k] .= sprintf(
+                        '<span class="age"><span title="%2$s" class="content">%1$s</span> Jahre</span>',
+                        $date->getAge(),
+                        'Alter zum aktuellen Zeitpunkt'
+                    );
+
+                    // Add postal
+
+                    $args[$k] .= sprintf(
+                        '<span class="postal">PLZ: <span class="content">%s</span></span>',
+                        (null !== $member) ? $member->postal : '-'
+                    );
+
+
                     break;
             }
         }
