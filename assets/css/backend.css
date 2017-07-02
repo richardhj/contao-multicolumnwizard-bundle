@@ -1436,7 +1436,10 @@
 .be_overview .item:hover .fa:before { background: #209bc9; }
 .be_overview .item span { display: block; }
 
-.tl_listing_container a.open_parent { white-space: nowrap; }
+.tl_listing_container.table_mm_ferienpass a.open_parent { white-space: nowrap; }
+.tl_listing_container.table_mm_ferienpass a[data-applicationlist-state="no-attendances"] { background: #dddddd; padding: 5px; line-height: 3; -moz-border-radius: 50%; -webkit-border-radius: 50%; border-radius: 50%; }
+.tl_listing_container.table_mm_ferienpass a[data-applicationlist-state="needs-reassignments"] { background: #a81c42; padding: 5px; line-height: 3; -moz-border-radius: 50%; -webkit-border-radius: 50%; border-radius: 50%; }
+.tl_listing_container.table_mm_ferienpass a[data-applicationlist-state="all-assigned"] { background: #8caf23; padding: 5px; line-height: 3; -moz-border-radius: 50%; -webkit-border-radius: 50%; border-radius: 50%; }
 
 .attendances_offer_view .tl_header { margin-bottom: 2em; }
 .attendances_offer_view .status-assignment { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; }

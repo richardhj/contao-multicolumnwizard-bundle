@@ -18,7 +18,6 @@ use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2Ba
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
 use ContaoCommunityAlliance\DcGeneral\Contao\InputProvider;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\BuildWidgetEvent;
-use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPropertyOptionsEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
@@ -34,7 +33,6 @@ use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Ferienpass\Model\ApplicationSystem;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Config as FerienpassConfig;
 use Ferienpass\Model\DataProcessing;
 use Ferienpass\Model\Offer;
 use MetaModels\BackendIntegration\ViewCombinations;
@@ -42,10 +40,10 @@ use MetaModels\DcGeneral\Data\Model;
 use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
 use MetaModels\Events\MetaModelsBootEvent;
 use MetaModels\Factory;
-use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
 use MetaModels\IMetaModelsServiceContainer;
+use MetaModels\Item as MetaModelsItem;
 use MetaModels\MetaModelsEvents;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -137,35 +135,6 @@ class Dca implements EventSubscriberInterface
 
 
     /**
-     * Remove the "edit attendances" operation for variant bases
-     *
-     * @param GetOperationButtonEvent $event
-     */
-    public function createAttendancesButtonInOfferView(GetOperationButtonEvent $event)
-    {
-        if ('edit_attendances' !== $event->getCommand()->getName()) {
-            return;
-        }
-
-        /** @var Model $model */
-        $model         = $event->getModel();
-        $metaModelItem = $model->getItem();
-
-        if ($metaModelItem->isVariantBase() && 0 !== $metaModelItem->getVariants(null)->getCount()) {
-            $event->setDisabled(true);
-        }
-//        elseif (0 === Attendance::countByOfferAndStatus(
-//                $model->getProperty('id'),
-//                AttendanceStatus::findWaiting()->id
-//            )
-//        ) {
-//            //todo
-////            $event->setHtml('<p>test</p>'.$event->getHtml());
-//        }
-    }
-
-
-    /**
      * Add the "edit attendances" operation to the MetaModel back end view
      *
      * @param BuildMetaModelOperationsEvent $event
@@ -177,28 +146,28 @@ class Dca implements EventSubscriberInterface
         }
 
         /** @var Contao2BackendViewDefinitionInterface $view */
-        $view       = $event->getContainer()->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
-        $collection = $view->getModelCommands();
+        $view          = $event->getContainer()->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
+        $collection    = $view->getModelCommands();
+        $operationName = 'edit_attendances';
 
         $command = new Command();
-        $command->setName('edit_attendances');
+        $command->setName($operationName);
 
         $parameters          = $command->getParameters();
         $parameters['table'] = Attendance::getTable();
 
-//        if (!$command->getLabel()) {
-//            $command->setLabel($operationName . '.0');
-//            if (isset($extraValues['label'])) {
-//                $command->setLabel($extraValues['label']);
-//            }
-//        }
-//
-//        if (!$command->getDescription()) {
-//            $command->setDescription($operationName . '.1');
-//            if (isset($extraValues['description'])) {
-//                $command->setDescription($extraValues['description']);
-//            }
-//        }
+        if (!$command->getLabel()) {
+            $command->setLabel($operationName . '.0');
+            if (isset($extraValues['label'])) {
+                $command->setLabel($extraValues['label']);
+            }
+        }
+        if (!$command->getDescription()) {
+            $command->setDescription($operationName . '.1');
+            if (isset($extraValues['description'])) {
+                $command->setDescription($extraValues['description']);
+            }
+        }
 
         $extra               = $command->getExtra();
         $extra['icon']       = 'assets/ferienpass/core/img/users.png';
@@ -206,6 +175,56 @@ class Dca implements EventSubscriberInterface
         $extra['idparam']    = 'pid';
 
         $collection->addCommand($command);
+    }
+
+
+    /**
+     * Remove the "edit attendances" operation for variant bases
+     *
+     * @param GetOperationButtonEvent $event
+     */
+    public function createAttendancesButtonInOfferView(GetOperationButtonEvent $event)
+    {
+        /** @var Model $model */
+        $model = $event->getModel();
+
+        if ('edit_attendances' !== $event->getCommand()->getName()
+            || 'mm_ferienpass' !== $model->getProviderName()
+        ) {
+            return;
+        }
+
+        $item = $model->getItem();
+
+        if (!$item instanceof MetaModelsItem) {
+            return;
+        }
+
+        // Disable action for variant bases
+        if ($item->isVariantBase() && 0 !== $item->getVariants(null)->getCount()) {
+            $event->setDisabled(true);
+        }
+
+        if (!$item->get('applicationlist_active')) {
+            // Does not use the application system
+            $event->setDisabled(true);
+        } elseif (0 === Attendance::countByOffer($item->get('id'))) {
+            // No attendances at all
+            $event->setAttributes(
+                sprintf('%s data-applicationlist-state="no-attendances"', $event->getAttributes())
+            );
+        } elseif (0 === Attendance::countByOfferAndStatus($item->get('id'), AttendanceStatus::findWaiting()->id)
+        ) {
+            // No attendances with `waiting` status
+            $event->setAttributes(
+                sprintf('%s data-applicationlist-state="all-assigned"', $event->getAttributes())
+            );
+        } else {
+            // Needs further assignments
+            $event->setAttributes(
+                sprintf('%s data-applicationlist-state="needs-reassignments"', $event->getAttributes())
+            );
+        }
     }
 
 

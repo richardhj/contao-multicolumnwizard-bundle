@@ -1,6 +1,7 @@
 @import "compass/css3"
 $fa-font-path: "../../../components/font-awesome/fonts"
 @import "../../../../components/font-awesome/scss/font-awesome"
+@import "../../../ferienpass-assets/files/sass/variables"
 
 .be_overview .item
   a
@@ -34,9 +35,24 @@ $fa-font-path: "../../../components/font-awesome/fonts"
   span
     display: block
 
-.tl_listing_container
+.tl_listing_container.table_mm_ferienpass
   a.open_parent
     white-space: nowrap
+  a[data-applicationlist-state="no-attendances"]
+    background: #dddddd
+    padding: 5px
+    line-height: 3
+    +border-radius(50%)
+  a[data-applicationlist-state="needs-reassignments"]
+    background: $error
+    padding: 5px
+    line-height: 3
+    +border-radius(50%)
+  a[data-applicationlist-state="all-assigned"]
+    background: $confirmation
+    padding: 5px
+    line-height: 3
+    +border-radius(50%)
 
 .attendances_offer_view
   .tl_header
