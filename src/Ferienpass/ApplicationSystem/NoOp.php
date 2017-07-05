@@ -51,6 +51,6 @@ class NoOp extends AbstractApplicationSystem
      */
     public function setNewAttendance()
     {
-        Message::addError('zur zeit keine Anmeldungen möglich');
+        Message::addError('Zurzeit sind keine Anmeldungen möglich. Bitte versuchen Sie es später.');
     }
 }
