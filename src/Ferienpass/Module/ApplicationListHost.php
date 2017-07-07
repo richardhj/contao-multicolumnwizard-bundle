@@ -13,14 +13,16 @@ namespace Ferienpass\Module;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\Table;
 use Ferienpass\Model\Attendance;
+use Ferienpass\Model\AttendanceStatus;
 use Ferienpass\Model\Document;
-use Ferienpass\Model\Participant;
 use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IMetaModelsServiceContainer;
 use MetaModels\ItemList;
 
 
 /**
  * Class ApplicationListHost
+ *
  * @package Ferienpass\Module
  */
 class ApplicationListHost extends Item
@@ -28,6 +30,7 @@ class ApplicationListHost extends Item
 
     /**
      * Template
+     *
      * @var string
      */
     protected $strTemplate = 'mod_offer_applicationlisthost';
@@ -48,6 +51,8 @@ class ApplicationListHost extends Item
      */
     protected function compile()
     {
+        global $container;
+
         if (!$this->item->get('applicationlist_active')) {
             Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['inactive']);
             $this->Template->message = Message::generate();
@@ -55,28 +60,35 @@ class ApplicationListHost extends Item
             return;
         }
 
-        $maxParticipants = $this->item->get('applicationlist_max');
-        $attendances = Attendance::findByOffer($this->item->get('id'));
-        $view = Participant::getInstance()->getMetaModel()->getView($this->metamodel_child_list_view);
-        $fields = $view->getSettingNames();
-        $rows = [];
+        /** @var IMetaModelsServiceContainer $metaModelsServiceContainer */
+        $metaModelsServiceContainer = $container['metamodels-service-container'];
+        $participantsMetaModel      = $metaModelsServiceContainer->getFactory()->getMetaModel('mm_participant');
+
+        $maxParticipants  = $this->item->get('applicationlist_max');
+        $attendances      = Attendance::findByOffer($this->item->get('id'));
+        $view             = $participantsMetaModel->getView($this->metamodel_child_list_view);
+        $fields           = $view->getSettingNames();
+        $statusConfirmed  = AttendanceStatus::findConfirmed()->id;
+        $statusWaitlisted = AttendanceStatus::findWaitlisted()->id;
+        $rows             = [];
 
         if (null !== $attendances) {
             // Create table head
             foreach ($fields as $field) {
-                $rows[0][] = Participant::getInstance()->getMetaModel()->getAttribute($field)->get('name');
+                $rows[0][] = $participantsMetaModel->getAttribute($field)->get('name');
             }
 
-            $this->fetchOwnerAttribute(Participant::getInstance()->getMetaModel());
+            $this->fetchOwnerAttribute($participantsMetaModel);
 
             // Walk each attendee
             while ($attendances->next()) {
-                $participant = Participant::getInstance()->findById($attendances->participant);
-                $values = [];
+                $values      = [];
+                $participant = $participantsMetaModel->findById($attendances->participant);
 
-                // Participant is not existent
+                if (!in_array($attendances->current()->getStatus()->id, [$statusConfirmed, $statusWaitlisted])) {
+                    continue;
+                }
                 if (null === $participant) {
-                    // Delete attendance too
                     $attendances->current()->delete(); # this will sync the entire list
 
                     continue;
@@ -100,7 +112,7 @@ class ApplicationListHost extends Item
         if (empty($rows)) {
             Message::addWarning($GLOBALS['TL_LANG']['MSC']['noAttendances']);
         } else {
-            $this->useHeader = true;
+            $this->useHeader        = true;
             $this->max_participants = $maxParticipants;
 
             // Define row class callback
@@ -117,15 +129,14 @@ class ApplicationListHost extends Item
             $this->Template->dataTable = Table::getDataArray($rows, 'application-list', $this, $rowClassCallback);
 
             // Add download button
-            $this->Template->download = $this->document ? sprintf
-            (
+            $this->Template->download = $this->document ? sprintf(
                 '<a href="%1$s" title="%3$s" class="download_list">%2$s</a>',
                 $this->addToUrl('action=download_list'),
                 $GLOBALS['TL_LANG']['MSC']['downloadList'][0],
                 $GLOBALS['TL_LANG']['MSC']['downloadList'][1]
             ) : '';
 
-            if (\Input::get('action') == 'download_list') {
+            if ('download_list' === \Input::get('action')) {
                 if (($objDocument = Document::findByPk($this->document)) === null) {
                     Message::addError($GLOBALS['TL_LANG']['MSC']['document']['export_error']);
                 } else {
@@ -135,7 +146,6 @@ class ApplicationListHost extends Item
         }
 
         $this->addRenderedMetaModelToTemplate();
-
         $this->Template->message = Message::generate();
     }
 
@@ -146,7 +156,6 @@ class ApplicationListHost extends Item
     protected function addRenderedMetaModelToTemplate()
     {
         $itemRenderer = new ItemList();
-
         $itemRenderer
             ->setMetaModel($this->metamodel, $this->metamodel_rendersettings)
             ->addFilterRule(new StaticIdList([$this->item->get('id')]));

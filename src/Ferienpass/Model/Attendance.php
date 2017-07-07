@@ -168,8 +168,7 @@ class Attendance extends Model
         return static::findBy(
             'offer',
             $offerId,
-            array_merge
-            (
+            array_merge(
                 [
                     'order' => static::getOrderBy(),
                 ],
@@ -191,8 +190,7 @@ class Attendance extends Model
         return static::findBy(
             'participant',
             $participantId,
-            array_merge
-            (
+            array_merge(
                 [
                     'order' => static::getOrderBy(),
                 ],
