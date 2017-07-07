@@ -65,9 +65,9 @@ class ApplicationListHost extends Item
         $participantsMetaModel      = $metaModelsServiceContainer->getFactory()->getMetaModel('mm_participant');
 
         $maxParticipants  = $this->item->get('applicationlist_max');
-        $attendances      = Attendance::findByOffer($this->item->get('id'));
         $view             = $participantsMetaModel->getView($this->metamodel_child_list_view);
         $fields           = $view->getSettingNames();
+        $attendances      = Attendance::findByOffer($this->item->get('id'));
         $statusConfirmed  = AttendanceStatus::findConfirmed()->id;
         $statusWaitlisted = AttendanceStatus::findWaitlisted()->id;
         $rows             = [];
@@ -116,10 +116,10 @@ class ApplicationListHost extends Item
             $this->max_participants = $maxParticipants;
 
             // Define row class callback
-            $rowClassCallback = function ($j, $arrRows, $objModule) {
-                if ($j == ($objModule->max_participants - 1) && $j != count($arrRows) - 1) {
+            $rowClassCallback = function ($j, $rows, $module) {
+                if ($j === ($module->max_participants - 1) && $j !== count($rows) - 1) {
                     return 'last_attendee';
-                } elseif ($j >= $objModule->max_participants) {
+                } elseif ($j >= $module->max_participants) {
                     return 'waiting_list';
                 }
 
@@ -137,10 +137,10 @@ class ApplicationListHost extends Item
             ) : '';
 
             if ('download_list' === \Input::get('action')) {
-                if (($objDocument = Document::findByPk($this->document)) === null) {
+                if (null === ($document = Document::findByPk($this->document))) {
                     Message::addError($GLOBALS['TL_LANG']['MSC']['document']['export_error']);
                 } else {
-                    $objDocument->outputToBrowser($attendances);
+                    $document->outputToBrowser($attendances);
                 }
             }
         }
