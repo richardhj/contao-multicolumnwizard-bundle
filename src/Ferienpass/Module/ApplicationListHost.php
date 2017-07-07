@@ -10,6 +10,7 @@
 
 namespace Ferienpass\Module;
 
+use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use Ferienpass\Helper\Message;
 use Ferienpass\Helper\Table;
 use Ferienpass\Model\Attendance;
@@ -128,21 +129,22 @@ class ApplicationListHost extends Item
 
             $this->Template->dataTable = Table::getDataArray($rows, 'application-list', $this, $rowClassCallback);
 
-            // Add download button
-            $this->Template->download = $this->document ? sprintf(
-                '<a href="%1$s" title="%3$s" class="download_list">%2$s</a>',
-                $this->addToUrl('action=download_list'),
-                $GLOBALS['TL_LANG']['MSC']['downloadList'][0],
-                $GLOBALS['TL_LANG']['MSC']['downloadList'][1]
-            ) : '';
-
-            if ('download_list' === \Input::get('action')) {
+            $urlBuilder = UrlBuilder::fromUrl(\Environment::get('uri'));
+            if ('download_list' === $urlBuilder->getQueryParameter('action')) {
                 if (null === ($document = Document::findByPk($this->document))) {
                     Message::addError($GLOBALS['TL_LANG']['MSC']['document']['export_error']);
                 } else {
                     $document->outputToBrowser($attendances);
                 }
             }
+
+            // Add download button
+            $this->Template->download = $this->document ? sprintf(
+                '<a href="%1$s" title="%3$s" class="download_list">%2$s</a>',
+                $urlBuilder->setQueryParameter('action', 'download_list')->getUrl(),
+                $GLOBALS['TL_LANG']['MSC']['downloadList'][0],
+                $GLOBALS['TL_LANG']['MSC']['downloadList'][1]
+            ) : '';
         }
 
         $this->addRenderedMetaModelToTemplate();
