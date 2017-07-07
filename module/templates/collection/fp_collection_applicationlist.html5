@@ -76,11 +76,5 @@ $strParticipantParentColName = Participant::getInstance()->getOwnerAttribute()->
         <tr>
             <td colspan="6">&nbsp;</td>
         </tr>
-        <tr>
-            <td colspan="6" style="font-size:16px;font-weight:bold">Warteliste</td>
-        </tr>
-        <tr>
-            <td colspan="6">&nbsp;</td>
-        </tr>
     </table>
 </div>
