@@ -85,7 +85,7 @@ class ApplicationListHost extends Item
                 $values      = [];
                 $participant = $participantsMetaModel->findById($attendances->participant);
 
-                if (!in_array($attendances->current()->getStatus()->id, [$statusConfirmed, $statusWaitlisted])) {
+                if (!in_array($attendances->status, [$statusConfirmed, $statusWaitlisted])) {
                     continue;
                 }
                 if (null === $participant) {

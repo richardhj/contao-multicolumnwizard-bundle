@@ -19,6 +19,7 @@ use MetaModels\IItems;
 
 /**
  * Class Document
+ *
  * @package Ferienpass\Model
  */
 class Document extends Model
@@ -50,10 +51,10 @@ class Document extends Model
         $this->prepareEnvironment($collection);
 
         $tokens = $this->prepareCollectionTokens();
-        $pdf = $this->generatePDF($tokens);
+        $pdf    = $this->generatePDF($tokens);
 
         $pdf->Output(
-            $this->prepareFileName($this->fileTitle, $tokens).'.pdf',
+            $this->prepareFileName($this->fileTitle, $tokens) . '.pdf',
             'D'
         );
     }
@@ -71,9 +72,9 @@ class Document extends Model
     {
         $this->prepareEnvironment($collection);
 
-        $tokens = $this->prepareCollectionTokens();
-        $pdf = $this->generatePDF($tokens);
-        $fileName = $this->prepareFileName($this->fileTitle, $tokens, $path).'.pdf';
+        $tokens   = $this->prepareCollectionTokens();
+        $pdf      = $this->generatePDF($tokens);
+        $fileName = $this->prepareFileName($this->fileTitle, $tokens, $path) . '.pdf';
 
         $pdf->Output(
             $fileName,
@@ -94,14 +95,14 @@ class Document extends Model
     protected function generatePDF(array $tokens): \TCPDF
     {
         // TCPDF configuration
-        $l = [];
-        $l['a_meta_dir'] = 'ltr';
-        $l['a_meta_charset'] = $GLOBALS['TL_CONFIG']['characterSet'];
+        $l                    = [];
+        $l['a_meta_dir']      = 'ltr';
+        $l['a_meta_charset']  = $GLOBALS['TL_CONFIG']['characterSet'];
         $l['a_meta_language'] = substr($GLOBALS['TL_LANGUAGE'], 0, 2);
-        $l['w_page'] = 'page';
+        $l['w_page']          = 'page';
 
         // Include TCPDF config
-        require_once TL_ROOT.'/system/config/tcpdf.php';
+        require_once TL_ROOT . '/system/config/tcpdf.php';
 
         // Create new PDF document
         $pdf = new \TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true);
@@ -160,11 +161,11 @@ class Document extends Model
         $template = new \FrontendTemplate($this->documentTpl);
         $template->setData($this->arrData);
 
-        $template->title = StringUtil::parseSimpleTokens($this->documentTitle, $tokens);
-        $template->collection = $this->collection;
-        $template->page = $objPage;
-        $template->dateFormat = $objPage->dateFormat ?: $GLOBALS['TL_CONFIG']['dateFormat'];
-        $template->timeFormat = $objPage->timeFormat ?: $GLOBALS['TL_CONFIG']['timeFormat'];
+        $template->title       = StringUtil::parseSimpleTokens($this->documentTitle, $tokens);
+        $template->collection  = $this->collection;
+        $template->page        = $objPage;
+        $template->dateFormat  = $objPage->dateFormat ?: $GLOBALS['TL_CONFIG']['dateFormat'];
+        $template->timeFormat  = $objPage->timeFormat ?: $GLOBALS['TL_CONFIG']['timeFormat'];
         $template->datimFormat = $objPage->datimFormat ?: $GLOBALS['TL_CONFIG']['datimFormat'];
 
         // Render the collection
@@ -196,7 +197,7 @@ class Document extends Model
                     return $args[2];
                 }
 
-                return $args[1].TL_ROOT.'/'.rawurldecode($args[2]).$args[3];
+                return $args[1] . TL_ROOT . '/' . rawurldecode($args[2]) . $args[3];
             },
             $buffer
         );
@@ -270,20 +271,24 @@ class Document extends Model
 
 
                         /** @type MetaModelBridge $class */
-                        $class = __NAMESPACE__.'\\'.ucfirst($attr);
+                        $class = __NAMESPACE__ . '\\' . ucfirst($attr);
 
                         // Try to find model
                         if (class_exists($class)) {
                             $objRelated = $class::getInstance()->findById($value);
 
                             foreach ($objRelated->getMetaModel()->getAttributes() as $attrRelatedName => $attrRelated) {
-                                $item[$attr.'_'.$attrRelatedName] = $objRelated->get($attrRelatedName);
+                                $item[$attr . '_' . $attrRelatedName] = $objRelated->get($attrRelatedName);
                             }
                         }
                     }
                 }
 
-                $items[] = $item;
+                $items[$this->collection->status][] = $item;
+                // Add css classes
+                RowClass::withKey('rowClass')->addCount('row_')->addFirstLast('row_')->addEvenOdd('row_')->applyTo(
+                    $items[$this->collection->status]
+                );
             }
         } elseif ($this->collection instanceof IItems) {
             $arrValues = $this->collection->parseAll();
@@ -297,7 +302,7 @@ class Document extends Model
                     // Add related fields (e.g. from select fields)
                     if (is_array($arrItem['raw'][$attr])) {
                         foreach ($arrItem['raw'][$attr] as $refName => $refVal) {
-                            $item[$attr.'_'.$refName] = $refVal;
+                            $item[$attr . '_' . $refName] = $refVal;
                         }
                     }
                 }
@@ -306,8 +311,6 @@ class Document extends Model
             }
         }
 
-        // Add css classes
-        RowClass::withKey('rowClass')->addCount('row_')->addFirstLast('row_')->addEvenOdd('row_')->applyTo($items);
 
         $template->items = $items;
 
@@ -346,12 +349,12 @@ class Document extends Model
 
         if ($this->collection instanceof Model\Collection) {
             foreach ($this->collection->row() as $k => $v) {
-                $tokens['collection_'.$k] = $v;
+                $tokens['collection_' . $k] = $v;
             }
         } elseif ($this->collection instanceof IItems) //@todo
         {
             foreach ($this->collection->getItem()->getMetaModel()->getAttributes() as $k => $v) {
-                $tokens['collection_'.$k] = $this->collection->getItem()->get($v);
+                $tokens['collection_' . $k] = $this->collection->getItem()->get($v);
             }
         }
 
@@ -378,7 +381,7 @@ class Document extends Model
             // Make sure the path contains a trailing slash
             $path = preg_replace('/([^\/]+)$/', '$1/', $path);
 
-            $name = $path.$name;
+            $name = $path . $name;
         }
 
         return $name;
