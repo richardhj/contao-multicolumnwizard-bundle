@@ -201,7 +201,7 @@ class NotificationSubscriber implements EventSubscriberInterface
                     $time = time();
 
                     \Database::getInstance()->query(
-                        "INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification) " .
+                        "INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)" .
                         " VALUES ({$time}, {$attendances->id}, {$notificationId})" .
                         " ON DUPLICATE KEY UPDATE tstamp={$time}"
                     );
