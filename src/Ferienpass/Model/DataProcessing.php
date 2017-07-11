@@ -11,7 +11,7 @@
 namespace Ferienpass\Model;
 
 use Contao\Model;
-use Dropbox\Client;
+use Dropbox\Client as DropboxClient;
 use Ferienpass\Model\DataProcessing\Filesystem\Dropbox;
 use Ferienpass\Model\DataProcessing\Filesystem\Local;
 use Ferienpass\Model\DataProcessing\Filesystem\SendToBrowser;
@@ -363,7 +363,7 @@ class DataProcessing extends Model
                 break;
 
             case 'dropbox':
-                $client  = new Client(
+                $client  = new DropboxClient(
                     $this->dropbox_access_token,
                     $container['ferienpass.dropbox.appSecret']
                 );
