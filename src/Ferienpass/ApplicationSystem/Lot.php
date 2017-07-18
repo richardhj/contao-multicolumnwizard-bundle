@@ -40,7 +40,7 @@ class Lot extends AbstractApplicationSystem
     {
         return [
             UserSetApplicationEvent::NAME  => [
-                'setNewAttendance',
+                ['setNewAttendance'],
             ],
             PreSaveModelEvent::NAME        => [
                 ['setAttendanceStatus'],
@@ -49,10 +49,10 @@ class Lot extends AbstractApplicationSystem
                 ['setAttendanceStatusDcGeneral']
             ],
             PopulateEnvironmentEvent::NAME => [
-                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY + 50],
+                ['enableOfferAttendancesView', DataProviderPopulator::PRIORITY + 50],
             ],
             ModelToLabelEvent::NAME        => [
-                ['addAttendancesEditLinkInOfferListView', -10],
+                ['alterLabelInOfferAttendancesView', -10],
             ],
         ];
     }
@@ -71,10 +71,9 @@ class Lot extends AbstractApplicationSystem
      */
     public function setAttendanceStatus(PreSaveModelEvent $event)
     {
-        /** @var Attendance $attendance */
-        $attendance = $event->getModel();
-
-        if (!$attendance instanceof Attendance || null !== $attendance->getStatus()) {
+        /** @var Attendance $model */
+        $model = $event->getModel();
+        if (!$model instanceof Attendance || null !== $model->getStatus()) {
             return;
         }
 
@@ -85,7 +84,7 @@ class Lot extends AbstractApplicationSystem
         $data['status'] = $newStatus->id;
 
         // Update sorting afterwards
-        $lastAttendance = Attendance::findLastByOfferAndStatus($attendance->offer, $data['status']);
+        $lastAttendance = Attendance::findLastByOfferAndStatus($model->offer, $data['status']);
         $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
         $sorting += 128;
         $data['sorting'] = $sorting;
@@ -120,7 +119,8 @@ class Lot extends AbstractApplicationSystem
             $model->getProperty('offer'),
             $model->getProperty('status')
         );
-        $sorting        = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
+
+        $sorting = (null !== $lastAttendance) ? $lastAttendance->sorting : 0;
         $sorting += 128;
         $model->setProperty('sorting', $sorting);
     }
@@ -131,7 +131,7 @@ class Lot extends AbstractApplicationSystem
      *
      * @param PopulateEnvironmentEvent $event
      */
-    public function populateEnvironmentForAttendancesChildTable(PopulateEnvironmentEvent $event)
+    public function enableOfferAttendancesView(PopulateEnvironmentEvent $event)
     {
         $environment = $event->getEnvironment();
 
@@ -144,19 +144,16 @@ class Lot extends AbstractApplicationSystem
 
         // Not attendances for offer MetaModel
         if (!($definition->getName() === Attendance::getTable()
-              && 'mm_ferienpass' === $definition
-                    ->getBasicDefinition()
-                    ->getParentDataProvider())
+              && 'mm_ferienpass' === $definition->getBasicDefinition()->getParentDataProvider())
             || !$definition->hasBasicDefinition()
         ) {
             return;
         }
 
-        // Alter view
+        // Set view
         $view = new OfferAttendancesView();
         $view->setEnvironment($environment);
         $environment->setView($view);
-
 
         // Add "attendances" property
         /** @var Contao2BackendViewDefinitionInterface $viewSection */
@@ -175,22 +172,15 @@ class Lot extends AbstractApplicationSystem
      *
      * @param ModelToLabelEvent $event
      */
-    public function addAttendancesEditLinkInOfferListView(ModelToLabelEvent $event)
+    public function alterLabelInOfferAttendancesView(ModelToLabelEvent $event)
     {
-        $model      = $event->getModel();
-        $definition = $event->getEnvironment()->getDataDefinition();
-
         // Not attendances for offer MetaModel
-        if (!($definition->getName() === Attendance::getTable()
-              && 'mm_ferienpass' === $definition
-                    ->getBasicDefinition()
-                    ->getParentDataProvider())
-            || !$definition->hasBasicDefinition()
-        ) {
+        if (!$event->getEnvironment()->getView() instanceof OfferAttendancesView) {
             return;
         }
 
-        $args = $event->getArgs();
+        $model = $event->getModel();
+        $args  = $event->getArgs();
 
         // Adjust the label
         foreach ($args as $k => $v) {
@@ -205,13 +195,11 @@ class Lot extends AbstractApplicationSystem
                             $model->getProperty('participant')
                         ) . ' Anmeldungen gesamt',
                         // Member edit description
-                        sprintf(
-                            $GLOBALS['TL_LANG']['tl_member']['edit'][1],
-                            ''
-                        ),
+                        sprintf($GLOBALS['TL_LANG']['tl_member']['edit'][1], $model->getProperty('participant')),
                         REQUEST_TOKEN
                     );
                     break;
+
                 case 'participant':
                     global $container;
 
@@ -233,12 +221,10 @@ class Lot extends AbstractApplicationSystem
                     );
 
                     // Add postal
-
                     $args[$k] .= sprintf(
                         '<span class="postal">PLZ: <span class="content">%s</span></span>',
                         (null !== $member) ? $member->postal : '-'
                     );
-
 
                     break;
             }
