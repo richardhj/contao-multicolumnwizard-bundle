@@ -66,7 +66,7 @@ class AttendanceAllocationView extends ParentView
             );
         }
 
-        $template = $this->getTemplate('dcbe_general_offerAttendancesView');
+        $template = $this->getTemplate('dcbe_general_attendance_allocation_view');
 
         /** @var AttendanceStatus|\Model\Collection $status */
         $status      = AttendanceStatus::findBy('enableManualAssignment', 1);
