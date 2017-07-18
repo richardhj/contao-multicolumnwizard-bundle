@@ -23,11 +23,11 @@ use Ferienpass\Model\AttendanceStatus;
 
 
 /**
- * Class OfferAttendancesView
+ * Class AttendanceAllocationView
  *
  * @package Ferienpass\DcGeneral\View
  */
-class OfferAttendancesView extends ParentView
+class AttendanceAllocationView extends ParentView
 {
 
     /**

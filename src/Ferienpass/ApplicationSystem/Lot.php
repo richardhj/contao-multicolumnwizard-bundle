@@ -17,7 +17,7 @@ use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
-use Ferienpass\DcGeneral\View\OfferAttendancesView;
+use Ferienpass\DcGeneral\View\AttendanceAllocationView;
 use Ferienpass\Event\UserSetApplicationEvent;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
@@ -105,7 +105,6 @@ class Lot extends AbstractApplicationSystem
         }
 
         $model = $event->getModel();
-
         if ($model->getProperty('status')) {
             return;
         }
@@ -127,7 +126,7 @@ class Lot extends AbstractApplicationSystem
 
 
     /**
-     * Use the OfferAttendancesView if applicable
+     * Use the AttendanceAllocationView if applicable
      *
      * @param PopulateEnvironmentEvent $event
      */
@@ -151,7 +150,7 @@ class Lot extends AbstractApplicationSystem
         }
 
         // Set view
-        $view = new OfferAttendancesView();
+        $view = new AttendanceAllocationView();
         $view->setEnvironment($environment);
         $environment->setView($view);
 
@@ -175,7 +174,7 @@ class Lot extends AbstractApplicationSystem
     public function alterLabelInOfferAttendancesView(ModelToLabelEvent $event)
     {
         // Not attendances for offer MetaModel
-        if (!$event->getEnvironment()->getView() instanceof OfferAttendancesView) {
+        if (!$event->getEnvironment()->getView() instanceof AttendanceAllocationView) {
             return;
         }
 
@@ -210,13 +209,13 @@ class Lot extends AbstractApplicationSystem
                     $serviceContainer = $container['metamodels-service-container'];
                     $metaModel        = $serviceContainer->getFactory()->getMetaModel('mm_participant');
                     $participant      = $metaModel->findById($model->getProperty('participant'));
-                    $date             = new DateTime('@' . $participant->get('dateOfBirth'));
+                    $dateOfBirth      = new DateTime('@' . $participant->get('dateOfBirth'));
                     $member           = MemberModel::findById($participant->get('pmember'));
 
                     // Add age
                     $args[$k] .= sprintf(
                         '<span class="age"><span title="%2$s" class="content">%1$s</span> Jahre</span>',
-                        $date->getAge(),
+                        $dateOfBirth->getAge(),
                         'Alter zum aktuellen Zeitpunkt'
                     );
 
