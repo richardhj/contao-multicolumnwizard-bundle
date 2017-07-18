@@ -1,61 +1,56 @@
-<?php echo $this->getMessages(); ?>
-<div class="tl_listing_container attendances_offer_view table_<?php echo $this->tableName; ?>">
+<?= $this->getMessages() ?>
+<div class="tl_listing_container attendances_offer_view table_<?= $this->tableName ?>">
 
-    <?php if (strlen($this->breadcrumb)) {
-        echo $this->breadcrumb;
-    } ?>
+    <?php if (strlen($this->breadcrumb)): ?>
+        <?= $this->breadcrumb ?>
+    <?php endif ?>
 
     <div class="tl_header" onmouseover="Theme.hoverDiv(this,1)" onmouseout="Theme.hoverDiv(this,0)">
-
         <div class="tl_content_right">
-            <?php echo $this->headerButtons; ?>
+            <?= $this->headerButtons ?>
         </div>
-
         <table class="tl_header_table">
-
             <?php foreach ($this->header as $key => $value): ?>
                 <tr>
-                    <td><span class="tl_label"><?php echo $key; ?></span></td>
-                    <td><?php echo $value; ?></td>
+                    <td><span class="tl_label"><?= $key ?></span></td>
+                    <td><?= $value ?></td>
                 </tr>
             <?php endforeach; ?>
-
         </table>
-
     </div>
 
     <?php if ($this->collection->length() < 1): ?>
-        <p class="tl_empty"><?php echo $GLOBALS['TL_LANG']['MSC']['noResult']; ?></p>
+        <p class="tl_empty"><?= $GLOBALS['TL_LANG']['MSC']['noResult'] ?></p>
     <?php else: ?>
-        <div id="table_<?php echo $this->tableName; ?>" class="status-assignment">
+        <div id="table_<?= $this->tableName ?>" class="status-assignment">
 
-            <?php foreach ($this->status as $status): ?>
-                <div data-status-id="<?php echo ContaoCommunityAlliance\DcGeneral\Data\ModelId::fromValues($status->getTable(), $status->id)->getSerialized(); ?>" class="attendance-status -<?php echo $status->cssClass ?>">
-                    <h2><?php echo Haste\Util\Format::dcaValue($status->getTable(), 'type', $status->type) ?></h2>
+            <?php /** @var Ferienpass\Model\AttendanceStatus $status */
+            foreach ($this->status as $status): ?>
+                <div data-status-id="<?= ContaoCommunityAlliance\DcGeneral\Data\ModelId::fromValues($status->getTable(), $status->id)->getSerialized() ?>" class="attendance-status -<?php echo $status->cssClass ?>">
+                    <h2><?= Haste\Util\Format::dcaValue($status->getTable(), 'type', $status->type) ?></h2>
                     <div class="count">
                         <span
                             class="current"><?php echo $this->statusCount[$status->id]['current'] ?></span> / <span
                             class="max"><?php echo $this->statusCount[$status->id]['max'] ?></span></div>
                     <ul>
 
-                        <?php foreach ($this->collection as $objModel): ?>
-                            <?php /** @var \ContaoCommunityAlliance\DcGeneral\Data\ModelInterface $objModel */ ?>
-                            <?php if ($objModel->getProperty('status') !== $status->id)
+                        <?php foreach ($this->collection as $model): ?>
+                            <?php /** @var \ContaoCommunityAlliance\DcGeneral\Data\ModelInterface $model */ ?>
+                            <?php if ($model->getProperty('status') !== $status->id)
                                 continue ?>
-                            <li id="table_row_<?php echo $objModel->getId(); ?>"
-                                class="<?php echo $objModel->getMeta($objModel::CSS_ROW_CLASS); ?>"
-                                data-model-id="<?php echo \ContaoCommunityAlliance\DcGeneral\Data\ModelId::fromModel(
-                                    $objModel
-                                )->getSerialized(); ?>">
-                                <?php $arrLabels = $objModel->getMeta($objModel::LABEL_VALUE); ?>
+                            <li id="table_row_<?= $model->getId() ?>"
+                                class="<?= $model->getMeta($model::CSS_ROW_CLASS) ?>"
+                                data-model-id="<?= \ContaoCommunityAlliance\DcGeneral\Data\ModelId::fromModel($model)
+                                    ->getSerialized(); ?>">
+                                <?php $arrLabels = $model->getMeta($model::LABEL_VALUE); ?>
 
                                 <?php foreach ($arrLabels as $arrLabel): ?>
-                                    <span class="<?php echo $arrLabel['class']; ?>">
-									<?php echo $arrLabel['content']; ?>
+                                    <span class="<?= $arrLabel['class'] ?>">
+									<?= $arrLabel['content'] ?>
 								</span>
                                 <?php endforeach; ?>
                                 <span class="tl_file_list tl_right_nowrap">
-									<?php echo $objModel->getMeta($objModel::OPERATION_BUTTONS); ?>
+									<?= $model->getMeta($model::OPERATION_BUTTONS) ?>
                                     <?php if ($this->sortable): echo $this->generateImage(
                                         'system/modules/dc-general/html/images/drag.gif',
                                         '&udarr;',
@@ -85,7 +80,7 @@
                         previousModel: (null != e.detail.item.getPrevious('li')) ? e.detail.item.getPrevious('li').getAttribute('data-model-id') : '',
                         oldStatus: e.detail.startparent.getParent().getAttribute('data-status-id'),
                         newStatus: e.detail.endparent.getParent().getAttribute('data-status-id'),
-                        REQUEST_TOKEN: '<?php echo REQUEST_TOKEN; ?>'
+                        REQUEST_TOKEN: '<?= REQUEST_TOKEN ?>'
                     },
                     onRequest: function () {
                         e.detail.endparent.getParent().getElement('.count').addClass('ajax-waiting');

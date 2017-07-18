@@ -325,13 +325,5 @@ $GLOBALS['TL_HOOKS']['replaceInsertTags'][] = ['Ferienpass\Helper\InsertTags', '
 $GLOBALS['TL_HOOKS']['createNewUser'][] = ['Ferienpass\Helper\UserAccount', 'createNewUser'];
 $GLOBALS['TL_HOOKS']['closeAccount'][] = ['Ferienpass\Helper\UserAccount', 'closeAccount'];
 $GLOBALS['TL_HOOKS']['getAllEvents'][] = ['Ferienpass\Helper\Events', 'getMetaModelAsEvents'];
-$GLOBALS['TL_HOOKS']['simpleAjax'][] = ['Ferienpass\Helper\Ajax', 'handleDropboxWebhook'];
 $GLOBALS['TL_HOOKS']['executePostActions'][] = ['Ferienpass\Helper\Ajax', 'handleOfferAttendancesView'];
 $GLOBALS['TL_HOOKS']['getSystemMessages'][] = ['Ferienpass\Helper\Backend', 'addCurrentApplicationSystemToSystemMessages'];
-
-//$GLOBALS['TL_DCA'][FerienpassConfig::get(FerienpassConfig::PARTICIPANT_MODEL)]['list']['label']['label_callback'] = array('Ferienpass\Helper\Dca', 'test');
-
-/**
- * Cron jobs
- */
-//$GLOBALS['TL_CRON']['daily'][] = array('Ferienpass\FerienpassCalendar', 'writeICal');

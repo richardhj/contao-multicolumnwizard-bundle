@@ -10,9 +10,10 @@
 
 namespace Ferienpass\Helper;
 
+use Contao\Input;
+use Contao\Versions;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\DataProcessing;
 use Haste\Http\Response\JsonResponse;
 
 
@@ -22,34 +23,6 @@ use Haste\Http\Response\JsonResponse;
  */
 class Ajax
 {
-
-    /**
-     * Handle the Dropbox webhook
-     */
-    public function handleDropboxWebhook()
-    {
-        if (!\Environment::get('isAjaxRequest') || 'dropbox-webhook' !== \Input::get('action')) {
-            return;
-        }
-
-        /** @type \Model\Collection $processings */
-        $processings = DataProcessing::findBy
-        (
-            [
-                'dropbox_uid=?',
-                'sync=1',
-            ],
-            [
-                \Input::get('uid'),
-            ]
-        );
-
-        /** @var DataProcessing $processing */
-        foreach ($processings as $processing) {
-            $processing->syncFromRemoteDropbox();
-        }
-    }
-
 
     /**
      * Handle the reposition of attendances in the backend
@@ -65,11 +38,11 @@ class Ajax
         }
 
         try {
-            $oldStatusId = ModelId::fromSerialized(\Input::post('oldStatus'));
-            $newStatusId = ModelId::fromSerialized(\Input::post('newStatus'));
-            $modelId = ModelId::fromSerialized(\Input::post('model'));
-            $previousModelId = ('' !== \Input::post('previousModel'))
-                ? ModelId::fromSerialized(\Input::post('previousModel'))
+            $oldStatusId = ModelId::fromSerialized(Input::post('oldStatus'));
+            $newStatusId = ModelId::fromSerialized(Input::post('newStatus'));
+            $modelId = ModelId::fromSerialized(Input::post('model'));
+            $previousModelId = ('' !== Input::post('previousModel'))
+                ? ModelId::fromSerialized(Input::post('previousModel'))
                 : null;
 
         } catch (\Exception $e) {
@@ -87,7 +60,7 @@ class Ajax
         //@todo
 
         // Initialize versioning
-        $versions = new \Versions($modelId->getDataProviderName(), $modelId->getId());
+        $versions = new Versions($modelId->getDataProviderName(), $modelId->getId());
         $versions->initialize();
 
         $attendance = Attendance::findByPk($modelId->getId());
