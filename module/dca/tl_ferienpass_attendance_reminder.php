@@ -38,6 +38,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'fields'      => [
                 'remind_before',
                 'nc_notification',
+                'attendance_status',
             ],
             'showColumns' => true,
         ],
