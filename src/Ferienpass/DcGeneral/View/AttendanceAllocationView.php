@@ -8,15 +8,6 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-/**
- * E-POSTBUSINESS API integration for Contao Open Source CMS
- *
- * Copyright (c) 2015-2016 Richard Henkenjohann
- *
- * @package E-POST
- * @author  Richard Henkenjohann <richard-epost@henkenjohann.me>
- */
-
 namespace Ferienpass\DcGeneral\View;
 
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
@@ -26,15 +17,17 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ParentView;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ViewHelpers;
 use ContaoCommunityAlliance\DcGeneral\Data\CollectionInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelInterface;
+use Environment;
 use Ferienpass\Model\Attendance;
 use Ferienpass\Model\AttendanceStatus;
 
 
 /**
- * Class OfferAttendancesView
+ * Class AttendanceAllocationView
+ *
  * @package Ferienpass\DcGeneral\View
  */
-class OfferAttendancesView extends ParentView
+class AttendanceAllocationView extends ParentView
 {
 
     /**
@@ -48,10 +41,10 @@ class OfferAttendancesView extends ParentView
      */
     public function viewParent($collection, $parentModel)
     {
-        $definition = $this->getEnvironment()->getDataDefinition();
-        $parentProvider = $definition->getBasicDefinition()->getParentDataProvider();
+        $definition          = $this->getEnvironment()->getDataDefinition();
+        $parentProvider      = $definition->getBasicDefinition()->getParentDataProvider();
         $groupingInformation = ViewHelpers::getGroupingMode($this->environment);
-        $dispatcher = $this->getEnvironment()->getEventDispatcher();
+        $dispatcher          = $this->getEnvironment()->getEventDispatcher();
 
         // Skip if we have no parent or parent collection.
         if (!$parentModel) {
@@ -62,7 +55,7 @@ class OfferAttendancesView extends ParentView
                         'The view for %s has either a empty parent data provider or collection.',
                         $parentProvider
                     ),
-                    __CLASS__.'::'.__FUNCTION__.'()',
+                    __METHOD__,
                     TL_ERROR
                 )
             );
@@ -73,10 +66,10 @@ class OfferAttendancesView extends ParentView
             );
         }
 
-        $objTemplate = $this->getTemplate('dcbe_general_offerAttendancesView');
+        $template = $this->getTemplate('dcbe_general_attendance_allocation_view');
 
         /** @var AttendanceStatus|\Model\Collection $status */
-        $status = AttendanceStatus::findBy('enableManualAssignment', 1);
+        $status      = AttendanceStatus::findBy('enableManualAssignment', 1);
         $statusCount = [];
 
         while (null !== $status && $status->next()) {
@@ -84,34 +77,34 @@ class OfferAttendancesView extends ParentView
                 $parentModel->getProperty('id'),
                 $status->id
             );
-            $statusCount[$status->id]['max'] = ($status->id === AttendanceStatus::findConfirmed()->id)
+            $statusCount[$status->id]['max']     = (AttendanceStatus::findConfirmed() === $status)
                 ? $parentModel->getProperty('applicationlist_max') : '-';
         }
 
         $this
-            ->addToTemplate('status', $status, $objTemplate)
-            ->addToTemplate('statusCount', $statusCount, $objTemplate)
-            ->addToTemplate('tableName', strlen($definition->getName()) ? $definition->getName() : 'none', $objTemplate)
-            ->addToTemplate('collection', $collection, $objTemplate)
+            ->addToTemplate('status', $status, $template)
+            ->addToTemplate('statusCount', $statusCount, $template)
+            ->addToTemplate('tableName', strlen($definition->getName()) ? $definition->getName() : 'none', $template)
+            ->addToTemplate('collection', $collection, $template)
+            ->addToTemplate('action', ampersand(Environment::get('request'), true), $template)
+            ->addToTemplate('header', $this->renderFormattedHeaderFields($parentModel), $template)
+            ->addToTemplate('mode', ($groupingInformation ? $groupingInformation['mode'] : null), $template)
+            ->addToTemplate('pdp', (string) $parentProvider, $template)
+            ->addToTemplate('cdp', $definition->getName(), $template)
+            ->addToTemplate('headerButtons', $this->getHeaderButtons($parentModel), $template)
+            ->addToTemplate('sortable', (bool) ViewHelpers::getManualSortingProperty($this->environment), $template)
+            ->addToTemplate('showColumns', $this->getViewSection()->getListingConfig()->getShowColumns(), $template);
 //            ->addToTemplate('select', $this->isSelectModeActive(), $objTemplate)
-            ->addToTemplate('action', ampersand(\Environment::get('request'), true), $objTemplate)
-            ->addToTemplate('header', $this->renderFormattedHeaderFields($parentModel), $objTemplate)
-            ->addToTemplate('mode', ($groupingInformation ? $groupingInformation['mode'] : null), $objTemplate)
-            ->addToTemplate('pdp', (string)$parentProvider, $objTemplate)
-            ->addToTemplate('cdp', $definition->getName(), $objTemplate)
 //            ->addToTemplate('selectButtons', $this->getSelectButtons(), $objTemplate)
-            ->addToTemplate('headerButtons', $this->getHeaderButtons($parentModel), $objTemplate)
-            ->addToTemplate('sortable', (bool)ViewHelpers::getManualSortingProperty($this->environment), $objTemplate)
-            ->addToTemplate('showColumns', $this->getViewSection()->getListingConfig()->getShowColumns(), $objTemplate);
 
         $this->renderEntries($collection, $groupingInformation);
 
         // Add breadcrumb, if we have one.
-        $strBreadcrumb = $this->breadcrumb();
-        if ($strBreadcrumb != null) {
-            $this->addToTemplate('breadcrumb', $strBreadcrumb, $objTemplate);
+        $breadcrumb = $this->breadcrumb();
+        if (null !== $breadcrumb) {
+            $this->addToTemplate('breadcrumb', $breadcrumb, $template);
         }
 
-        return $objTemplate->parse();
+        return $template->parse();
     }
 }

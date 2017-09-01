@@ -10,6 +10,7 @@
 
 use Ferienpass\Helper\Dca;
 use Ferienpass\Module\Subscriber as ModuleSubscriber;
+use Ferienpass\Subscriber\Dca\Offer as DcaOffer;
 use Ferienpass\Subscriber\NotificationSubscriber;
 
 
@@ -17,6 +18,7 @@ global $container;
 
 return [
     new Dca(),
+    new DcaOffer(),
     new NotificationSubscriber(),
     new ModuleSubscriber(),
     $container['ferienpass.applicationsystem'],
