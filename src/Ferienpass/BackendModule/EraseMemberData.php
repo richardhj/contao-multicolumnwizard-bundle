@@ -10,17 +10,27 @@
 
 namespace Ferienpass\BackendModule;
 
+use Contao\CheckBox;
+use Contao\Database;
+use Contao\Input;
+use Contao\MemberGroupModel;
+use Contao\MemberModel;
+use Contao\Widget;
+use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
+use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\ReloadEvent;
+use ContaoCommunityAlliance\Contao\Bindings\Events\Message\AddMessageEvent;
 use Ferienpass\Model\Attendance;
-use Ferienpass\Model\Participant;
 use Haste\Util\Format;
 use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
+use MetaModels\IMetaModelsServiceContainer;
 
 
 /**
  * Class EraseMemberData
+ *
  * @package Ferienpass\BackendModule
  */
 class EraseMemberData extends \BackendModule
@@ -31,6 +41,7 @@ class EraseMemberData extends \BackendModule
 
     /**
      * Generate the module
+     *
      * @return string
      */
     public function generate()
@@ -48,65 +59,74 @@ class EraseMemberData extends \BackendModule
      */
     protected function compile()
     {
-        $output = '';
-        $formSubmit = 'erase_member_data';
-        $memberGroup = \MemberGroupModel::findByPk('2'); // @todo
-        $members = \MemberModel::findBy(['groups=?', 'persist<>1'], [serialize([$memberGroup->id])]);
-        $attendances = Attendance::findAll();
-        $getParticipantsFilter = function () use ($members) {
-            $filter = new Filter(Participant::getInstance()->getMetaModel());
-            if (null === $members) {
-                $rule = new StaticIdList([]);
-            } else {
-                $rule = new SimpleQuery(
-                    sprintf(
-                        'SELECT id FROM %1$s WHERE %2$s IN (%3$s) OR %2$s=0',
-                        Participant::getInstance()->getMetaModel()->getTableName(),
-                        Participant::getInstance()->getOwnerAttribute()->getColName(),
-                        implode(',', $members->fetchEach('id'))
-                    )
-                );
-            }
+        global $container;
 
-            $filter->addFilterRule($rule);
+        /** @var IMetaModelsServiceContainer $serviceContainer */
+        $serviceContainer       = $container['metamodels-service-container'];
+        $eventDispatcher        = $serviceContainer->getEventDispatcher();
+        $output                 = '';
+        $formSubmit             = 'erase_member_data';
+        $memberGroup            = MemberGroupModel::findByPk('2'); // @todo
+        $members                = MemberModel::findBy(['groups=?', 'persist<>1'], [serialize([$memberGroup->id])]);
+        $attendances            = Attendance::findAll();
+        $participantsMetaModel  = $serviceContainer->getFactory()->getMetaModel('mm_participant');
+        $participantsFilter     = new Filter($participantsMetaModel);
+        $participantsFilterRule = (null === $members)
+            ? new StaticIdList([])
+            : new SimpleQuery(
+                sprintf(
+                    'SELECT id FROM %1$s WHERE %2$s IN (%3$s) OR %2$s=0',
+                    $participantsMetaModel->getTableName(),
+                    'pmember',
+                    implode(',', $members->fetchEach('id'))
+                )
+            );
+        $participantsFilter->addFilterRule($participantsFilterRule);
+        $participants = $participantsMetaModel->findByFilter($participantsFilter);
 
-            return $filter;
-        };
-        $participants = Participant::getInstance()->getMetaModel()->findByFilter($getParticipantsFilter());
-
-        /** @var \CheckBox|\Widget $checkboxConfirm */
-        $checkboxConfirm = new \CheckBox(null);
-        $checkboxConfirm->options = [
+        /** @var CheckBox|Widget $checkboxConfirm */
+        $checkboxConfirm            = new CheckBox(null);
+        $checkboxConfirm->id        = $checkboxConfirm->name = 'confirm';
+        $checkboxConfirm->mandatory = true;
+        $checkboxConfirm->options   = [
             [
                 'value' => 1,
                 'label' => 'Ich bin mir bewusst, dass die Daten unwiderruflich gelöscht werden.',
             ],
         ];
-        $checkboxConfirm->id = $checkboxConfirm->name = 'confirm';
-        $checkboxConfirm->mandatory = true;
 
-        /** @var \CheckBox|\Widget $checkboxResetPersist */
-        $checkboxResetPersist = new \CheckBox(null);
-        /** @noinspection PhpUndefinedMethodInspection */
+        /** @var CheckBox|Widget $checkboxResetPersist */
+        $checkboxResetPersist          = new CheckBox(null);
+        $checkboxResetPersist->id      = $checkboxResetPersist->name = 'resetPersist';
         $checkboxResetPersist->options = [
             [
                 'value' => 1,
                 'label' => sprintf(
                     'Den Status "%s" bei diesen Mitglieder zurücksetzen',
-                    Format::dcaLabel(\MemberModel::getTable(), 'persist')
+                    Format::dcaLabel(MemberModel::getTable(), 'persist')
                 ),
             ],
         ];
-        $checkboxResetPersist->id = $checkboxResetPersist->name = 'resetPersist';
 
-        if ($formSubmit === \Input::post('FORM_SUBMIT')) {
+        /** @var CheckBox|Widget $checkboxPreserveAttendances */
+        $checkboxPreserveAttendances          = new CheckBox(null);
+        $checkboxPreserveAttendances->id      = $checkboxPreserveAttendances->name = 'preserveAttendances';
+        $checkboxPreserveAttendances->options = [
+            [
+                'value' => 1,
+                'label' => 'Anmeldungen nicht löschen',
+            ],
+        ];
+
+        if ($formSubmit === Input::post('FORM_SUBMIT')) {
             $checkboxConfirm->validate();
             $checkboxResetPersist->validate();
+            $checkboxPreserveAttendances->validate();
 
             if (!$checkboxConfirm->hasErrors()) {
-                if (null !== $attendances) {
-                    // Truncate attendances
-                    \Database::getInstance()->query(
+                // Truncate attendances
+                if ('1' !== $checkboxPreserveAttendances->value && null !== $attendances) {
+                    Database::getInstance()->query(
                         sprintf(
                             'DELETE FROM %s WHERE id IN (%s)',
                             Attendance::getTable(),
@@ -115,12 +135,12 @@ class EraseMemberData extends \BackendModule
                     );
                 }
 
+                // Truncate participants
                 if (0 !== $participants->getCount()) {
-                    // Truncate participants
-                    \Database::getInstance()->query(
+                    Database::getInstance()->query(
                         sprintf(
                             'DELETE FROM %s WHERE id IN (%s)',
-                            Participant::getInstance()->getMetaModel()->getTableName(),
+                            $participantsMetaModel->getTableName(),
                             implode(
                                 ',',
                                 array_map(
@@ -136,27 +156,29 @@ class EraseMemberData extends \BackendModule
 
                 // Truncate members
                 if (null !== $members) {
-                    /** @noinspection PhpUndefinedMethodInspection */
-                    \Database::getInstance()->query(
+                    Database::getInstance()->query(
                         sprintf(
                             'DELETE FROM %s WHERE id IN (%s)',
-                            \MemberModel::getTable(),
+                            MemberModel::getTable(),
                             implode(',', $members->fetchEach('id'))
                         )
                     );
                 }
 
                 // Reset persist status
-                if ('1' === $checkboxResetPersist) {
-                    /** @noinspection PhpUndefinedMethodInspection */
-                    \Database::getInstance()
+                if ('1' === $checkboxResetPersist->value) {
+                    Database::getInstance()
                         ->prepare(
-                            sprintf("UPDATE %s SET persist='' WHERE persist=1 AND groups=?", \MemberModel::getTable())
+                            sprintf("UPDATE %s SET persist='' WHERE persist=1 AND groups=?", MemberModel::getTable())
                         )
                         ->execute(serialize([$memberGroup->id]));
                 }
 
-                \Message::addConfirmation('Löschung wurde erfolgreich ausgeführt');
+                $eventDispatcher->dispatch(
+                    ContaoEvents::MESSAGE_ADD,
+                    AddMessageEvent::createConfirm('Löschung wurde erfolgreich ausgeführt')
+                );
+                $eventDispatcher->dispatch(ContaoEvents::CONTROLLER_RELOAD, new ReloadEvent());
             }
         }
 
@@ -197,8 +219,8 @@ class EraseMemberData extends \BackendModule
 </table>
 HTML
             ,
-            \MemberModel::getTable(),
-            Participant::getInstance()->getMetaModel()->getTableName(),
+            MemberModel::getTable(),
+            $participantsMetaModel->getTableName(),
             Attendance::getTable(),
             (null !== $members) ? $members->count() : 0,
             $participants->getCount(),
@@ -206,13 +228,14 @@ HTML
             $memberGroup->name
         );
 
+        $output .= $checkboxPreserveAttendances->generateWithError();
         $output .= $checkboxResetPersist->generateWithError();
         $output .= $checkboxConfirm->generateWithError();
 
         $this->Template->subHeadline = 'Personenbezogene Daten löschen';
-        $this->Template->table = $formSubmit;
+        $this->Template->table       = $formSubmit;
         $this->Template->editButtons = $buttons;
-        $this->Template->fieldsets = [
+        $this->Template->fieldsets   = [
             [
                 'class'   => 'tl_box',
                 'palette' => $output,
