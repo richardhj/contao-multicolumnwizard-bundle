@@ -10,6 +10,8 @@
 
 namespace Ferienpass\Module;
 
+use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
+use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\RedirectEvent;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Ferienpass\Helper\Message;
 use Ferienpass\MetaModels\FrontendEditingItem as Item;
@@ -20,6 +22,7 @@ use MetaModels\Attribute\Select\MetaModelSelect;
 use MetaModels\Attribute\Tags\MetaModelTags as MetaModelTagsAttribute;
 use MetaModels\IItem;
 use MetaModels\IItems;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
 /**
@@ -520,12 +523,18 @@ HTML;
                         $redirectUrl .= '&variants=1';
                     }
 
-                    \Controller::redirect($redirectUrl);
+                    $this->getEventDispatcher()->dispatch(
+                        ContaoEvents::CONTROLLER_REDIRECT,
+                        new RedirectEvent($redirectUrl)
+                    );
                 }
                 elseif ($editVariants && 0 === $this->metaModel->findVariants($this->item->get('id'), null)->getCount() && !\Input::get('variants')) {
                     $redirectUrl = \Environment::get('request');
                     $redirectUrl .= '&variants=1';
-                    \Controller::redirect($redirectUrl);
+                    $this->getEventDispatcher()->dispatch(
+                        ContaoEvents::CONTROLLER_REDIRECT,
+                        new RedirectEvent($redirectUrl)
+                    );
                 }
             }
 
@@ -607,5 +616,13 @@ HTML;
             '<p class="count_variants">Es existieren aktuell %u Varianten zu diesem Angebot. Die erstellten Termine sehen Sie in der Übersicht.</p>',
             $variants->getCount()
         ); //@todo lang
+    }
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    private function getEventDispatcher()
+    {
+        return $GLOBALS['event-dispatcher'];
     }
 }
