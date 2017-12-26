@@ -22,7 +22,6 @@
     "contao-community-alliance/meta-palettes": "^1.10",
     "eluceo/ical": "^0.8",
     "spatie/flysystem-dropbox": "^1.0",
-    "metamodels/bundle_all": "^2.1",
     "oneup/flysystem-bundle": "^3.0",
     "richardhj/contao-model-events": "^1.0",
     "stevenmaguire/oauth2-dropbox": "^2.0",
