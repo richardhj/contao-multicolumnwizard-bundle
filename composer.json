@@ -23,7 +23,7 @@
     "eluceo/ical": "^0.8",
     "spatie/flysystem-dropbox": "^1.0",
     "oneup/flysystem-bundle": "^3.0",
-    "richardhj/contao-model-events": "^1.0",
+    "richardhj/contao-model-events": "^2.0",
     "stevenmaguire/oauth2-dropbox": "^2.0",
     "terminal42/contao-conditionalselectmenu": "^3.0",
     "terminal42/contao-tablelookupwizard": "^3.2",
