@@ -17,9 +17,7 @@
   "require": {
     "php": "^7.0",
     "codefog/contao-haste": "~4.11",
-    "contao-community-alliance/events-contao-bindings": "^3.5",
-    "contao-community-alliance/events-cron": "^1.0",
-    "contao-community-alliance/meta-palettes": "^1.10",
+    "contao-community-alliance/meta-palettes": "^2.0",
     "eluceo/ical": "^0.8",
     "spatie/flysystem-dropbox": "^1.0",
     "oneup/flysystem-bundle": "^3.0",
