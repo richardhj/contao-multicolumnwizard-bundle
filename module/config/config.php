@@ -18,13 +18,13 @@ array_insert(
     [
         'ferienpass' => [
             'ferienpass_management'  => [
-                'callback' => 'Ferienpass\BackendModule\Management',
+                'callback' => 'Richardhj\ContaoFerienpassBundle\BackendModule\Management',
                 'tables'   => [],
                 'icon'     => 'assets/ferienpass/core/img/equalizer.png',
             ],
             'ferienpass_attendances' => [
                 'tables' => [
-                    Ferienpass\Model\Attendance::getTable(),
+                    Richardhj\ContaoFerienpassBundle\Model\Attendance::getTable(),
                     'mm_ferienpass',
                 ],
                 'icon'   => 'assets/ferienpass/core/img/equalizer.png',
@@ -37,12 +37,12 @@ array_insert(
 /**
  * Models
  */
-$GLOBALS['TL_MODELS']['tl_ferienpass_attendance'] = 'Ferienpass\Model\Attendance';
-$GLOBALS['TL_MODELS']['tl_ferienpass_applicationsystem'] = 'Ferienpass\Model\ApplicationSystem';
-$GLOBALS['TL_MODELS']['tl_ferienpass_attendancestatus'] = 'Ferienpass\Model\AttendanceStatus';
-$GLOBALS['TL_MODELS']['tl_ferienpass_attendance_reminder'] = 'Ferienpass\Model\AttendanceReminder';
-$GLOBALS['TL_MODELS']['tl_ferienpass_document'] = 'Ferienpass\Model\Document';
-$GLOBALS['TL_MODELS']['tl_ferienpass_dataprocessing'] = 'Ferienpass\Model\DataProcessing';
+$GLOBALS['TL_MODELS']['tl_ferienpass_attendance'] = 'Richardhj\ContaoFerienpassBundle\Model\Attendance';
+$GLOBALS['TL_MODELS']['tl_ferienpass_applicationsystem'] = 'Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem';
+$GLOBALS['TL_MODELS']['tl_ferienpass_attendancestatus'] = 'Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus';
+$GLOBALS['TL_MODELS']['tl_ferienpass_attendance_reminder'] = 'Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder';
+$GLOBALS['TL_MODELS']['tl_ferienpass_document'] = 'Richardhj\ContaoFerienpassBundle\Model\Document';
+$GLOBALS['TL_MODELS']['tl_ferienpass_dataprocessing'] = 'Richardhj\ContaoFerienpassBundle\Model\DataProcessing';
 
 
 
@@ -52,34 +52,34 @@ $GLOBALS['TL_MODELS']['tl_ferienpass_dataprocessing'] = 'Ferienpass\Model\DataPr
 $GLOBALS['FERIENPASS_MOD'] = [
     'tools'           => [
         'erase_member_data' => [
-            'callback' => 'Ferienpass\BackendModule\EraseMemberData',
+            'callback' => 'Richardhj\ContaoFerienpassBundle\BackendModule\EraseMemberData',
             'icon'     => 'trash-o',
             ],
         'send_member_attendances_overview' => [
-            'callback' => 'Ferienpass\BackendModule\SendMemberAttendancesOverview',
+            'callback' => 'Richardhj\ContaoFerienpassBundle\BackendModule\SendMemberAttendancesOverview',
             'icon'     => 'envelope-o',
         ],
     ],
     'data_processing' => [],
     'setup'           => [
         'data_processings'  => [
-            'tables' => [\Ferienpass\Model\DataProcessing::getTable()],
+            'tables' => [\Richardhj\ContaoFerienpassBundle\Model\DataProcessing::getTable()],
             'icon'   => 'folder-open',
         ],
         'documents'         => [
-            'tables' => [\Ferienpass\Model\Document::getTable()],
+            'tables' => [\Richardhj\ContaoFerienpassBundle\Model\Document::getTable()],
             'icon'   => 'file-text-o',
         ],
         'application_system' => [
-            'tables' => [\Ferienpass\Model\ApplicationSystem::getTable()],
+            'tables' => [\Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable()],
             'icon'   => 'th-list',
         ],
         'attendance_status' => [
-            'tables' => [\Ferienpass\Model\AttendanceStatus::getTable()],
+            'tables' => [\Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus::getTable()],
             'icon'   => 'th-list',
         ],
         'attendance_reminders' => [
-            'tables' => [\Ferienpass\Model\AttendanceReminder::getTable()],
+            'tables' => [\Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder::getTable()],
             'icon'   => 'clock-o',
         ],
         'ferienpass_config' => [
@@ -92,11 +92,11 @@ $GLOBALS['FERIENPASS_MOD'] = [
 if ($_GET['do'] == 'ferienpass_management') {
     foreach ($GLOBALS['FERIENPASS_MOD'] as $group => $modules) {
         if ('data_processing' === $group) {
-            $processings = \Ferienpass\Model\DataProcessing::findAll();
+            $processings = \Richardhj\ContaoFerienpassBundle\Model\DataProcessing::findAll();
 
             while (null !== $processings && $processings->next()) {
                 $GLOBALS['FERIENPASS_MOD'][$group]['data_processing_'.$processings->id] = [
-                    'callback' => 'Ferienpass\BackendModule\DataProcessing',
+                    'callback' => 'Richardhj\ContaoFerienpassBundle\BackendModule\DataProcessing',
                     'icon'     => 'file-archive-o',
                 ];
             }
@@ -135,20 +135,20 @@ if (TL_MODE == 'BE') {
 /**
  * Front end modules
  */
-$GLOBALS['FE_MOD']['application']['offer_editing'] = 'Ferienpass\Module\Editing';
-$GLOBALS['FE_MOD']['application']['items_editing_actions'] = 'Ferienpass\Module\EditingActions';
-$GLOBALS['FE_MOD']['application']['offer_user_application'] = 'Ferienpass\Module\UserApplication';
-$GLOBALS['FE_MOD']['application']['offer_applicationlisthost'] = 'Ferienpass\Module\ApplicationListHost';
-$GLOBALS['FE_MOD']['application']['offer_addattendeehost'] = 'Ferienpass\Module\AddAttendeeHost';
-$GLOBALS['FE_MOD']['application']['offers_user_attendances'] = 'Ferienpass\Module\UserAttendances';
-$GLOBALS['FE_MOD']['application']['ferienpass_messages'] = 'Ferienpass\Module\Messages';
-$GLOBALS['FE_MOD']['user']['host_logo'] = 'Ferienpass\Module\HostLogo';
+$GLOBALS['FE_MOD']['application']['offer_editing'] = 'Richardhj\ContaoFerienpassBundle\Module\Editing';
+$GLOBALS['FE_MOD']['application']['items_editing_actions'] = 'Richardhj\ContaoFerienpassBundle\Module\EditingActions';
+$GLOBALS['FE_MOD']['application']['offer_user_application'] = 'Richardhj\ContaoFerienpassBundle\Module\UserApplication';
+$GLOBALS['FE_MOD']['application']['offer_applicationlisthost'] = 'Richardhj\ContaoFerienpassBundle\Module\ApplicationListHost';
+$GLOBALS['FE_MOD']['application']['offer_addattendeehost'] = 'Richardhj\ContaoFerienpassBundle\Module\AddAttendeeHost';
+$GLOBALS['FE_MOD']['application']['offers_user_attendances'] = 'Richardhj\ContaoFerienpassBundle\Module\UserAttendances';
+$GLOBALS['FE_MOD']['application']['ferienpass_messages'] = 'Richardhj\ContaoFerienpassBundle\Module\Messages';
+$GLOBALS['FE_MOD']['user']['host_logo'] = 'Richardhj\ContaoFerienpassBundle\Module\HostLogo';
 
 
 /**
  * Content elements
  */
-$GLOBALS['TL_CTE']['ferienpass']['host_editing_list'] = 'Ferienpass\Module\HostEditingList';
+$GLOBALS['TL_CTE']['ferienpass']['host_editing_list'] = 'Richardhj\ContaoFerienpassBundle\Module\HostEditingList';
 
 
 /**
@@ -303,27 +303,27 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
 /**
  * Back end form fields
  */
-$GLOBALS['BE_FFL']['fp_age'] = 'Ferienpass\Widget\Age';
-$GLOBALS['BE_FFL']['offer_date'] = 'Ferienpass\Widget\OfferDate';
-$GLOBALS['BE_FFL']['request_access_token'] = 'Ferienpass\Widget\RequestAccessToken';
+$GLOBALS['BE_FFL']['fp_age'] = 'Richardhj\ContaoFerienpassBundle\Widget\Age';
+$GLOBALS['BE_FFL']['offer_date'] = 'Richardhj\ContaoFerienpassBundle\Widget\OfferDate';
+$GLOBALS['BE_FFL']['request_access_token'] = 'Richardhj\ContaoFerienpassBundle\Widget\RequestAccessToken';
 
 
 /**
  * Front end form fields
  */
-$GLOBALS['TL_FFL']['fp_age'] = 'Ferienpass\Form\Age';
-$GLOBALS['TL_FFL']['offer_date'] = 'Ferienpass\Form\OfferDate';
-$GLOBALS['TL_FFL']['select_disabled_options'] = 'Ferienpass\Form\SelectDisabledOptions';
-$GLOBALS['TL_FFL']['fileTree'] = 'Ferienpass\Form\UploadImage';
-$GLOBALS['TL_FFL']['multiColumnWizard'] = 'Ferienpass\Form\MultiColumnWizard';
-$GLOBALS['TL_FFL']['host_logo'] = 'Ferienpass\Form\HostLogo';
+$GLOBALS['TL_FFL']['fp_age'] = 'Richardhj\ContaoFerienpassBundle\Form\Age';
+$GLOBALS['TL_FFL']['offer_date'] = 'Richardhj\ContaoFerienpassBundle\Form\OfferDate';
+$GLOBALS['TL_FFL']['select_disabled_options'] = 'Richardhj\ContaoFerienpassBundle\Form\SelectDisabledOptions';
+$GLOBALS['TL_FFL']['fileTree'] = 'Richardhj\ContaoFerienpassBundle\Form\UploadImage';
+$GLOBALS['TL_FFL']['multiColumnWizard'] = 'Richardhj\ContaoFerienpassBundle\Form\MultiColumnWizard';
+$GLOBALS['TL_FFL']['host_logo'] = 'Richardhj\ContaoFerienpassBundle\Form\HostLogo';
 
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = ['Ferienpass\Helper\InsertTags', 'replaceInsertTags'];
-$GLOBALS['TL_HOOKS']['createNewUser'][] = ['Ferienpass\Helper\UserAccount', 'createNewUser'];
-$GLOBALS['TL_HOOKS']['closeAccount'][] = ['Ferienpass\Helper\UserAccount', 'closeAccount'];
-$GLOBALS['TL_HOOKS']['getAllEvents'][] = ['Ferienpass\Helper\Events', 'getMetaModelAsEvents'];
-$GLOBALS['TL_HOOKS']['executePostActions'][] = ['Ferienpass\Helper\Ajax', 'handleOfferAttendancesView'];
-$GLOBALS['TL_HOOKS']['getSystemMessages'][] = ['Ferienpass\Helper\Backend', 'addCurrentApplicationSystemToSystemMessages'];
+$GLOBALS['TL_HOOKS']['replaceInsertTags'][] = ['Richardhj\ContaoFerienpassBundle\Helper\InsertTags', 'replaceInsertTags'];
+$GLOBALS['TL_HOOKS']['createNewUser'][] = ['Richardhj\ContaoFerienpassBundle\Helper\UserAccount', 'createNewUser'];
+$GLOBALS['TL_HOOKS']['closeAccount'][] = ['Richardhj\ContaoFerienpassBundle\Helper\UserAccount', 'closeAccount'];
+$GLOBALS['TL_HOOKS']['getAllEvents'][] = ['Richardhj\ContaoFerienpassBundle\Helper\Events', 'getMetaModelAsEvents'];
+$GLOBALS['TL_HOOKS']['executePostActions'][] = ['Richardhj\ContaoFerienpassBundle\Helper\Ajax', 'handleOfferAttendancesView'];
+$GLOBALS['TL_HOOKS']['getSystemMessages'][] = ['Richardhj\ContaoFerienpassBundle\Helper\Backend', 'addCurrentApplicationSystemToSystemMessages'];

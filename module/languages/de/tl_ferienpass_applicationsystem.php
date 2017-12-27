@@ -9,7 +9,7 @@
  */
 
 
-$table = Ferienpass\Model\ApplicationSystem::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable();
 
 
 /**

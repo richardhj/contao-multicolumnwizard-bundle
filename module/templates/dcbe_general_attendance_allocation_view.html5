@@ -24,7 +24,7 @@
     <?php else: ?>
         <div id="table_<?= $this->tableName ?>" class="status-assignment">
 
-            <?php /** @var Ferienpass\Model\AttendanceStatus $status */
+            <?php /** @var Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus $status */
             foreach ($this->status as $status): ?>
                 <div data-status-id="<?= ContaoCommunityAlliance\DcGeneral\Data\ModelId::fromValues($status->getTable(), $status->id)->getSerialized() ?>" class="attendance-status -<?php echo $status->cssClass ?>">
                     <h2><?= Haste\Util\Format::dcaValue($status->getTable(), 'type', $status->type) ?></h2>

@@ -8,11 +8,11 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-use Ferienpass\MetaModels\Attribute\Age\AttributeTypeFactory as AgeAttributeTypeFactory;
-use Ferienpass\MetaModels\Attribute\OfferDate\AttributeTypeFactory as OfferDateAttributeTypeFactory;
-use Ferienpass\MetaModels\Filter\Setting\AgeFilterSettingTypeFactory;
-use Ferienpass\MetaModels\Filter\Setting\AttendanceAvailableFilterSettingTypeFactory;
-use Ferienpass\MetaModels\Filter\Setting\FromToOfferDateFilterSettingTypeFactory;
+use Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\Age\AttributeTypeFactory as AgeAttributeTypeFactory;
+use Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\AttributeTypeFactory as OfferDateAttributeTypeFactory;
+use Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\AgeFilterSettingTypeFactory;
+use Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\AttendanceAvailableFilterSettingTypeFactory;
+use Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\FromToOfferDateFilterSettingTypeFactory;
 use MetaModels\Attribute\Events\CreateAttributeFactoryEvent;
 use MetaModels\Filter\Setting\Events\CreateFilterSettingFactoryEvent;
 use MetaModels\MetaModelsEvents;

@@ -34,7 +34,7 @@ $GLOBALS['TL_DCA']['tl_calendar']['fields']['metamodel'] = array
 	'label'            => &$GLOBALS['TL_LANG']['tl_calendar']['metamodel'],
 	'exclude'          => true,
 	'inputType'        => 'select',
-	'options_callback' => array('\Ferienpass\Helper\Dca', 'getMetaModels'),
+	'options_callback' => array('\Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getMetaModels'),
 	'eval'             => array('tl_class' => 'w50'),
 	'sql'              => "varchar(64) NOT NULL default ''"
 );
@@ -53,7 +53,7 @@ $GLOBALS['TL_DCA']['tl_calendar']['fields']['metamodelFields'] = array
 				'label'            => &$GLOBALS['TL_LANG']['tl_theme']['ts_client_os'],
 				'exclude'          => true,
 				'inputType'        => 'select',
-				'options_callback' => array('Ferienpass\Helper\Events', 'getEventAttributesTranslated'),
+				'options_callback' => array('Richardhj\ContaoFerienpassBundle\Helper\Events', 'getEventAttributesTranslated'),
 				'eval'             => array('style' => 'width:250px', 'chosen' => true)
 			),
 			'metamodel_field' => array
@@ -61,7 +61,7 @@ $GLOBALS['TL_DCA']['tl_calendar']['fields']['metamodelFields'] = array
 				'label'            => &$GLOBALS['TL_LANG']['tl_theme']['ts_client_browser'],
 				'exclude'          => true,
 				'inputType'        => 'conditionalselect',
-				'options_callback' => array('Ferienpass\Helper\Dca', 'getMetaModelsAttributes'),
+				'options_callback' => array('Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getMetaModelsAttributes'),
 				'eval'             => array('conditionField' => 'metamodel', 'chosen' => true, 'style' => 'width:250px')
 			),
 		)

@@ -12,7 +12,7 @@ use NotificationCenter\Model\Notification;
 
 
 global $container;
-$table = Ferienpass\Model\AttendanceStatus::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus::getTable();
 
 
 /** @noinspection PhpUndefinedMethodInspection */
@@ -24,7 +24,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'notCreatable'    => true,
         'notDeletable'    => true,
         'onload_callback' => [
-            ['Ferienpass\Helper\Dca', 'addDefaultStatus'],
+            ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'addDefaultStatus'],
         ],
         'sql'             => [
             'keys' => [
@@ -147,7 +147,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'            => &$GLOBALS['TL_LANG'][$table]['notification_new'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => ['Ferienpass\Helper\Dca', 'getNotificationChoices'],
+            'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getNotificationChoices'],
             'eval'             => [
                 'includeBlankOption' => true,
                 'chosen'             => true,
@@ -160,7 +160,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'            => &$GLOBALS['TL_LANG'][$table]['notification_onChange'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => ['Ferienpass\Helper\Dca', 'getNotificationChoices'],
+            'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getNotificationChoices'],
             'eval'             => [
                 'includeBlankOption' => true,
                 'chosen'             => true,
@@ -186,7 +186,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'     => &$GLOBALS['TL_LANG'][$table]['messageType'],
             'exclude'   => true,
             'inputType' => 'select',
-            'options'   => Ferienpass\Helper\Message::getTypes(),
+            'options'   => Richardhj\ContaoFerienpassBundle\Helper\Message::getTypes(),
             'eval'      => [
                 'mandatory' => true,
                 'tl_class'  => 'w50',

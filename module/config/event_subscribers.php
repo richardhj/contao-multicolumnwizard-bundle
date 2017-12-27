@@ -8,10 +8,10 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-use Ferienpass\Helper\Dca;
-use Ferienpass\Module\Subscriber as ModuleSubscriber;
-use Ferienpass\Subscriber\Dca\Offer as DcaOffer;
-use Ferienpass\Subscriber\NotificationSubscriber;
+use Richardhj\ContaoFerienpassBundle\Helper\Dca;
+use Richardhj\ContaoFerienpassBundle\Module\Subscriber as ModuleSubscriber;
+use Richardhj\ContaoFerienpassBundle\Subscriber\Dca\Offer as DcaOffer;
+use Richardhj\ContaoFerienpassBundle\Subscriber\NotificationSubscriber;
 
 
 global $container;

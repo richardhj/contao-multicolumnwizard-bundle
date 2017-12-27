@@ -8,14 +8,14 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Offer;
-use Ferienpass\Model\Participant;
+use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
+use Richardhj\ContaoFerienpassBundle\Model\Offer;
+use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use MetaModels\IItem;
 use MetaModels\Items;
 
 
-$table = Ferienpass\Model\Attendance::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\Attendance::getTable();
 
 
 /**
@@ -116,7 +116,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'headerFields' => [
                 'id',
-//                Offer::getInstance()->getMetaModel()->getAttribute(Ferienpass\Model\Config::getInstance()->offer_attribute_name)->getColName(),
+//                Offer::getInstance()->getMetaModel()->getAttribute(Richardhj\ContaoFerienpassBundle\Model\Config::getInstance()->offer_attribute_name)->getColName(),
             ],
             'panelLayout'  => 'filter',
         ],

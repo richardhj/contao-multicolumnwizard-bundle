@@ -5,5 +5,5 @@ define('TL_MODE', 'FE');
 require '../../../../../../system/initialize.php';
 
 // Run the controller
-$controller = new Ferienpass\Model\DataProcessing\DropboxWebhook();
+$controller = new Richardhj\ContaoFerienpassBundle\Model\DataProcessing\DropboxWebhook();
 $controller->handle();

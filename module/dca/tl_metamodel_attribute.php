@@ -25,7 +25,7 @@ $GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['alias_trigger_sync
 //$GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['data_processing'] = array
 //(
 //	'inputType'  => 'select',
-//	'options_callback' => array('Ferienpass\Helper\Dca', 'getDataProcessingChoices'),
+//	'options_callback' => array('Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getDataProcessingChoices'),
 //	'eval' => array
 //	(
 //		'mandatory' => true

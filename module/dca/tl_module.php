@@ -48,7 +48,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['document'] = [
     'label'            => &$GLOBALS['TL_LANG']['tl_module']['document'],
     'exclude'          => true,
     'inputType'        => 'select',
-    'options_callback' => ['Ferienpass\Helper\Dca', 'getDocumentChoices'],
+    'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getDocumentChoices'],
     'eval'             => [
         'includeBlankOption' => true,
         'chosen'             => true,
@@ -61,7 +61,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['metamodel_child_list_view'] = [
     'label'            => &$GLOBALS['TL_LANG']['tl_content']['metamodel_child_list_view'],
     'exclude'          => true,
     'inputType'        => 'select',
-    'options_callback' => ['Ferienpass\Helper\Dca', 'getAllMetaModelRenderSettings'],
+    'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getAllMetaModelRenderSettings'],
     'default'          => '',
     'eval'             =>
         [

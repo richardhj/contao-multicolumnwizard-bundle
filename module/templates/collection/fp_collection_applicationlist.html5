@@ -1,14 +1,14 @@
 <?php
 
-use Ferienpass\Model\AttendanceStatus;
-use Ferienpass\Model\Participant;
+use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
+use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Util\Format;
 
 foreach ($this->items as $c) {
     $countParticipants += count($c);
 }
 $maxParticipants            =
-    \Ferienpass\Model\Offer::getInstance()->findById($this->collection->offer)->get('applicationlist_max');
+    \Richardhj\ContaoFerienpassBundle\Model\Offer::getInstance()->findById($this->collection->offer)->get('applicationlist_max');
 $countParticipantsConfirmed = min($countParticipants, $maxParticipants);
 
 $strParticipantParentColName = Participant::getInstance()->getOwnerAttribute()->getColName();

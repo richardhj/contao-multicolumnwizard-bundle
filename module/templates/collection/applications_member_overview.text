@@ -1,4 +1,4 @@
-<?php /** @var Ferienpass\Model\Attendance $attendance */
+<?php /** @var Richardhj\ContaoFerienpassBundle\Model\Attendance $attendance */
 foreach ($this->attendances as $attendance): ?><?=
     $attendance->getParticipant()->parseAttribute('name', 'text', $this->participantRenderSettings)['text'] ?> (<?=
     $attendance->getOffer()->parseAttribute('name', 'text', $this->offerRenderSettings)['text'] ?>, <?=

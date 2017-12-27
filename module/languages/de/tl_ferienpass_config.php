@@ -8,7 +8,7 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-$table = Ferienpass\Model\Config::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\Config::getTable();
 
 
 /**

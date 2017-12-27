@@ -5,7 +5,7 @@
         <th><?= 'Angebot' ?></th>
         <th><?= 'Datum' ?></th>
         <th class="col_last"><?= 'Anmeldestatus' ?></th>
-    </tr><?php /** @var Ferienpass\Model\Attendance $attendance */
+    </tr><?php /** @var Richardhj\ContaoFerienpassBundle\Model\Attendance $attendance */
     foreach ($this->attendances as $attendance): ?><?php
         $rowClass    = ($i++ % 2) ? 'odd' : 'even';
         $offer       = $attendance->getOffer();

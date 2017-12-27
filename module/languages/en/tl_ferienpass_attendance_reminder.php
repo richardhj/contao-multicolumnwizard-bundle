@@ -9,7 +9,7 @@
  */
 
 
-$table = Ferienpass\Model\AttendanceReminder::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder::getTable();
 
 
 /**

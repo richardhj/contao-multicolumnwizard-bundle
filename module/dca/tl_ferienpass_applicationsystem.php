@@ -8,11 +8,11 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-use Ferienpass\Model\ApplicationSystem;
+use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
 
 global $container;
-$table = Ferienpass\Model\ApplicationSystem::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable();
 
 
 /** @noinspection PhpUndefinedMethodInspection */
@@ -24,7 +24,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'notCreatable'    => true,
         'notDeletable'    => true,
         'onload_callback' => [
-            ['Ferienpass\Helper\Dca', 'addDefaultApplicationSystems'],
+            ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'addDefaultApplicationSystems'],
         ],
         'sql'             => [
             'keys' => [

@@ -2,7 +2,7 @@
 	<div style="font-size:12px; line-height: 14px;">
 		<table cellspacing="0" cellpadding="0" border="0">
 			<tr>
-				<td colspan="4" style="text-align:center; font-size:18px"><?php use Ferienpass\Helper\ToolboxOfferDate;
+				<td colspan="4" style="text-align:center; font-size:18px"><?php use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 
                     echo $this->page->rootTitle; ?></td>
 			</tr>
@@ -17,7 +17,7 @@
 			</tr>
 			<tr>
 				<td style="font-weight:bold;">Veranstaltung:</td>
-                <td colspan="3"><?php echo \Ferienpass\Model\Offer::getInstance()->findById(
+                <td colspan="3"><?php echo \Richardhj\ContaoFerienpassBundle\Model\Offer::getInstance()->findById(
                         $this->collection->offer
                     )->get('name'); ?></td>
 			</tr>

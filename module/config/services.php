@@ -8,8 +8,8 @@
  * @author  Richard Henkenjohann <richard@ferienpass.online>
  */
 
-use Ferienpass\ApplicationSystem\AbstractApplicationSystem;
-use Ferienpass\Model\ApplicationSystem as ApplicationSystemModel;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\AbstractApplicationSystem;
+use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem as ApplicationSystemModel;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\IMetaModelsServiceContainer;
 
@@ -17,13 +17,13 @@ use MetaModels\IMetaModelsServiceContainer;
 
 $container['ferienpass.applicationsystem.firstcome'] = $container->share(
     function () {
-        return new Ferienpass\ApplicationSystem\FirstCome();
+        return new Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome();
     }
 );
 
 $container['ferienpass.applicationsystem.lot'] = $container->share(
     function () {
-        return new Ferienpass\ApplicationSystem\Lot();
+        return new Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot();
     }
 );
 
@@ -33,7 +33,7 @@ $container['ferienpass.applicationsystem'] = $container->share(
         $database = $container['database.connection'];
 
         $time  = time();
-        $table = Ferienpass\Model\ApplicationSystem::getTable();
+        $table = Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable();
 
         try {
             $result = $database
@@ -56,10 +56,10 @@ $container['ferienpass.applicationsystem'] = $container->share(
             }
 
         } catch (\Exception $e) {
-            return new Ferienpass\ApplicationSystem\NoOp();
+            return new Richardhj\ContaoFerienpassBundle\ApplicationSystem\NoOp();
         }
 
-        return new Ferienpass\ApplicationSystem\NoOp();
+        return new Richardhj\ContaoFerienpassBundle\ApplicationSystem\NoOp();
     }
 );
 

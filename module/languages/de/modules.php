@@ -64,7 +64,7 @@ $GLOBALS['TL_LANG']['FPMD']['attendance_reminders'][1] = 'Die Anmelde-Erinnerung
 $GLOBALS['TL_LANG']['FPMD']['ferienpass_config'][0] = 'Konfiguration';
 $GLOBALS['TL_LANG']['FPMD']['ferienpass_config'][1] = 'Die grundlegende Konfiguration vornehmen';
 
-$objProcessings = \Ferienpass\Model\DataProcessing::findAll();
+$objProcessings = \Richardhj\ContaoFerienpassBundle\Model\DataProcessing::findAll();
 
 while (null !== $objProcessings && $objProcessings->next())
 {

@@ -11,7 +11,7 @@
 
 use MetaModels\IMetaModelsServiceContainer;
 
-$table = Ferienpass\Model\DataProcessing::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\DataProcessing::getTable();
 
 
 $GLOBALS['TL_DCA'][$table] = [
@@ -178,7 +178,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'metamodel_view'             => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_view'],
             'inputType'        => 'select',
-            'options_callback' => ['Ferienpass\Helper\Dca', 'getOffersMetaModelRenderSettings'],
+            'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getOffersMetaModelRenderSettings'],
             'eval'             => [
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
@@ -410,7 +410,7 @@ $GLOBALS['TL_DCA'][$table] = [
                     'metamodel_attribute' => [
                         'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_attribute'],
                         'inputType'        => 'conditionalselect',
-                        'options_callback' => ['Ferienpass\Helper\Dca', 'getMetaModelsAttributes'],
+                        'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getMetaModelsAttributes'],
                         'eval'             => [
                             'condition' => 'mm_ferienpass',
                             'chosen'    => true,

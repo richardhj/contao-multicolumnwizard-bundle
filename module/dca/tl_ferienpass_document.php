@@ -9,7 +9,7 @@
  */
 
 
-$table = Ferienpass\Model\Document::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\Document::getTable();
 
 
 $GLOBALS['TL_DCA'][$table] = [

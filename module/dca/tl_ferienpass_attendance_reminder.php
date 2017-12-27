@@ -9,9 +9,9 @@
  */
 
 
-use Ferienpass\Model\AttendanceStatus;
+use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
-$table = Ferienpass\Model\AttendanceReminder::getTable();
+$table = Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder::getTable();
 
 
 /** @noinspection PhpUndefinedMethodInspection */
