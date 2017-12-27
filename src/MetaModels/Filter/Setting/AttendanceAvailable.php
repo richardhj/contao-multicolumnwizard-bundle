@@ -13,11 +13,11 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting;
 
+use MetaModels\FilterCheckboxBundle\FilterSetting\Checkbox;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
-use MetaModels\Filter\Setting\Checkbox;
 
 
 /**
