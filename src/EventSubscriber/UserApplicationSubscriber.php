@@ -11,7 +11,7 @@
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-namespace Richardhj\ContaoFerienpassBundle\Subscriber;
+namespace Richardhj\ContaoFerienpassBundle\EventSubscriber;
 
 use Contao\Date;
 use Contao\Model\Event\PostSaveModelEvent;

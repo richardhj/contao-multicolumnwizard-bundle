@@ -11,7 +11,7 @@
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-namespace Richardhj\ContaoFerienpassBundle\Subscriber\Dca;
+namespace Richardhj\ContaoFerienpassBundle\EventSubscriber\Dca;
 
 
 use Contao\MemberModel;
