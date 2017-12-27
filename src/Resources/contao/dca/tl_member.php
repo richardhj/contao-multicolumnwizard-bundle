@@ -11,6 +11,8 @@
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
+use ContaoCommunityAlliance\MetaPalettes\MetaPalettes;
+
 
 /** @noinspection PhpUndefinedMethodInspection */
 $table = \MemberModel::getTable();
