@@ -32,7 +32,7 @@ class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingT
         $this
             ->setTypeName('attendance_available')
             ->setTypeIcon('system/modules/metamodelsfilter_checkbox/html/filter_checkbox.png')
-            ->setTypeClass('Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\AttendanceAvailable')
+            ->setTypeClass(AttendanceAvailable::class)
             ->allowAttributeTypes('numeric');
     }
 }

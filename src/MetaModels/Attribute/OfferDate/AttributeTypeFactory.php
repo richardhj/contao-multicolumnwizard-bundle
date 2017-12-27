@@ -13,25 +13,28 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate;
 
-use MetaModels\Attribute\AbstractAttributeTypeFactory;
+use Doctrine\DBAL\Connection;
+use MetaModels\Attribute\AbstractSimpleAttributeTypeFactory;
+use MetaModels\Helper\TableManipulator;
 
 
 /**
  * Class AttributeTypeFactory
+ *
  * @package MetaModels\Attribute\OfferDate
  */
-class AttributeTypeFactory extends AbstractAttributeTypeFactory
+class AttributeTypeFactory extends AbstractSimpleAttributeTypeFactory
 {
 
     /**
      * {@inheritDoc}
      */
-    public function __construct()
+    public function __construct(Connection $connection, TableManipulator $tableManipulator)
     {
-        parent::__construct();
+        parent::__construct($connection, $tableManipulator);
 
-        $this->typeName = 'offer_date';
-        $this->typeIcon = 'assets/ferienpass/core/img/fp_age.png';
-        $this->typeClass = 'Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\OfferDate';
+        $this->typeName  = 'offer_date';
+        $this->typeIcon  = 'assets/ferienpass/core/img/fp_age.png';
+        $this->typeClass = OfferDate::class;
     }
 }
