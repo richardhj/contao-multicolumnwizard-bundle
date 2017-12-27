@@ -1,7 +1,7 @@
 {
   "name": "richardhj/contao-ferienpass",
   "description": "FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension",
-  "type": "contao-module",
+  "type": "contao-bundle",
   "homepage": "https://ferienpass.online/",
   "authors": [
     {
@@ -37,11 +37,5 @@
   },
   "extra": {
     "contao-manager-plugin": "Richardhj\\ContaoFerienpassBundle\\ContaoManager\\Plugin",
-    "contao": {
-      "sources": {
-        "assets": "assets/ferienpass/core",
-        "module": "system/modules/ferienpass"
-      }
-    }
   }
 }
