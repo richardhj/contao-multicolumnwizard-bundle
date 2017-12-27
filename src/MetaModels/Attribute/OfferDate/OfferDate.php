@@ -15,7 +15,9 @@ namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate;
 
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Date\ParseDateEvent;
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\BaseComplex;
+use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
 
 
@@ -26,6 +28,33 @@ use MetaModels\Render\Template;
  */
 class OfferDate extends BaseComplex
 {
+
+    /**
+     * Database connection.
+     *
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * Instantiate an MetaModel attribute.
+     *
+     * Note that you should not use this directly but use the factory classes to instantiate attributes.
+     *
+     * @param IMetaModel      $objMetaModel The MetaModel instance this attribute belongs to.
+     *
+     * @param array           $arrData      The information array, for attribute information, refer to documentation of
+     *                                      table tl_metamodel_attribute and documentation of the certain attribute
+     *                                      classes for information what values are understood.
+     *
+     * @param Connection|null $connection   The database connection.
+     */
+    public function __construct(IMetaModel $objMetaModel, array $arrData = [], Connection $connection = null)
+    {
+        parent::__construct($objMetaModel, $arrData);
+
+        $this->connection = $connection;
+    }
 
     /**
      * Return the table we are operating on.
@@ -76,14 +105,14 @@ class OfferDate extends BaseComplex
                 ->execute($this->get('id'), $id);
 
             // Walk every row.
-            foreach ((array) $values[$id] as $period) {
+            foreach ((array)$values[$id] as $period) {
                 if (null === ($setValues = $this->getSetValues($period, $id))) {
                     continue;
                 }
 
                 // Walk every column and update / insert the value.
                 $database
-                    ->prepare('INSERT INTO ' . $this->getValueTable() . ' %s')
+                    ->prepare('INSERT INTO '.$this->getValueTable().' %s')
                     ->set($setValues)
                     ->execute();
             }
@@ -193,8 +222,8 @@ SQL
             'tstamp'  => time(),
             'att_id'  => $this->get('id'),
             'item_id' => $id,
-            'start'   => (int) $period['start'],
-            'end'     => (int) $period['end'],
+            'start'   => (int)$period['start'],
+            'end'     => (int)$period['end'],
         ];
     }
 
@@ -204,24 +233,25 @@ SQL
      */
     public function getDataFor($ids)
     {
-        $where  = $this->getWhere($ids);
-        $result = $this
-            ->getMetaModel()
-            ->getServiceContainer()
-            ->getDatabase()
-            ->prepare(
-                sprintf(
-                    'SELECT * FROM %1$s%2$s ORDER BY start',
-                    $this->getValueTable(),
-                    ($where ? ' WHERE ' . $where['procedure'] : '')
-                )
-            )
-            ->execute(($where ? $where['params'] : null));
+        $where   = $this->getWhere($ids);
+        $builder = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from($this->getValueTable())
+            ->orderBy('start');
 
-        $return = [];
+        if ($where) {
+            $builder->andWhere($where['procedure']);
 
-        while ($result->next()) {
-            $return[$result->item_id][] = $result->row();
+            foreach ($where['params'] as $name => $value) {
+                $builder->setParameter($name, $value);
+            }
+        }
+
+        $statement = $builder->execute();
+        $return    = [];
+
+        while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+            $return[$row['item_id']][] = $row;
         }
 
         return $return;
@@ -250,14 +280,14 @@ SQL
 
         if ($ids) {
             if (is_array($ids)) {
-                $whereIds = ' AND item_id IN (' . implode(',', $ids) . ')';
+                $whereIds = ' AND item_id IN ('.implode(',', $ids).')';
             } else {
-                $whereIds = ' AND item_id=' . $ids;
+                $whereIds = ' AND item_id='.$ids;
             }
         }
 
         $return = [
-            'procedure' => 'att_id=?' . $whereIds,
+            'procedure' => 'att_id=?'.$whereIds,
             'params'    => [$this->get('id')],
         ];
 
@@ -272,18 +302,18 @@ SQL
     {
         $where = $this->getWhere($ids);
 
-        $this
-            ->getMetaModel()
-            ->getServiceContainer()
-            ->getDatabase()
-            ->prepare(
-                sprintf(
-                    'DELETE FROM %1$s%2$s',
-                    $this->getValueTable(),
-                    ($where ? ' WHERE ' . $where['procedure'] : '')
-                )
-            )
-            ->execute(($where ? $where['params'] : null));
+        $builder = $this->connection->createQueryBuilder()
+            ->delete($this->getValueTable());
+
+        if ($where) {
+            $builder->andWhere($where['procedure']);
+
+            foreach ($where['params'] as $name => $value) {
+                $builder->setParameter($name, $value);
+            }
+        }
+
+        $builder->execute();
     }
 
 
@@ -325,7 +355,7 @@ SQL
 
         $parsedDates = [];
 
-        foreach ((array) $template->raw as $period) {
+        foreach ((array)$template->raw as $period) {
             $parsedDate = [];
 
             if ((new \Date($period['start']))->dayBegin !== (new \Date($period['end']))->dayBegin) {

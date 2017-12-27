@@ -13,39 +13,63 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\Age;
 
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\BaseComplex;
+use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
 
 
 /**
  * Class Age
+ *
  * @package MetaModels\Attribute\Age
  */
 class Age extends BaseComplex
 {
 
     /**
+     * Database connection.
+     *
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * Instantiate an MetaModel attribute.
+     *
+     * Note that you should not use this directly but use the factory classes to instantiate attributes.
+     *
+     * @param IMetaModel      $objMetaModel The MetaModel instance this attribute belongs to.
+     *
+     * @param array           $arrData      The information array, for attribute information, refer to documentation of
+     *                                      table tl_metamodel_attribute and documentation of the certain attribute
+     *                                      classes for information what values are understood.
+     *
+     * @param Connection|null $connection   The database connection.
+     */
+    public function __construct(IMetaModel $objMetaModel, array $arrData = [], Connection $connection = null)
+    {
+        parent::__construct($objMetaModel, $arrData);
+
+        $this->connection = $connection;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function searchFor($pattern)
     {
-        $result = $this
-            ->getMetaModel()
-            ->getServiceContainer()
-            ->getDatabase()
-            ->prepare(
-                sprintf(
-                    'SELECT item_id FROM %1$s WHERE (lower=0 OR lower<=?) AND (upper=0 OR upper>=?) AND att_id=?',
-                    $this->getValueTable()
-                )
-            )
-            ->execute(
-                $pattern,
-                $pattern,
-                $this->get('id')
-            );
+        $query = sprintf(
+            'SELECT item_id FROM %1$s WHERE (lower=0 OR lower <= :age) AND (upper=0 OR upper >= :age) AND att_id = :id',
+            $this->getValueTable()
+        );
 
-        return $result->fetchEach('item_id');
+        $statement = $this->connection->prepare($query);
+        $statement->bindValue('age', $pattern);
+        $statement->bindValue('id', $this->get('id'));
+        $statement->execute();
+
+        return $statement->fetchAll(\PDO::FETCH_COLUMN, 'item_id');
     }
 
 
@@ -54,27 +78,27 @@ class Age extends BaseComplex
      */
     public function getDataFor($ids)
     {
-        $where = $this->getWhere($ids);
-        $result = $this
-            ->getMetaModel()
-            ->getServiceContainer()
-            ->getDatabase()
-            ->prepare(
-                sprintf(
-                    'SELECT * FROM %1$s%2$s',
-                    $this->getValueTable(),
-                    ($where ? ' WHERE '.$where['procedure'] : '')
-                )
-            )
-            ->execute(($where ? $where['params'] : null));
+        $where   = $this->getWhere($ids);
+        $builder = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from($this->getValueTable());
 
-        $return = [];
+        if ($where) {
+            $builder->andWhere($where['procedure']);
 
-        while ($result->next()) {
-            $lower = $result->lower ?: '';
-            $upper = $result->upper ?: '';
+            foreach ($where['params'] as $name => $value) {
+                $builder->setParameter($name, $value);
+            }
+        }
 
-            $return[$result->item_id] = ($lower === '' && $upper === '') ? 0 : sprintf('%s,%s', $lower, $upper);
+        $statement = $builder->execute();
+        $return    = [];
+
+        while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+            $lower = $row['lower'] ?: '';
+            $upper = $row['upper'] ?: '';
+
+            $return[$row['item_id']] = ($lower === '' && $upper === '') ? 0 : sprintf('%s,%s', $lower, $upper);
         }
 
         return $return;
@@ -92,9 +116,10 @@ class Age extends BaseComplex
 
         // Get the ids
         $ids = array_keys($values);
+
         $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
 
-        $query = 'INSERT INTO '.$this->getValueTable().' %s';
+        $query       = 'INSERT INTO '.$this->getValueTable().' %s';
         $queryUpdate = 'UPDATE %s';
 
         // Set data
@@ -147,58 +172,12 @@ class Age extends BaseComplex
      * {@inheritdoc}
      *
      * Fetch filter options from foreign table.
+     *
      * @todo
      */
     public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
     {
         return [];
-        if ($idList) {
-            $objRow = $this
-                ->getMetaModel()
-                ->getServiceContainer()
-                ->getDatabase()
-                ->prepare(
-                    sprintf(
-                        'SELECT value, COUNT(value) as mm_count
-                        FROM %1$s
-                        WHERE item_id IN (%2$s) AND att_id = ?
-                        GROUP BY value
-                        ORDER BY FIELD(id,%2$s)',
-                        $this->getValueTable(),
-                        $this->parameterMask($idList)
-                    )
-                )
-                ->execute(array_merge($idList, [$this->get('id')], $idList));
-        } else {
-            $objRow = $this
-                ->getMetaModel()
-                ->getServiceContainer()
-                ->getDatabase()
-                ->prepare(
-                    sprintf(
-                        'SELECT value, COUNT(value) as mm_count
-                        FROM %s
-                        WHERE att_id = ?
-                        GROUP BY value',
-                        $this->getValueTable()
-                    )
-                )
-                ->execute($this->get('id'));
-        }
-
-        $arrResult = [];
-
-        while ($objRow->next()) {
-            $strValue = $objRow->value;
-
-            if (is_array($arrCount)) {
-                $arrCount[$strValue] = $objRow->mm_count;
-            }
-
-            $arrResult[$strValue] = $strValue;
-        }
-
-        return $arrResult;
     }
 
 
@@ -209,18 +188,18 @@ class Age extends BaseComplex
     {
         $where = $this->getWhere($ids);
 
-        $this
-            ->getMetaModel()
-            ->getServiceContainer()
-            ->getDatabase()
-            ->prepare(
-                sprintf(
-                    'DELETE FROM %1$s%2$s',
-                    $this->getValueTable(),
-                    ($where ? ' WHERE '.$where['procedure'] : '')
-                )
-            )
-            ->execute(($where ? $where['params'] : null));
+        $builder = $this->connection->createQueryBuilder()
+            ->delete($this->getValueTable());
+
+        if ($where) {
+            $builder->andWhere($where['procedure']);
+
+            foreach ($where['params'] as $name => $value) {
+                $builder->setParameter($name, $value);
+            }
+        }
+
+        $builder->execute();
     }
 
 
@@ -257,8 +236,8 @@ class Age extends BaseComplex
      */
     public function getFieldDefinition($overrides = [])
     {
-        $fieldDefinition = parent::getFieldDefinition($overrides);
-        $fieldDefinition['inputType'] = 'fp_age';
+        $fieldDefinition                         = parent::getFieldDefinition($overrides);
+        $fieldDefinition['inputType']            = 'fp_age';
         $fieldDefinition['eval']['widget_lines'] = [
             [
                 'input_format'  => 'alle Ferienpass-Kinder',
@@ -322,16 +301,16 @@ class Age extends BaseComplex
     {
         parent::prepareTemplate($template, $rowData, $settings);
 
-        $colname = $this->getColName();
+        $colname  = $this->getColName();
         $varValue = $rowData[$colname];
 
         $arrFieldDefinition = $this->getFieldDefinition();
-        $arrWidgetLines = $arrFieldDefinition['eval']['widget_lines'];
-        $checkedFile = $this->getCheckedLine($varValue, $arrWidgetLines);
+        $arrWidgetLines     = $arrFieldDefinition['eval']['widget_lines'];
+        $checkedFile        = $this->getCheckedLine($varValue, $arrWidgetLines);
 
         if (false !== $checkedFile) {
             $arrLineInputValues = array_values(array_filter(trimsplit(',', $varValue)));
-            $template->parsed = vsprintf($arrWidgetLines[$checkedFile]['render_format'], $arrLineInputValues);
+            $template->parsed   = vsprintf($arrWidgetLines[$checkedFile]['render_format'], $arrLineInputValues);
         }
     }
 

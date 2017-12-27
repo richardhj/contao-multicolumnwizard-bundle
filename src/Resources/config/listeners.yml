@@ -3,14 +3,12 @@ services:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\Age\AttributeTypeFactory
         arguments:
             - '@database_connection'
-            - '@metamodels.table_manipulator'
         tags:
             - { name: metamodels.attribute_factory }
     richardhj.ferienpass.metamodels.attribute.offer_date.factory:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\AttributeTypeFactory
         arguments:
             - '@database_connection'
-            - '@metamodels.table_manipulator'
         tags:
             - { name: metamodels.attribute_factory }
     richardhj.ferienpass.metamodels.filter.age.factory:
