@@ -13,10 +13,12 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting;
 
-use MetaModels\Filter\Setting\FromToDateFilterSettingTypeFactory;
+use MetaModels\FilterFromToBundle\FilterSetting\FromToDateFilterSettingTypeFactory;
+
 
 /**
  * Class FromToOfferDateFilterSettingTypeFactory
+ *
  * @package MetaModels\Filter\Setting
  */
 class FromToOfferDateFilterSettingTypeFactory extends FromToDateFilterSettingTypeFactory

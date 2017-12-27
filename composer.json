@@ -26,7 +26,8 @@
     "stevenmaguire/oauth2-dropbox": "^2.0",
     "terminal42/contao-conditionalselectmenu": "^3.0",
     "terminal42/contao-tablelookupwizard": "^3.2",
-    "terminal42/notification_center": "^1.3"
+    "terminal42/notification_center": "^1.3",
+    "metamodels/filter_fromto": "^2.1@dev"
   },
   "autoload": {
     "psr-4": {
