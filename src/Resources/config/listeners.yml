@@ -23,3 +23,29 @@ services:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\FromToOfferDateFilterSettingTypeFactory
         tags:
             - { name: metamodels.filter_factory }
+    richardhj.ferienpass.metamodels.filter.age.filter_setting_renderer_listener:
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\EventListener\AgeFilterSettingTypeRendererListener
+        arguments:
+            - "@metamodels.filter_setting_factory"
+            - "@event_dispatcher"
+            - "@metamodels.assets.icon_builder"
+            - "@cca.dc-general.scope-matcher"
+        tags:
+            - {
+                name: kernel.event_listener,
+                event: 'dc-general.view.contao2backend.model-to-label',
+                method: modelToLabel
+              }
+    richardhj.ferienpass.metamodels.filter.attendance_available.filter_setting_renderer_listener:
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\EventListener\AttendanceAvailableFilterSettingTypeRendererListener
+        arguments:
+            - "@metamodels.filter_setting_factory"
+            - "@event_dispatcher"
+            - "@metamodels.assets.icon_builder"
+            - "@cca.dc-general.scope-matcher"
+        tags:
+            - {
+                name: kernel.event_listener,
+                event: 'dc-general.view.contao2backend.model-to-label',
+                method: modelToLabel
+              }
