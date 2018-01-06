@@ -15,6 +15,7 @@ namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate;
 
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\AbstractAttributeTypeFactory;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Class AttributeTypeFactory
@@ -32,13 +33,19 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
     private $connection;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
      * {@inheritDoc}
      */
-    public function __construct(Connection $connection)
+    public function __construct(Connection $connection, EventDispatcherInterface $dispatcher)
     {
         parent::__construct();
 
         $this->connection = $connection;
+        $this->dispatcher = $dispatcher;
         $this->typeName   = 'offer_date';
         $this->typeIcon   = 'bundles/metamodelsattributetimestamp/timestamp.png';
         $this->typeClass  = OfferDate::class;
@@ -50,6 +57,6 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
      */
     public function createInstance($information, $metaModel)
     {
-        return new $this->typeClass($metaModel, $information, $this->connection);
+        return new $this->typeClass($metaModel, $information, $this->connection, $this->dispatcher);
     }
 }

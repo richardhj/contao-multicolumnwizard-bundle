@@ -3,11 +3,11 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
  * @package   richardhj/richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
+ * @copyright 2015-2018 Richard Henkenjohann
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
@@ -19,6 +19,7 @@ use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\BaseComplex;
 use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
 /**
@@ -37,23 +38,36 @@ class OfferDate extends BaseComplex
     private $connection;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
      * Instantiate an MetaModel attribute.
      *
      * Note that you should not use this directly but use the factory classes to instantiate attributes.
      *
-     * @param IMetaModel      $objMetaModel The MetaModel instance this attribute belongs to.
+     * @param IMetaModel               $objMetaModel The MetaModel instance this attribute belongs to.
      *
-     * @param array           $arrData      The information array, for attribute information, refer to documentation of
-     *                                      table tl_metamodel_attribute and documentation of the certain attribute
-     *                                      classes for information what values are understood.
+     * @param array                    $arrData      The information array, for attribute information, refer to
+     *                                               documentation of table tl_metamodel_attribute and documentation of
+     *                                               the certain attribute classes for information what values are
+     *                                               understood.
      *
-     * @param Connection|null $connection   The database connection.
+     * @param Connection               $connection   The database connection.
+     *
+     * @param EventDispatcherInterface $dispatcher   The event dispatcher.
      */
-    public function __construct(IMetaModel $objMetaModel, array $arrData = [], Connection $connection = null)
-    {
+    public function __construct(
+        IMetaModel $objMetaModel,
+        array $arrData = [],
+        Connection $connection = null,
+        EventDispatcherInterface $dispatcher = null
+    ) {
         parent::__construct($objMetaModel, $arrData);
 
         $this->connection = $connection;
+        $this->dispatcher = $dispatcher;
     }
 
     /**
@@ -93,16 +107,18 @@ class OfferDate extends BaseComplex
         }
 
         // Get the ids.
-        $ids      = array_keys($values);
-        $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
+        $ids = array_keys($values);
 
         // Insert or update the cells.
         foreach ($ids as $id) {
-
             // Delete all entries as we override them
-            $database
-                ->prepare(sprintf('DELETE FROM %1$s WHERE att_id=? AND item_id=?', $this->getValueTable()))
-                ->execute($this->get('id'), $id);
+            $this->connection->createQueryBuilder()
+                ->delete($this->getValueTable())
+                ->where('att_id=:attr')
+                ->andWhere('item_id=:item')
+                ->setParameter('attr', $this->get('id'))
+                ->setParameter('item', $id)
+                ->execute();
 
             // Walk every row.
             foreach ((array)$values[$id] as $period) {
@@ -111,9 +127,9 @@ class OfferDate extends BaseComplex
                 }
 
                 // Walk every column and update / insert the value.
-                $database
-                    ->prepare('INSERT INTO '.$this->getValueTable().' %s')
-                    ->set($setValues)
+                $this->connection->createQueryBuilder()
+                    ->insert($this->getValueTable())
+                    ->values($setValues)
                     ->execute();
             }
         }
@@ -128,6 +144,8 @@ class OfferDate extends BaseComplex
      * @param string   $direction The direction for sorting. either 'ASC' or 'DESC', as in plain SQL.
      *
      * @return string[] The sorted array.
+     *
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function sortIds($idList, $direction)
     {
@@ -145,10 +163,8 @@ class OfferDate extends BaseComplex
         }
 
         // The IFNULL statement will use the next variant's date for sorting when the varbase's date is not present
-        $idList = $this->getMetaModel()->getServiceContainer()->getDatabase()
-            ->prepare(
-                sprintf(
-                    <<<'SQL'
+        $query = sprintf(
+            <<<'SQL'
 SELECT
   item.id AS item_id,
   IFNULL(
@@ -161,16 +177,19 @@ WHERE item.id IN (%3$s)
 GROUP BY item.id
 ORDER BY sortdate %5$s
 SQL
-                    ,
-                    $this->getMetaModel()->getTableName(),
-                    $this->getValueTable(),
-                    $this->parameterMask($idList),
-                    $function,
-                    $direction
-                )
-            )
-            ->execute($idList)
-            ->fetchEach('item_id');
+            ,
+            $this->getMetaModel()->getTableName(),
+            $this->getValueTable(),
+            $this->parameterMask($idList),
+            $function,
+            $direction
+        );
+
+        $statement = $this->connection->prepare($query);
+        $statement->execute();
+
+        $idList = $statement->fetchAll(\PDO::FETCH_COLUMN, 'item_id');
+
 
         return $idList;
     }
@@ -400,11 +419,8 @@ SQL
      */
     protected function parseDate($date, string $format)
     {
-        $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
-
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $event = new ParseDateEvent($date, $format);
-        $dispatcher->dispatch(ContaoEvents::DATE_PARSE, $event);
+        $this->dispatcher->dispatch(ContaoEvents::DATE_PARSE, $event);
 
         return $event->getResult();
     }
@@ -484,17 +500,15 @@ SQL
                 throw new \InvalidArgumentException(sprintf('Invalid operation "%s" given', $operation));
         }
 
-        $query = sprintf(
-            'SELECT item_id FROM %s WHERE att_id=%s GROUP BY item_id HAVING %s %s %d',
-            $this->getValueTable(),
-            $this->get('id'),
-            $function,
-            $operation,
-            intval($value)
-        );
+        $statement = $this->connection->createQueryBuilder()
+            ->select('item_id')
+            ->from($this->getValueTable())
+            ->where('att_id=:attr')
+            ->groupBy('item_id')
+            ->having($function.' '.$operation.' '.intval($value))
+            ->setParameter('attr', $this->get('id'))
+            ->execute();
 
-        $result = $this->getMetaModel()->getServiceContainer()->getDatabase()->execute($query);
-
-        return $result->fetchEach('item_id');
+        return $statement->fetch(\PDO::FETCH_COLUMN, 'item_id');
     }
 }

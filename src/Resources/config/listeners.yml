@@ -9,6 +9,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\AttributeTypeFactory
         arguments:
             - '@database_connection'
+            - '@event_dispatcher'
         tags:
             - { name: metamodels.attribute_factory }
     richardhj.ferienpass.metamodels.filter.age.factory:
