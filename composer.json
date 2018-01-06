@@ -1,5 +1,6 @@
 {
   "name": "richardhj/contao-ferienpass",
+  "license": "proprietary",
   "description": "FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension",
   "type": "contao-bundle",
   "homepage": "https://ferienpass.online/",
