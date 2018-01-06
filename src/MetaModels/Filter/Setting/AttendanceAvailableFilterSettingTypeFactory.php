@@ -3,11 +3,11 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
  * @package   richardhj/richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
+ * @copyright 2015-2018 Richard Henkenjohann
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
@@ -31,7 +31,7 @@ class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingT
 
         $this
             ->setTypeName('attendance_available')
-            ->setTypeIcon('system/modules/metamodelsfilter_checkbox/html/filter_checkbox.png')
+            ->setTypeIcon('bundles/metamodelsfiltercheckbox/filter_checkbox.png')
             ->setTypeClass(AttendanceAvailable::class)
             ->allowAttributeTypes('numeric');
     }

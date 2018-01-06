@@ -3,11 +3,11 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
  * @package   richardhj/richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
+ * @copyright 2015-2018 Richard Henkenjohann
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
@@ -40,7 +40,7 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
 
         $this->connection = $connection;
         $this->typeName   = 'age';
-        $this->typeIcon   = 'assets/ferienpass/core/img/fp_age.png';
+        $this->typeIcon   = 'bundles/metamodelsattributetext/text.png';
         $this->typeClass  = Age::class;
     }
 

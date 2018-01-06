@@ -3,11 +3,11 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
  * @package   richardhj/richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
+ * @copyright 2015-2018 Richard Henkenjohann
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
@@ -31,7 +31,7 @@ class AgeFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 
         $this
             ->setTypeName('age')
-            ->setTypeIcon('assets/ferienpass/core/img/filter_fp_age.png')
+            ->setTypeIcon('bundles/richardhjcontaoferienpass/img/filter_fp_age.png')
             ->setTypeClass(Age::class)
             ->allowAttributeTypes('age');
     }
