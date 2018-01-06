@@ -5,13 +5,13 @@
  *
  * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-namespace Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting;
+namespace Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting;
 
 use MetaModels\Filter\Setting\AbstractFilterSettingTypeFactory;
 

@@ -13,15 +13,15 @@ services:
         tags:
             - { name: metamodels.attribute_factory }
     richardhj.ferienpass.metamodels.filter.age.factory:
-        class: Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\AgeFilterSettingTypeFactory
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\AgeFilterSettingTypeFactory
         tags:
             - { name: metamodels.filter_factory }
     richardhj.ferienpass.metamodels.filter.attendance_available.factory:
-        class: Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\AttendanceAvailableFilterSettingTypeFactory
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\AttendanceAvailableFilterSettingTypeFactory
         tags:
             - { name: metamodels.filter_factory }
     richardhj.ferienpass.metamodels.filter.from_to_offer_date.factory:
-        class: Richardhj\ContaoFerienpassBundle\MetaModels\Filter\Setting\FromToOfferDateFilterSettingTypeFactory
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\FromToOfferDateFilterSettingTypeFactory
         tags:
             - { name: metamodels.filter_factory }
     richardhj.ferienpass.metamodels.filter.age.filter_setting_renderer_listener:
