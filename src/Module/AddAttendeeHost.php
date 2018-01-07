@@ -3,16 +3,17 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
+use Contao\Input;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\MetaModels\FrontendEditingItem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
@@ -53,7 +54,7 @@ class AddAttendeeHost extends Item
         $form = new Form(
             'tl_add_attendee_host', 'POST', function ($haste) {
             /** @noinspection PhpUndefinedMethodInspection */
-            return $haste->getFormId() === \Input::post('FORM_SUBMIT');
+            return $haste->getFormId() === Input::post('FORM_SUBMIT');
         }
         );
 
