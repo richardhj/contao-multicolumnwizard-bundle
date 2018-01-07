@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 
@@ -327,6 +327,5 @@ $GLOBALS['TL_FFL']['host_logo'] = 'Richardhj\ContaoFerienpassBundle\Form\HostLog
 $GLOBALS['TL_HOOKS']['replaceInsertTags'][] = ['Richardhj\ContaoFerienpassBundle\Helper\InsertTags', 'replaceInsertTags'];
 $GLOBALS['TL_HOOKS']['createNewUser'][] = ['Richardhj\ContaoFerienpassBundle\Helper\UserAccount', 'createNewUser'];
 $GLOBALS['TL_HOOKS']['closeAccount'][] = ['Richardhj\ContaoFerienpassBundle\Helper\UserAccount', 'closeAccount'];
-$GLOBALS['TL_HOOKS']['getAllEvents'][] = ['Richardhj\ContaoFerienpassBundle\Helper\Events', 'getMetaModelAsEvents'];
 $GLOBALS['TL_HOOKS']['executePostActions'][] = ['Richardhj\ContaoFerienpassBundle\Helper\Ajax', 'handleOfferAttendancesView'];
 $GLOBALS['TL_HOOKS']['getSystemMessages'][] = ['Richardhj\ContaoFerienpassBundle\Helper\Backend', 'addCurrentApplicationSystemToSystemMessages'];
