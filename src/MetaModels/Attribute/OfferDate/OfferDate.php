@@ -5,10 +5,10 @@
  *
  * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate;
@@ -144,8 +144,6 @@ class OfferDate extends BaseComplex
      * @param string   $direction The direction for sorting. either 'ASC' or 'DESC', as in plain SQL.
      *
      * @return string[] The sorted array.
-     *
-     * @throws \Doctrine\DBAL\DBALException
      */
     public function sortIds($idList, $direction)
     {
@@ -162,36 +160,21 @@ class OfferDate extends BaseComplex
                 throw new \InvalidArgumentException(sprintf('Invalid direction "%s" given', $direction));
         }
 
-        // The IFNULL statement will use the next variant's date for sorting when the varbase's date is not present
-        $query = sprintf(
-            <<<'SQL'
-SELECT
-  item.id AS item_id,
-  IFNULL(
-    dateperiod.start,
-    (SELECT %4$s FROM %2$s WHERE item_id IN (SELECT id FROM %1$s WHERE vargroup=item.id))
-  ) AS sortdate
-FROM %1$s item
-LEFT JOIN %2$s dateperiod ON dateperiod.item_id=item.id
-WHERE item.id IN (%3$s)
-GROUP BY item.id
-ORDER BY sortdate %5$s
-SQL
-            ,
-            $this->getMetaModel()->getTableName(),
-            $this->getValueTable(),
-            $this->parameterMask($idList),
-            $function,
-            $direction
-        );
+        $statement = $this->connection->createQueryBuilder()
+            ->select(
+                'item.id AS item_id',
+                // The COALESCE statement will use the next variant's date for sorting when the varbase's date is not present
+                "COALESCE(dateperiod.start, (SELECT $function FROM {$this->getValueTable()} WHERE item_id IN (SELECT id FROM {$this->getMetaModel()->getTableName()} WHERE vargroup=item.id))) AS sortdate"
+            )
+            ->from($this->getMetaModel()->getTableName(), 'item')
+            ->leftJoin('item', $this->getValueTable(), 'dateperiod', 'dateperiod.item_id=item.id')
+            ->where('item.id IN (:items)')
+            ->groupBy('item.id')
+            ->orderBy('sortdate', $direction)
+            ->setParameter('items', $idList, Connection::PARAM_INT_ARRAY)
+            ->execute();
 
-        $statement = $this->connection->prepare($query);
-        $statement->execute();
-
-        $idList = $statement->fetchAll(\PDO::FETCH_COLUMN, 'item_id');
-
-
-        return $idList;
+        return $idList = $statement->fetchAll(\PDO::FETCH_COLUMN, 'item_id');
     }
 
 
