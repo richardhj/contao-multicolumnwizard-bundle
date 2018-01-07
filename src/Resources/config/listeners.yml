@@ -86,3 +86,10 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\TriggerCronRemindersListener
         tags:
             - { name: kernel.event_listener, event: 'cron.hourly' }
+
+    richardhj.ferienpass.hook.calendar.ferienpass_items:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\AddCalendarEventListener
+        arguments:
+            - "@metamodels.factory"
+        tags:
+            - { name: contao.hook, hook: getAllEvents }

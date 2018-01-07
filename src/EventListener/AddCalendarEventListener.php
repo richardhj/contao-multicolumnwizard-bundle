@@ -3,26 +3,38 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-namespace Richardhj\ContaoFerienpassBundle\Helper;
+namespace Richardhj\ContaoFerienpassBundle\EventListener;
 
+use Contao\Calendar as ContaoCalendar;
+use Contao\CalendarModel;
+use Contao\DcaExtractor;
+use Contao\Date;
 use Haste\Util\Format;
-use MetaModels\IMetaModelsServiceContainer;
+use MetaModels\Factory;
+use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 
 
 /**
  * Class Events
+ *
  * @package Richardhj\ContaoFerienpassBundle\Helper
  */
-class Events extends \Controller
+class AddCalendarEventListener
 {
+
+    /**
+     * @var Factory
+     */
+    private $metaModelsFactory;
+
 
     /**
      * All attributes possible for one event
@@ -34,16 +46,14 @@ class Events extends \Controller
 
     /**
      * Define event attributes
+     *
+     * @param Factory $factory
      */
-    public function __construct()
+    public function __construct(Factory $factory)
     {
-        static::$eventAttributes = array_keys
-        (
-            \DcaExtractor::getInstance('tl_calendar_events')
-                ->getFields()
-        );
+        static::$eventAttributes = array_keys(DcaExtractor::getInstance('tl_calendar_events')->getFields());
 
-        parent::__construct();
+        $this->metaModelsFactory = $factory;
     }
 
 
@@ -57,8 +67,7 @@ class Events extends \Controller
         return array_combine
         (
             static::getEventAttributes(),
-            array_map
-            (
+            array_map(
                 function ($field) {
                     return Format::dcaLabel('tl_calendar_events', $field) ?: $field;
                 }
@@ -92,25 +101,22 @@ class Events extends \Controller
      * @internal param int $calendarRangeEnd
      * @internal param \Events $module
      */
-    public function getMetaModelAsEvents($events, $calendars)
+    public function onGetAllEvents($events, $calendars)
     {
         /** @type \Model $objPage */
-        global $objPage, $container;
-
-        /** @var IMetaModelsServiceContainer $serviceContainer */
-        $serviceContainer = $container['metamodels-service-container'];
+        global $objPage;
 
         // Walk each calendar selected in module
         foreach ($calendars as $calendarId) {
             /** @type \Model $calendar */
-            $calendar = \CalendarModel::findById($calendarId);
+            $calendar = CalendarModel::findById($calendarId);
 
             if (!$calendar->addMetamodel) {
                 continue;
             }
 
             // Get MetaModel object
-            $metaModel = $serviceContainer->getFactory()->getMetaModel($calendar->metamodel);
+            $metaModel = $this->metaModelsFactory->getMetaModel($calendar->metamodel);
 
             // Skip if MetaModel not found
             if (null === $metaModel) {
@@ -121,10 +127,10 @@ class Events extends \Controller
 
             // Walk each item in MetaModel
             while ($items->next()) {
-                $event = [];
+                $event   = [];
                 $addTime = false;
-                $start = 0;
-                $end = 0;
+                $start   = 0;
+                $end     = 0;
 
                 // Walk each associated attribute
                 foreach (deserialize($calendar->metamodelFields, true) as $attribute) {
@@ -133,8 +139,8 @@ class Events extends \Controller
                     switch ($attribute['calendar_field']) {
                         case 'startDate':
                             $event[$attribute['calendar_field']] = ToolboxOfferDate::offerStart($items->getItem());
-                            $start = $event[$attribute['calendar_field']];
-                            $addTime = in_array(
+                            $start                               = $event[$attribute['calendar_field']];
+                            $addTime                             = in_array(
                                 $items->getItem()->getAttribute($attribute['metamodel_field'])->get('timetype'),
                                 ['datim', 'time']
                             );
@@ -142,21 +148,21 @@ class Events extends \Controller
 
                         case 'endDate':
                             $event[$attribute['calendar_field']] = ToolboxOfferDate::offerEnd($items->getItem());
-                            $end = $event[$attribute['calendar_field']];
+                            $end                                 = $event[$attribute['calendar_field']];
                             break;
                     }
                 }
 
-                $key = date('Ymd', $start);
-                $date = \Date::parse($objPage->dateFormat, $start);
-                $day = $GLOBALS['TL_LANG']['DAYS'][date('w', $start)];
+                $key   = date('Ymd', $start);
+                $date  = Date::parse($objPage->dateFormat, $start);
+                $day   = $GLOBALS['TL_LANG']['DAYS'][date('w', $start)];
                 $month = $GLOBALS['TL_LANG']['MONTHS'][(date('n', $start) - 1)];
 
-                $span = \Calendar::calculateSpan($start, $end);
+                $span = ContaoCalendar::calculateSpan($start, $end);
 
                 if ($span > 0) {
-                    $date = \Date::parse($objPage->dateFormat, $start).' – '.\Date::parse($objPage->dateFormat, $end);
-                    $day = '';
+                    $date = Date::parse($objPage->dateFormat, $start).' – '.Date::parse($objPage->dateFormat, $end);
+                    $day  = '';
                 }
 
                 $time = '';
@@ -165,39 +171,39 @@ class Events extends \Controller
                     if ($span > 0) {
                         $date = sprintf(
                             '%s – %s',
-                            \Date::parse($objPage->datimFormat, $start),
-                            \Date::parse($objPage->datimFormat, $end)
+                            Date::parse($objPage->datimFormat, $start),
+                            Date::parse($objPage->datimFormat, $end)
                         );
                     } elseif ($start == $end) {
-                        $time = \Date::parse($objPage->timeFormat, $start);
+                        $time = Date::parse($objPage->timeFormat, $start);
                     } else {
                         $time = sprintf(
                             '%s – %s',
-                            \Date::parse($objPage->timeFormat, $start),
-                            \Date::parse($objPage->timeFormat, $end)
+                            Date::parse($objPage->timeFormat, $start),
+                            Date::parse($objPage->timeFormat, $end)
                         );
                     }
                 }
 
                 // Overwrite some settings
-                $event['date'] = $date;
-                $event['time'] = $time;
+                $event['date']     = $date;
+                $event['time']     = $time;
                 $event['datetime'] = $addTime ? date('Y-m-d\TH:i:sP', $start) : date('Y-m-d', $start);
-                $event['day'] = $day;
-                $event['month'] = $month;
+                $event['day']      = $day;
+                $event['month']    = $month;
                 $event['calendar'] = $calendar;
-                $event['link'] = $event['title'];
-                $event['target'] = '';
-                $event['title'] = specialchars($event['title'], true);
+                $event['link']     = $event['title'];
+                $event['target']   = '';
+                $event['title']    = specialchars($event['title'], true);
 //				$arrEvent['href'] = $this->generateEventUrl($objEvents, $strUrl);
                 $event['class'] = ($event['cssClass'] != '') ? ' '.$event['cssClass'] : '';
 //				$arrEvent['recurring'] = $recurring;
 //				$arrEvent['until'] = $until;
-                $event['begin'] = $start;
-                $event['end'] = $end;
-                $event['details'] = '';
+                $event['begin']      = $start;
+                $event['end']        = $end;
+                $event['details']    = '';
                 $event['hasDetails'] = false;
-                $event['hasTeaser'] = false;
+                $event['hasTeaser']  = false;
 
                 // Add event to global array
                 $events[$key][$start][] = $event;
