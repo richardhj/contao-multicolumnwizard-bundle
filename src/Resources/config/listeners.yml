@@ -71,3 +71,18 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableWrongeAgeParticipantsListener
         tags:
             - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+
+    richardhj.ferienpass.listener.notification.attendance_status_new:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\NewAttendanceStatusListener
+        tags:
+            - { name: kernel.event_listener, event: 'model.post-save' }
+
+    richardhj.ferienpass.listener.notification.attendance_status_changed:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\ChangedAttendanceStatusListener
+        tags:
+            - { name: kernel.event_listener, event: 'model.post-save' }
+
+    richardhj.ferienpass.listener.notification.cron_reminders:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\TriggerCronRemindersListener
+        tags:
+            - { name: kernel.event_listener, event: 'cron.hourly' }
