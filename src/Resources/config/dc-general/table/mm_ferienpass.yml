@@ -1,0 +1,14 @@
+services:
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.set_custom_view:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\SetCustomViewListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', priority: 150 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.modify_label:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ModifyLabelListener
+        arguments:
+            - '@metamodels.factory'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', priority: -10 }

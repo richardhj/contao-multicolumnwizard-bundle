@@ -33,6 +33,7 @@ class RichardhjContaoFerienpassExtension extends Extension
         'config.yml',
         'listeners.yml',
         'services.yml',
+        'dc-general/table/mm_ferienpass.yml'
     ];
 
     /**
