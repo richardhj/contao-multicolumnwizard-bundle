@@ -50,3 +50,24 @@ services:
                 event: 'dc-general.view.contao2backend.model-to-label',
                 method: modelToLabel
               }
+
+
+    richardhj.ferienpass.listener.user_application.add_attendance_status_confirmation:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\AddAttendanceStatusConfirmationListener
+        tags:
+            - { name: kernel.event_listener, event: 'model.post-save' }
+
+    richardhj.ferienpass.listener.user_application.build_participant_options.disable_already_attending:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableAlreadyAttendingParticipantsListener
+        tags:
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+
+    richardhj.ferienpass.listener.user_application.build_participant_options.disable_double_booking:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableDoubleBookingParticipantsListener
+        tags:
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+
+    richardhj.ferienpass.listener.user_application.build_participant_options.disable_wrong_age:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableWrongeAgeParticipantsListener
+        tags:
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
