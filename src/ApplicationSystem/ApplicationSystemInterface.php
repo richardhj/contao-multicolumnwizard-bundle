@@ -11,21 +11,14 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
+
 namespace Richardhj\ContaoFerienpassBundle\ApplicationSystem;
 
-use Contao\Model\Event\PreSaveModelEvent;
-use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
-use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
-use Richardhj\ContaoFerienpassBundle\Model\Attendance;
-use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
+use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
-/**
- * Class Lot
- *
- * @package Richardhj\ContaoFerienpassBundle\ApplicationSystem
- */
-class Lot extends AbstractApplicationSystem
+interface ApplicationSystemInterface
 {
 
+    public function getModel(): ?ApplicationSystem;
 }

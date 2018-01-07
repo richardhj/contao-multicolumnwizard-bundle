@@ -7,5 +7,14 @@ services:
 
     richardhj.ferienpass.controller.dropbox_webhook:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook
-        arguments:
 
+    richardhj.ferienpass.application_system.firstcome:
+        class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome
+        lazy: true
+
+    richardhj.ferienpass.application_system.lot:
+        class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot
+        lazy: true
+
+    richardhj.ferienpass.application_system:
+        factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', create]

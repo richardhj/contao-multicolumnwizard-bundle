@@ -72,6 +72,13 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
 
+    richardhj.ferienpass.listener.user_application.build_participant_options.disable_limit_reached:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableLimitReachedParticipantsListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+
     richardhj.ferienpass.listener.notification.attendance_status_new:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\NewAttendanceStatusListener
         tags:
@@ -93,3 +100,45 @@ services:
             - "@metamodels.factory"
         tags:
             - { name: contao.hook, hook: getAllEvents }
+
+    richardhj.ferienpass.listener.application_system.new_attendance:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\NewAttendanceListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.set-attendance', method: handle }
+
+    richardhj.ferienpass.listener.application_system.first_come.attendance_status:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\FirstComeAttendanceStatusListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: kernel.event_listener, event: 'model.pre-save', method: handle }
+
+    richardhj.ferienpass.listener.application_system.first_come.attendance_status:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\FirstComeAttendanceStatusListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-persist', method: handleDcGeneral }
+
+    richardhj.ferienpass.listener.application_system.first_come.deleted_attendance:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\FirstComeDeletedAttendanceListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: kernel.event_listener, event: 'model.delete', method: handle }
+
+    richardhj.ferienpass.listener.application_system.lot.attendance_status:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\LotAttendanceStatusListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: kernel.event_listener, event: 'model.pre-save', method: handle }
+
+    richardhj.ferienpass.listener.application_system.lot.attendance_status:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\LotAttendanceStatusListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-persist', method: handleDcGeneral }

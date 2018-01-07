@@ -3,17 +3,18 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Helper;
 
 
+use Contao\System;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\AbstractApplicationSystem;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\NoOp;
 
@@ -33,10 +34,8 @@ class Backend
      */
     public function addCurrentApplicationSystemToSystemMessages()
     {
-        global $container;
-
         /** @var AbstractApplicationSystem $applicationSystem */
-        $applicationSystem = $container['ferienpass.applicationsystem'];
+        $applicationSystem = System::getContainer()->get('richardhj.ferienpass.application_system');
 
         if (!$applicationSystem instanceof NoOp) {
             $name = $applicationSystem->getModel()->title;
