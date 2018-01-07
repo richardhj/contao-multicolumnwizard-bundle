@@ -1,0 +1,6 @@
+services:
+    richardhj.ferienpass.controller.redirect_short_url:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Frontend\RedirectShortUrl
+        arguments:
+          - '@metamodels.factory'
+          - '@event_dispatcher'
