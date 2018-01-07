@@ -102,11 +102,3 @@ $container['ferienpass.pass-release.edit-previous'] = function () {
 
     return $release->getItem();
 };
-
-$container['ferienpass.attendance-status'] = [
-    'confirmed',
-    'waitlisted',
-    'waiting',
-    'error',
-];
-

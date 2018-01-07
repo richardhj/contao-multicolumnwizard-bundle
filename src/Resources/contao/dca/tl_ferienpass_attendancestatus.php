@@ -3,18 +3,17 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
+use Contao\System;
 use NotificationCenter\Model\Notification;
 
-
-global $container;
 $table = Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus::getTable();
 
 
@@ -110,7 +109,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
             'exclude'   => true,
             'inputType' => 'select',
-            'options'   => $container['ferienpass.attendance-status'],
+            'options'   => System::getContainer()->getParameter('richardhj.ferienpass.attendance_status'),
             'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'],
             'eval'      => [
                 'tl_class' => 'w50',

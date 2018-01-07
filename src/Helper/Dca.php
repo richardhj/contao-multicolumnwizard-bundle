@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Helper;
@@ -16,6 +16,7 @@ namespace Richardhj\ContaoFerienpassBundle\Helper;
 use Contao\BackendUser;
 use Contao\ContentModel;
 use Contao\Input;
+use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\Dca\Populator\DataProviderPopulator;
@@ -488,19 +489,15 @@ class Dca implements EventSubscriberInterface
      */
     public function addDefaultStatus()
     {
-        global $container;
+        $attendanceStatus = System::getContainer()->getParameter('richardhj.ferienpass.attendance_status');
 
-        if ('' !== Input::get('act')
-            || AttendanceStatus::countAll() === count(
-                $container['ferienpass.attendance-status']
-            )
-        ) {
+        if ('' !== Input::get('act') || AttendanceStatus::countAll() === count($attendanceStatus)) {
             return;
         }
 
         $status = [];
 
-        foreach ($container['ferienpass.attendance-status'] as $number => $statusName) {
+        foreach ($attendanceStatus as $number => $statusName) {
             $status[] = [
                 'type'     => $number,
                 'name'     => lcfirst($statusName),

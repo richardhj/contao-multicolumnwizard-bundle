@@ -1,4 +1,10 @@
 parameters:
-   # Credentials for the dropbox app {@see https://www.dropbox.com/developers/apps/info/qgbgzoptvlpyofc}
-   richardhj.ferienpass.dropbox.app_id: qgbgzoptvlpyofc
-   richardhj.ferienpass.dropbox.app_secret: 9fktiifz7cxhar6
+    # Credentials for the dropbox app {@see https://www.dropbox.com/developers/apps/info/qgbgzoptvlpyofc}
+    richardhj.ferienpass.dropbox.app_id: qgbgzoptvlpyofc
+    richardhj.ferienpass.dropbox.app_secret: 9fktiifz7cxhar6
+
+    richardhj.ferienpass.attendance_status:
+      - confirmed
+      - waitlisted
+      - waiting
+      - error
