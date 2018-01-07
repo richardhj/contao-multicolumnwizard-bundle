@@ -4,3 +4,8 @@ services:
         arguments:
           - '@metamodels.factory'
           - '@event_dispatcher'
+
+    richardhj.ferienpass.controller.dropbox_webhook:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook
+        arguments:
+

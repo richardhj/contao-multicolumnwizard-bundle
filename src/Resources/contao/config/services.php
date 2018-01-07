@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\AbstractApplicationSystem;
@@ -110,5 +110,3 @@ $container['ferienpass.attendance-status'] = [
     'error',
 ];
 
-$container['ferienpass.dropbox.appId']     = 'qgbgzoptvlpyofc';
-$container['ferienpass.dropbox.appSecret'] = '9fktiifz7cxhar6';

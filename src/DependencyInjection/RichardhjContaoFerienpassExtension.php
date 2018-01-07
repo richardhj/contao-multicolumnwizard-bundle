@@ -30,6 +30,7 @@ class RichardhjContaoFerienpassExtension extends Extension
      * @var string[]
      */
     private $files = [
+        'config.yml',
         'listeners.yml',
         'services.yml',
     ];

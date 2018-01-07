@@ -1,0 +1,4 @@
+parameters:
+   # Credentials for the dropbox app {@see https://www.dropbox.com/developers/apps/info/qgbgzoptvlpyofc}
+   richardhj.ferienpass.dropbox.app_id: qgbgzoptvlpyofc
+   richardhj.ferienpass.dropbox.app_secret: 9fktiifz7cxhar6
