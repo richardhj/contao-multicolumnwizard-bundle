@@ -27,7 +27,7 @@ class DisableAlreadyAttendingParticipantsListener
      *
      * @return void
      */
-    public function onBuildParticipantsOptionsForUserApplication(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         $options        = $event->getResult();
         $participantIds = Participant::getInstance()

@@ -32,13 +32,23 @@ class DisableLimitReachedParticipantsListener
     private $applicationSystem;
 
     /**
+     * DisableLimitReachedParticipantsListener constructor.
+     *
+     * @param ApplicationSystemInterface $applicationSystem The application system.
+     */
+    public function __construct(ApplicationSystemInterface $applicationSystem)
+    {
+        $this->applicationSystem = $applicationSystem;
+    }
+
+    /**
      * Disable participants from options that have reached their limit.
      *
      * @param BuildParticipantOptionsForUserApplicationEvent $event The event.
      *
      * @return void
      */
-    public function onBuildParticipantsOptionsForUserApplication(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         if (!$this->applicationSystem instanceof FirstCome) {
             return;

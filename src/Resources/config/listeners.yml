@@ -60,24 +60,24 @@ services:
     richardhj.ferienpass.listener.user_application.build_participant_options.disable_already_attending:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableAlreadyAttendingParticipantsListener
         tags:
-            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
     richardhj.ferienpass.listener.user_application.build_participant_options.disable_double_booking:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableDoubleBookingParticipantsListener
         tags:
-            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
     richardhj.ferienpass.listener.user_application.build_participant_options.disable_wrong_age:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableWrongeAgeParticipantsListener
         tags:
-            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
     richardhj.ferienpass.listener.user_application.build_participant_options.disable_limit_reached:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableLimitReachedParticipantsListener
         arguments:
             - "@richardhj.ferienpass.application_system"
         tags:
-            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options' }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
     richardhj.ferienpass.listener.notification.attendance_status_new:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\NewAttendanceStatusListener

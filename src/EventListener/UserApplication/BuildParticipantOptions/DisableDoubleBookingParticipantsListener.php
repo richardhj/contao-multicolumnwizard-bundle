@@ -28,7 +28,7 @@ class DisableDoubleBookingParticipantsListener
      *
      * @return void
      */
-    public function onBuildParticipantsOptionsForUserApplication(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         $options    = $event->getResult();
         $offerDates = $event->getOffer()->get('date_period');

@@ -32,7 +32,7 @@ class DisableWrongAgeParticipantsListener
      *
      * @return void
      */
-    public function onBuildParticipantsOptionsForUserApplication(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         if (null === ($offerStart = ToolboxOfferDate::offerStart($event->getOffer()))) {
             return;
