@@ -95,7 +95,7 @@ services:
             - { name: kernel.event_listener, event: 'cron.hourly' }
 
     richardhj.ferienpass.hook.calendar.ferienpass_items:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\AddCalendarEventListener
+        class: Richardhj\ContaoFerienpassBundle\EventListener\AddCalendarEventsListener
         arguments:
             - "@metamodels.factory"
         tags:

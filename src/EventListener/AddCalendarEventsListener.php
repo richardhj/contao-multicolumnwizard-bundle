@@ -27,7 +27,7 @@ use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
  *
  * @package Richardhj\ContaoFerienpassBundle\Helper
  */
-class AddCalendarEventListener
+class AddCalendarEventsListener
 {
 
     /**
