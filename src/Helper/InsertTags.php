@@ -3,16 +3,17 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Helper;
 
+use Contao\System;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 
 
@@ -31,16 +32,14 @@ class InsertTags
      */
     public function replaceInsertTags($tag)
     {
-        global $container;
-
         $elements = trimsplit('::', $tag);
 
-        if ($elements[0] == 'ferienpass') {
+        if ('ferienpass' === $elements[0]) {
             switch ($elements[1]) {
                 case 'max_applications_per_day':
                     /** @var FirstCome $applicationSystem */
-                    $applicationSystem = $container['ferienpass.applicationsystem.firstcome'];
-                    return $applicationSystem->getModel()->maxApplicationsPerDay;
+                    $applicationSystem = System::getContainer()->get('richardhj.ferienpass.application_system.firstcome');
+                    return $applicationSystem->getMaxApplicationsPerDay();
                     break;
             }
         }

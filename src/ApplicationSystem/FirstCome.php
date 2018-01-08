@@ -31,4 +31,13 @@ use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 class FirstCome extends AbstractApplicationSystem
 {
 
+    /**
+     * Get the maximum number of applications per participant and day.
+     *
+     * @return int
+     */
+    public function getMaxApplicationsPerDay()
+    {
+        return (int)$this->getModel()->maxApplicationsPerDay;
+    }
 }
