@@ -18,3 +18,9 @@ services:
 
     richardhj.ferienpass.application_system:
         factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', create]
+
+    richardhj.ferienpass.participant:
+        class: Richardhj\ContaoFerienpassBundle\Model\Participant
+
+    richardhj.ferienpass.offer:
+        class: Richardhj\ContaoFerienpassBundle\Model\Offer

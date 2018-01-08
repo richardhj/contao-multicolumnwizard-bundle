@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
@@ -273,7 +273,7 @@ class Document extends Model
                     if (in_array($attr, ['offer', 'participant'])) {
 
 
-                        /** @type MetaModelBridge $class */
+                        /** @type AbstractSimpleMetaModel $class */
                         $class = __NAMESPACE__ . '\\' . ucfirst($attr);
 
                         // Try to find model
