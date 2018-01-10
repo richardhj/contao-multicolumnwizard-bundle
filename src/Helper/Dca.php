@@ -66,9 +66,6 @@ class Dca implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            GetOperationButtonEvent::NAME            => [
-                ['createAttendancesButtonInOfferView'],
-            ],
             BuildMetaModelOperationsEvent::NAME      => [
                 ['addAttendancesOperationToMetaModelView'],
             ],
@@ -79,27 +76,10 @@ class Dca implements EventSubscriberInterface
                 ['prohibitDuplicateKeyOnSaveAttendance', -100],
                 ['alterNewAttendancePrePersist'],
             ],
-            PopulateEnvironmentEvent::NAME           => [
-                ['populateEnvironmentForAttendancesChildTable', DataProviderPopulator::PRIORITY + 100],
-            ],
-            ModelToLabelEvent::NAME                  => [
-                ['addMemberEditLinkForParticipantListView', -10],
-            ],
             PostPersistModelEvent::NAME              => [
-                ['triggerSyncForOffer'],
-                ['handleApplicationListMaxChange'],
+
                 ['handlePassReleaseChanges'],
             ],
-            GetPropertyOptionsEvent::NAME            => [
-                ['loadDataProcessingFilterOptions'],
-                ['loadDataProcessingSortAttributes'],
-            ],
-            CreateDcGeneralEvent::NAME               => [
-                ['buildFilterParamsForDataProcessing'],
-            ],
-            BuildWidgetEvent::NAME                   => [
-//                ['loadOfferDateWidget']
-            ]
         ];
     }
 
@@ -137,162 +117,13 @@ class Dca implements EventSubscriberInterface
     }
 
 
-    /**
-     * Add the "edit attendances" operation to the MetaModel back end view
-     *
-     * @param BuildMetaModelOperationsEvent $event
-     */
-    public function addAttendancesOperationToMetaModelView(BuildMetaModelOperationsEvent $event)
-    {
-        if (!in_array($event->getMetaModel()->getTableName(), ['mm_ferienpass', 'mm_participant'])) {
-            return;
-        }
-
-        /** @var Contao2BackendViewDefinitionInterface $view */
-        $view          = $event->getContainer()->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
-        $collection    = $view->getModelCommands();
-        $operationName = 'edit_attendances';
-
-        $command = new Command();
-        $command->setName($operationName);
-
-        $parameters          = $command->getParameters();
-        $parameters['table'] = Attendance::getTable();
-
-        if (!$command->getLabel()) {
-            $command->setLabel($operationName . '.0');
-            if (isset($extraValues['label'])) {
-                $command->setLabel($extraValues['label']);
-            }
-        }
-        if (!$command->getDescription()) {
-            $command->setDescription($operationName . '.1');
-            if (isset($extraValues['description'])) {
-                $command->setDescription($extraValues['description']);
-            }
-        }
-
-        $extra               = $command->getExtra();
-        $extra['icon']       = 'assets/ferienpass/core/img/users.png';
-        $extra['attributes'] = 'onclick="Backend.getScrollOffset();"';
-        $extra['idparam']    = 'pid';
-
-        $collection->addCommand($command);
-    }
 
 
-    /**
-     * Remove the "edit attendances" operation for variant bases
-     *
-     * @param GetOperationButtonEvent $event
-     */
-    public function createAttendancesButtonInOfferView(GetOperationButtonEvent $event)
-    {
-        /** @var Model $model */
-        $model = $event->getModel();
-
-        if ('edit_attendances' !== $event->getCommand()->getName()
-            || 'mm_ferienpass' !== $model->getProviderName()
-        ) {
-            return;
-        }
-
-        $item = $model->getItem();
-
-        if (!$item instanceof MetaModelsItem) {
-            return;
-        }
-
-        // Disable action for variant bases
-        if ($item->isVariantBase() && 0 !== $item->getVariants(null)->getCount()) {
-            $event->setDisabled(true);
-        }
-
-        if (!$item->get('applicationlist_active')) {
-            // Does not use the application system
-            $event->setDisabled(true);
-        } elseif (0 === Attendance::countByOffer($item->get('id'))) {
-            // No attendances at all
-            $event->setAttributes(
-                sprintf('%s data-applicationlist-state="no-attendances"', $event->getAttributes())
-            );
-        } elseif (0 === Attendance::countByOfferAndStatus($item->get('id'), AttendanceStatus::findWaiting()->id)
-        ) {
-            // No attendances with `waiting` status
-            $event->setAttributes(
-                sprintf('%s data-applicationlist-state="all-assigned"', $event->getAttributes())
-            );
-        } else {
-            // Needs further assignments
-            $event->setAttributes(
-                sprintf('%s data-applicationlist-state="needs-reassignments"', $event->getAttributes())
-            );
-        }
-    }
 
 
-    /**
-     * Add the Attendances table name to the MetaModel back end module tables, to make them editable
-     *
-     * @param MetaModelsBootEvent $event
-     */
-    public function addAttendancesToMetaModelModuleTables(MetaModelsBootEvent $event)
-    {
-        foreach (['mm_ferienpass', 'mm_participant'] as $metaModelName) {
-            try {
-                /** @var ViewCombinations $viewCombinations */
-                $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
-                $inputScreen      = $viewCombinations->getInputScreenDetails($metaModelName);
-                $backendSection   = $inputScreen->getBackendSection();
-                \Controller::loadDataContainer($metaModelName);
-
-                // Add table name to back end module tables
-                $GLOBALS['BE_MOD'][$backendSection]['metamodel_' . $metaModelName]['tables'][] = Attendance::getTable();
-
-            } catch (\RuntimeException $e) {
-                \System::log($e->getMessage(), __METHOD__, TL_ERROR);
-            }
-        }
-    }
 
 
-    /**
-     * Make the "attendances" table editable as a child table of the offer or participant
-     *
-     * @param PopulateEnvironmentEvent $event
-     */
-    public function populateEnvironmentForAttendancesChildTable(PopulateEnvironmentEvent $event)
-    {
-        $environment   = $event->getEnvironment();
-        $definition    = $environment->getDataDefinition();
-        $inputProvider = $environment->getInputProvider() ?: new InputProvider(); // FIXME Why is inputProvider null?
 
-        if ($definition->getName() !== Attendance::getTable()
-            || null === ($pid = $inputProvider->getParameter('pid'))
-        ) {
-            return;
-        };
-
-        $modelId = ModelId::fromSerialized($pid);
-
-        // Set parented list mode
-        $environment->getDataDefinition()->getBasicDefinition()->setMode(BasicDefinitionInterface::MODE_PARENTEDLIST);
-        // Set parent data provider corresponding to pid
-        $definition->getBasicDefinition()->setParentDataProvider($modelId->getDataProviderName());
-
-        // Remove redundant legend (offer_legend in offer view)
-        $palette = $definition->getPalettesDefinition()->getPaletteByName('default');
-
-        switch ($modelId->getDataProviderName()) {
-            case 'mm_ferienpass':
-                $palette->removeLegend($palette->getLegend('offer'));
-                break;
-
-            case 'mm_participant':
-                $palette->removeLegend($palette->getLegend('participant'));
-                break;
-        }
-    }
 
 
     /**
@@ -551,222 +382,12 @@ class Dca implements EventSubscriberInterface
     }
 
 
-    /**
-     * Add the member edit link when in participant list view
-     *
-     * @param ModelToLabelEvent $event
-     */
-    public function addMemberEditLinkForParticipantListView(ModelToLabelEvent $event)
-    {
-        $model = $event->getModel();
-
-        if ($model instanceof Model && 'mm_participant' === $model->getProviderName()) {
-            $args = $event->getArgs();
-
-            $metaModel     = $model->getItem()->getMetaModel();
-            $parentColName = $metaModel->getAttributeById($metaModel->get('owner_attribute'))->getColName();
-
-            // No parent referenced
-            if (!$args[$parentColName]) {
-                return;
-            }
-
-            \System::loadLanguageFile('tl_member');
-
-            $parentRaw = $model->getItem()->get($parentColName);
-
-            // Adjust the label
-            foreach ($args as $k => $v) {
-                switch ($k) {
-                    case $parentColName:
-                        /** @noinspection HtmlUnknownTarget */
-                        $args[$k] = sprintf(
-                            '<a href="contao/main.php?do=member&amp;act=edit&amp;id=%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_parent" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
-                            // Member ID
-                            $parentRaw['id'],
-                            // Link
-                            '<i class="fa fa-external-link tl_gray"></i> ' . $args[$k],
-                            // Member edit description
-                            sprintf(
-                                $GLOBALS['TL_LANG']['tl_member']['edit'][1],
-                                $parentRaw['id']
-                            ),
-                            REQUEST_TOKEN
-                        );
-                        break;
-
-                    default:
-                        if ('' === $model->getItem()->get($k) && '' !== ($parentData = $parentRaw[$k])) {
-                            $args[$k] = sprintf('<span class="tl_gray">%s</span>', $parentData);
-                        }
-                }
-            }
-
-            $event->setArgs($args);
-        }
-    }
 
 
-    /**
-     * Trigger data processing when saving an offer
-     *
-     * @param PostPersistModelEvent $event
-     */
-    public function triggerSyncForOffer(PostPersistModelEvent $event)
-    {
-        $model = $event->getModel();
-
-        if (!$model instanceof Model
-            || 'mm_ferienpass' !== $model->getProviderName()
-        ) {
-            return;
-        }
-
-        /** @type \Model\Collection|DataProcessing $processing */
-        $processing = DataProcessing::findBy('sync', '1');
-
-        while (null !== $processing && $processing->next()) {
-            if (!$processing->xml_single_file) {
-
-                $variants = $model->getItem()->getVariants(null);
-
-                $ids = [];
-                if (null !== $variants) {
-                    $ids = array_map(
-                        function ($item) {
-                            /** @var IItem $item */
-                            return $item->get('id');
-                        },
-                        iterator_to_array($variants)
-                    );
-                }
-
-                $ids = array_merge([$model->getId()], $ids);
-
-                // FIXME getting troubles when using single_xml_file
-                $filterRule = new StaticIdList($ids);
-                $processing->current()
-                    ->getFilter()
-                    ->addFilterRule($filterRule);
-            }
-
-            $processing->current()->run();
-        }
-    }
 
 
-    /**
-     * Update the attendances when changing the "applicationlist_max" value
-     *
-     * @param PostPersistModelEvent $event
-     */
-    public function handleApplicationListMaxChange(PostPersistModelEvent $event)
-    {
-        $model         = $event->getModel();
-        $originalModel = $event->getOriginalModel();
-        if (!$model instanceof Model
-            || 'mm_ferienpass' !== $event->getModel()->getProviderName()
-            || $model->getProperty('applicationlist_max') === $originalModel->getProperty('applicationlist_max')
-        ) {
-            return;
-        }
-
-        $ids = [$model->getId()];
-        if ($model->getItem()->isVariantBase()) {
-            $variants = $model->getItem()->getVariants(null);
-            $ids      = array_merge(
-                array_map(
-                    function (IItem $item) {
-                        return $item->get('id');
-                    },
-                    iterator_to_array($variants)
-                ),
-                $ids
-            );
-        }
-
-        foreach ($ids as $id) {
-            Attendance::updateStatusByOffer($id);
-        }
-    }
 
 
-    public function loadDataProcessingFilterOptions(GetPropertyOptionsEvent $event)
-    {
-        if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
-            || ('metamodel_filtering' !== $event->getPropertyName())
-        ) {
-            return;
-        }
-
-        $filters = \Database::getInstance()
-            ->prepare('SELECT id,name FROM tl_metamodel_filter WHERE pid=?')
-            ->execute(Offer::getInstance()->getMetaModel()->get('id'));
-
-        $event->setOptions($filters->fetchEach('name'));
-    }
-
-    public function loadDataProcessingSortAttributes(GetPropertyOptionsEvent $event)
-    {
-        if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
-            || ('metamodel_sortby' !== $event->getPropertyName())
-        ) {
-            return;
-        }
-
-        $options    = [];
-        $attributes = \Database::getInstance()
-            ->prepare('SELECT colName,name FROM tl_metamodel_attribute WHERE pid=?')
-            ->execute(Offer::getInstance()->getMetaModel()->get('id'));
-
-        while ($attributes->next()) {
-            $options[$attributes->colName] = $attributes->name;
-        }
-
-        $event->setOptions($options);
-    }
-
-
-    public function buildFilterParamsForDataProcessing(CreateDcGeneralEvent $event)
-    {
-        if ('tl_ferienpass_dataprocessing' !== ($table =
-                $event->getDcGeneral()->getEnvironment()->getDataDefinition()->getName())
-        ) {
-            return;
-        }
-
-        // Todo We need another event which provides the model instance so we don't need to fetch the model id from the url
-        try {
-            $modelId = ModelId::fromSerialized(\Input::get('id'));
-        } catch (DcGeneralRuntimeException $e) {
-            return;
-        }
-
-        $container = $this->getServiceContainer();
-        $element   = DataProcessing::findByPk($modelId->getId());
-
-        /** @var DefaultPropertiesDefinition $propertiesDefinition */
-        $propertiesDefinition = $event
-            ->getDcGeneral()
-            ->getEnvironment()
-            ->getDataDefinition()
-            ->getDefinition('properties');
-
-        if (!$element->metamodel_filtering) {
-//            $propertiesDefinition->removeProperty('metamodel_filterparams');
-            return;
-        }
-
-        $filterSettings = $container
-            ->getFilterFactory()
-            ->createCollection($element->metamodel_filtering);
-
-        $property = $propertiesDefinition->getProperty('metamodel_filterparams');
-        $extra    = $property->getExtra();
-
-        $extra['subfields'] = $filterSettings->getParameterDCA();
-        $property->setExtra($extra);
-    }
 
 
     public function handlePassReleaseChanges(PostPersistModelEvent $event)
