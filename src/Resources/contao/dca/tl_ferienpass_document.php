@@ -3,13 +3,15 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
+
+use Contao\Controller;
 
 $table = Richardhj\ContaoFerienpassBundle\Model\Document::getTable();
 
@@ -150,7 +152,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'            => &$GLOBALS['TL_LANG'][$table]['documentTpl'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => \Controller::getTemplateGroup('fp_document_'),
+            'options_callback' => Controller::getTemplateGroup('fp_document_'),
             'eval'             => [
                 'includeBlankOption' => true,
                 'chosen'             => true,
@@ -164,7 +166,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'exclude'   => true,
             'default'   => 'iso_collection_invoice',
             'inputType' => 'select',
-            'options'   => \Controller::getTemplateGroup('fp_collection_'),
+            'options'   => Controller::getTemplateGroup('fp_collection_'),
             'eval'      => [
                 'includeBlankOption' => true,
                 'chosen'             => true,

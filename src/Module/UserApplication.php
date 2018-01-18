@@ -3,25 +3,26 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
+use Contao\Controller;
+use Contao\System;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
-use Richardhj\ContaoFerienpassBundle\Subscriber\UserApplicationSubscriber;
 use Haste\Form\Form;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
 /**
@@ -42,11 +43,11 @@ class UserApplication extends Item
      */
     protected function compile()
     {
-        global $container;
-        /** @var EventDispatcher $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
-
-        $dispatcher->addSubscriber(new UserApplicationSubscriber());
+        $container = System::getContainer();
+        /** @var EventDispatcherInterface $dispatcher */
+        $dispatcher = $container->get('event_dispatcher');
+        /** @var Participant $participantsModel */
+        $participantsModel = $container->get('richardhj.ferienpass.model.participant');
 
         // Stop if the procedure is not used
         if (!$this->item->get('applicationlist_active')) {
@@ -88,7 +89,7 @@ class UserApplication extends Item
 
 
         if (FE_USER_LOGGED_IN && $this->User->id) {
-            $participants = Participant::getInstance()->findByParent($this->User->id);
+            $participants = $participantsModel->findByParent($this->User->id);
 
             if (0 === $participants->getCount()) {
                 Message::addWarning($GLOBALS['TL_LANG']['MSC']['noParticipants']);
@@ -141,13 +142,13 @@ class UserApplication extends Item
                     // Trigger event and let the application system set the attendance
                     $event = new UserSetApplicationEvent(
                         $this->item,
-                        Participant::getInstance()->findById($participant)
+                        $participantsModel->findById($participant)
                     );
                     $dispatcher->dispatch(UserSetApplicationEvent::NAME, $event);
                 }
 
                 // Reload page to show confirmation message
-                \Controller::reload();
+                Controller::reload();
             }
 
             // Get the form as string

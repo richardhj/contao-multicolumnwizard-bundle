@@ -13,6 +13,7 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
 
+use MetaModels\Factory;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\IFilterRule;
 use MetaModels\Filter\Rules\SimpleQuery;
@@ -31,10 +32,12 @@ class Participant extends AbstractSimpleMetaModel
 
     /**
      * Participant constructor.
+     *
+     * @param Factory $factory
      */
-    public function __construct()
+    public function __construct(Factory $factory)
     {
-        parent::__construct('mm_participant');
+        parent::__construct($factory, 'mm_participant');
     }
 
     /**

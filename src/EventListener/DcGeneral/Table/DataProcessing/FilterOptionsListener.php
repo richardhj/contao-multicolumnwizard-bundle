@@ -46,7 +46,7 @@ class FilterOptionsListener
     /**
      * @param GetPropertyOptionsEvent $event The event.
      */
-    public function loadDataProcessingFilterOptions(GetPropertyOptionsEvent $event)
+    public function handle(GetPropertyOptionsEvent $event)
     {
         if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
             || ('metamodel_filtering' !== $event->getPropertyName())

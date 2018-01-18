@@ -1,0 +1,15 @@
+services:
+    richardhj.ferienpass.listener.dc_general.table.mm_participant.build_metamodel_operations:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\BuildMetaModelOperationsListener
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.dc-general.events.metamodel.build.metamodel.operations', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_participant.attendances_populate_environment:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\PopulateAttendancesEnvironmentListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', method: handle, priority: 200 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_participant.model_to_label:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\ModelToLabelListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle, priority: -10 }

@@ -42,10 +42,12 @@ abstract class AbstractSimpleMetaModel
     /**
      * Load the MetaModel settings
      *
-     * @param string $tableName
+     * @param Factory $factory
+     * @param string  $tableName
      */
-    public function __construct(string $tableName)
+    public function __construct(Factory $factory, string $tableName)
     {
+        $this->factory   = $factory;
         $this->metaModel = $this->factory->getMetaModel($tableName);
         if (null === $this->metaModel) {
             return;

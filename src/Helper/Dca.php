@@ -436,17 +436,5 @@ class Dca implements EventSubscriberInterface
     }
 
 
-    public function loadOfferDateWidget(BuildWidgetEvent $event)
-    {
-        global $container;
 
-        /** @var BackendUser $user */
-        $user = $container['user'];
-
-        if (!$user->offer_date_picker || 'offer_date' !== $event->getProperty()->getWidgetType()) {
-            return;
-        }
-
-        // TODO Add jQuery period picker assets
-    }
 }

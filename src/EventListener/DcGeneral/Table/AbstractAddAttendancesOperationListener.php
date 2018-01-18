@@ -19,7 +19,7 @@ use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
 use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
-class AbstractAddAttendancesOperationListener
+abstract class AbstractAddAttendancesOperationListener
 {
 
     /**

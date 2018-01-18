@@ -44,7 +44,7 @@ class ModifyLabelListener
      *
      * @param ModelToLabelEvent $event The event.
      */
-    public function onModelToLabel(ModelToLabelEvent $event)
+    public function handle(ModelToLabelEvent $event)
     {
         // Not attendances for offer MetaModel
         if (!$event->getEnvironment()->getView() instanceof AttendanceAllocationView) {

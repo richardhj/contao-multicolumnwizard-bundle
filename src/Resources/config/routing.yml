@@ -1,10 +1,10 @@
 richardhj.ferienpass.redirect_short_url:
-    path: /{item}
+    path: /{itemId}
     defaults:
         _scope: frontend
         _controller: richardhj.ferienpass.controller.redirect_short_url
     requirements:
-        page: '\d+'
+        itemId: '\d+'
 
 richardhj.ferienpass.dropbox_webhook:
     path: /ferienpass-dropbox-webhook

@@ -3,71 +3,77 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
+
+use Richardhj\ContaoFerienpassBundle\EventListener\AddCalendarEventsListener;
+use Richardhj\ContaoFerienpassBundle\Helper\Dca;
 
 
 /**
  * Palettes
  */
-$GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][] = 'addMetamodel';
-$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default'] .= ';{metamodel_legend},addMetamodel';
+$GLOBALS['TL_DCA']['tl_calendar']['palettes']['__selector__'][]  = 'addMetamodel';
+$GLOBALS['TL_DCA']['tl_calendar']['palettes']['default']         .= ';{metamodel_legend},addMetamodel';
 $GLOBALS['TL_DCA']['tl_calendar']['subpalettes']['addMetamodel'] = 'metamodel,metamodelFields';
 
 
 /**
  * Fields
  */
-$GLOBALS['TL_DCA']['tl_calendar']['fields']['addMetamodel'] = array
-(
-	'label'     => &$GLOBALS['TL_LANG']['tl_calendar']['addMetaModel'],
-	'exclude'   => true,
-	'inputType' => 'checkbox',
-	'eval'      => array('submitOnChange' => true, 'tl_class' => 'w50'),
-	'sql'       => "char(1) NOT NULL default ''"
-);
+$GLOBALS['TL_DCA']['tl_calendar']['fields']['addMetamodel'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_calendar']['addMetaModel'],
+    'exclude'   => true,
+    'inputType' => 'checkbox',
+    'eval'      => ['submitOnChange' => true, 'tl_class' => 'w50'],
+    'sql'       => "char(1) NOT NULL default ''",
+];
 
-$GLOBALS['TL_DCA']['tl_calendar']['fields']['metamodel'] = array
-(
-	'label'            => &$GLOBALS['TL_LANG']['tl_calendar']['metamodel'],
-	'exclude'          => true,
-	'inputType'        => 'select',
-	'options_callback' => array('\Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getMetaModels'),
-	'eval'             => array('tl_class' => 'w50'),
-	'sql'              => "varchar(64) NOT NULL default ''"
-);
+$GLOBALS['TL_DCA']['tl_calendar']['fields']['metamodel'] = [
+    'label'            => &$GLOBALS['TL_LANG']['tl_calendar']['metamodel'],
+    'exclude'          => true,
+    'inputType'        => 'select',
+    'options_callback' => [Dca::class, 'getMetaModels'],
+    'eval'             => ['tl_class' => 'w50'],
+    'sql'              => "varchar(64) NOT NULL default ''",
+];
 
-$GLOBALS['TL_DCA']['tl_calendar']['fields']['metamodelFields'] = array
-(
-	'label'     => &$GLOBALS['TL_LANG']['tl_calendar']['metamodelFields'],
-	'exclude'   => true,
-	'inputType' => 'multiColumnWizard',
-	'eval'      => array
-	(
-		'columnFields' => array
-		(
-			'calendar_field'     => array
-			(
-				'label'            => &$GLOBALS['TL_LANG']['tl_theme']['ts_client_os'],
-				'exclude'          => true,
-				'inputType'        => 'select',
-				'options_callback' => array('Richardhj\ContaoFerienpassBundle\Helper\Events', 'getEventAttributesTranslated'),
-				'eval'             => array('style' => 'width:250px', 'chosen' => true)
-			),
-			'metamodel_field' => array
-			(
-				'label'            => &$GLOBALS['TL_LANG']['tl_theme']['ts_client_browser'],
-				'exclude'          => true,
-				'inputType'        => 'conditionalselect',
-				'options_callback' => array('Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getMetaModelsAttributes'),
-				'eval'             => array('conditionField' => 'metamodel', 'chosen' => true, 'style' => 'width:250px')
-			),
-		)
-	),
-	'sql'       => "text NULL"
-);
+$GLOBALS['TL_DCA']['tl_calendar']['fields']['metamodelFields'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_calendar']['metamodelFields'],
+    'exclude'   => true,
+    'inputType' => 'multiColumnWizard',
+    'eval'      =>
+        [
+            'columnFields' =>
+                [
+                    'calendar_field'  =>
+                        [
+                            'label'            => &$GLOBALS['TL_LANG']['tl_calendar']['mm_field_calendar'],
+                            'exclude'          => true,
+                            'inputType'        => 'select',
+                            'options_callback' => [
+                                AddCalendarEventsListener::class,
+                                'getEventAttributesTranslated',
+                            ],
+                            'eval'             => ['style' => 'width:250px', 'chosen' => true],
+                        ],
+                    'metamodel_field' => [
+                        'label'            => &$GLOBALS['TL_LANG']['tl_calendar']['mm_field_model'],
+                        'exclude'          => true,
+                        'inputType'        => 'conditionalselect',
+                        'options_callback' => [Dca::class, 'getMetaModelsAttributes',],
+                        'eval'             => [
+                            'conditionField' => 'metamodel',
+                            'chosen'         => true,
+                            'style'          => 'width:250px',
+                        ],
+                    ],
+                ],
+        ],
+    'sql'       => "text NULL",
+];

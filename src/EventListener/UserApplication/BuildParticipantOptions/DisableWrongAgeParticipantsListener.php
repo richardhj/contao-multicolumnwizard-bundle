@@ -19,11 +19,13 @@ use Haste\DateTime\DateTime;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\GetFerienpassConfigTrait;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class DisableWrongAgeParticipantsListener
+class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
 {
 
-    use GetFerienpassConfigTrait;
+    use ContainerAwareTrait;
 
     /**
      * Disable participants from options that have a wrong age.
@@ -61,8 +63,8 @@ class DisableWrongAgeParticipantsListener
             $ageOnOffer           = $dateTimeOfBirth->getAge($dateTimeOffer);
             $offersWithAgeAllowed = [];
 
-            switch ($this->getFerienpassConfig()->getAgeCheckMethod()) {
-                case 'vagueOnYear':
+            switch ($this->container->getParameter('richardhj.ferienpass.age_check_method')) {
+                case 'vague_on_year':
                     $dateOffer      = new Date($offerStart);
                     $ageOnYearBegin = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearBegin)));
                     $ageOnYearEnd   = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearEnd)));

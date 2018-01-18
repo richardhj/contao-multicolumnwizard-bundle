@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\Age;
@@ -59,15 +59,17 @@ class Age extends BaseComplex
      */
     public function searchFor($pattern)
     {
-        $query = sprintf(
-            'SELECT item_id FROM %1$s WHERE (lower=0 OR lower <= :age) AND (upper=0 OR upper >= :age) AND att_id = :id',
-            $this->getValueTable()
-        );
+        $qb = $this->connection->createQueryBuilder();
 
-        $statement = $this->connection->prepare($query);
-        $statement->bindValue('age', $pattern);
-        $statement->bindValue('id', $this->get('id'));
-        $statement->execute();
+        $statement = $qb
+            ->select('item_id')
+            ->from($this->getValueTable())
+            ->where($qb->expr()->orx()->add('lower = 0')->add('lower <= :age'))
+            ->andWhere($qb->expr()->orx()->add('upper = 0')->add('upper >= :age'))
+            ->andWhere('att_id = :id')
+            ->setParameter('age', $pattern)
+            ->setParameter('id', $this->get('id'))
+            ->execute();
 
         return $statement->fetchAll(\PDO::FETCH_COLUMN, 'item_id');
     }

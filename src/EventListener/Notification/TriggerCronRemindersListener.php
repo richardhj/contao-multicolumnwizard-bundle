@@ -46,7 +46,7 @@ class TriggerCronRemindersListener
      *
      * @internal param CronEvent $event
      */
-    public function onCronHourly()
+    public function handle()
     {
         /** @var Collection|Attendance $reminders */
         $reminders = AttendanceReminder::findBy(['published=1'], []);

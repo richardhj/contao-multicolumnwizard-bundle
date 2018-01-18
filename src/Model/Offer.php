@@ -13,6 +13,8 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
 
+use MetaModels\Factory;
+
 
 /**
  * Class Offer
@@ -23,9 +25,11 @@ class Offer extends AbstractSimpleMetaModel
 
     /**
      * Offer constructor.
+     *
+     * @param Factory $factory
      */
-    public function __construct()
+    public function __construct(Factory $factory)
     {
-        parent::__construct('mm_ferienpass');
+        parent::__construct($factory,'mm_ferienpass');
     }
 }

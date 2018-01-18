@@ -3,25 +3,25 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 use ContaoCommunityAlliance\MetaPalettes\MetaPalettes;
+use Richardhj\ContaoFerienpassBundle\Helper\UserAccount;
 
 
-/** @noinspection PhpUndefinedMethodInspection */
 $table = \MemberModel::getTable();
 
 
 /**
  * Config
  */
-$GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = ['Richardhj\ContaoFerienpassBundle\Helper\UserAccount', 'setRequiredFields'];
+$GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [UserAccount::class, 'setRequiredFields'];
 
 
 /**

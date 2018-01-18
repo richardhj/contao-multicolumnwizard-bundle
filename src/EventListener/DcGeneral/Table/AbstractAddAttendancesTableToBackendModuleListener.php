@@ -16,7 +16,7 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table;
 
 use MetaModels\Events\MetaModelsBootEvent;
 
-class AbstractAddAttendancesTableToBackendModuleListener
+abstract class AbstractAddAttendancesTableToBackendModuleListener
 {
 
     /**

@@ -10,17 +10,24 @@ services:
 
     richardhj.ferienpass.application_system.firstcome:
         class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome
+        factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createFirstCome]
         lazy: true
 
     richardhj.ferienpass.application_system.lot:
         class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot
+        factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createLot]
         lazy: true
 
     richardhj.ferienpass.application_system:
+        class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\AbstractApplicationSystem
         factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', create]
 
     richardhj.ferienpass.model.participant:
         class: Richardhj\ContaoFerienpassBundle\Model\Participant
+        arguments:
+            - '@metamodels.factory'
 
     richardhj.ferienpass.model.offer:
         class: Richardhj\ContaoFerienpassBundle\Model\Offer
+        arguments:
+            - '@metamodels.factory'

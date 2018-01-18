@@ -13,11 +13,11 @@
 
 use Contao\System;
 use NotificationCenter\Model\Notification;
+use Richardhj\ContaoFerienpassBundle\Helper\Dca;
 
 $table = Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus::getTable();
 
 
-/** @noinspection PhpUndefinedMethodInspection */
 $GLOBALS['TL_DCA'][$table] = [
 
     // Config
@@ -26,7 +26,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'notCreatable'    => true,
         'notDeletable'    => true,
         'onload_callback' => [
-            ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'addDefaultStatus'],
+            [Dca::class, 'addDefaultStatus'],
         ],
         'sql'             => [
             'keys' => [

@@ -14,11 +14,27 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions;
 
 
+use Contao\FrontendUser;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 
 class DisableAlreadyAttendingParticipantsListener
 {
+
+    /**
+     * @var Participant
+     */
+    private $participantsModel;
+
+    /**
+     * DisableAlreadyAttendingParticipantsListener constructor.
+     *
+     * @param Participant $participantsModel The participants model.
+     */
+    public function __construct(Participant $participantsModel)
+    {
+        $this->participantsModel = $participantsModel;
+    }
 
     /**
      * Disable participants from options that are already attending.
@@ -30,8 +46,8 @@ class DisableAlreadyAttendingParticipantsListener
     public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
     {
         $options        = $event->getResult();
-        $participantIds = Participant::getInstance()
-            ->byParentAndOfferFilter(\FrontendUser::getInstance()->id, $event->getOffer()->get('id'))
+        $participantIds = $this->participantsModel
+            ->byParentAndOfferFilter(FrontendUser::getInstance()->id, $event->getOffer()->get('id'))
             ->getMatchingIds();
 
         foreach ($options as $k => $option) {

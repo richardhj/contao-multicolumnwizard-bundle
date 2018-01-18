@@ -41,11 +41,20 @@ class ApplicationSystemFactory
 
         if (null !== $model) {
             $applicationSystem = System::getContainer()->get('richardhj.ferienpass.application_system.'.$model->type);
-            $applicationSystem->setModel($model);
 
             return $applicationSystem;
         }
 
         return new NoOp();
+    }
+
+    public static function createFirstCome()
+    {
+        return new FirstCome(ApplicationSystemModel::findFirstCome());
+    }
+
+    public function createLot()
+    {
+        return new Lot(ApplicationSystemModel::findLot());
     }
 }

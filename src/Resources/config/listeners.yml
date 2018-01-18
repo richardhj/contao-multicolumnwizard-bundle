@@ -10,10 +10,12 @@ services:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\AgeFilterSettingTypeFactory
         tags:
             - { name: metamodels.filter_factory }
+
     richardhj.ferienpass.metamodels.filter.attendance_available.factory:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\AttendanceAvailableFilterSettingTypeFactory
         tags:
             - { name: metamodels.filter_factory }
+
     richardhj.ferienpass.metamodels.filter.age.filter_setting_renderer_listener:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\EventListener\AgeFilterSettingTypeRendererListener
         arguments:
@@ -41,14 +43,15 @@ services:
                 method: modelToLabel
               }
 
-
     richardhj.ferienpass.listener.user_application.add_attendance_status_confirmation:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\AddAttendanceStatusConfirmationListener
         tags:
-            - { name: kernel.event_listener, event: 'model.post-save' }
+            - { name: kernel.event_listener, event: 'model.post-save', method: 'handle' }
 
     richardhj.ferienpass.listener.user_application.build_participant_options.disable_already_attending:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableAlreadyAttendingParticipantsListener
+        arguments:
+            - "@richardhj.ferienpass.model.participant"
         tags:
             - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
@@ -58,7 +61,9 @@ services:
             - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
     richardhj.ferienpass.listener.user_application.build_participant_options.disable_wrong_age:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableWrongeAgeParticipantsListener
+        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableWrongAgeParticipantsListener
+        calls:
+            - [setContainer, ["@service_container"]]
         tags:
             - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
@@ -72,17 +77,19 @@ services:
     richardhj.ferienpass.listener.notification.attendance_status_new:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\NewAttendanceStatusListener
         tags:
-            - { name: kernel.event_listener, event: 'model.post-save' }
+            - { name: kernel.event_listener, event: 'model.post-save', method: 'handle' }
 
     richardhj.ferienpass.listener.notification.attendance_status_changed:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\ChangedAttendanceStatusListener
         tags:
-            - { name: kernel.event_listener, event: 'model.post-save' }
+            - { name: kernel.event_listener, event: 'model.post-save', method: 'handle' }
 
     richardhj.ferienpass.listener.notification.cron_reminders:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\TriggerCronRemindersListener
+        arguments:
+            - "@database_connection"
         tags:
-            - { name: kernel.event_listener, event: 'cron.hourly' }
+            - { name: kernel.event_listener, event: 'cron.hourly', method: 'handle' }
 
     richardhj.ferienpass.hook.calendar.ferienpass_items:
         class: Richardhj\ContaoFerienpassBundle\EventListener\AddCalendarEventsListener
@@ -105,7 +112,7 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'model.pre-save', method: handle }
 
-    richardhj.ferienpass.listener.application_system.first_come.attendance_status:
+    richardhj.ferienpass.listener.application_system.first_come.attendance_status.dc_general:
         class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\FirstComeAttendanceStatusListener
         arguments:
             - "@richardhj.ferienpass.application_system"
@@ -126,72 +133,9 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'model.pre-save', method: handle }
 
-    richardhj.ferienpass.listener.application_system.lot.attendance_status:
+    richardhj.ferienpass.listener.application_system.lot.attendance_status.dc_general:
         class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\LotAttendanceStatusListener
         arguments:
             - "@richardhj.ferienpass.application_system"
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-persist', method: handleDcGeneral }
-
-    richardhj.ferienpass.listener.dc_general.table.data_processing.build_widget:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\BuildWidgetListener
-        arguments:
-            - "@metamodels.filter_setting_factory"
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.build-widget', method: handle }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.build_metamodel_operations:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\BuildMetaModelOperationsListener
-        tags:
-            - { name: kernel.event_listener, event: 'metamodels.dc-general.events.metamodel.build.metamodel.operations', method: handle }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_participant.build_metamodel_operations:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\BuildMetaModelOperationsListener
-        tags:
-            - { name: kernel.event_listener, event: 'metamodels.dc-general.events.metamodel.build.metamodel.operations', method: handle }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.attendances_operation_button:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\AttendancesOperationButtonListener
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-operation-button', method: handle }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.attendances_populate_environment:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\PopulateAttendancesEnvironmentListener
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', method: handle, priority: 200 }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_participant.attendances_populate_environment:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\PopulateAttendancesEnvironmentListener
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', method: handle, priority: 200 }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_participant.model_to_label:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\PopulateAttendancesEnvironmentListener
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle, priority: -10 }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_ferienpasss.application_list_max_post_persist:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\MaxApplicationsPostPersistListener
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: handle }
-
-    richardhj.ferienpass.listener.dc_general.table.mm_ferienpasss.application_list_max_post_persist:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\TriggerSyncPostPersist
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: handle }
-
-    richardhj.ferienpass.listener.dc_general.table.data_processing.sort_attribute_options:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\SortAttributeOptionsListener
-        arguments:
-            - "@database.connection"
-            - "@richardhj.ferienpass.model.offer"
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-property-options', method: handle }
-
-    richardhj.ferienpass.listener.dc_general.table.data_processing.filter_options:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\FilterOptionsListener
-        arguments:
-            - "@database.connection"
-            - "@richardhj.ferienpass.model.offer"
-        tags:
-            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-property-options', method: handle }

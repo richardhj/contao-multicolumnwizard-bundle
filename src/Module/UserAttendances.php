@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
@@ -16,12 +16,14 @@ namespace Richardhj\ContaoFerienpassBundle\Module;
 use Contao\Controller;
 use Contao\Input;
 use Contao\RequestToken;
+use Contao\System;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
+use Symfony\Component\Security\Csrf\CsrfToken;
 
 
 /**
@@ -55,6 +57,10 @@ class UserAttendances extends Items
      */
     protected function compile()
     {
+        $container = System::getContainer();
+        /** @var Participant $participantsModel */
+        $participantsModel = $container->get('richardhj.ferienpass.model.participant');
+
         /*
          * Delete attendance
          */
@@ -63,13 +69,13 @@ class UserAttendances extends Items
             $attendanceToDelete = Attendance::findByPk($id);
 
             // Validate request token
-            if (!RequestToken::validate($rt)) {
+            if (!$container->get('security.csrf.token_manager')->isTokenValid(new CsrfToken($container->getParameter('contao.csrf_token_name'), $rt))) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['tokenRetry']);
             } // Check for existence
             elseif (null === $attendanceToDelete) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteNotFound']);
             } // Check for permission
-            elseif (!Participant::getInstance()->isProperChild($attendanceToDelete->participant, $this->User->id)) {
+            elseif (!$participantsModel->isProperChild($attendanceToDelete->participant, $this->User->id)) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteMissingPermission']);
                 \System::log(
                     sprintf(
@@ -112,7 +118,7 @@ class UserAttendances extends Items
                         break;
 
                     case 'participant':
-                        $rows[0][] = Participant::getInstance()->getMetaModel()->getAttribute($key)->getName();
+                        $rows[0][] = $participantsModel->getMetaModel()->getAttribute($key)->getName();
                         break;
 
                     case 'details':
@@ -141,7 +147,7 @@ class UserAttendances extends Items
                             break;
 
                         case 'participant':
-                            $value = Participant::getInstance()->findById($attendances->participant)->get($f[1]);
+                            $value = $participantsModel->findById($attendances->participant)->get($f[1]);
                             break;
 
                         case 'state':
@@ -174,7 +180,7 @@ class UserAttendances extends Items
                                         sprintf(
                                             $GLOBALS['TL_LANG']['MSC']['attendanceConfirmDeleteLink'],
                                             $item->parseAttribute('name')['text'],
-                                            Participant::getInstance()
+                                            $participantsModel
                                                 ->findById($attendances->participant)
                                                 ->parseAttribute('name')['text']
                                         )

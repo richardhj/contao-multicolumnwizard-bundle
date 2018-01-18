@@ -20,7 +20,7 @@ use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionI
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
-class AbstractAttendancePopulateEnvironmentListener
+abstract class AbstractAttendancePopulateEnvironmentListener
 {
 
     /**

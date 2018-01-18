@@ -3,13 +3,15 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
+
+use Richardhj\ContaoFerienpassBundle\Helper\Dca;
 
 
 /**
@@ -51,7 +53,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['document'] = [
     'label'            => &$GLOBALS['TL_LANG']['tl_module']['document'],
     'exclude'          => true,
     'inputType'        => 'select',
-    'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getDocumentChoices'],
+    'options_callback' => [Dca::class, 'getDocumentChoices'],
     'eval'             => [
         'includeBlankOption' => true,
         'chosen'             => true,
@@ -64,7 +66,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['metamodel_child_list_view'] = [
     'label'            => &$GLOBALS['TL_LANG']['tl_content']['metamodel_child_list_view'],
     'exclude'          => true,
     'inputType'        => 'select',
-    'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getAllMetaModelRenderSettings'],
+    'options_callback' => [Dca::class, 'getAllMetaModelRenderSettings'],
     'default'          => '',
     'eval'             =>
         [

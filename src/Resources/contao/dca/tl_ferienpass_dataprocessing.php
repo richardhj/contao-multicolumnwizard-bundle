@@ -3,15 +3,17 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
+use MetaModels\Factory;
 use MetaModels\IMetaModelsServiceContainer;
+use Richardhj\ContaoFerienpassBundle\Helper\Dca;
 
 $table = Richardhj\ContaoFerienpassBundle\Model\DataProcessing::getTable();
 
@@ -180,7 +182,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'metamodel_view'             => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_view'],
             'inputType'        => 'select',
-            'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getOffersMetaModelRenderSettings'],
+            'options_callback' => [Dca::class, 'getOffersMetaModelRenderSettings'],
             'eval'             => [
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
@@ -292,14 +294,11 @@ $GLOBALS['TL_DCA'][$table] = [
                         'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_attribute'],
                         'inputType'        => 'conditionalselect',
                         'options_callback' => function () {
-                            global $container;
+                            /** @var Factory $factory */
+                            $factory = \Contao\System::getContainer()->get('metamodels.factory');
+                            $metaModel        = $factory->getMetaModel('mm_ferienpass');
 
                             $return = [];
-
-                            /** @var IMetaModelsServiceContainer $serviceContainer */
-                            $serviceContainer = $container['metamodels-service-container'];
-                            $metaModel        = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass');
-
                             foreach ($metaModel->getAttributes() as $attrName => $attribute) {
                                 $return[$attrName] = $attribute->getName();
                             }
@@ -412,7 +411,7 @@ $GLOBALS['TL_DCA'][$table] = [
                     'metamodel_attribute' => [
                         'label'            => &$GLOBALS['TL_LANG'][$table]['metamodel_attribute'],
                         'inputType'        => 'conditionalselect',
-                        'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getMetaModelsAttributes'],
+                        'options_callback' => [Dca::class, 'getMetaModelsAttributes'],
                         'eval'             => [
                             'condition' => 'mm_ferienpass',
                             'chosen'    => true,

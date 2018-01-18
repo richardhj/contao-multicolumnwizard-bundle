@@ -16,6 +16,7 @@ use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Model;
 use Contao\PageModel;
+use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\GenerateFrontendUrlEvent;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
@@ -65,9 +66,8 @@ class RedirectShortUrl
     {
         $metaModel = $this->factory->getMetaModel('mm_ferienpass');
 
-        // TODO fill this vars properly
-        $viewId         = 4;
-        $listPageId     = 10;
+        $viewId         = System::getContainer()->getParameter('richardhj.ferienpass.metamodel_list.view.id');
+        $listPageId     = System::getContainer()->getParameter('richardhj.ferienpass.list_page.id');
         $filter         = $metaModel->getEmptyFilter();
         $filterVariants = clone $filter;
 

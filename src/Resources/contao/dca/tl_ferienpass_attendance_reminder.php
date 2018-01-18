@@ -3,14 +3,15 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
+use Doctrine\DBAL\Connection;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
 $table = Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder::getTable();
@@ -68,8 +69,8 @@ $GLOBALS['TL_DCA'][$table] = [
                 'label'      => &$GLOBALS['TL_LANG'][$table]['delete'],
                 'href'       => 'act=delete',
                 'icon'       => 'delete.gif',
-                'attributes' => 'onclick="if (!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm']
-                                . '\')) return false; Backend.getScrollOffset();"',
+                'attributes' => 'onclick="if (!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm']
+                                .'\')) return false; Backend.getScrollOffset();"',
             ],
             'show'   => [
                 'label' => &$GLOBALS['TL_LANG'][$table]['show'],
@@ -113,7 +114,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'inputUnit',
             'options'   => [
                 'hours',
-                'days'
+                'days',
             ],
             'eval'      => [
                 'doNotCopy' => true,
@@ -129,12 +130,17 @@ $GLOBALS['TL_DCA'][$table] = [
             'foreignKey'       => 'tl_nc_notification.title',
             'filter'           => true,
             'options_callback' => function () {
-                $notifications = \Database::getInstance()
-                    ->query(
-                        "SELECT id,title FROM tl_nc_notification WHERE type='application_list_reminder' ORDER BY title"
-                    );
+                /** @var Connection $connection */
+                $connection    = \Contao\System::getContainer()->get('database_connection');
+                $notifications = $connection->createQueryBuilder()
+                    ->select('id', 'title')
+                    ->from('tl_nc_notification')
+                    ->where('type=:type')
+                    ->orderBy('title')
+                    ->setParameter('type', 'application_list_reminder')
+                    ->execute();
 
-                return $notifications->fetchEach('title');
+                return $notifications->fetchAll(\PDO::FETCH_COLUMN, 'title');
             },
             'eval'             => [
                 'mandatory'          => true,
@@ -142,7 +148,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
                 'chosen'             => true,
-                'submitOnChange'     => true
+                'submitOnChange'     => true,
             ],
             //            'wizard'           => [
             //                function (DcCompat $dc) {
@@ -172,8 +178,8 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'              => "int(10) unsigned NOT NULL default '0'",
             'relation'         => [
                 'type' => 'hasOne',
-                'load' => 'eager'
-            ]
+                'load' => 'eager',
+            ],
         ],
         'attendance_status' => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['attendance_status'],

@@ -30,7 +30,7 @@ class AddAttendanceStatusConfirmationListener
      *
      * @throws \Exception
      */
-    public function addAttendanceStatusMessage(PostSaveModelEvent $event)
+    public function handle(PostSaveModelEvent $event)
     {
         $attendance = $event->getModel();
         if (!$attendance instanceof Attendance) {

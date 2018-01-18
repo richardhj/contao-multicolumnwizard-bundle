@@ -8,3 +8,6 @@ parameters:
       - waitlisted
       - waiting
       - error
+
+    # Age check method can be - exact or - vague_on_year
+    richardhj.ferienpass.age_check_method: exact

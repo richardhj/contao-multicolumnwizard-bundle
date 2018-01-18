@@ -43,7 +43,7 @@ class SetCustomViewListener
      *
      * @param PopulateEnvironmentEvent $event
      */
-    public function onPopulateEnvironment(PopulateEnvironmentEvent $event)
+    public function handle(PopulateEnvironmentEvent $event)
     {
         $environment = $event->getEnvironment();
 

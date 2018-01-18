@@ -3,22 +3,20 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
+use Richardhj\ContaoFerienpassBundle\Helper\Dca;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
 
-global $container;
 $table = Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable();
 
-
-/** @noinspection PhpUndefinedMethodInspection */
 $GLOBALS['TL_DCA'][$table] = [
 
     // Config
@@ -27,7 +25,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'notCreatable'    => true,
         'notDeletable'    => true,
         'onload_callback' => [
-            ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'addDefaultApplicationSystems'],
+            [Dca::class, 'addDefaultApplicationSystems'],
         ],
         'sql'             => [
             'keys' => [

@@ -3,17 +3,17 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
+use Contao\MemberModel;
+use Contao\System;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
-use Richardhj\ContaoFerienpassBundle\Model\Offer;
-use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use MetaModels\IItem;
 use MetaModels\Items;
 
@@ -46,15 +46,15 @@ $GLOBALS['TL_DCA'][$table] = [
             'default'                                  => [
                 'source' => $table,
             ],
-            Offer::getInstance()->getTableName()       => [
-                'source' => Offer::getInstance()->getTableName(),
+            'mm_ferienpass'       => [
+                'source' => 'mm_ferienpass',
             ],
-            Participant::getInstance()->getTableName() => [
-                'source' => Participant::getInstance()->getTableName(),
+            'mm_participant' => [
+                'source' => 'mm_participant',
             ],
         ],
         'child_list'     => [
-            Offer::getInstance()->getTableName() => [
+            'mm_ferienpass' => [
                 'fields' => ['tstamp'],
             ],
             $table                               => [
@@ -68,7 +68,7 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'childCondition' => [
             [
-                'from'   => Offer::getInstance()->getTableName(),
+                'from'   => 'mm_ferienpass',
                 'to'     => $table,
                 'setOn'  => [
                     [
@@ -85,7 +85,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 ],
             ],
             [
-                'from'   => Participant::getInstance()->getTableName(),
+                'from'   => 'mm_participant',
                 'to'     => $table,
                 'setOn'  => [
                     [
@@ -216,7 +216,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'tableLookup',
             'eval'      => [
                 'mandatory'        => true,
-                'foreignTable'     => Offer::getInstance()->getTableName(),
+                'foreignTable'     => 'mm_ferienpass',
                 'fieldType'        => 'radio',
                 'listFields'       => [
                     'name'
@@ -228,12 +228,12 @@ $GLOBALS['TL_DCA'][$table] = [
                 // Exclude varbases if they have children
                 'sqlWhere'         => sprintf(
                     '%1$s.varbase=0 OR (%1$s.varbase=1 AND (SELECT COUNT(*) FROM %1$s c WHERE c.varbase=0 AND c.vargroup=%1$s.id)=0)',
-                    Offer::getInstance()->getTableName()
+                    'mm_ferienpass'
                 ),
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
-                iterator_to_array((Offer::getInstance()->findAll() ?: new Items([]))),
+                iterator_to_array((System::getContainer()->get('richardhj.ferienpass.model.offer')->findAll() ?: new Items([]))),
                 function (array $carry, IItem $item) {
                     $carry[$item->get('id')] = $item->get(
                         'name'
@@ -250,13 +250,13 @@ $GLOBALS['TL_DCA'][$table] = [
             'inputType' => 'tableLookup',
             'eval'      => [
                 'mandatory'        => true,
-                'foreignTable'     => Participant::getInstance()->getTableName(),
+                'foreignTable'     => 'mm_participant',
                 'fieldType'        => 'radio',
                 'listFields'       => [
                     'name',
 //                    'dateOfBirth',
-                    \MemberModel::getTable().'.firstname',
-                    \MemberModel::getTable().'.lastname',
+                    MemberModel::getTable().'.firstname',
+                    MemberModel::getTable().'.lastname',
 
                 ],
                 'customLabels' => [
@@ -267,11 +267,11 @@ $GLOBALS['TL_DCA'][$table] = [
                 ],
                 'searchFields' => [
                     'name',
-                    \MemberModel::getTable().'.firstname',
-                    \MemberModel::getTable().'.lastname',
+                    MemberModel::getTable().'.firstname',
+                    MemberModel::getTable().'.lastname',
                 ],
                 'joins'            => [
-                    \MemberModel::getTable() => [
+                    MemberModel::getTable() => [
                         'type' => 'INNER JOIN',
                         'jkey' => 'id',
                         'fkey' => 'pmember',
@@ -281,7 +281,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
-                iterator_to_array((Participant::getInstance()->findAll() ?: new Items([]))),
+                iterator_to_array((System::getContainer()->get('richardhj.ferienpass.model.participant')->findAll() ?: new Items([]))),
                 function (array $carry, IItem $item) {
                     $carry[$item->get('id')] = $item->get(
                         'name'
