@@ -16,11 +16,17 @@ namespace Richardhj\ContaoFerienpassBundle\ApplicationSystem;
 
 use Contao\System;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem as ApplicationSystemModel;
+use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
 class ApplicationSystemFactory
 {
 
-    public static function create()
+    /**
+     * @return ApplicationSystemInterface
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     */
+    public static function create(): ApplicationSystemInterface
     {
 //        $time = time();
 //        $expr = $this->connection->getExpressionBuilder();
@@ -40,6 +46,7 @@ class ApplicationSystemFactory
 //        $result = $statement->fetch(\PDO::FETCH_ASSOC);
 
         if (null !== $model) {
+            /** @var ApplicationSystemInterface $applicationSystem */
             $applicationSystem = System::getContainer()->get('richardhj.ferienpass.application_system.'.$model->type);
 
             return $applicationSystem;
@@ -48,12 +55,18 @@ class ApplicationSystemFactory
         return new NoOp();
     }
 
-    public static function createFirstCome()
+    /**
+     * @return FirstCome
+     */
+    public static function createFirstCome(): FirstCome
     {
         return new FirstCome(ApplicationSystemModel::findFirstCome());
     }
 
-    public function createLot()
+    /**
+     * @return Lot
+     */
+    public function createLot(): Lot
     {
         return new Lot(ApplicationSystemModel::findLot());
     }

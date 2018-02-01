@@ -5,10 +5,10 @@
  *
  * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\EventListener;
@@ -25,7 +25,7 @@ class AgeFilterSettingTypeRendererListener extends AbstractFilterSettingTypeRend
     /**
      * {@inheritdoc}
      */
-    protected function getTypes()
+    protected function getTypes(): array
     {
         return ['age'];
     }
@@ -33,7 +33,7 @@ class AgeFilterSettingTypeRendererListener extends AbstractFilterSettingTypeRend
     /**
      * {@inheritdoc}
      */
-    protected function getLabelParameters(EnvironmentInterface $environment, ModelInterface $model)
+    protected function getLabelParameters(EnvironmentInterface $environment, ModelInterface $model): array
     {
         return $this->getLabelParametersWithAttributeAndUrlParam($environment, $model);
     }

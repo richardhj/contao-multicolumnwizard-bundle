@@ -36,7 +36,7 @@ class FirstCome extends AbstractApplicationSystem
      *
      * @return int
      */
-    public function getMaxApplicationsPerDay()
+    public function getMaxApplicationsPerDay(): int
     {
         return (int)$this->getModel()->maxApplicationsPerDay;
     }

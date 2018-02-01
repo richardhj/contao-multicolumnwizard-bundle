@@ -45,20 +45,27 @@ class FilterOptionsListener
 
     /**
      * @param GetPropertyOptionsEvent $event The event.
+     *
+     * @throws \RuntimeException
      */
-    public function handle(GetPropertyOptionsEvent $event)
+    public function handle(GetPropertyOptionsEvent $event): void
     {
-        if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
-            || ('metamodel_filtering' !== $event->getPropertyName())
+        if (('metamodel_filtering' !== $event->getPropertyName())
+            || ('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
         ) {
             return;
+        }
+
+        $metaModel = $this->offerModel->getMetaModel();
+        if (null === $metaModel) {
+            throw new \RuntimeException('MetaModel not found.');
         }
 
         $statement = $this->connection->createQueryBuilder()
             ->select('id', 'name')
             ->from('tl_metamodel_filter')
             ->where('pid=:metamodel')
-            ->setParameter('metamodel', $this->offerModel->getMetaModel()->get('id'))
+            ->setParameter('metamodel', $metaModel->get('id'))
             ->execute();
 
         $options = $statement->fetchAll(\PDO::FETCH_COLUMN, 'name');

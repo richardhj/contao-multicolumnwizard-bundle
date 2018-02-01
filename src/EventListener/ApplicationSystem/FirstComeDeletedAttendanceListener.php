@@ -28,7 +28,7 @@ class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListen
      *
      * @return void
      */
-    public function handle(DeleteModelEvent $event)
+    public function handle(DeleteModelEvent $event): void
     {
         if (!$this->applicationSystem instanceof FirstCome) {
             return;

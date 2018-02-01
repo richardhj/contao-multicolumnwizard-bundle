@@ -30,15 +30,24 @@ class AddAttendanceStatusConfirmationListener
      *
      * @throws \Exception
      */
-    public function handle(PostSaveModelEvent $event)
+    public function handle(PostSaveModelEvent $event): void
     {
         $attendance = $event->getModel();
         if (!$attendance instanceof Attendance) {
             return;
         }
 
-        $participantName = $attendance->getParticipant()->parseAttribute('name')['text'];
-        $status          = $attendance->getStatus();
+        $participant = $attendance->getParticipant();
+        if (null === $participant) {
+            throw new \RuntimeException('No participant given.');
+        }
+
+        $participantName = $participant->parseAttribute('name')['text'];
+
+        $status = $attendance->getStatus();
+        if (null === $status) {
+            throw new \RuntimeException('No attendance status given.');
+        }
 
         Message::add(
             sprintf(

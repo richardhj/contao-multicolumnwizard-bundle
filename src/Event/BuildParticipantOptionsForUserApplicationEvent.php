@@ -25,26 +25,22 @@ use Symfony\Component\EventDispatcher\Event;
 class BuildParticipantOptionsForUserApplicationEvent extends Event
 {
 
-    const NAME = 'richardhj.ferienpass.user-application.build-participant-options';
-
+    public const NAME = 'richardhj.ferienpass.user-application.build-participant-options';
 
     /**
      * @var IItems
      */
-    protected $participants;
-
+    private $participants;
 
     /**
      * @var IItem
      */
-    protected $offer;
-
+    private $offer;
 
     /**
      * @var array
      */
-    protected $result;
-
+    private $result;
 
     /**
      * BuildParticipantOptionsForUserApplicationEvent constructor.
@@ -64,7 +60,7 @@ class BuildParticipantOptionsForUserApplicationEvent extends Event
     /**
      * @return IItems
      */
-    public function getParticipants()
+    public function getParticipants(): IItems
     {
         return $this->participants;
     }
@@ -73,7 +69,7 @@ class BuildParticipantOptionsForUserApplicationEvent extends Event
     /**
      * @return IItem
      */
-    public function getOffer()
+    public function getOffer(): IItem
     {
         return $this->offer;
     }
@@ -82,7 +78,7 @@ class BuildParticipantOptionsForUserApplicationEvent extends Event
     /**
      * @return array
      */
-    public function getResult()
+    public function getResult(): array
     {
         return $this->result;
     }
@@ -93,7 +89,7 @@ class BuildParticipantOptionsForUserApplicationEvent extends Event
      *
      * @return self
      */
-    public function setResult($result)
+    public function setResult($result): self
     {
         $this->result = $result;
 

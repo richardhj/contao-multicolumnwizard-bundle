@@ -29,7 +29,7 @@ class RichardhjContaoFerienpassExtension extends Extension
      *
      * @var string[]
      */
-    private $files = [
+    private static $files = [
         'config.yml',
         'listeners.yml',
         'services.yml',
@@ -39,12 +39,17 @@ class RichardhjContaoFerienpassExtension extends Extension
     ];
 
     /**
-     * {@inheritDoc}
+     * Loads a specific configuration.
+     *
+     * @param array            $configs
+     * @param ContainerBuilder $container
+     *
+     * @throws \Exception
      */
-    public function load(array $configs, ContainerBuilder $container)
+    public function load(array $configs, ContainerBuilder $container): void
     {
         $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        foreach ($this->files as $file) {
+        foreach (self::$files as $file) {
             $loader->load($file);
         }
     }

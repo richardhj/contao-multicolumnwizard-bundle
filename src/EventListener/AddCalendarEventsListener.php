@@ -35,14 +35,12 @@ class AddCalendarEventsListener
      */
     private $metaModelsFactory;
 
-
     /**
      * All attributes possible for one event
      *
      * @var array
      */
     protected static $eventAttributes;
-
 
     /**
      * Define event attributes
@@ -56,16 +54,14 @@ class AddCalendarEventsListener
         $this->metaModelsFactory = $factory;
     }
 
-
     /**
      * Get the event attributes array with name=>translatedName
      *
      * @return array
      */
-    public static function getEventAttributesTranslated()
+    public static function getEventAttributesTranslated(): array
     {
-        return array_combine
-        (
+        return array_combine(
             static::getEventAttributes(),
             array_map(
                 function ($field) {
@@ -77,13 +73,12 @@ class AddCalendarEventsListener
         );
     }
 
-
     /**
      * Get the event attributes array
      *
      * @return array
      */
-    public static function getEventAttributes()
+    public static function getEventAttributes(): array
     {
         return static::$eventAttributes;
     }
@@ -101,7 +96,7 @@ class AddCalendarEventsListener
      * @internal param int $calendarRangeEnd
      * @internal param \Events $module
      */
-    public function onGetAllEvents($events, $calendars)
+    public function onGetAllEvents($events, $calendars): array
     {
         /** @type \Model $objPage */
         global $objPage;
@@ -110,6 +105,9 @@ class AddCalendarEventsListener
         foreach ($calendars as $calendarId) {
             /** @type \Model $calendar */
             $calendar = CalendarModel::findById($calendarId);
+            if (null === $calendar) {
+                continue;
+            }
 
             if (!$calendar->addMetamodel) {
                 continue;
@@ -117,8 +115,6 @@ class AddCalendarEventsListener
 
             // Get MetaModel object
             $metaModel = $this->metaModelsFactory->getMetaModel($calendar->metamodel);
-
-            // Skip if MetaModel not found
             if (null === $metaModel) {
                 continue;
             }
@@ -133,16 +129,17 @@ class AddCalendarEventsListener
                 $end     = 0;
 
                 // Walk each associated attribute
-                foreach (deserialize($calendar->metamodelFields, true) as $attribute) {
+                foreach ((array)deserialize($calendar->metamodelFields, true) as $attribute) {
                     $event[$attribute['calendar_field']] = $items->getItem()->get($attribute['metamodel_field']);
 
                     switch ($attribute['calendar_field']) {
                         case 'startDate':
                             $event[$attribute['calendar_field']] = ToolboxOfferDate::offerStart($items->getItem());
                             $start                               = $event[$attribute['calendar_field']];
-                            $addTime                             = in_array(
+                            $addTime                             = \in_array(
                                 $items->getItem()->getAttribute($attribute['metamodel_field'])->get('timetype'),
-                                ['datim', 'time']
+                                ['datim', 'time'],
+                                true
                             );
                             break;
 
@@ -156,7 +153,7 @@ class AddCalendarEventsListener
                 $key   = date('Ymd', $start);
                 $date  = Date::parse($objPage->dateFormat, $start);
                 $day   = $GLOBALS['TL_LANG']['DAYS'][date('w', $start)];
-                $month = $GLOBALS['TL_LANG']['MONTHS'][(date('n', $start) - 1)];
+                $month = $GLOBALS['TL_LANG']['MONTHS'][date('n', $start) - 1];
 
                 $span = ContaoCalendar::calculateSpan($start, $end);
 
@@ -174,7 +171,7 @@ class AddCalendarEventsListener
                             Date::parse($objPage->datimFormat, $start),
                             Date::parse($objPage->datimFormat, $end)
                         );
-                    } elseif ($start == $end) {
+                    } elseif ($start === $end) {
                         $time = Date::parse($objPage->timeFormat, $start);
                     } else {
                         $time = sprintf(
@@ -196,7 +193,7 @@ class AddCalendarEventsListener
                 $event['target']   = '';
                 $event['title']    = specialchars($event['title'], true);
 //				$arrEvent['href'] = $this->generateEventUrl($objEvents, $strUrl);
-                $event['class'] = ($event['cssClass'] != '') ? ' '.$event['cssClass'] : '';
+                $event['class'] = ('' !== $event['cssClass']) ? ' '.$event['cssClass'] : '';
 //				$arrEvent['recurring'] = $recurring;
 //				$arrEvent['until'] = $until;
                 $event['begin']      = $start;

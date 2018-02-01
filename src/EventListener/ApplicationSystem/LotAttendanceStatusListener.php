@@ -30,7 +30,7 @@ class LotAttendanceStatusListener extends AbstractApplicationSystemListener
      *
      * @return void
      */
-    public function handle(PreSaveModelEvent $event)
+    public function handle(PreSaveModelEvent $event): void
     {
         if (!$this->applicationSystem instanceof Lot) {
             return;
@@ -67,7 +67,7 @@ class LotAttendanceStatusListener extends AbstractApplicationSystemListener
      *
      * @return void
      */
-    public function handleDcGeneral(PrePersistModelEvent $event)
+    public function handleDcGeneral(PrePersistModelEvent $event): void
     {
         if (!$this->applicationSystem instanceof Lot) {
             return;

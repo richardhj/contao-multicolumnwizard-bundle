@@ -43,7 +43,7 @@ class DisableAlreadyAttendingParticipantsListener
      *
      * @return void
      */
-    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event): void
     {
         $options        = $event->getResult();
         $participantIds = $this->participantsModel
@@ -56,7 +56,7 @@ class DisableAlreadyAttendingParticipantsListener
                 continue;
             }
 
-            if (in_array($option['value'], $participantIds)) {
+            if (\in_array($option['value'], $participantIds, false)) {
                 // Disable option
                 $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(

@@ -35,29 +35,25 @@ abstract class AbstractSimpleMetaModel
     protected $metaModel;
 
     /**
-     * @var Factory
-     */
-    private $factory;
-
-    /**
      * Load the MetaModel settings
      *
      * @param Factory $factory
      * @param string  $tableName
+     *
+     * @throws \RuntimeException
      */
     public function __construct(Factory $factory, string $tableName)
     {
-        $this->factory   = $factory;
-        $this->metaModel = $this->factory->getMetaModel($tableName);
+        $this->metaModel = $factory->getMetaModel($tableName);
         if (null === $this->metaModel) {
-            return;
+            throw new \RuntimeException('Failed creating MetaModel.');
         }
     }
 
     /**
      * Return the MetaModel object
      *
-     * @return \MetaModels\IMetaModel|null
+     * @return \MetaModels\IMetaModel
      */
     public function getMetaModel(): IMetaModel
     {

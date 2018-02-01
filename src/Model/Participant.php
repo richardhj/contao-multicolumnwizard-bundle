@@ -34,6 +34,8 @@ class Participant extends AbstractSimpleMetaModel
      * Participant constructor.
      *
      * @param Factory $factory
+     *
+     * @throws \RuntimeException
      */
     public function __construct(Factory $factory)
     {
@@ -73,16 +75,11 @@ class Participant extends AbstractSimpleMetaModel
      * @param integer $parentId
      *
      * @return IFilterRule
-     * @throws \LogicException
      */
-    protected function byParentFilterRule(int $parentId): IFilterRule
+    private function byParentFilterRule(int $parentId): IFilterRule
     {
-        return new SimpleQuery(
-            sprintf(
-                'SELECT id FROM %1$s WHERE %2$s=?',
-                $this->getMetaModel()->getTableName(),
-                'pmember'
-            ),
+        $metaModel = $this->getMetaModel();
+        return new SimpleQuery("SELECT id FROM {$metaModel->getTableName()} WHERE pmember=?",
             [$parentId]
         );
     }
@@ -124,7 +121,7 @@ class Participant extends AbstractSimpleMetaModel
      *
      * @return IFilterRule
      */
-    protected function byOfferFilterRule(int $offerId): IFilterRule
+    private function byOfferFilterRule(int $offerId): IFilterRule
     {
         $attendances = Attendance::findByOffer($offerId);
         if (null === $attendances) {
@@ -150,6 +147,6 @@ class Participant extends AbstractSimpleMetaModel
             return false;
         }
 
-        return $parentId == $child->get('pmember')['id'];
+        return $parentId === $child->get('pmember')['id'];
     }
 }

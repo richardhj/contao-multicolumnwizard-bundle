@@ -33,15 +33,17 @@ class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
      * @param BuildParticipantOptionsForUserApplicationEvent $event The event.
      *
      * @return void
+     * @throws \RuntimeException
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      */
-    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event): void
     {
         if (null === ($offerStart = ToolboxOfferDate::offerStart($event->getOffer()))) {
             return;
         }
 
         $options       = $event->getResult();
-        $dateTimeOffer = new DateTime('@' . $offerStart);
+        $dateTimeOffer = new DateTime('@'.$offerStart);
 
         foreach ($options as $k => $option) {
             // Skip if already disabled
@@ -49,15 +51,17 @@ class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
                 continue;
             }
 
-            $dateTimeOfBirth = new DateTime(
-                '@' . $event
-                    ->getParticipants()
-                    ->reset()
-                    ->getItem()
-                    ->getMetaModel()
-                    ->findById($option['value'])
-                    ->get('dateOfBirth')
-            );
+            $participant = $event
+                ->getParticipants()
+                ->reset()
+                ->getItem()
+                ->getMetaModel()
+                ->findById($option['value']);
+            if (null === $participant) {
+                throw new \RuntimeException('Participant not found: ID '.$option['value']);
+            }
+
+            $dateTimeOfBirth = new DateTime('@'.$participant->get('dateOfBirth'));
 
             // Calculate age at offer's date
             $ageOnOffer           = $dateTimeOfBirth->getAge($dateTimeOffer);
@@ -66,13 +70,15 @@ class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
             switch ($this->container->getParameter('richardhj.ferienpass.age_check_method')) {
                 case 'vague_on_year':
                     $dateOffer      = new Date($offerStart);
-                    $ageOnYearBegin = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearBegin)));
-                    $ageOnYearEnd   = $dateTimeOfBirth->getAge((new DateTime('@' . $dateOffer->yearEnd)));
+                    $ageOnYearBegin = $dateTimeOfBirth->getAge(new DateTime('@'.$dateOffer->yearBegin));
+                    $ageOnYearEnd   = $dateTimeOfBirth->getAge(new DateTime('@'.$dateOffer->yearEnd));
                     foreach (array_unique([$ageOnOffer, $ageOnYearBegin, $ageOnYearEnd]) as $age) {
-                        $offersWithAgeAllowed = array_unique(array_merge(
-                            $event->getOffer()->getAttribute('age')->searchFor($age),
-                            $offersWithAgeAllowed
-                        ));
+                        $offersWithAgeAllowed = array_unique(
+                            array_merge(
+                                $event->getOffer()->getAttribute('age')->searchFor($age),
+                                $offersWithAgeAllowed
+                            )
+                        );
                     }
                     break;
 
@@ -82,9 +88,10 @@ class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
                     break;
             }
 
-            $isAgeAllowed = in_array(
+            $isAgeAllowed = \in_array(
                 $event->getOffer()->get('id'),
-                $offersWithAgeAllowed
+                $offersWithAgeAllowed,
+                true
             );
 
             if (!$isAgeAllowed) {

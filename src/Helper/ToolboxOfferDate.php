@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Helper;
@@ -79,7 +79,7 @@ class ToolboxOfferDate
      *
      * @return IAttribute
      */
-    public static function fetchDateAttribute(IItem $item)
+    public static function fetchDateAttribute(IItem $item): IAttribute
     {
         return $item->getAttribute('date_period');
     }
@@ -90,7 +90,7 @@ class ToolboxOfferDate
      *
      * @return IItem|null
      */
-    protected static function fetchOffer($offer)
+    protected static function fetchOffer($offer): ?IItem
     {
         if ($offer instanceof IItem) {
             if ('mm_ferienpass' !== $offer->getMetaModel()->getTableName()) {

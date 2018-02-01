@@ -13,12 +13,6 @@
 
 namespace Richardhj\ContaoFerienpassBundle\ApplicationSystem;
 
-use Contao\Model\Event\PreSaveModelEvent;
-use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
-use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
-use Richardhj\ContaoFerienpassBundle\Model\Attendance;
-use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
-
 
 /**
  * Class Lot

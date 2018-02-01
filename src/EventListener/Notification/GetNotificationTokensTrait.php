@@ -28,26 +28,23 @@ trait GetNotificationTokensTrait
      *
      * @return array
      */
-    private static function getNotificationTokens($participant, $offer)
+    private static function getNotificationTokens($participant, $offer): array
     {
         $tokens = [];
 
         // Add all offer fields
         foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['offer_' . $name] = $offer->parseAttribute($name)['text'];
+            $tokens['offer_'.$name] = $offer->parseAttribute($name)['text'];
         }
 
         // Add all the participant fields
         foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['participant_' . $name] = $participant->parseAttribute($name)['text'];
+            $tokens['participant_'.$name] = $participant->parseAttribute($name)['text'];
         }
 
         // Add all the parent's member fields
-        $ownerAttribute = $participant->getMetaModel()->getAttributeById(
-            $participant->getMetaModel()->get('owner_attribute')
-        );
-        foreach ($participant->get($ownerAttribute->getColName()) as $k => $v) {
-            $tokens['member_' . $k] = $v;
+        foreach ((array)$participant->get('pmember') as $k => $v) {
+            $tokens['member_'.$k] = $v;
         }
 
         // Add the participant's email

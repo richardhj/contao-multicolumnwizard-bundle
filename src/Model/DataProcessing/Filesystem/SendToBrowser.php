@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
@@ -75,8 +75,9 @@ class SendToBrowser implements FilesystemInterface
 
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
-    public function processFiles(array $files)
+    public function processFiles(array $files): void
     {
         // Generate a zip file
         $zipWriter = new \ZipWriter($this->getModel()->getTmpPath() . '/export.zip');

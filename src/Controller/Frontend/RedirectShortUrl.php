@@ -55,16 +55,26 @@ class RedirectShortUrl
     }
 
     /**
-     * @param string  $itemId  The MetaModel item id of the offer (at least we assume).
+     * @param int     $itemId  The MetaModel item id of the offer.
      * @param Request $request The request.
      *
      * @return void
      *
+     * @throws \UnexpectedValueException When the item id is not numeric
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws \Contao\CoreBundle\Exception\PageNotFoundException
      * @throws RedirectResponseException
      */
     public function __invoke($itemId, Request $request)
     {
+        if (!is_numeric($itemId)) {
+            throw new \UnexpectedValueException('Item ID is no ID, something must be broken.');
+        }
+
         $metaModel = $this->factory->getMetaModel('mm_ferienpass');
+        if (null === $metaModel) {
+            throw new PageNotFoundException('MetaModel could not be found.');
+        }
 
         $viewId         = System::getContainer()->getParameter('richardhj.ferienpass.metamodel_list.view.id');
         $listPageId     = System::getContainer()->getParameter('richardhj.ferienpass.list_page.id');
@@ -81,19 +91,22 @@ class RedirectShortUrl
                 // Redirect directly to the reader page
                 $url = $item->buildJumpToLink($item->getMetaModel()->getView($viewId))['url'];
                 throw new RedirectResponseException($url, 301);
-            } else {
-                // Redirect to the list page with the vargroup as filter
-                /** @var PageModel|Model $jumpTo */
-                $jumpTo = PageModel::findById($listPageId);
-
-                $params   = '/vargroup/'.$item->get('vargroup').'#jumpToMmList';
-                $urlEvent = new GenerateFrontendUrlEvent($jumpTo->row(), $params);
-                $this->dispatcher->dispatch(
-                    ContaoEvents::CONTROLLER_GENERATE_FRONTEND_URL,
-                    $urlEvent
-                );
-                throw new RedirectResponseException($urlEvent->getUrl(), 301);
             }
+
+            // Redirect to the list page with the vargroup as filter
+            /** @var PageModel|Model $jumpTo */
+            $jumpTo = PageModel::findById($listPageId);
+            if (null === $jumpTo) {
+                throw new PageNotFoundException('List page could not be found: '.$listPageId);
+            }
+
+            $params   = '/vargroup/'.$item->get('vargroup').'#jumpToMmList';
+            $urlEvent = new GenerateFrontendUrlEvent($jumpTo->row(), $params);
+            $this->dispatcher->dispatch(
+                ContaoEvents::CONTROLLER_GENERATE_FRONTEND_URL,
+                $urlEvent
+            );
+            throw new RedirectResponseException($urlEvent->getUrl(), 301);
         }
 
         throw new PageNotFoundException(

@@ -17,6 +17,8 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerie
 use ContaoCommunityAlliance\DcGeneral\Contao\DataDefinition\Definition\Contao2BackendViewDefinitionInterface;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\DcGeneral\View\AttendanceAllocationView;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
@@ -29,13 +31,22 @@ class SetCustomViewListener
     private $scopeMatcher;
 
     /**
+     * @var ApplicationSystemInterface
+     */
+    private $applicationSystem;
+
+    /**
      * SetCustomView constructor.
      *
-     * @param RequestScopeDeterminator $requestScopeDeterminator The request scope determinator.
+     * @param RequestScopeDeterminator   $requestScopeDeterminator The request scope determinator.
+     * @param ApplicationSystemInterface $applicationSystem        The current application system.
      */
-    public function __construct(RequestScopeDeterminator $requestScopeDeterminator)
-    {
-        $this->scopeMatcher = $requestScopeDeterminator;
+    public function __construct(
+        RequestScopeDeterminator $requestScopeDeterminator,
+        ApplicationSystemInterface $applicationSystem
+    ) {
+        $this->scopeMatcher      = $requestScopeDeterminator;
+        $this->applicationSystem = $applicationSystem;
     }
 
     /**
@@ -43,21 +54,23 @@ class SetCustomViewListener
      *
      * @param PopulateEnvironmentEvent $event
      */
-    public function handle(PopulateEnvironmentEvent $event)
+    public function handle(PopulateEnvironmentEvent $event): void
     {
         $environment = $event->getEnvironment();
 
         // Already populated or not in Backend? Get out then.
-        if ($environment->getView() || false === $this->scopeMatcher->currentScopeIsBackend()) {
+        if (!$this->applicationSystem instanceof Lot
+            || $environment->getView()
+            || false === $this->scopeMatcher->currentScopeIsBackend()) {
             return;
         }
 
         $definition = $environment->getDataDefinition();
 
         // Not attendances for offer MetaModel
-        if (!($definition->getName() === Attendance::getTable()
-              && 'mm_ferienpass' === $definition->getBasicDefinition()->getParentDataProvider())
-            || !$definition->hasBasicDefinition()
+        if (!$definition->hasBasicDefinition()
+            || !($definition->getName() === Attendance::getTable()
+                 && 'mm_ferienpass' === $definition->getBasicDefinition()->getParentDataProvider())
         ) {
             return;
         }

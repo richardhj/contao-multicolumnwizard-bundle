@@ -31,27 +31,25 @@ class Age extends SimpleLookup
      * Overrides the parent implementation to always return true, as this setting is always optional.
      * @return bool true if all matches shall be returned, false otherwise.
      */
-    public function allowEmpty()
+    public function allowEmpty(): bool
     {
         return true;
     }
-
 
     /**
      * Overrides the parent implementation to always return true, as this setting is always available for FE filtering.
      * @return bool true as this setting is always available.
      */
-    public function enableFEFilterWidget()
+    public function enableFEFilterWidget(): bool
     {
         return true;
     }
-
 
     /**
      * Retrieve the filter parameter name to react on.
      * @return string
      */
-    protected function getParamName()
+    protected function getParamName(): string
     {
         if ($this->get('urlparam')) {
             return $this->get('urlparam');
@@ -66,11 +64,10 @@ class Age extends SimpleLookup
         return null;
     }
 
-
     /**
      * {@inheritdoc}
      */
-    public function prepareRules(IFilter $objFilter, $arrFilterUrl)
+    public function prepareRules(IFilter $objFilter, $arrFilterUrl): void
     {
         $objMetaModel = $this->getMetaModel();
         $objAttribute = $objMetaModel->getAttributeById($this->get('attr_id'));
@@ -86,30 +83,27 @@ class Age extends SimpleLookup
         $objFilter->addFilterRule(new StaticIdList(null));
     }
 
-
     /**
      * {@inheritdoc}
      */
-    public function getParameters()
+    public function getParameters(): array
     {
         return ($strParamName = $this->getParamName()) ? [$strParamName] : [];
     }
-
 
     /**
      * {@inheritdoc}
      */
     public function getParameterFilterNames()
     {
-        if (($strParamName = $this->getParamName())) {
+        if ($strParamName = $this->getParamName()) {
             return [
-                $strParamName => ($this->get('label') ? $this->get('label') : $this->getParamName()),
+                $strParamName => $this->get('label') ? $this->get('label') : $this->getParamName(),
             ];
         }
 
         return [];
     }
-
 
     /**
      * {@inheritdoc}
@@ -119,7 +113,7 @@ class Age extends SimpleLookup
         $arrFilterUrl,
         $arrJumpTo,
         FrontendFilterOptions $objFrontendFilterOptions
-    ) {
+    ): array {
         // If defined as static, return nothing as not to be manipulated via editors.
         if (!$this->enableFEFilterWidget()) {
             return [];
@@ -132,7 +126,7 @@ class Age extends SimpleLookup
         $arrCount = [];
         $arrWidget = [
             'label'     => [
-                ($this->get('label') ? $this->get('label') : $this->getParamName()),
+                $this->get('label') ? $this->get('label') : $this->getParamName(),
                 'GET: '.$this->getParamName(),
             ],
             'inputType' => 'text',
@@ -156,7 +150,7 @@ class Age extends SimpleLookup
     /**
      * {@inheritdoc}
      */
-    public function getParameterDCA()
+    public function getParameterDCA(): array
     {
         return [];
     }
@@ -171,7 +165,7 @@ class Age extends SimpleLookup
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
-    private function addFilterParam($strParam)
+    private function addFilterParam($strParam): void
     {
         $GLOBALS['MM_FILTER_PARAMS'][] = $strParam;
     }

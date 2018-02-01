@@ -14,7 +14,9 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions;
 
 
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
@@ -27,11 +29,12 @@ class DisableDoubleBookingParticipantsListener
      * @param BuildParticipantOptionsForUserApplicationEvent $event The event.
      *
      * @return void
+     * @throws \RuntimeException
      */
-    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event): void
     {
         $options    = $event->getResult();
-        $offerDates = $event->getOffer()->get('date_period');
+        $offerDates = (array)$event->getOffer()->get('date_period');
 
         foreach ($options as $k => $option) {
             // Skip if already disabled
@@ -59,10 +62,14 @@ class DisableDoubleBookingParticipantsListener
             // Fetch all date periods the participant is already attending
             $participantDates = [];
             if (null !== $participateOffers) {
-                while ($participateOffers->next()) {
-                    $participantDates =
-                        array_merge($participantDates, $participateOffers->getItem()->get('date_period'));
-                }
+                $participatingDatePeriods = array_map(
+                    function (IItem $item) {
+                        return $item->get('date_period');
+                    },
+                    iterator_to_array($participateOffers)
+                );
+
+                $participantDates = array_merge(...$participatingDatePeriods);
             }
 
             // Walk every date the participant is already attending to…
@@ -76,6 +83,14 @@ class DisableDoubleBookingParticipantsListener
                             ->getOffer()
                             ->getMetaModel()
                             ->findById($participantDate['item_id']);
+                        if (null === $overlappingOffer) {
+                            throw new \RuntimeException(
+                                'MetaModel item not found: '.ModelId::fromValues(
+                                    $event->getOffer()->getMetaModel()->getTableName(),
+                                    $participantDate['item_id']
+                                )->getSerialized()
+                            );
+                        }
 
                         // Disable option
                         $options[$k]['disabled'] = true;

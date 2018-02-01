@@ -13,7 +13,6 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Event;
 
-use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use MetaModels\IItem;
 use Symfony\Component\EventDispatcher\Event;
 
@@ -25,20 +24,17 @@ use Symfony\Component\EventDispatcher\Event;
 class UserSetApplicationEvent extends Event
 {
 
-    const NAME = 'richardhj.ferienpass.user-application.set-attendance';
-
+    public const NAME = 'richardhj.ferienpass.user-application.set-attendance';
 
     /**
      * @var IItem
      */
     protected $offer;
 
-
     /**
      * @var IItem
      */
     protected $participant;
-
 
     /**
      * UserSetApplicationEvent constructor.
@@ -52,20 +48,18 @@ class UserSetApplicationEvent extends Event
         $this->participant = $participant;
     }
 
-
     /**
      * @return IItem
      */
-    public function getOffer()
+    public function getOffer(): IItem
     {
         return $this->offer;
     }
 
-
     /**
      * @return IItem
      */
-    public function getParticipant()
+    public function getParticipant(): IItem
     {
         return $this->participant;
     }

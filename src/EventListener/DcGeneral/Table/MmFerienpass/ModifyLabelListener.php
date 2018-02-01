@@ -43,8 +43,10 @@ class ModifyLabelListener
      * Show the participant's overall attendances and show an popup link
      *
      * @param ModelToLabelEvent $event The event.
+     *
+     * @throws \RuntimeException
      */
-    public function handle(ModelToLabelEvent $event)
+    public function handle(ModelToLabelEvent $event): void
     {
         // Not attendances for offer MetaModel
         if (!$event->getEnvironment()->getView() instanceof AttendanceAllocationView) {
@@ -76,8 +78,16 @@ class ModifyLabelListener
                     // Wrap current content
                     $args[$k] = sprintf('<span class="name">%s</span>', $v);
 
-                    $metaModel   = $this->metaModelsFactory->getMetaModel('mm_participant');
+                    $metaModel = $this->metaModelsFactory->getMetaModel('mm_participant');
+                    if (null === $metaModel) {
+                        throw new \RuntimeException('MetaModel could not be found.');
+                    }
+
                     $participant = $metaModel->findById($model->getProperty('participant'));
+                    if (null === $participant) {
+                        throw new \RuntimeException('Participant could not be found.');
+                    }
+
                     $dateOfBirth = new DateTime('@'.$participant->get('dateOfBirth'));
                     $member      = MemberModel::findById($participant->get('pmember'));
 

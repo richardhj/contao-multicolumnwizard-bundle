@@ -46,10 +46,10 @@ class SortAttributeOptionsListener
     /**
      * @param GetPropertyOptionsEvent $event The event.
      */
-    public function handle(GetPropertyOptionsEvent $event)
+    public function handle(GetPropertyOptionsEvent $event): void
     {
-        if (('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
-            || ('metamodel_sortby' !== $event->getPropertyName())
+        if (('metamodel_sortby' !== $event->getPropertyName())
+            || ('tl_ferienpass_dataprocessing' !== $event->getModel()->getProviderName())
         ) {
             return;
         }

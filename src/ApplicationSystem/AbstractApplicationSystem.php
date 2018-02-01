@@ -37,7 +37,7 @@ class AbstractApplicationSystem implements ApplicationSystemInterface
     /**
      * @return ApplicationSystem
      */
-    public function getModel(): ?ApplicationSystem
+    public function getModel(): ApplicationSystem
     {
         return $this->model;
     }

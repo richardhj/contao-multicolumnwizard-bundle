@@ -28,7 +28,7 @@ class TriggerSyncPostPersistListener
      *
      * @param PostPersistModelEvent $event The event.
      */
-    public function handle(PostPersistModelEvent $event)
+    public function handle(PostPersistModelEvent $event): void
     {
         $model = $event->getModel();
 
@@ -48,15 +48,14 @@ class TriggerSyncPostPersistListener
                 $ids = [];
                 if (null !== $variants) {
                     $ids = array_map(
-                        function ($item) {
-                            /** @var IItem $item */
+                        function (IItem $item) {
                             return $item->get('id');
                         },
                         iterator_to_array($variants)
                     );
                 }
 
-                $ids = array_merge([$model->getId()], $ids);
+                $ids[] = $model->getId();
 
                 // FIXME getting troubles when using single_xml_file
                 $filterRule = new StaticIdList($ids);

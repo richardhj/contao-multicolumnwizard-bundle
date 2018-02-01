@@ -3,6 +3,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\SetCustomViewListener
         arguments:
             - '@cca.dc-general.scope-matcher'
+            - '@richardhj.ferienpass.application_system'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', method: handle, priority: 150 }
 
@@ -20,8 +21,24 @@ services:
 
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.attendances_operation_button:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\AttendancesOperationButtonListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
         tags:
             - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-operation-button', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.add_attendances_table_to_backend_module:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\AddAttendancesTableToBackendModuleListener
+        arguments:
+            - "@metamodels.view_combination"
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.boot.backend', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_participant.add_attendances_table_to_backend_module:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\AddAttendancesTableToBackendModuleListener
+        arguments:
+            - "@metamodels.view_combination"
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.boot.backend', method: handle }
 
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.attendances_populate_environment:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\PopulateAttendancesEnvironmentListener
@@ -34,6 +51,6 @@ services:
             - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: handle }
 
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpasss.trigger_sync_post_persist:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\TriggerSyncPostPersist
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\TriggerSyncPostPersistListener
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: handle }

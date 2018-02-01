@@ -42,7 +42,7 @@ abstract class AbstractAddAttendancesOperationListener
      *
      * @param BuildMetaModelOperationsEvent $event The event.
      */
-    public function handle(BuildMetaModelOperationsEvent $event)
+    public function handle(BuildMetaModelOperationsEvent $event): void
     {
         if ($this->table !== $event->getMetaModel()->getTableName()) {
             return;

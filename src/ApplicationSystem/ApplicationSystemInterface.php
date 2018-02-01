@@ -20,5 +20,5 @@ use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 interface ApplicationSystemInterface
 {
 
-    public function getModel(): ?ApplicationSystem;
+    public function getModel(): ApplicationSystem;
 }

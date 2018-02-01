@@ -46,7 +46,7 @@ class TriggerCronRemindersListener
      *
      * @internal param CronEvent $event
      */
-    public function handle()
+    public function handle(): void
     {
         /** @var Collection|Attendance $reminders */
         $reminders = AttendanceReminder::findBy(['published=1'], []);
@@ -58,11 +58,11 @@ class TriggerCronRemindersListener
             $remindBefore = deserialize($reminders->remind_before);
             $time         = time();
             $timeEnd      = strtotime(sprintf('+%d %s', $remindBefore['value'], $remindBefore['unit']));
-            $whereStatus  = ($reminders->attendance_status) ? ' AND status='.(int)$reminders->attendance_status : '';
+            $whereStatus  = $reminders->attendance_status ? ' AND status='.(int)$reminders->attendance_status : '';
             $attendances  = Attendance::findBy(
                 [
                     "offer IN(SELECT id FROM mm_ferienpass WHERE published=1 AND id IN (SELECT item_id FROM tl_metamodel_offer_date WHERE start > {$time} AND start <= {$timeEnd}))"
-                    ." AND id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0 AND notification=?)"
+                    .' AND id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0 AND notification=?)'
                     .$whereStatus,
                 ],
                 [$reminders->nc_notification]
@@ -82,7 +82,7 @@ class TriggerCronRemindersListener
      * @param Attendance|Collection $attendances
      * @param int                   $notificationId
      */
-    private function sendAttendanceReminderNotifications(Collection $attendances, int $notificationId)
+    private function sendAttendanceReminderNotifications(Collection $attendances, int $notificationId): void
     {
         /** @var Notification $notification */
         $notification = Notification::findByPk($notificationId);
@@ -97,12 +97,12 @@ class TriggerCronRemindersListener
                 );
 
                 // Mark attendance notification as sent
-                if (in_array(true, $sent)) {
+                if (\in_array(true, $sent, true)) {
                     $time = time();
 
                     try {
                         $this->connection->executeQuery(
-                            "INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)".
+                            'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)'.
                             " VALUES ({$time}, {$attendances->id}, {$notificationId})".
                             " ON DUPLICATE KEY UPDATE tstamp={$time}"
                         );

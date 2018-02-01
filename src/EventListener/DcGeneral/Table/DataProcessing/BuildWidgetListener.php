@@ -38,15 +38,17 @@ class BuildWidgetListener
 
     /**
      * @param BuildWidgetEvent $event The event.
+     *
+     * @throws \RuntimeException
      */
-    public function handle(BuildWidgetEvent $event)
+    public function handle(BuildWidgetEvent $event): void
     {
         $environment = $event->getEnvironment();
         $model       = $event->getModel();
         $property    = $event->getProperty();
 
-        if ('tl_ferienpass_dataprocessing' !== $environment->getDataDefinition()->getName()
-            || 'metamodel_filterparams' !== $property->getName()) {
+        if ('metamodel_filterparams' !== $property->getName()
+            || 'tl_ferienpass_dataprocessing' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 

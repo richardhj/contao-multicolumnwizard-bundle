@@ -348,42 +348,6 @@ class Dca implements EventSubscriberInterface
     }
 
 
-    /**
-     * Add default application systems if none are set
-     *
-     * @category onload_callback
-     */
-    public function addDefaultApplicationSystems()
-    {
-        $systems = ApplicationSystem::getApplicationSystemNames();
-
-        if (null !== \Input::get('act') || ApplicationSystem::countAll() === count($systems)) {
-            return;
-        }
-
-        $rows = [];
-
-        foreach ($systems as $system) {
-            $rows[] = [
-                'type'  => $system,
-                'title' => lcfirst($system),
-            ];
-        }
-
-        foreach ($rows as $row) {
-            if (null !== ApplicationSystem::findByType($row['type'])) {
-                continue;
-            }
-
-            $model = new ApplicationSystem();
-            $model->setRow($row);
-            $model->save();
-        }
-    }
-
-
-
-
 
 
 

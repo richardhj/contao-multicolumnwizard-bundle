@@ -24,8 +24,6 @@ use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 class DisableLimitReachedParticipantsListener
 {
 
-    use GetFerienpassConfigTrait;
-
     /**
      * @var ApplicationSystemInterface
      */
@@ -48,7 +46,7 @@ class DisableLimitReachedParticipantsListener
      *
      * @return void
      */
-    public function handle(BuildParticipantOptionsForUserApplicationEvent $event)
+    public function handle(BuildParticipantOptionsForUserApplicationEvent $event): void
     {
         if (!$this->applicationSystem instanceof FirstCome) {
             return;

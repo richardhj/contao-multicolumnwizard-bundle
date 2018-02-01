@@ -30,7 +30,7 @@ class AttendanceAvailable extends Checkbox
     /**
      * {@inheritdoc}
      */
-    public function prepareRules(IFilter $objFilter, $arrFilterUrl)
+    public function prepareRules(IFilter $objFilter, $arrFilterUrl): void
     {
         $objMetaModel = $this->getMetaModel();
         $strParamName = $this->getParamName();

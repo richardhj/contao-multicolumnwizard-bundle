@@ -28,8 +28,12 @@ class NewAttendanceListener extends AbstractApplicationSystemListener
      * @param UserSetApplicationEvent $event
      *
      * @return void
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     * @throws \RuntimeException
+     * @throws \InvalidArgumentException
      */
-    public function handle(UserSetApplicationEvent $event)
+    public function handle(UserSetApplicationEvent $event): void
     {
         if ($this->applicationSystem instanceof NoOp) {
             Message::addError('Zurzeit sind keine Anmeldungen möglich. Bitte versuchen Sie es später.');

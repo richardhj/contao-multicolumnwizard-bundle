@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
@@ -126,6 +126,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
 
     /**
      * {@inheritdoc}
+     * @throws \League\Flysystem\FilesystemNotFoundException
      */
     public function triggerBackSync()
     {
@@ -134,6 +135,8 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
 
     /**
      * Sync from remote dropbox by fetching the delta (last edited files in dropbox)
+     *
+     * @throws \League\Flysystem\FilesystemNotFoundException
      */
     protected function syncFromRemoteDropbox()
     {

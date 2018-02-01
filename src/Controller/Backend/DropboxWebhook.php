@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
@@ -29,6 +30,7 @@ class DropboxWebhook
      *
      * @return Response
      *
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      * @throws AccessDeniedException
      */
     public function __invoke(Request $request)
@@ -37,7 +39,7 @@ class DropboxWebhook
 
         // Check get parameter
         // Necessary for enabling the webhook via dropbox' app console
-        if (($challenge = $request->query->get('challenge'))) {
+        if ($challenge = $request->query->get('challenge')) {
             return Response::create($challenge);
         }
 

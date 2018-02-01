@@ -12,7 +12,6 @@
  */
 
 use Richardhj\ContaoFerienpassBundle\Helper\Dca;
-use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
 
 $table = Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable();
@@ -124,7 +123,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
             'exclude'   => true,
             'inputType' => 'select',
-            'options'   => ApplicationSystem::getApplicationSystemNames(),
+            //'options'   => ApplicationSystem::getApplicationSystemNames(),
             'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'],
             'eval'      => [
                 'tl_class' => 'w50',

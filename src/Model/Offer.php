@@ -27,6 +27,8 @@ class Offer extends AbstractSimpleMetaModel
      * Offer constructor.
      *
      * @param Factory $factory
+     *
+     * @throws \RuntimeException
      */
     public function __construct(Factory $factory)
     {

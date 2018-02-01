@@ -139,3 +139,11 @@ services:
             - "@richardhj.ferienpass.application_system"
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-persist', method: handleDcGeneral }
+
+    richardhj.ferienpass.hook_listener.user_account:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\UserAccountListener
+        arguments:
+            - "@richardhj.ferienpass.model.participant"
+            - "@event_dispatcher"
+        tags:
+            - { name: 'contao.hook', hook: 'closeAccount' }

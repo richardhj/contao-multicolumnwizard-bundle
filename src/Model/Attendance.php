@@ -3,17 +3,19 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
 
 use Contao\Model;
+use Contao\System;
+use Doctrine\DBAL\Connection;
 use MetaModels\IItem;
 
 
@@ -33,6 +35,16 @@ class Attendance extends Model
 {
 
     use Model\DispatchModelEventsTrait;
+
+    /**
+     * @var Offer
+     */
+    private $offerModel;
+
+    /**
+     * @var Participant
+     */
+    private $participantModel;
 
     /**
      * Table name
@@ -59,12 +71,13 @@ class Attendance extends Model
      * Get attendance's current position
      *
      * @return integer|null if participant not in attendance list (yet) or has error status
+     * @throws \Exception
      */
-    public function getPosition()
+    public function getPosition(): ?int
     {
         /** @var Attendance|\Model\Collection $attendances */
-        $attendances = static::findByOffer($this->offer); // Collection is already ordered
-
+        $attendances = static::findByOffer($this->offer);
+        // Collection is already ordered now
         if (null === $attendances) {
             return null;
         }
@@ -75,7 +88,7 @@ class Attendance extends Model
                 continue;
             }
 
-            if ($attendances->current()->participant == $this->participant) {
+            if ($attendances->current()->participant === $this->participant) {
                 return $i;
             }
         }
@@ -86,10 +99,14 @@ class Attendance extends Model
     /**
      * @return AttendanceStatus|null
      */
-    public function getStatus()
+    public function getStatus(): ?AttendanceStatus
     {
-        /** @var AttendanceStatus $this ->getRelated('status') */
-        return $this->getRelated('status');
+        try {
+            /** @var AttendanceStatus $this ->getRelated('status') */
+            return $this->getRelated('status');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**
@@ -97,7 +114,7 @@ class Attendance extends Model
      */
     public function getOffer(): IItem
     {
-        return Offer::getInstance()->findById($this->offer);
+        return $this->offerModel->findById($this->offer);
     }
 
     /**
@@ -105,7 +122,7 @@ class Attendance extends Model
      */
     public function getParticipant(): IItem
     {
-        return Participant::getInstance()->findById($this->participant);
+        return $this->participantModel->findById($this->participant);
     }
 
     /**
@@ -113,27 +130,30 @@ class Attendance extends Model
      *
      * @param  integer $parentId
      *
-     * @return Attendance|\Model\Collection|null
+     * @return Attendance|\Contao\Model\Collection|null
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      */
     public static function findByParent($parentId)
     {
         //@todo this could be better with an associate db table
 
+        /** @var Participant $participant */
+        $participant = System::getContainer()->get('richardhj.ferienpass.model.participant');
         /** @var \MetaModels\Filter\Filter $filter */
-        $filter = Participant::getInstance()->byParentFilter($parentId);
+        $filter = $participant->byParentFilter($parentId);
 
         $participantIds = $filter->getMatchingIds();
-
         if (empty($participantIds)) {
             return null;
         }
 
         /** @var \Database\Result $result */
         $result = \Database::getInstance()->query(
-            "SELECT * FROM " . static::$strTable . " WHERE participant IN(" . implode(
+            'SELECT * FROM '.static::$strTable.' WHERE participant IN('.implode(
                 ',',
                 $participantIds
-            ) . ") ORDER BY " . static::getOrderBy()
+            ).') ORDER BY '.static::getOrderBy()
         );
 
         return static::createCollectionFromDbResult($result, static::$strTable);
@@ -309,13 +329,23 @@ class Attendance extends Model
      * @param integer $offerId
      *
      * @return bool
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      */
     public static function isNotExistent($participantId, $offerId): bool
     {
-        return !(\Database::getInstance()
-            ->prepare("SELECT id FROM " . static::$strTable . " WHERE participant=? AND offer=?")
-            ->execute($participantId, $offerId)
-            ->numRows);
+        /** @var Connection $connection */
+        $connection = System::getContainer()->get('database_connection');
+
+        return (bool)$connection->createQueryBuilder()
+            ->select('id')
+            ->from(static::$strTable)
+            ->where('participant=:participant')
+            ->andWhere('offer=:offer')
+            ->setParameter('participant', $participantId)
+            ->setParameter('offer', $offerId)
+            ->execute()
+            ->rowCount();
     }
 
     /**

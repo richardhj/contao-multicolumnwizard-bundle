@@ -31,8 +31,10 @@ class Backend
      * Display the current application system at the back end start page
      *
      * @return string
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
      */
-    public function addCurrentApplicationSystemToSystemMessages()
+    public function addCurrentApplicationSystemToSystemMessages(): string
     {
         /** @var AbstractApplicationSystem $applicationSystem */
         $applicationSystem = System::getContainer()->get('richardhj.ferienpass.application_system');
@@ -41,8 +43,8 @@ class Backend
             $name = $applicationSystem->getModel()->title;
             return sprintf('<p class="tl_info">Es läuft aktuell das Anmeldesystem <strong>%s</strong></p>', $name);
 
-        } else {
-            return '<p class="tl_error">Es läuft aktuell <strong>kein</strong> Anmeldesystem. Anmeldungen sind <strong>nicht möglich.</strong></p>';
         }
+
+        return '<p class="tl_error">Es läuft aktuell <strong>kein</strong> Anmeldesystem. Anmeldungen sind <strong>nicht möglich.</strong></p>';
     }
 }

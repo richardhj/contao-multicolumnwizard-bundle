@@ -3,12 +3,12 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
@@ -39,7 +39,7 @@ class ApplicationSystem extends \Model
      *
      * @return ApplicationSystem|null
      */
-    public static function findFirstCome()
+    public static function findFirstCome(): ?ApplicationSystem
     {
         return static::findByType('firstcome');
     }
@@ -50,7 +50,7 @@ class ApplicationSystem extends \Model
      *
      * @return ApplicationSystem|null
      */
-    public static function findLot()
+    public static function findLot(): ?ApplicationSystem
     {
         return static::findByType('lot');
     }
@@ -63,7 +63,7 @@ class ApplicationSystem extends \Model
      *
      * @return ApplicationSystem|null
      */
-    public static function findByType($type)
+    public static function findByType($type): ?ApplicationSystem
     {
         return static::findOneBy('type', $type);
     }
@@ -74,7 +74,7 @@ class ApplicationSystem extends \Model
      *
      * @return ApplicationSystem|null
      */
-    public static function findCurrent()
+    public static function findCurrent(): ?ApplicationSystem
     {
         $t       = static::$strTable;
         $columns = [];
@@ -84,23 +84,5 @@ class ApplicationSystem extends \Model
                      . "') AND $t.published='1'";
 
         return static::findOneBy($columns, []);
-    }
-
-
-    /**
-     * @return array
-     */
-    public static function getApplicationSystemNames(): array
-    {
-        global $container;
-
-        return array_map(
-            function ($v) {
-                list(, , $name) = trimsplit('.', $v);
-
-                return $name;
-            },
-            array_values(preg_grep('/^Richardhj\ContaoFerienpassBundle\.applicationsystem\.(.+)$/', $container->keys()))
-        );
     }
 }

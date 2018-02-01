@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
@@ -16,6 +17,8 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerie
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
 use MetaModels\DcGeneral\Data\Model;
 use MetaModels\IItem;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
@@ -23,29 +26,52 @@ class AttendancesOperationButtonListener
 {
 
     /**
-     * Remove the "edit attendances" operation for variant bases
+     * @var ApplicationSystemInterface
+     */
+    private $applicationSystem;
+
+    /**
+     * AttendancesOperationButtonListener constructor.
+     *
+     * @param ApplicationSystemInterface $applicationSystem The current application system.
+     */
+    public function __construct(ApplicationSystemInterface $applicationSystem)
+    {
+        $this->applicationSystem = $applicationSystem;
+    }
+
+    /**
+     * Alter the "edit attendances" button.
      *
      * @param GetOperationButtonEvent $event
+     *
+     * @throws \RuntimeException
      */
-    public function handle(GetOperationButtonEvent $event)
+    public function handle(GetOperationButtonEvent $event): void
     {
         /** @var Model $model */
         $model = $event->getModel();
 
-        if ('edit_attendances' !== $event->getCommand()->getName()
+        if (!$this->applicationSystem instanceof Lot
             || 'mm_ferienpass' !== $model->getProviderName()
+            || 'edit_attendances' !== $event->getCommand()->getName()
         ) {
             return;
         }
 
         $item = $model->getItem();
-
         if (!$item instanceof IItem) {
             return;
         }
 
         // Disable action for variant bases
-        if ($item->isVariantBase() && 0 !== $item->getVariants(null)->getCount()) {
+        $variants = $item->getVariants(null);
+        if (null === $variants) {
+            // We have a variant here
+            return;
+        }
+
+        if ($item->isVariantBase() && 0 !== $variants->getCount()) {
             $event->setDisabled(true);
         }
 

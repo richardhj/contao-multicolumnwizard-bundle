@@ -28,8 +28,9 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
      * @param PreSaveModelEvent $event
      *
      * @return void
+     * @throws \Exception
      */
-    public function handle(PreSaveModelEvent $event)
+    public function handle(PreSaveModelEvent $event): void
     {
         if (!$this->applicationSystem instanceof FirstCome) {
             return;
@@ -40,8 +41,12 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
             return;
         }
 
-        $oldStatus = $attendance->getStatus();
         $newStatus = self::findStatusForAttendance($attendance);
+        $oldStatus = $attendance->getStatus();
+        if (null === $oldStatus) {
+            throw new \RuntimeException('Old status not given.');
+        }
+
         if ($newStatus->id === $oldStatus->id) {
             return;
         }
@@ -63,15 +68,15 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
         $event->setData($data);
     }
 
-
     /**
      * Save the attendance status corresponding to the current application list.
      *
      * @param PrePersistModelEvent $event
      *
      * @return void
+     * @throws \Exception
      */
-    public function handleDcGeneral(PrePersistModelEvent $event)
+    public function handleDcGeneral(PrePersistModelEvent $event): void
     {
         if (!$this->applicationSystem instanceof FirstCome) {
             return;
@@ -84,6 +89,10 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
         $attendance = Attendance::findByPk($model->getId());
         $newStatus  = self::findStatusForAttendance($attendance);
         $oldStatus  = $attendance->getStatus();
+        if (null === $oldStatus) {
+            throw new \RuntimeException('Old status not given.');
+        }
+
         if ($newStatus->id === $oldStatus->id) {
             return;
         }
@@ -107,8 +116,9 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
      * @param Attendance $attendance
      *
      * @return AttendanceStatus
+     * @throws \Exception
      */
-    protected static function findStatusForAttendance(Attendance $attendance)
+    protected static function findStatusForAttendance(Attendance $attendance): AttendanceStatus
     {
         // Is current status locked?
         if (null !== $attendance->getStatus() && $attendance->getStatus()->locked) {
@@ -123,28 +133,25 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
         $max = $attendance->getOffer()->get('applicationlist_max');
 
         // Offers without usage of application list or without limit
-        if (!$attendance->getOffer()->get('applicationlist_active') || !$max) {
+        if (!$max || !$attendance->getOffer()->get('applicationlist_active')) {
             return AttendanceStatus::findConfirmed();
         }
 
         $position = $attendance->getPosition();
-
         if (null !== $position) {
             if ($position < $max) {
                 return AttendanceStatus::findConfirmed();
-
-            } else {
-                return AttendanceStatus::findWaitlisted();
             }
-        } // Attendance not saved yet
-        else {
-            if (Attendance::countParticipants($attendance->getOffer()->get('id')) < $max) {
-                return AttendanceStatus::findConfirmed();
 
-            } else {
-                return AttendanceStatus::findWaitlisted();
-            }
+            return AttendanceStatus::findWaitlisted();
         }
+
+        // Attendance not saved yet
+        if (Attendance::countParticipants($attendance->getOffer()->get('id')) < $max) {
+            return AttendanceStatus::findConfirmed();
+        }
+
+        return AttendanceStatus::findWaitlisted();
     }
 
 }

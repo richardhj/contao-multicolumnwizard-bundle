@@ -57,15 +57,15 @@ class Age extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    public function searchFor($pattern)
+    public function searchFor($pattern): ?array
     {
         $qb = $this->connection->createQueryBuilder();
 
         $statement = $qb
             ->select('item_id')
             ->from($this->getValueTable())
-            ->where($qb->expr()->orx()->add('lower = 0')->add('lower <= :age'))
-            ->andWhere($qb->expr()->orx()->add('upper = 0')->add('upper >= :age'))
+            ->where($qb->expr()->orX()->add('lower = 0')->add('lower <= :age'))
+            ->andWhere($qb->expr()->orX()->add('upper = 0')->add('upper >= :age'))
             ->andWhere('att_id = :id')
             ->setParameter('age', $pattern)
             ->setParameter('id', $this->get('id'))
@@ -78,7 +78,7 @@ class Age extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    public function getDataFor($ids)
+    public function getDataFor($ids): array
     {
         $where   = $this->getWhere($ids);
         $builder = $this->connection->createQueryBuilder()
@@ -88,7 +88,7 @@ class Age extends BaseComplex
         if ($where) {
             $builder->andWhere($where['procedure']);
 
-            foreach ($where['params'] as $name => $value) {
+            foreach ((array)$where['params'] as $name => $value) {
                 $builder->setParameter($name, $value);
             }
         }
@@ -110,7 +110,7 @@ class Age extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    public function setDataFor($values)
+    public function setDataFor($values): void
     {
         if (empty($values)) {
             return;
@@ -120,6 +120,8 @@ class Age extends BaseComplex
         $ids = array_keys($values);
 
         $database = $this->getMetaModel()->getServiceContainer()->getDatabase();
+
+        // insert into tl_metamodel_age … on duplicate key update
 
         $query       = 'INSERT INTO '.$this->getValueTable().' %s';
         $queryUpdate = 'UPDATE %s';
@@ -151,21 +153,21 @@ class Age extends BaseComplex
      *
      * @return array
      */
-    protected function getSetValues($value, $id)
+    protected function getSetValues($value, $id): array
     {
         $lower = 0;
         $upper = 0;
 
         if ($value) {
-            list($lower, $upper) = trimsplit(',', $value);
+            [$lower, $upper] = trimsplit(',', $value);
         }
 
         return [
             'tstamp'  => time(),
             'att_id'  => (int)$this->get('id'),
             'item_id' => $id,
-            'lower'   => (int)$lower,
-            'upper'   => (int)$upper,
+            'lower'   => $lower,
+            'upper'   => $upper,
         ];
     }
 
@@ -177,7 +179,7 @@ class Age extends BaseComplex
      *
      * @todo
      */
-    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null): array
     {
         return [];
     }
@@ -186,7 +188,7 @@ class Age extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    public function unsetDataFor($ids)
+    public function unsetDataFor($ids): void
     {
         $where = $this->getWhere($ids);
 
@@ -196,7 +198,7 @@ class Age extends BaseComplex
         if ($where) {
             $builder->andWhere($where['procedure']);
 
-            foreach ($where['params'] as $name => $value) {
+            foreach ((array)$where['params'] as $name => $value) {
                 $builder->setParameter($name, $value);
             }
         }
@@ -236,7 +238,7 @@ class Age extends BaseComplex
      * {@inheritdoc}
      * @todo
      */
-    public function getFieldDefinition($overrides = [])
+    public function getFieldDefinition($overrides = []): array
     {
         $fieldDefinition                         = parent::getFieldDefinition($overrides);
         $fieldDefinition['inputType']            = 'fp_age';
@@ -275,12 +277,12 @@ class Age extends BaseComplex
      *
      * @return array<string,string|array>
      */
-    protected function getWhere($ids)
+    protected function getWhere($ids): array
     {
         $whereIds = '';
 
         if ($ids) {
-            if (is_array($ids)) {
+            if (\is_array($ids)) {
                 $whereIds = ' AND item_id IN ('.implode(',', $ids).')';
             } else {
                 $whereIds = ' AND item_id='.$ids;
@@ -299,7 +301,7 @@ class Age extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    protected function prepareTemplate(Template $template, $rowData, $settings)
+    protected function prepareTemplate(Template $template, $rowData, $settings): void
     {
         parent::prepareTemplate($template, $rowData, $settings);
 
@@ -338,6 +340,6 @@ class Age extends BaseComplex
             }
         }
 
-        return ($checkedLine !== null) ? $checkedLine : false;
+        return $checkedLine ?? false;
     }
 }

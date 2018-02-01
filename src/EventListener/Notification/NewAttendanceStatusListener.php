@@ -29,7 +29,7 @@ class NewAttendanceStatusListener
      *
      * @param PostSaveModelEvent $event
      */
-    public function handle(PostSaveModelEvent $event)
+    public function handle(PostSaveModelEvent $event): void
     {
         /** @var Attendance $attendance */
         $attendance = $event->getModel();

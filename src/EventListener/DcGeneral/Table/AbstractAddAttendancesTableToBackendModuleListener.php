@@ -14,32 +14,40 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table;
 
 
-use MetaModels\Events\MetaModelsBootEvent;
+use Contao\Controller;
+use MetaModels\ViewCombination\ViewCombination;
+use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
 abstract class AbstractAddAttendancesTableToBackendModuleListener
 {
 
     /**
-     * Add the Attendances table name to the MetaModel back end module tables, to make them editable
-     *
-     * @param MetaModelsBootEvent $event
+     * @var ViewCombination
      */
-    public function handle(MetaModelsBootEvent $event)
+    private $viewCombination;
+
+    /**
+     * AbstractAddAttendancesTableToBackendModuleListener constructor.
+     *
+     * @param ViewCombination $viewCombination The view combination with information about the current screen.
+     */
+    public function __construct(ViewCombination $viewCombination)
     {
-        foreach (['mm_ferienpass', 'mm_participant'] as $metaModelName) {
-            try {
-                /** @var ViewCombinations $viewCombinations */
-                $viewCombinations = $event->getServiceContainer()->getService('metamodels-view-combinations');
-                $inputScreen      = $viewCombinations->getInputScreenDetails($metaModelName);
-                $backendSection   = $inputScreen->getBackendSection();
-                \Controller::loadDataContainer($metaModelName);
+        $this->viewCombination = $viewCombination;
+    }
 
-                // Add table name to back end module tables
-                $GLOBALS['BE_MOD'][$backendSection]['metamodel_' . $metaModelName]['tables'][] = Attendance::getTable();
+    /**
+     * @param string $moduleTable
+     */
+    protected function addTableForModule(string $moduleTable): void
+    {
+        $viewCombination = $this->viewCombination;
+        $screen          = $viewCombination->getScreen($moduleTable);
+        $backendSection  = $screen['meta']['backendsection'];
 
-            } catch (\RuntimeException $e) {
-                \System::log($e->getMessage(), __METHOD__, TL_ERROR);
-            }
-        }
+        Controller::loadDataContainer($moduleTable);
+
+        // Add table name to back end module tables
+        $GLOBALS['BE_MOD'][$backendSection]['metamodel_'.$moduleTable]['tables'][] = Attendance::getTable();
     }
 }
