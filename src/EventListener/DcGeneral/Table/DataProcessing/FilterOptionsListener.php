@@ -44,9 +44,9 @@ class FilterOptionsListener
     }
 
     /**
-     * @param GetPropertyOptionsEvent $event The event.
+     * Set the available filters as options.
      *
-     * @throws \RuntimeException
+     * @param GetPropertyOptionsEvent $event The event.
      */
     public function handle(GetPropertyOptionsEvent $event): void
     {
@@ -57,10 +57,6 @@ class FilterOptionsListener
         }
 
         $metaModel = $this->offerModel->getMetaModel();
-        if (null === $metaModel) {
-            throw new \RuntimeException('MetaModel not found.');
-        }
-
         $statement = $this->connection->createQueryBuilder()
             ->select('id', 'name')
             ->from('tl_metamodel_filter')
@@ -73,4 +69,3 @@ class FilterOptionsListener
         $event->setOptions($options);
     }
 }
-

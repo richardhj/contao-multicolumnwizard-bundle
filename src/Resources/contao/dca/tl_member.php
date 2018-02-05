@@ -12,16 +12,9 @@
  */
 
 use ContaoCommunityAlliance\MetaPalettes\MetaPalettes;
-use Richardhj\ContaoFerienpassBundle\Helper\UserAccount;
 
 
 $table = \MemberModel::getTable();
-
-
-/**
- * Config
- */
-$GLOBALS['TL_DCA'][$table]['config']['onload_callback'][] = [UserAccount::class, 'setRequiredFields'];
 
 
 /**

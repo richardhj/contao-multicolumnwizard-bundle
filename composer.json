@@ -38,6 +38,11 @@
       "Richardhj\\ContaoFerienpassBundle\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Richardhj\\ContaoFerienpassBundle\\Test\\": "tests/Test"
+    }
+  },
   "extra": {
     "contao-manager-plugin": "Richardhj\\ContaoFerienpassBundle\\ContaoManager\\Plugin"
   }

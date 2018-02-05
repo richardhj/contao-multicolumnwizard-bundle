@@ -13,15 +13,32 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
+use Contao\BackendTemplate;
+use Contao\CoreBundle\Exception\AccessDeniedException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\Environment;
+use Contao\Frontend;
+use Contao\FrontendUser;
+use Contao\Input;
+use Contao\Module;
+use Contao\System;
+use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
+use Doctrine\DBAL\Connection;
+use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
+use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Richardhj\ContaoFerienpassBundle\Model\Document;
 use MetaModels\Filter\Rules\StaticIdList;
-use MetaModels\IMetaModelsServiceContainer;
 use MetaModels\ItemList;
+use Richardhj\ContaoFerienpassBundle\Model\Offer;
+use Richardhj\ContaoFerienpassBundle\Model\Participant;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 
 /**
@@ -29,7 +46,7 @@ use MetaModels\ItemList;
  *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class ApplicationListHost extends Item
+class ApplicationListHost extends Module
 {
 
     /**
@@ -39,14 +56,108 @@ class ApplicationListHost extends Item
      */
     protected $strTemplate = 'mod_offer_applicationlisthost';
 
+    /**
+     * @var IItem|null
+     */
+    private $offer;
 
     /**
-     * {@inheritdoc}
-     * Include permission check
+     * @var Participant
      */
-    public function generate($isProtected = true)
+    private $participantModel;
+
+    /**
+     * @var RequestScopeDeterminator
+     */
+    private $scopeMatcher;
+
+    /**
+     * @var Frontend
+     */
+    private $frontendUser;
+
+    /**
+     * ApplicationListHost constructor.
+     *
+     * @param \ModuleModel $module
+     * @param string       $column
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct(\ModuleModel $module, $column = 'main')
     {
-        return parent::generate($isProtected);
+        parent::__construct($module, $column);
+
+        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
+        $this->offer            = $this->fetchOffer();
+        $this->frontendUser     = FrontendUser::getInstance();
+    }
+
+    /**
+     * @return IItem|null
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    private function fetchOffer(): ?IItem
+    {
+        /** @var Offer $metaModel */
+        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
+        /** @var Connection $connection */
+        $connection = System::getContainer()->get('database_connection');
+        $statement  = $connection->createQueryBuilder()
+            ->select('id')
+            ->from('mm_ferienpass')
+            ->where('alias=:item')
+            ->setParameter('item', Input::get('auto_item'))
+            ->execute();
+
+        $id = $statement->fetch(\PDO::FETCH_OBJ)->id;
+
+        return $metaModel->findById($id);
+    }
+
+    /**
+     * @return string
+     * @throws AccessDeniedException
+     * @throws PageNotFoundException
+     */
+    public function generate(): string
+    {
+        if ($this->scopeMatcher->currentScopeIsBackend()) {
+            $template = new BackendTemplate('be_wildcard');
+
+            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->title    = $this->headline;
+            $template->id       = $this->id;
+            $template->link     = $this->name;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+
+            return $template->parse();
+        }
+
+        if (null === $this->offer) {
+            throw new PageNotFoundException(
+                'Item not found: '.ModelId::fromValues(
+                    $this->offer->getMetaModel()->getTableName(),
+                    $this->offer->get('id')
+                )->getSerialized()
+            );
+        }
+
+        $hostId = $this->offer->get('host')[MetaModelSelect::SELECT_RAW]['id'];
+
+        if ($this->frontendUser->ferienpass_host !== $hostId) {
+            throw new AccessDeniedException('Access denied');
+        }
+
+        if ('' !== $this->customTpl) {
+            $this->strTemplate = $this->customTpl;
+        }
+
+        return parent::generate();
     }
 
 
@@ -55,23 +166,18 @@ class ApplicationListHost extends Item
      */
     protected function compile()
     {
-        global $container;
-
-        if (!$this->item->get('applicationlist_active')) {
+        if (!$this->offer->get('applicationlist_active')) {
             Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['inactive']);
             $this->Template->message = Message::generate();
 
             return;
         }
 
-        /** @var IMetaModelsServiceContainer $metaModelsServiceContainer */
-        $metaModelsServiceContainer = $container['metamodels-service-container'];
-        $participantsMetaModel      = $metaModelsServiceContainer->getFactory()->getMetaModel('mm_participant');
-
-        $maxParticipants  = $this->item->get('applicationlist_max');
-        $view             = $participantsMetaModel->getView($this->metamodel_child_list_view);
+        $maxParticipants = $this->offer->get('applicationlist_max');
+        $view            = $this->participantModel->getMetaModel()->getView($this->metamodel_child_list_view);
+        /** @var array $fields */
         $fields           = $view->getSettingNames();
-        $attendances      = Attendance::findByOffer($this->item->get('id'));
+        $attendances      = Attendance::findByOffer($this->offer->get('id'));
         $statusConfirmed  = AttendanceStatus::findConfirmed()->id;
         $statusWaitlisted = AttendanceStatus::findWaitlisted()->id;
         $rows             = [];
@@ -79,17 +185,15 @@ class ApplicationListHost extends Item
         if (null !== $attendances) {
             // Create table head
             foreach ($fields as $field) {
-                $rows[0][] = $participantsMetaModel->getAttribute($field)->get('name');
+                $rows[0][] = $this->participantModel->getAttribute($field)->get('name');
             }
-
-            $this->fetchOwnerAttribute($participantsMetaModel);
 
             // Walk each attendee
             while ($attendances->next()) {
                 $values      = [];
-                $participant = $participantsMetaModel->findById($attendances->participant);
+                $participant = $this->participantModel->findById($attendances->participant);
 
-                if (!in_array($attendances->status, [$statusConfirmed, $statusWaitlisted])) {
+                if (!\in_array($attendances->status, [$statusConfirmed, $statusWaitlisted], false)) {
                     continue;
                 }
                 if (null === $participant) {
@@ -102,8 +206,8 @@ class ApplicationListHost extends Item
                     $value = $participant->parseAttribute($field, null, $view)['text'];
 
                     // Inherit parent's data
-                    if (!strlen($value)) {
-                        $value = $participant->get($this->ownerAttribute->getColName())[$field];
+                    if ('' === $value) {
+                        $value = $participant->get('pmember')[$field];
                     }
 
                     $values[] = $value;
@@ -121,9 +225,11 @@ class ApplicationListHost extends Item
 
             // Define row class callback
             $rowClassCallback = function ($j, $rows, $module) {
-                if ($j === ($module->max_participants - 1) && $j !== count($rows) - 1) {
+                if ($j === ($module->max_participants - 1) && $j !== \count($rows) - 1) {
                     return 'last_attendee';
-                } elseif ($j >= $module->max_participants) {
+                }
+
+                if ($j >= $module->max_participants) {
                     return 'waiting_list';
                 }
 
@@ -132,7 +238,7 @@ class ApplicationListHost extends Item
 
             $this->Template->dataTable = Table::getDataArray($rows, 'application-list', $this, $rowClassCallback);
 
-            $urlBuilder = UrlBuilder::fromUrl(\Environment::get('uri'));
+            $urlBuilder = UrlBuilder::fromUrl(Environment::get('uri'));
             if ('download_list' === $urlBuilder->getQueryParameter('action')) {
                 if (null === ($document = Document::findByPk($this->document))) {
                     Message::addError($GLOBALS['TL_LANG']['MSC']['document']['export_error']);
@@ -163,7 +269,7 @@ class ApplicationListHost extends Item
         $itemRenderer = new ItemList();
         $itemRenderer
             ->setMetaModel($this->metamodel, $this->metamodel_rendersettings)
-            ->addFilterRule(new StaticIdList([$this->item->get('id')]));
+            ->addFilterRule(new StaticIdList([$this->offer->get('id')]));
 
         $this->Template->metamodel = $itemRenderer->render($this->metamodel_noparsing, $this);
     }

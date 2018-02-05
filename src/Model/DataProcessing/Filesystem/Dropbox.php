@@ -45,6 +45,11 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
     private $items;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
      * {@inheritdoc}
      */
     public function __construct(DataProcessing $model)
@@ -101,7 +106,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
             } catch (Exception_BadRequest $e) {
                 // File was not uploaded
                 // often because it is on the ignored file list
-                $this->getEventDispatcher()->dispatch(
+                $this->dispatcher->dispatch(
                     ContaoEvents::SYSTEM_LOG,
                     new LogEvent(
                         sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
@@ -112,7 +117,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
             } catch (Exception_NetworkIO $e) {
                 // File was not uploaded
                 // Connection refused
-                $this->getEventDispatcher()->dispatch(
+                $this->dispatcher->dispatch(
                     ContaoEvents::SYSTEM_LOG,
                     new LogEvent(
                         sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
@@ -175,7 +180,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                 // Remote file was deleted
                 if (null === $entry[1]) {
                     if ($mountManager->delete('dbafs://' . $dir . '/' . basename($entry[0]))) {
-                        $this->getEventDispatcher()->dispatch(
+                        $this->dispatcher->dispatch(
                             ContaoEvents::SYSTEM_LOG,
                             new LogEvent(
                                 sprintf(
@@ -201,7 +206,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                             'dbafs://' . $entry['path'],
                             $mountManager->read('dropbox://' . $entry['path'])
                         );
-                        $this->getEventDispatcher()->dispatch(
+                        $this->dispatcher->dispatch(
                             ContaoEvents::SYSTEM_LOG,
                             new LogEvent(
                                 sprintf(
@@ -231,16 +236,5 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                 'dropbox'
             );
         }
-    }
-
-    /**
-     * @return EventDispatcherInterface
-     */
-    private function getEventDispatcher(): EventDispatcherInterface
-    {
-        global $container;
-
-        /** @var EventDispatcherInterface $dispatcher */
-        return $container['event-dispatcher'];
     }
 }

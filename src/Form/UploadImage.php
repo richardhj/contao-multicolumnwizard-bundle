@@ -17,7 +17,7 @@ namespace Richardhj\ContaoFerienpassBundle\Form;
  * Class UploadImage
  * @package Richardhj\ContaoFerienpassBundle\Form
  */
-class UploadImage extends \UploadPreviewFieldFE
+class UploadImage
 {
 
     /**
@@ -27,16 +27,16 @@ class UploadImage extends \UploadPreviewFieldFE
      */
     public function __construct($attributes = null)
     {
-        parent::__construct
-        (
-            array_merge
-            (
-                [
-                    'uploadFolder' => '926817ba-c7bf-11e6-86e8-acb172276daf', //@todo
-//                    'renameFile'   => 'angebot_##id##_'.substr(md5(uniqid(mt_rand())), 0, 6) //@todo
-                ],
-                (array)$attributes
-            )
-        );
+//        parent::__construct
+//        (
+//            array_merge
+//            (
+//                [
+//                    'uploadFolder' => '926817ba-c7bf-11e6-86e8-acb172276daf', //@todo
+////                    'renameFile'   => 'angebot_##id##_'.substr(md5(uniqid(mt_rand())), 0, 6) //@todo
+//                ],
+//                (array)$attributes
+//            )
+//        );
     }
 }  

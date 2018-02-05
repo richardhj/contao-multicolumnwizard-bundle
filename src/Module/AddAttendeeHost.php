@@ -13,41 +13,161 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
+use Contao\BackendTemplate;
+use Contao\Controller;
+use Contao\CoreBundle\Exception\AccessDeniedException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\FrontendUser;
 use Contao\Input;
+use Contao\Module;
+use Contao\System;
+use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
+use Doctrine\DBAL\Connection;
+use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
+use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\MetaModels\FrontendEditingItem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Form\Form;
 use MetaModels\Attribute\IAttribute;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 
 /**
  * Class AddAttendeeHost
+ *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class AddAttendeeHost extends Item
+class AddAttendeeHost extends Module
 {
 
     /**
      * Template
+     *
      * @var string
      */
     protected $strTemplate = 'mod_offer_addattendeehost';
 
+    /**
+     * @var RequestScopeDeterminator
+     */
+    private $scopeMatcher;
 
     /**
-     * {@inheritdoc}
-     * Include permission check
+     * @var Connection
      */
-    public function generate($isProtected = true)
+    private $connection;
+
+    /**
+     * @var Participant
+     */
+    private $participantModel;
+
+    /**
+     * @var IItem|null
+     */
+    private $offer;
+
+    /**
+     * @var FrontendUser
+     */
+    private $frontendUser;
+
+    /**
+     * AddAttendeeHost constructor.
+     *
+     * @param \ModuleModel $module
+     * @param string       $column
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct(\ModuleModel $module, $column = 'main')
     {
-        return parent::generate($isProtected);
+        parent::__construct($module, $column);
+
+        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->connection       = System::getContainer()->get('database_connection');
+        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
+        $this->offer            = $this->fetchOffer();
+        $this->frontendUser     = FrontendUser::getInstance();
     }
 
+    /**
+     * @return IItem|null
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    private function fetchOffer(): ?IItem
+    {
+        /** @var Offer $metaModel */
+        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
+        $statement = $this->connection->createQueryBuilder()
+            ->select('id')
+            ->from('mm_ferienpass')
+            ->where('alias=:item')
+            ->setParameter('item', Input::get('auto_item'))
+            ->execute();
+
+        $id = $statement->fetch(\PDO::FETCH_OBJ)->id;
+
+        return $metaModel->findById($id);
+    }
+
+    /**
+     * @return string
+     *
+     * @throws AccessDeniedException
+     * @throws PageNotFoundException
+     */
+    public function generate(): string
+    {
+        if ($this->scopeMatcher->currentScopeIsBackend()) {
+            $template = new BackendTemplate('be_wildcard');
+
+            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->title    = $this->headline;
+            $template->id       = $this->id;
+            $template->link     = $this->name;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+
+            return $template->parse();
+        }
+
+        if (null === $this->offer) {
+            throw new PageNotFoundException(
+                'Item not found: '.ModelId::fromValues(
+                    $this->offer->getMetaModel()->getTableName(),
+                    $this->offer->get('id')
+                )->getSerialized()
+            );
+        }
+
+        $hostId = $this->offer->get('host')[MetaModelSelect::SELECT_RAW]['id'];
+
+        if ($this->frontendUser->ferienpass_host !== $hostId) {
+            throw new AccessDeniedException('Access denied');
+        }
+
+        if ('' !== $this->customTpl) {
+            $this->strTemplate = $this->customTpl;
+        }
+
+        return parent::generate();
+    }
 
     /**
      * Generate the module
+     *
+     * @throws \InvalidArgumentException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
+     * @throws \RuntimeException
      */
     protected function compile()
     {
@@ -62,40 +182,49 @@ class AddAttendeeHost extends Item
          * Fetch participant model attributes
          */
         $columnFieldsDca = [];
-        $memberGroups = deserialize($this->User->groups);
+        $memberGroups    = deserialize($this->frontendUser->groups);
 
-        $dcaCombine = $this->database
-            ->prepare(
-                "SELECT * FROM tl_metamodel_dca_combine WHERE fe_group IN(".implode(',', $memberGroups).") AND pid=?"
-            )
-            ->limit(1)
-            ->execute(Participant::getInstance()->getMetaModel()->get('id'));
+        $dcaCombine = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from('tl_metamodel_dca_combine')
+            ->where('fe_group IN (:fegroups)')
+            ->andWhere('pid=:pid')
+            ->setParameter('fegroups', $memberGroups, Connection::PARAM_INT_ARRAY)
+            ->setParameter('pid', $this->participantModel->getMetaModel()->get('id'))
+            ->execute();
 
         // Throw exception if no dca combine setting is set
-        if (!$dcaCombine->numRows) {
+        if (0 === $dcaCombine->rowCount()) {
             throw new \RuntimeException(
                 sprintf(
                     'No dca combine setting found for MetaModel ID %u and member groups %s found',
-                    Participant::getInstance()->getMetaModel()->get('id'),
+                    $this->participantModel->getMetaModel()->get('id'),
                     var_export($memberGroups, true)
                 )
             );
         }
+        $dcaCombine = $dcaCombine->fetch(\PDO::FETCH_OBJ);
 
         // Get the dca settings
-        $dcaDatabase = $this->database
-            ->prepare("SELECT * FROM tl_metamodel_dca WHERE id=?")
-            ->execute($dcaCombine->dca_id);
+        $dca = $this->connection->createQueryBuilder()
+            ->select('*')
+            ->from('tl_metamodel_dca')
+            ->where('id=:id')
+            ->setParameter('id', $dcaCombine->dca_id)
+            ->execute()
+            ->fetch(\PDO::FETCH_OBJ);
 
-        $dcaSettingDatabase = $this->database
-            ->prepare(
-                "SELECT a.colname,s.* FROM tl_metamodel_attribute a INNER JOIN tl_metamodel_dcasetting s ON a.id=s.attr_id WHERE s.pid=?"
-            )
-            ->execute($dcaDatabase->id);
+        $dcaSetting = $this->connection->createQueryBuilder()
+            ->select('a.colname', 's.*')
+            ->from('tl_metamodel_attribute', 'a')
+            ->innerJoin('a', 'tl_metamodel_dcasetting', 's', 'a.id=s.attr_id')
+            ->where('s.pid=:dca_id')
+            ->setParameter('dca_id', $dca->id)
+            ->execute();
 
         // Fetch all dca settings as associative array
         $dcaSettings = array_reduce(
-            $dcaSettingDatabase->fetchAllAssoc(),
+            $dcaSetting->fetchAll(\PDO::FETCH_ASSOC),
             function ($result, $item) {
                 $result[$item['colname']] = $item;
 
@@ -105,7 +234,7 @@ class AddAttendeeHost extends Item
         );
 
         // Exit if a new item creation is not allowed
-        if (!$dcaDatabase->iscreatable) {
+        if (!$dca->iscreatable) {
             Message::addError($GLOBALS['TL_LANG']['MSC']['tableClosedInfo']);
 
             $this->Template->message = Message::generate();
@@ -118,7 +247,7 @@ class AddAttendeeHost extends Item
          * @var string     $attributeName
          * @var IAttribute $attribute
          */
-        foreach (Participant::getInstance()->getMetaModel()->getAttributes() as $attributeName => $attribute) {
+        foreach ($this->participantModel->getMetaModel()->getAttributes() as $attributeName => $attribute) {
             if (!$dcaSettings[$attributeName]['published']) {
                 continue;
             }
@@ -140,11 +269,13 @@ class AddAttendeeHost extends Item
         $form->addSubmitFormField('submit', $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['submit']);
 
         if ($form->validate()) {
+            /** @var array $participantsToAdd */
             $participantsToAdd = $form->fetch('attendees');
 
             // Create a new model for each participant
+            /** @var array $participantRow */
             foreach ($participantsToAdd as $participantRow) {
-                $participant = new FrontendEditingItem(Participant::getInstance()->getMetaModel(), []);
+                $participant = new FrontendEditingItem($this->participantModel->getMetaModel(), []);
 
                 // Set each attribute in participant model
                 foreach ($participantRow as $attributeName => $value) {
@@ -154,21 +285,21 @@ class AddAttendeeHost extends Item
                 $participant->save();
 
                 // Create an attendance for this participant and offer
-                $attendance = new Attendance();
-                $attendance->tstamp = time();
-                $attendance->created = time();
-                $attendance->offer = $this->item->get('id');
+                $attendance              = new Attendance();
+                $attendance->tstamp      = time();
+                $attendance->created     = time();
+                $attendance->offer       = $this->offer->get('id');
                 $attendance->participant = $participant->get('id');
                 $attendance->save();
             }
 
             Message::addConfirmation(
-                sprintf($GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['confirmation'], count($participantsToAdd))
+                sprintf($GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['confirmation'], \count($participantsToAdd))
             );
-            \Controller::reload();
+            Controller::reload();
         }
 
         $this->Template->message = Message::generate();
-        $this->Template->form = $form->generate();
+        $this->Template->form    = $form->generate();
     }
 }

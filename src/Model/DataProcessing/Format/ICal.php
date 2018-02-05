@@ -13,6 +13,7 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format;
 
+use Contao\Environment;
 use DateTime;
 use Eluceo\iCal\Component\Calendar;
 use Eluceo\iCal\Component\Event;
@@ -102,16 +103,20 @@ class ICal implements FormatInterface
             $this->getModel()->export_file_name
         );
 
-        // Save the iCal in the tmp path
-        $this
-            ->getModel()
-            ->getMountManager()
-            ->put('local://' . $path, $this->createICal());
+        try {
+            // Save the iCal in the tmp path
+            $this
+                ->getModel()
+                ->getMountManager()
+                ->put('local://'.$path, $this->createICal());
+        } catch (\UnexpectedValueException $e) {
+            return $this;
+        }
 
         $files[] = array_merge(
-            $this->getModel()->getMountManager()->getMetadata('local://' . $path),
+            $this->getModel()->getMountManager()->getMetadata('local://'.$path),
             [
-                'basename' => basename($path)
+                'basename' => basename($path),
             ]
         );
 
@@ -124,10 +129,11 @@ class ICal implements FormatInterface
      * Create the iCal for given items
      *
      * @return string
+     * @throws \UnexpectedValueException
      */
-    protected function createICal(): string
+    private function createICal(): string
     {
-        $calendar       = new Calendar(\Environment::get('httpHost'));
+        $calendar       = new Calendar(Environment::get('httpHost'));
         $iCalProperties = deserialize($this->getModel()->ical_fields);
 
         /** @var IItem $item */
@@ -142,16 +148,16 @@ class ICal implements FormatInterface
             foreach ($date as $period) {
                 $event = new Event();
 
-                $dateTime = new DateTime('@' . $period['start']);
+                $dateTime = new DateTime('@'.$period['start']);
                 $event->setDtStart($dateTime);
-                $dateTime = new DateTime('@' . $period['end']);
+                $dateTime = new DateTime('@'.$period['end']);
                 $event->setDtEnd($dateTime);
 
                 /**
                  * @var array $property [ical_field]          The property identifier
                  *                      [metamodel_attribute] The property assigned MetaModel attribute name
                  */
-                foreach ($iCalProperties as $property) {
+                foreach ((array)$iCalProperties as $property) {
                     switch ($property['ical_field']) {
                         case 'summary':
                             $event->setSummary($item->get($property['metamodel_attribute']));

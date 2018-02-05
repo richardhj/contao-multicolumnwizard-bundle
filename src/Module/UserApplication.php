@@ -13,23 +13,36 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
+use Contao\BackendTemplate;
 use Contao\Controller;
+use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\FrontendUser;
+use Contao\Input;
+use Contao\Message;
+use Contao\Module;
 use Contao\System;
+use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
+use Doctrine\DBAL\Connection;
+use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
-use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Form\Form;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
 /**
  * Class UserApplication
+ *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class UserApplication extends Item
+class UserApplication extends Module
 {
 
     /**
@@ -37,62 +50,163 @@ class UserApplication extends Item
      */
     protected $strTemplate = 'mod_offer_applicationlist';
 
+    /**
+     * @var IItem
+     */
+    private $offer;
+
+    /**
+     * @var Participant
+     */
+    private $participantModel;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
+     * @var RequestScopeDeterminator
+     */
+    private $scopeMatcher;
+
+    /**
+     * @var FrontendUser
+     */
+    private $frontendUser;
+
+    /**
+     * UserApplication constructor.
+     *
+     * @param        $module
+     * @param string $column
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct($module, $column = 'main')
+    {
+        parent::__construct($module, $column);
+
+        $this->scopeMatcher = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->dispatcher   = System::getContainer()->get('event_dispatcher');
+        $this->offer        = $this->fetchOffer();
+        $this->frontendUser = FrontendUser::getInstance();
+    }
+
+    /**
+     * @return IItem|null
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    private function fetchOffer(): ?IItem
+    {
+        /** @var Offer $metaModel */
+        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
+        /** @var Connection $connection */
+        $connection = System::getContainer()->get('database_connection');
+        $statement  = $connection->createQueryBuilder()
+            ->select('id')
+            ->from('mm_ferienpass')
+            ->where('alias=:item')
+            ->setParameter('item', Input::get('auto_item'))
+            ->execute();
+
+        $id = $statement->fetch(\PDO::FETCH_OBJ)->id;
+
+        return $metaModel->findById($id);
+    }
+
+    /**
+     * @return string
+     *
+     * @throws PageNotFoundException
+     */
+    public function generate(): string
+    {
+        if ($this->scopeMatcher->currentScopeIsBackend()) {
+            $template = new BackendTemplate('be_wildcard');
+
+            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->title    = $this->headline;
+            $template->id       = $this->id;
+            $template->link     = $this->name;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+
+            return $template->parse();
+        }
+
+        if (null === $this->offer) {
+            throw new PageNotFoundException(
+                'Item not found: '.ModelId::fromValues(
+                    $this->offer->getMetaModel()->getTableName(),
+                    $this->offer->get('id')
+                )->getSerialized()
+            );
+        }
+
+        if ('' !== $this->customTpl) {
+            $this->strTemplate = $this->customTpl;
+        }
+
+        return parent::generate();
+    }
 
     /**
      * Generate the module
      */
     protected function compile()
     {
-        $container = System::getContainer();
-        /** @var EventDispatcherInterface $dispatcher */
-        $dispatcher = $container->get('event_dispatcher');
-        /** @var Participant $participantsModel */
-        $participantsModel = $container->get('richardhj.ferienpass.model.participant');
-
         // Stop if the procedure is not used
-        if (!$this->item->get('applicationlist_active')) {
+        if (!$this->offer->get('applicationlist_active')) {
             $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'];
 
             return;
         }
 
         // Stop if the offer is in the past
-        if (time() >= ToolboxOfferDate::offerStart($this->item)) {
+        if (time() >= ToolboxOfferDate::offerStart($this->offer)) {
             $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['past'];
 
             return;
         }
 
-        $countParticipants = Attendance::countParticipants($this->item->get('id'));
-        $maxParticipants = $this->item->get('applicationlist_max');
+        $countParticipants = Attendance::countParticipants($this->offer->get('id'));
+        $maxParticipants   = $this->offer->get('applicationlist_max');
 
         $availableParticipants = $maxParticipants - $countParticipants;
 
         if ($maxParticipants) {
             if ($availableParticipants < -10) {
                 $this->Template->booking_state_code = 4;
-                $this->Template->booking_state_text = 'Es sind keine Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls voll.';
+                $this->Template->booking_state_text =
+                    'Es sind keine Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls voll.';
             } elseif ($availableParticipants < 1) {
                 $this->Template->booking_state_code = 3;
-                $this->Template->booking_state_text = 'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
+                $this->Template->booking_state_text =
+                    'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
             } elseif ($availableParticipants < 4) {
                 $this->Template->booking_state_code = 2;
-                $this->Template->booking_state_text = 'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
+                $this->Template->booking_state_text =
+                    'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
             } else {
                 $this->Template->booking_state_code = 1;
-                $this->Template->booking_state_text = 'Es sind noch Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
+                $this->Template->booking_state_text =
+                    'Es sind noch Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
             }
         } else {
             $this->Template->booking_state_code = 0;
-            $this->Template->booking_state_text = 'Das Angebot hat keine Teilnehmer-Beschränkung.<br>Sie können sich jetzt für das Angebot anmelden.';
+            $this->Template->booking_state_text =
+                'Das Angebot hat keine Teilnehmer-Beschränkung.<br>Sie können sich jetzt für das Angebot anmelden.';
         }
 
 
-        if (FE_USER_LOGGED_IN && $this->User->id) {
-            $participants = $participantsModel->findByParent($this->User->id);
+        if (FE_USER_LOGGED_IN && $this->frontendUser->id) {
+            $participants = $this->participantModel->findByParent($this->frontendUser->id);
 
             if (0 === $participants->getCount()) {
-                Message::addWarning($GLOBALS['TL_LANG']['MSC']['noParticipants']);
+                Message::addInfo($GLOBALS['TL_LANG']['MSC']['noParticipants']);
             }
 
             // Build options
@@ -105,8 +219,8 @@ class UserApplication extends Item
                 ];
             }
 
-            $event = new BuildParticipantOptionsForUserApplicationEvent($participants, $this->item, $options);
-            $dispatcher->dispatch(BuildParticipantOptionsForUserApplicationEvent::NAME, $event);
+            $event = new BuildParticipantOptionsForUserApplicationEvent($participants, $this->offer, $options);
+            $this->dispatcher->dispatch(BuildParticipantOptionsForUserApplicationEvent::NAME, $event);
 
             $options = $event->getResult();
 
@@ -141,10 +255,10 @@ class UserApplication extends Item
                 foreach ((array)$form->fetch('participant') as $participant) {
                     // Trigger event and let the application system set the attendance
                     $event = new UserSetApplicationEvent(
-                        $this->item,
-                        $participantsModel->findById($participant)
+                        $this->offer,
+                        $this->participantModel->findById($participant)
                     );
-                    $dispatcher->dispatch(UserSetApplicationEvent::NAME, $event);
+                    $this->dispatcher->dispatch(UserSetApplicationEvent::NAME, $event);
                 }
 
                 // Reload page to show confirmation message

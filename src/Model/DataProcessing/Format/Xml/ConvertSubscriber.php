@@ -15,16 +15,16 @@ namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml;
 
 
 use Contao\FilesModel;
-use Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\OfferDate;
-use MetaModels\Attribute\Alias\Alias;
-use MetaModels\Attribute\CombinedValues\CombinedValues;
-use MetaModels\Attribute\Decimal\Decimal;
-use MetaModels\Attribute\File\File;
-use MetaModels\Attribute\Longtext\Longtext;
-use MetaModels\Attribute\Numeric\AttributeNumeric;
-use MetaModels\Attribute\TableText\TableText;
-use MetaModels\Attribute\Text\Text;
-use MetaModels\Attribute\Url\Url;
+use MetaModels\AttributeAliasBundle\Attribute\Alias;
+use MetaModels\AttributeCombinedValuesBundle\Attribute\CombinedValues;
+use MetaModels\AttributeDecimalBundle\Attribute\Decimal;
+use MetaModels\AttributeFileBundle\Attribute\File;
+use MetaModels\AttributeLongtextBundle\Attribute\Longtext;
+use MetaModels\AttributeNumericBundle\Attribute\Numeric;
+use MetaModels\AttributeTableTextBundle\Attribute\TableText;
+use MetaModels\AttributeTextBundle\Attribute\Text;
+use MetaModels\AttributeUrlBundle\Attribute\Url;
+use Richardhj\ContaoFerienpassBundle\Form\OfferDate;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ConvertSubscriber implements EventSubscriberInterface
@@ -55,7 +55,7 @@ class ConvertSubscriber implements EventSubscriberInterface
                 ['convertSimpleAttributes', -10],
                 ['convertOfferDateAttribute'],
                 ['convertTableTextAttribute'],
-                ['convertFileAttribute']
+                ['convertFileAttribute'],
             ],
         ];
     }
@@ -63,14 +63,14 @@ class ConvertSubscriber implements EventSubscriberInterface
     public function convertSimpleAttributes(ConvertDomElementToNativeWidgetEvent $event)
     {
         $attribute = $event->getAttribute();
-        if (null !== $event->getValue()
-            || !($attribute instanceof Alias)
+        if (!($attribute instanceof Alias)
             || !($attribute instanceof CombinedValues)
             || !($attribute instanceof Decimal)
             || !($attribute instanceof Longtext)
-            || !($attribute instanceof AttributeNumeric)
+            || !($attribute instanceof Numeric)
             || !($attribute instanceof Text)
             || !($attribute instanceof Url)
+            || null !== $event->getValue()
         ) {
             return;
         }
@@ -83,8 +83,8 @@ class ConvertSubscriber implements EventSubscriberInterface
     public function convertOfferDateAttribute(ConvertDomElementToNativeWidgetEvent $event)
     {
         $attribute = $event->getAttribute();
-        if (null !== $event->getValue()
-            || !($attribute instanceof OfferDate)
+        if (!($attribute instanceof OfferDate)
+            || null !== $event->getValue()
         ) {
             return;
         }
@@ -110,8 +110,8 @@ class ConvertSubscriber implements EventSubscriberInterface
     public function convertTableTextAttribute(ConvertDomElementToNativeWidgetEvent $event)
     {
         $attribute = $event->getAttribute();
-        if (null !== $event->getValue()
-            || !($attribute instanceof TableText)
+        if (!($attribute instanceof TableText)
+            || null !== $event->getValue()
         ) {
             return;
         }
@@ -129,12 +129,12 @@ class ConvertSubscriber implements EventSubscriberInterface
 
         /** @type \DOMElement $cell */
         foreach ($element->getElementsByTagName('Cell') as $cell) {
-            if ($c == $cc) {
+            if ($c === $cc) {
                 $c = 0;
                 $r++;
             }
 
-            $widget[$r]['col_' . $c] = $cell->nodeValue;
+            $widget[$r]['col_'.$c] = $cell->nodeValue;
 
             $c++;
         }
@@ -146,8 +146,8 @@ class ConvertSubscriber implements EventSubscriberInterface
     public function convertFileAttribute(ConvertDomElementToNativeWidgetEvent $event)
     {
         $attribute = $event->getAttribute();
-        if (null !== $event->getValue()
-            || !($attribute instanceof File)
+        if (!($attribute instanceof File)
+            || null !== $event->getValue()
         ) {
             return;
         }

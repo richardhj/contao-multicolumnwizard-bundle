@@ -13,10 +13,14 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
 
+use Contao\Database\Result;
 use Contao\Model;
 use Contao\System;
 use Doctrine\DBAL\Connection;
+use MetaModels\IFactory;
 use MetaModels\IItem;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 
 /**
@@ -37,16 +41,6 @@ class Attendance extends Model
     use Model\DispatchModelEventsTrait;
 
     /**
-     * @var Offer
-     */
-    private $offerModel;
-
-    /**
-     * @var Participant
-     */
-    private $participantModel;
-
-    /**
      * Table name
      *
      * @var string
@@ -54,18 +48,31 @@ class Attendance extends Model
     protected static $strTable = 'tl_ferienpass_attendance';
 
     /**
-     * The participant model
-     *
-     * @var Participant
-     */
-    protected static $participant;
-
-    /**
      * Fields used for "ORDER BY" sorting
      *
      * @var string
      */
     protected static $orderBy = 'offer,status,sorting';
+
+    /**
+     * @var IFactory
+     */
+    private $metaModelsFactory;
+
+    /**
+     * Attendance constructor.
+     *
+     * @param Result|null $result
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct(Result $result = null)
+    {
+        parent::__construct($result);
+
+        $this->metaModelsFactory = System::getContainer()->get('metamodels.factory');
+    }
 
     /**
      * Get attendance's current position
@@ -110,19 +117,23 @@ class Attendance extends Model
     }
 
     /**
-     * @return IItem
+     * @return IItem|null
      */
-    public function getOffer(): IItem
+    public function getOffer(): ?IItem
     {
-        return $this->offerModel->findById($this->offer);
+        $metaModel = $this->metaModelsFactory->getMetaModel('mm_ferienpass');
+
+        return $metaModel->findById($this->offer);
     }
 
     /**
      * @return IItem|null
      */
-    public function getParticipant(): IItem
+    public function getParticipant(): ?IItem
     {
-        return $this->participantModel->findById($this->participant);
+        $metaModel = $this->metaModelsFactory->getMetaModel('mm_participant');
+
+        return $metaModel->findById($this->participant);
     }
 
     /**
@@ -131,8 +142,8 @@ class Attendance extends Model
      * @param  integer $parentId
      *
      * @return Attendance|\Contao\Model\Collection|null
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
      */
     public static function findByParent($parentId)
     {
@@ -140,8 +151,7 @@ class Attendance extends Model
 
         /** @var Participant $participant */
         $participant = System::getContainer()->get('richardhj.ferienpass.model.participant');
-        /** @var \MetaModels\Filter\Filter $filter */
-        $filter = $participant->byParentFilter($parentId);
+        $filter      = $participant->byParentFilter($parentId);
 
         $participantIds = $filter->getMatchingIds();
         if (empty($participantIds)) {
@@ -329,8 +339,8 @@ class Attendance extends Model
      * @param integer $offerId
      *
      * @return bool
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
      */
     public static function isNotExistent($participantId, $offerId): bool
     {

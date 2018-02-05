@@ -20,31 +20,30 @@ use Haste\DateTime\DateTime;
 use MetaModels\Factory as MetaModelsFactory;
 use Richardhj\ContaoFerienpassBundle\DcGeneral\View\AttendanceAllocationView;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Richardhj\ContaoFerienpassBundle\Model\Participant;
 
 class ModifyLabelListener
 {
 
     /**
-     * @var MetaModelsFactory
+     * @var Participant
      */
-    private $metaModelsFactory;
+    private $participantsModel;
 
     /**
      * ModifyLabelListener constructor.
      *
-     * @param MetaModelsFactory $factory The MetaModels factory.
+     * @param Participant $participantsModel The participants model.
      */
-    public function __construct(MetaModelsFactory $factory)
+    public function __construct(Participant $participantsModel)
     {
-        $this->metaModelsFactory = $factory;
+        $this->participantsModel = $participantsModel;
     }
 
     /**
      * Show the participant's overall attendances and show an popup link
      *
      * @param ModelToLabelEvent $event The event.
-     *
-     * @throws \RuntimeException
      */
     public function handle(ModelToLabelEvent $event): void
     {
@@ -78,14 +77,9 @@ class ModifyLabelListener
                     // Wrap current content
                     $args[$k] = sprintf('<span class="name">%s</span>', $v);
 
-                    $metaModel = $this->metaModelsFactory->getMetaModel('mm_participant');
-                    if (null === $metaModel) {
-                        throw new \RuntimeException('MetaModel could not be found.');
-                    }
-
-                    $participant = $metaModel->findById($model->getProperty('participant'));
+                    $participant = $this->participantsModel->findById($model->getProperty('participant'));
                     if (null === $participant) {
-                        throw new \RuntimeException('Participant could not be found.');
+                        return;
                     }
 
                     $dateOfBirth = new DateTime('@'.$participant->get('dateOfBirth'));
@@ -110,5 +104,4 @@ class ModifyLabelListener
 
         $event->setArgs($args);
     }
-
 }

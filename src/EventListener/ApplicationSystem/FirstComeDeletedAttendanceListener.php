@@ -42,4 +42,3 @@ class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListen
         Attendance::updateStatusByOffer($attendance->getOffer()->get('id'));
     }
 }
-

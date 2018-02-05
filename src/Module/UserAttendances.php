@@ -13,112 +13,194 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
+use Contao\BackendTemplate;
 use Contao\Controller;
+use Contao\FrontendUser;
 use Contao\Input;
-use Contao\RequestToken;
+use Contao\Module;
+use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use ModuleModel;
 use Contao\System;
+use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
+use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 
 
 /**
  * Class UserAttendances
+ *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class UserAttendances extends Items
+class UserAttendances extends Module
 {
 
     /**
      * Template
+     *
      * @var string
      */
     protected $strTemplate = 'mod_user_attendances';
 
+    /**
+     * @var Offer
+     */
+    private $offerModel;
+
+    /**
+     * @var Participant
+     */
+    private $participantModel;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
+     * @var RequestScopeDeterminator
+     */
+    private $scopeMatcher;
+
+    /**
+     * @var FrontendUser
+     */
+    private $frontendUser;
+
+    /**
+     * UserAttendances constructor.
+     *
+     * @param ModuleModel $module
+     * @param string      $column
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct(ModuleModel $module, $column = 'main')
+    {
+        parent::__construct($module, $column);
+
+        $this->offerModel       = System::getContainer()->get('richardhj.ferienpass.model.offer');
+        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
+        $this->dispatcher       = System::getContainer()->get('event_dispatcher');
+        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->frontendUser     = FrontendUser::getInstance();
+    }
 
     /**
      * {@inheritdoc}
      */
-    public function generate()
+    public function generate(): string
     {
-        // Load language file
-        Controller::loadLanguageFile('exception');
+        if ($this->scopeMatcher->currentScopeIsBackend()) {
+            $template = new BackendTemplate('be_wildcard');
+
+            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->title    = $this->headline;
+            $template->id       = $this->id;
+            $template->link     = $this->name;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+
+            return $template->parse();
+        }
+
+        // Set a custom template
+        if ('' !== $this->customTpl) {
+            $this->strTemplate = $this->customTpl;
+        }
 
         return parent::generate();
     }
 
 
     /**
-     * {@inheritdoc}
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     * @throws InvalidArgumentException
      */
     protected function compile()
     {
-        $container = System::getContainer();
-        /** @var Participant $participantsModel */
-        $participantsModel = $container->get('richardhj.ferienpass.model.participant');
-
         /*
          * Delete attendance
          */
-        if ('delete' === substr(Input::get('action'), 0, 6)) {
+        if (0 === strpos(Input::get('action'), 'delete')) {
             list(, $id, $rt) = trimsplit('::', Input::get('action'));
             $attendanceToDelete = Attendance::findByPk($id);
 
+            if (!System::getContainer()->get('security.csrf.token_manager')->isTokenValid(
             // Validate request token
-            if (!$container->get('security.csrf.token_manager')->isTokenValid(new CsrfToken($container->getParameter('contao.csrf_token_name'), $rt))) {
+                new CsrfToken(System::getContainer()->getParameter('contao.csrf_token_name'), $rt)
+            )) {
                 Message::addError($GLOBALS['TL_LANG']['XPT']['tokenRetry']);
-            } // Check for existence
-            elseif (null === $attendanceToDelete) {
+            } elseif (null === $attendanceToDelete) {
+                // Check for existence
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteNotFound']);
-            } // Check for permission
-            elseif (!$participantsModel->isProperChild($attendanceToDelete->participant, $this->User->id)) {
+            } elseif (!$this->participantModel->isProperChild(
+                $attendanceToDelete->participant,
+                $this->frontendUser->id
+            )) {
+                // Check for permission
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteMissingPermission']);
-                \System::log(
-                    sprintf(
-                        'User "%s" does not have the permission to delete attendance ID %u',
-                        $this->User->username,
-                        $attendanceToDelete->id
-                    ),
-                    __METHOD__,
-                    TL_ERROR
+                $this->dispatcher->dispatch(
+                    new LogEvent(
+                        sprintf(
+                            'User "%s" does not have the permission to delete attendance ID %u',
+                            $this->frontendUser->username,
+                            $attendanceToDelete->id
+                        ),
+                        __METHOD__,
+                        TL_ERROR
+                    )
                 );
-            } // Check for offer's date
-            elseif (ToolboxOfferDate::offerStart($attendanceToDelete->offer) <= time()) {
+            } elseif (ToolboxOfferDate::offerStart($attendanceToDelete->offer) <= time()) {
+                // Check for offer's date
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteOfferInPast']);
-            } // Delete
-            else {
+            } else {
+                // Delete
                 $attendanceToDelete->delete();
 
                 Message::addConfirmation($GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation']);
-                Controller::redirect($this->addToUrl('action='));
+                Controller::redirect(static::addToUrl('action='));
             }
         }
 
         /*
          * Create table
          */
-        $attendances = Attendance::findByParent($this->User->id);
+        $attendances = Attendance::findByParent($this->frontendUser->id);
 
-        $rows = [];
-        $fields = ['offer.name', 'participant.name', 'offer.date_period', 'state', 'details', 'recall'];
+        $rows   = [];
+        $fields = [
+            'offer.name',
+            'participant.name',
+            /*'offer.date_period',*/
+            'state',
+            'details',
+            'recall',
+        ];
 
         if (null !== $attendances) {
             // Create table head
             foreach ($fields as $field) {
-                $f = trimsplit('.', $field);
+                $f   = trimsplit('.', $field);
                 $key = (strpos($field, '.') !== false) ? $f[1] : $field;
 
                 switch ($f[0]) {
                     case 'offer':
-                        $rows[0][] = $this->metaModel->getAttribute($key)->getName();
+                        $rows[0][] = $this->offerModel->getMetaModel()->getAttribute($key)->getName();
                         break;
 
                     case 'participant':
-                        $rows[0][] = $participantsModel->getMetaModel()->getAttribute($key)->getName();
+                        $rows[0][] = $this->participantModel->getMetaModel()->getAttribute($key)->getName();
                         break;
 
                     case 'details':
@@ -139,7 +221,7 @@ class UserAttendances extends Items
                 foreach ($fields as $field) {
                     $f = trimsplit('.', $field);
                     /** @var \MetaModels\Item $item */
-                    $item = $this->metaModel->findById($attendances->offer);
+                    $item = $this->offerModel->getMetaModel()->findById($attendances->offer);
 
                     switch ($f[0]) {
                         case 'offer':
@@ -147,13 +229,13 @@ class UserAttendances extends Items
                             break;
 
                         case 'participant':
-                            $value = $participantsModel->findById($attendances->participant)->get($f[1]);
+                            $value = $this->participantModel->findById($attendances->participant)->get($f[1]);
                             break;
 
                         case 'state':
                             /** @var AttendanceStatus $status */
                             $status = AttendanceStatus::findByPk($attendances->status);
-                            $value = sprintf(
+                            $value  = sprintf(
                                 '<span class="state %s">%s</span>',
                                 $status->cssClass,
                                 $status->title ?: $status->name
@@ -161,8 +243,11 @@ class UserAttendances extends Items
                             break;
 
                         case 'details':
-                            $url = $item->buildJumpToLink($this->metaModel->getView(4))['url'];//@todo make configurable
-                            $attribute = ($this->openLightbox) ? ' data-lightbox="' : '';
+                            $url       =
+                                $item->buildJumpToLink(
+                                    $this->offerModel->getMetaModel()->getView(4)
+                                )['url'];//@todo make configurable
+                            $attribute = $this->openLightbox ? ' data-lightbox="' : '';
 
                             $value = sprintf(
                                 '<a href="%s" class="%s"%s>%s</a>',
@@ -175,17 +260,17 @@ class UserAttendances extends Items
 
                         case 'recall':
                             if (ToolboxOfferDate::offerStart($item) >= time()) {
-                                $url = $this->addToUrl('action=delete::'.$attendances->id.'::'.REQUEST_TOKEN);
+                                $url       = static::addToUrl('action=delete::'.$attendances->id.'::'.REQUEST_TOKEN);
                                 $attribute = ' onclick="return confirm(\''.htmlspecialchars(
                                         sprintf(
                                             $GLOBALS['TL_LANG']['MSC']['attendanceConfirmDeleteLink'],
                                             $item->parseAttribute('name')['text'],
-                                            $participantsModel
+                                            $this->participantModel
                                                 ->findById($attendances->participant)
                                                 ->parseAttribute('name')['text']
                                         )
                                     )
-                                    .'\')"';
+                                             .'\')"';
 
                                 $value = sprintf(
                                     '<a href="%s" class="%s"%s>%s</a>',
@@ -210,10 +295,10 @@ class UserAttendances extends Items
                 $rows[] = $values;
             }
 
-            if (count($rows) <= 1) {
+            if (\count($rows) <= 1) {
                 Message::addInformation($GLOBALS['TL_LANG']['MSC']['noAttendances']);
             } else {
-                $this->useHeader = true;
+                $this->useHeader           = true;
                 $this->Template->dataTable = Table::getDataArray($rows, 'user-attendances', $this);
             }
         } else {

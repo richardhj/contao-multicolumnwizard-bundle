@@ -44,8 +44,6 @@ class AttendancesOperationButtonListener
      * Alter the "edit attendances" button.
      *
      * @param GetOperationButtonEvent $event
-     *
-     * @throws \RuntimeException
      */
     public function handle(GetOperationButtonEvent $event): void
     {

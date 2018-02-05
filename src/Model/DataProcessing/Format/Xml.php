@@ -19,15 +19,18 @@ use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use MetaModels\IFactory;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml\ConvertDomElementToNativeWidgetEvent;
+use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml\Exception\UnsupportedDomElementChangeException;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FormatInterface;
 use League\Flysystem\MountManager;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\IItem;
 use MetaModels\IItems;
 use MetaModels\IMetaModelsServiceContainer;
+use Symfony\Component\Config\Util\Exception\InvalidXmlException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
@@ -53,6 +56,18 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * @var IItems
      */
     private $items;
+
+    /**
+     * @var IFactory
+     */
+    private $factory;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    private $tableName = 'mm_ferienpass';
 
     /**
      * {@inheritdoc}
@@ -124,9 +139,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         $delimiter = '';
 
         $delimiterConfigs = deserialize($this->getModel()->variant_delimiters, true);
-        foreach ($delimiterConfigs as $delimiterConfig) {
-            if ($delimiterConfig['metamodel_attribute'] === $attribute->getColName()
-                || $delimiterConfig['metamodel_attribute'] === ''
+        foreach ((array)$delimiterConfigs as $delimiterConfig) {
+            if ('' === $delimiterConfig['metamodel_attribute']
+                || $attribute->getColName() === $delimiterConfig['metamodel_attribute']
             ) {
                 $delimiter = sprintf(
                     '%2$s%1$s%3$s',
@@ -143,11 +158,14 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
     /**
      * {@inheritdoc}
+     * @throws \League\Flysystem\FilesystemNotFoundException
+     * @throws \InvalidArgumentException
      */
     public function processItems(): FormatInterface
     {
         if (null === $this->getItems()) {
             $this->files = [];
+
             return $this;
         }
 
@@ -155,14 +173,14 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $path = sprintf(
                 '%s/xml/%s.xml',
                 $this->getModel()->getTmpPath(),
-                ($this->isXmlSingleFile() ? 'items' : 'item_' . $k)
+                ($this->isXmlSingleFile() ? 'items' : 'item_'.$k)
             );
 
             // Save xml in tmp path
             $this
                 ->getModel()
                 ->getMountManager()
-                ->put('local://' . $path, $xml);
+                ->put('local://'.$path, $xml);
         }
 
         // Fetch all files in xml tmp path
@@ -234,7 +252,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      *
      * @return DOMElement|null
      */
-    protected function itemAsDomNode(IItem $item, DOMDocument $dom)
+    protected function itemAsDomNode(IItem $item, DOMDocument $dom): ?DOMElement
     {
         $variants = null;
 
@@ -300,7 +318,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         return $root;
     }
 
-
     /**
      * Try to import a parsed attribute to a dom node if it is a valid xml string or set the dom node value otherwise
      *
@@ -311,7 +328,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     {
         try {
             $this->importXmlToNode($parsed, $domAttribute);
-        } catch (\RuntimeException $e) {
+        } catch (InvalidXmlException $e) {
             $domAttribute->nodeValue = htmlspecialchars(
                 html_entity_decode($parsed),
                 ENT_XML1
@@ -319,14 +336,13 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         }
     }
 
-
     /**
      * Take an XML string and import the nodes as children to a given node
      *
      * @param string  $attributeParsed
      * @param DOMNode $attributeNode
      *
-     * @throws \RuntimeException If $attributeParsed is not a valid xml string
+     * @throws InvalidXmlException
      */
     protected function importXmlToNode(string $attributeParsed, DOMNode $attributeNode)
     {
@@ -343,7 +359,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         libxml_clear_errors();
 
         if (!empty($errors)) {
-            throw new \RuntimeException('Invalid xml passed');
+            throw new InvalidXmlException('Invalid xml passed');
         }
 
         foreach ($dom->childNodes as $element) {
@@ -351,7 +367,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $attributeNode->appendChild($node);
         }
     }
-
 
     /**
      * Synchronize given xml files with the MetaModel
@@ -361,76 +376,45 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      */
     protected function syncXmlFilesWithModel(array $files, string $filesystem)
     {
-        global $container;
-
-        /** @var EventDispatcherInterface $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
         /** @var MountManager $mountManager */
         $mountManager = $this->getModel()->getMountManager($filesystem);
-        /** @var IMetaModelsServiceContainer $serviceContainer */
-        $serviceContainer = $container['metamodels-service-container'];
-        $metaModel        = $serviceContainer->getFactory()->getMetaModel('mm_ferienpass');
+        $metaModel    = $this->factory->getMetaModel($this->tableName);
 
         foreach ($files as $file) {
             if ('application/xml' !== $file['mimetype']) {
                 continue;
             }
 
-            // Load xml document
+            // Load XML document.
             $dom = new DOMDocument('1.0', 'utf-8');
-            $dom->loadXML($mountManager->read($filesystem . '://' . $file['path']));
+            $dom->loadXML($mountManager->read($filesystem.'://'.$file['path']));
 
             /** @type DOMElement $root */
-            $root            = $dom->getElementsByTagName('Item')->item(0);
-            $item            = $metaModel->findById($root->getAttribute('item_id'));
-            $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',', $root->getAttribute('variant_ids')));
+            $root = $dom->getElementsByTagName('Item')->item(0);
+            $item = $metaModel->findById($root->getAttribute('item_id'));
 
-//            // Existing offer was edited
-//            if ($file['timestamp'] < $offer->get('tstamp')) {
-//                $a = $this->setItems($metaModel->findById($offer->get('id')))->processItems()->getFiles();
-//                // Override foreign xml from database
-//                $mountManager->put(
-//                    $filesystem . '://' . $file['path'],
-//                    $this->generateOfferXml($offer->get('id'))
-//                );
-//
-//                \System::log(
-//                    sprintf(
-//                        'Could not sync XML file "%s" because offer ID %u was edited afterwards',
-//                        $file['path'],
-//                        $offer->get('id')
-//                    ),
-//                    __METHOD__,
-//                    TL_ERROR
-//                );
-//
-//                continue;
-//            }
+            $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',', $root->getAttribute('variant_ids')));
 
             /** @var DOMElement $element */
             foreach ($root->getElementsByTagName('*') as $element) {
-                // Child nodes irrespectively hierarchy are here too, skip them
                 if (!$element->hasAttribute('attr_id')) {
+                    // Child nodes irrespectively node hierarchy are here too, skip them.
                     continue;
                 }
 
-                $attribute = $item
-                    ->getMetaModel()
-                    ->getAttributeById($element->getAttribute('attr_id'));
+                $attribute = $item->getMetaModel()->getAttributeById($element->getAttribute('attr_id'));
                 if (null === $attribute) {
                     continue;
                 }
 
-                if (!($itemHasVariants && $attribute->get('isvariant'))) {
-                    $this->trackAttributeChange($element, $attribute, $item, $file);
-                } else {
+                if ($itemHasVariants && $attribute->get('isvariant')) {
                     /** @var DOMElement $variantValue */
                     foreach ($element->getElementsByTagName('_variantValue') as $variantValue) {
                         $variant = $metaModel->findById($variantValue->getAttribute('item_id'));
 
                         // Check for a proper variant
                         if ($variant->get('vargroup') !== $item->get('id')) {
-                            $dispatcher->dispatch(
+                            $this->dispatcher->dispatch(
                                 ContaoEvents::SYSTEM_LOG,
                                 new LogEvent(
                                     sprintf(
@@ -448,13 +432,14 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                             continue;
                         }
 
-                        $this->trackAttributeChange($variantValue, $attribute, $variant, $file);
+                        $this->trackAttributeChange($variantValue, $attribute, $variant);
                     }
+                } else {
+                    $this->trackAttributeChange($element, $attribute, $item);
                 }
             }
         }
     }
-
 
     /**
      * Check whether an attribute dom node differs from the attribute's database value, track change and save item
@@ -462,30 +447,54 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * @param DOMElement $domAttribute
      * @param IAttribute $attribute
      * @param IItem      $item
-     * @param array      $file
      */
-    protected function trackAttributeChange(DOMElement $domAttribute, IAttribute $attribute, IItem $item, array $file)
+    protected function trackAttributeChange(DOMElement $domAttribute, IAttribute $attribute, IItem $item)
     {
-        $widget = $this->domElementToNativeWidget($domAttribute, $attribute, $item);
+        $view   = $item->getMetaModel()->getView($this->getModel()->metamodel_view);
         $parsed = $item->parseAttribute(
             $attribute->getColName(),
             'text',
-            $item->getMetaModel()->getView($this->getModel()->metamodel_view)
+            $view
         );
 
-        // Widget can not be converted back because of its attribute type
-        if (null === $widget) {
-            // Do a check by approximation
+        try {
+            $widget = $this->domElementToNativeWidget($domAttribute, $attribute, $item);
+
+            if ($widget === $parsed['raw']) {
+                // No change detected.
+                return;
+            }
+
+            // Update changed data.
+            $item->set($attribute->getColName(), $widget);
+            $item->save();
+
+            $this->dispatcher->dispatch(
+                ContaoEvents::SYSTEM_LOG,
+                new LogEvent(
+                    sprintf(
+                        'Attribute "%s" for item variant ID %u was synced from xml file. Data processing ID %u',
+                        $attribute->getColName(),
+                        $item->get('id'),
+                        $this->getModel()->id
+                    ),
+                    __METHOD__,
+                    TL_GENERAL
+                )
+            );
+
+        } catch (UnsupportedDomElementChangeException $e) {
+            // Check for the attribute data being changed.
             $testDom     = new DOMDocument('1.0', 'utf-8');
             $testElement = $testDom->createElement($domAttribute->nodeName);
             try {
                 $this->importXmlToNode($parsed['text'], $testElement);
-            } catch (\RuntimeException $e) {
+            } catch (InvalidXmlException $e) {
                 $testElement->nodeValue = $parsed['text'];
             }
 
-            if ($domAttribute->nodeValue != $testElement->nodeValue) {
-                $attribute->getMetaModel()->getServiceContainer()->getEventDispatcher()->dispatch(
+            if ($domAttribute->nodeValue !== $testElement->nodeValue) {
+                $this->dispatcher->dispatch(
                     ContaoEvents::SYSTEM_LOG,
                     new LogEvent(
                         sprintf(
@@ -503,28 +512,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                     )
                 );
             }
-        } // Check for change
-        elseif ($widget !== $parsed['raw']) {
-            $item->set(
-                $attribute->getColName(),
-                $widget
-            );
-            $item->save();
-
-            $attribute->getMetaModel()->getServiceContainer()->getEventDispatcher()->dispatch(
-                ContaoEvents::SYSTEM_LOG,
-                new LogEvent(
-                    sprintf(
-                        'Attribute "%s" for item variant ID %u was synced from xml file "%s". Data processing ID %u',
-                        $attribute->getColName(),
-                        $item->get('id'),
-                        $file['path'],
-                        $this->getModel()->id
-                    ),
-                    __METHOD__,
-                    TL_GENERAL
-                )
-            );
         }
     }
 
@@ -535,22 +522,27 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * @param IAttribute $attribute
      * @param IItem      $item
      *
-     * @return mixed|null The attribute's data in the same format as the attribute's "raw" data
+     * @return mixed The attribute's data in the same format as the attribute's "raw" data
+     * @throws UnsupportedDomElementChangeException
      */
-    protected function domElementToNativeWidget(DOMElement $element, IAttribute $attribute, IItem $item)
+    private function domElementToNativeWidget(DOMElement $element, IAttribute $attribute, IItem $item)
     {
-        global $container;
-
-        /** @var EventDispatcherInterface $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
-        $dispatcher->addSubscriber(new Format\Xml\ConvertSubscriber());
+        $this->dispatcher->addSubscriber(new Format\Xml\ConvertSubscriber());
 
         $event = new ConvertDomElementToNativeWidgetEvent($element, $attribute, $item);
-        $dispatcher->dispatch($event::NAME, $event);
+        $this->dispatcher->dispatch($event::NAME, $event);
 
-        return $event->getValue();
+        if (null !== $event->getValue()) {
+            return $event->getValue();
+        }
+
+        throw new UnsupportedDomElementChangeException(
+            sprintf(
+                'The DOMElement cannot be converted back to native attribute data (Attribute type %s).',
+                $attribute->get('type')
+            )
+        );
     }
-
 
     /**
      * Camel Case (with first case uppercase) a column name

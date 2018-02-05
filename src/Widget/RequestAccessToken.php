@@ -13,11 +13,12 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Widget;
 
+use Contao\Controller;
 use Contao\FormHidden;
+use Contao\System;
 use Contao\TextField;
 use Contao\Widget;
 use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
-use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\Dropbox as DropboxOAuthProvider;
@@ -60,23 +61,24 @@ class RequestAccessToken extends Widget
      * generate widget
      *
      * @return string
+     * @throws \ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      */
-    public function generate()
+    public function generate(): string
     {
-        global $container;
-
         $provider = new DropboxOAuthProvider(
             [
-                'clientId'     => $container['ferienpass.dropbox.appId'],
-                'clientSecret' => $container['ferienpass.dropbox.appSecret'],
+                'clientId'     => System::getContainer()->getParameter('richardhj.ferienpass.dropbox.app_id'),
+                'clientSecret' => System::getContainer()->getParameter('richardhj.ferienpass.dropbox.app_secret'),
             ]
         );
 
         /** @var DcCompat $dataContainer */
         $dataContainer = $this->dataContainer;
         $model         = $dataContainer->getModel();
+        $environment   = $dataContainer->getEnvironment();
 
-        if ('create' === $dataContainer->getEnvironment()->getInputProvider()->getParameter('act')) {
+        if ('create' === $environment->getInputProvider()->getParameter('act')) {
             return sprintf(
                 '<div class="tl_info" style="margin-bottom: 7px;">%s</div>',
                 'Bitte speichern und wiederkommen'
@@ -97,15 +99,16 @@ class RequestAccessToken extends Widget
                 ),
                 $field->generate()
             );
-        } // Convert given code to an access token
-        elseif (null === $model->getProperty('dropbox_uid')) {
+        }
+
+        if (null === $model->getProperty('dropbox_uid')) {
             # At this point the value is an authorization code, not the access token
 
             try {
                 $objAccessToken = $provider->getAccessToken(
                     'authorization_code',
                     [
-                        'code' => $this->varValue
+                        'code' => $this->varValue,
                     ]
                 );
 
@@ -117,7 +120,7 @@ class RequestAccessToken extends Widget
                     ->getDataProvider($model->getProviderName())
                     ->save($model);
 
-                \Controller::reload();
+                Controller::reload();
 
             } catch (IdentityProviderException $e) {
                 $model->setProperty('dropbox_access_token', null);
@@ -132,14 +135,14 @@ class RequestAccessToken extends Widget
                     $e->getMessage()
                 );
             }
-        }
+        } // Convert given code to an access token
 
         try {
             /** @var DropboxResourceOwner $user */
             $user = $provider->getResourceOwner(
                 new AccessToken(
                     [
-                        'access_token' => $this->varValue
+                        'access_token' => $this->varValue,
                     ]
                 )
             );

@@ -11,35 +11,42 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-namespace Richardhj\ContaoFerienpassBundle\Helper;
+namespace Richardhj\ContaoFerienpassBundle\HookListener;
 
-use Contao\System;
+
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 
-
-/**
- * Class InsertTags
- *
- * @package Richardhj\ContaoFerienpassBundle\Helper
- */
-class InsertTags
+class InsertTagsListener
 {
+
+    /**
+     * @var FirstCome
+     */
+    private $firstComeApplicationSystem;
+
+    /**
+     * InsertTagsListener constructor.
+     *
+     * @param FirstCome $firstComeApplicationSystem
+     */
+    public function __construct(FirstCome $firstComeApplicationSystem)
+    {
+        $this->firstComeApplicationSystem = $firstComeApplicationSystem;
+    }
 
     /**
      * @param string $tag
      *
      * @return string|false
      */
-    public function replaceInsertTags($tag)
+    public function onReplaceInsertTags($tag)
     {
         $elements = trimsplit('::', $tag);
 
         if ('ferienpass' === $elements[0]) {
             switch ($elements[1]) {
                 case 'max_applications_per_day':
-                    /** @var FirstCome $applicationSystem */
-                    $applicationSystem = System::getContainer()->get('richardhj.ferienpass.application_system.firstcome');
-                    return $applicationSystem->getMaxApplicationsPerDay();
+                    return $this->firstComeApplicationSystem->getMaxApplicationsPerDay();
                     break;
             }
         }

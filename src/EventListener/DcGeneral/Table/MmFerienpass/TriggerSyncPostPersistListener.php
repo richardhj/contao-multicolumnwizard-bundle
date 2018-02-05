@@ -24,7 +24,7 @@ class TriggerSyncPostPersistListener
 {
 
     /**
-     * Trigger data processing when saving an offer
+     * Trigger data processing when saving an offer.
      *
      * @param PostPersistModelEvent $event The event.
      */

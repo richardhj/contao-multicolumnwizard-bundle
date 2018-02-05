@@ -50,7 +50,7 @@ class SetCustomViewListener
     }
 
     /**
-     * Use the AttendanceAllocationView if applicable
+     * Use the AttendanceAllocationView if applicable.
      *
      * @param PopulateEnvironmentEvent $event
      */

@@ -36,6 +36,8 @@ interface FormatInterface
      * @param IItems $items
      *
      * @return FormatInterface
+     *
+     * @deprecated
      */
     public function setItems(IItems $items): self;
 

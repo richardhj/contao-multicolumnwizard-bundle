@@ -11,9 +11,6 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-use Richardhj\ContaoFerienpassBundle\Helper\Dca;
-
-
 $table = Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable();
 
 $GLOBALS['TL_DCA'][$table] = [
@@ -24,7 +21,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'notCreatable'    => true,
         'notDeletable'    => true,
         'onload_callback' => [
-            [Dca::class, 'addDefaultApplicationSystems'],
+            //[Dca::class, 'addDefaultApplicationSystems'],
         ],
         'sql'             => [
             'keys' => [
@@ -114,7 +111,7 @@ $GLOBALS['TL_DCA'][$table] = [
     // Fields
     'fields'                => [
         'id'                    => [
-            'sql' => "int(10) unsigned NOT NULL auto_increment",
+            'sql' => 'int(10) unsigned NOT NULL auto_increment',
         ],
         'tstamp'                => [
             'sql' => "int(10) unsigned NOT NULL default '0'",

@@ -26,15 +26,13 @@ class MaxApplicationsPostPersistListener
      * Update the attendances when changing the "applicationlist_max" value
      *
      * @param PostPersistModelEvent $event The event.
-     *
-     * @throws \RuntimeException
      */
     public function handle(PostPersistModelEvent $event): void
     {
         $model         = $event->getModel();
         $originalModel = $event->getOriginalModel();
         if (null === $originalModel) {
-            throw new \RuntimeException('No original model given.');
+            return;
         }
 
         if (!$model instanceof Model

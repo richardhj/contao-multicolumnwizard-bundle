@@ -10,7 +10,7 @@ services:
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.modify_label:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ModifyLabelListener
         arguments:
-            - '@metamodels.factory'
+            - '@richardhj.ferienpass.model.participant'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle, priority: -10 }
 

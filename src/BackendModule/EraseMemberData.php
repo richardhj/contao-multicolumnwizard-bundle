@@ -3,32 +3,42 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\BackendModule;
 
+use Contao\BackendModule;
+use Contao\BackendUser;
 use Contao\CheckBox;
-use Contao\Database;
+use Contao\DataContainer;
+use Contao\Image;
 use Contao\Input;
 use Contao\MemberGroupModel;
 use Contao\MemberModel;
+use Contao\System;
 use Contao\Widget;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\ReloadEvent;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Message\AddMessageEvent;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
+use Doctrine\DBAL\Connection;
+use MetaModels\IFactory;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
-use Haste\Util\Format;
 use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IItem;
-use MetaModels\IMetaModelsServiceContainer;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\Exception\InvalidArgumentException;
+use Symfony\Component\Translation\TranslatorInterface;
 
 
 /**
@@ -36,20 +46,57 @@ use MetaModels\IMetaModelsServiceContainer;
  *
  * @package Richardhj\ContaoFerienpassBundle\BackendModule
  */
-class EraseMemberData extends \BackendModule
+class EraseMemberData extends BackendModule
 {
 
     protected $strTemplate = 'dcbe_general_edit';
 
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
+     * @var IFactory
+     */
+    private $factory;
+
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * EraseMemberData constructor.
+     *
+     * @param DataContainer|null $dataContainer
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct(DataContainer $dataContainer = null)
+    {
+        parent::__construct($dataContainer);
+
+        $this->dispatcher = System::getContainer()->get('event_dispatcher');
+        $this->factory    = System::getContainer()->get('metamodels.factory');
+        $this->connection = System::getContainer()->get('database_connection');
+        $this->translator = System::getContainer()->get('contao.translation.translator');
+    }
 
     /**
      * Generate the module
      *
      * @return string
      */
-    public function generate()
+    public function generate(): string
     {
-        if (!\BackendUser::getInstance()->isAdmin) {
+        if (!BackendUser::getInstance()->isAdmin) {
             return sprintf('<p class="tl_gerror">%s</p>', 'keine Berechtigung');
         }
 
@@ -59,20 +106,17 @@ class EraseMemberData extends \BackendModule
 
     /**
      * Generate the module
+     *
+     * @throws InvalidArgumentException
      */
     protected function compile()
     {
-        global $container;
-
-        /** @var IMetaModelsServiceContainer $serviceContainer */
-        $serviceContainer       = $container['metamodels-service-container'];
-        $eventDispatcher        = $serviceContainer->getEventDispatcher();
         $output                 = '';
         $formSubmit             = 'erase_member_data';
         $memberGroup            = MemberGroupModel::findByPk('2'); // @todo
         $members                = MemberModel::findBy(['groups=?', 'persist<>1'], [serialize([$memberGroup->id])]);
         $attendances            = Attendance::findAll();
-        $participantsMetaModel  = $serviceContainer->getFactory()->getMetaModel('mm_participant');
+        $participantsMetaModel  = $this->factory->getMetaModel('mm_participant');
         $participantsFilter     = new Filter($participantsMetaModel);
         $participantsFilterRule = (null === $members)
             ? new StaticIdList([])
@@ -106,7 +150,7 @@ class EraseMemberData extends \BackendModule
                 'value' => 1,
                 'label' => sprintf(
                     'Den Status "%s" bei diesen Mitglieder zurücksetzen',
-                    Format::dcaLabel(MemberModel::getTable(), 'persist')
+                    $this->translator->trans('persist', [], 'tl_member')
                 ),
             ],
         ];
@@ -129,66 +173,88 @@ class EraseMemberData extends \BackendModule
             if (!$checkboxConfirm->hasErrors()) {
                 // Truncate attendances
                 if ('1' !== $checkboxPreserveAttendances->value && null !== $attendances) {
-                    Database::getInstance()->query(
-                        sprintf(
-                            'DELETE FROM %s WHERE id IN (%s)',
-                            Attendance::getTable(),
-                            implode(',', $attendances->fetchEach('id'))
-                        )
-                    );
+                    $ids = $attendances->fetchEach('id');
+                    $this->connection->createQueryBuilder()
+                        ->delete(Attendance::getTable())
+                        ->where('id IN (:ids)')
+                        ->setParameter('ids', $ids, Connection::PARAM_INT_ARRAY)
+                        ->execute();
                 }
 
                 // Truncate participants
                 if (0 !== $participants->getCount()) {
-                    Database::getInstance()->query(
-                        sprintf(
-                            'DELETE FROM %s WHERE id IN (%s)',
-                            $participantsMetaModel->getTableName(),
-                            implode(
-                                ',',
-                                array_map(
-                                    function (IItem $item) {
-                                        return $item->get('id');
-                                    },
-                                    iterator_to_array($participants)
-                                )
-                            )
-                        )
+                    $ids = array_map(
+                        function (IItem $item) {
+                            return $item->get('id');
+                        },
+                        iterator_to_array($participants)
                     );
+
+                    $this->connection->createQueryBuilder()
+                        ->delete($participantsMetaModel->getTableName())
+                        ->where('id IN (:ids)')
+                        ->setParameter('ids', $ids, Connection::PARAM_INT_ARRAY)
+                        ->execute();
                 }
 
                 // Truncate members
                 if (null !== $members) {
-                    Database::getInstance()->query(
-                        sprintf(
-                            'DELETE FROM %s WHERE id IN (%s)',
-                            MemberModel::getTable(),
-                            implode(',', $members->fetchEach('id'))
-                        )
-                    );
+                    $ids = $members->fetchEach('id');
+                    $this->connection->createQueryBuilder()
+                        ->delete('tl_member')
+                        ->where('id IN (:ids)')
+                        ->setParameter('ids', $ids, Connection::PARAM_INT_ARRAY)
+                        ->execute();
                 }
 
                 // Reset persist status
                 if ('1' === $checkboxResetPersist->value) {
-                    Database::getInstance()
-                        ->prepare(
-                            sprintf("UPDATE %s SET persist='' WHERE persist=1 AND groups=?", MemberModel::getTable())
-                        )
-                        ->execute(serialize([$memberGroup->id]));
+                    $this->connection->createQueryBuilder()
+                        ->update('tl_member')
+                        ->set('persist', '')
+                        ->where('persist=1')
+                        ->andWhere('groups=:groups')
+                        ->setParameter('groups', serialize([$memberGroup->id]))
+                        ->execute();
                 }
 
-                $eventDispatcher->dispatch(
+                $this->dispatcher->dispatch(
                     ContaoEvents::MESSAGE_ADD,
                     AddMessageEvent::createConfirm('Löschung wurde erfolgreich ausgeführt')
                 );
-                $eventDispatcher->dispatch(ContaoEvents::CONTROLLER_RELOAD, new ReloadEvent());
+                $this->dispatcher->dispatch(ContaoEvents::CONTROLLER_RELOAD, new ReloadEvent());
             }
         }
 
-        $buttons[] = sprintf(
-            '<input type="submit" name="start" id="start" class="tl_submit" accesskey="s" value="%s" />',
-            'Daten unwiderruflich löschen'
+
+        $buttonTemplate = new ContaoBackendViewTemplate('dc_general_button');
+        $buttonTemplate->setData(
+            [
+                'label'      => 'Daten unwiderruflich löschen',
+                'attributes' => [
+                    'type'      => 'submit',
+                    'name'      => 'start',
+                    'id'        => 'start',
+                    'class'     => 'tl_submit',
+                    'accesskey' => 's',
+                ],
+            ]
         );
+        $buttons['save'] = $buttonTemplate->parse();
+
+        $submitButtons = ['toggleIcon' => Image::getHtml('navcol.svg')];
+        $editButtons   = $buttons;
+        if (array_key_exists('save', $editButtons)) {
+            $submitButtons['save'] = $editButtons['save'];
+            unset($editButtons['save']);
+        }
+
+        if (0 < \count($editButtons)) {
+            $submitButtons['buttonGroup'] = $editButtons;
+        }
+
+        $submitButtonTemplate = new ContaoBackendViewTemplate('dc_general_submit_button');
+        $submitButtonTemplate->setData($submitButtons);
 
         /** @noinspection PhpUndefinedMethodInspection */
         $output .= '<p>Dieses Tool steht Ihnen zur Verfügung, um alle personenbezogenen Daten der registrierten Eltern zu löschen.</p><h2>Gelöscht werden:</h2>';
@@ -237,7 +303,7 @@ HTML
 
         $this->Template->subHeadline = 'Personenbezogene Daten löschen';
         $this->Template->table       = $formSubmit;
-        $this->Template->editButtons = $buttons;
+        $this->Template->editButtons = preg_replace('/(\s\s+|\t|\n)/', '', $submitButtonTemplate->parse());
         $this->Template->fieldsets   = [
             [
                 'class'   => 'tl_box',

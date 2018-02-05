@@ -3,21 +3,30 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\BackendModule;
 
+use Contao\BackendUser;
+use Contao\DataContainer;
+use Contao\Image;
+use Contao\Input;
 use Contao\MemberModel;
+use Contao\System;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
+use Doctrine\DBAL\Connection;
+use MetaModels\IFactory;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
-use MetaModels\IMetaModelsServiceContainer;
 use MetaModels\Render\Template;
 use NotificationCenter\Model\Notification;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 
 /**
@@ -30,15 +39,40 @@ class SendMemberAttendancesOverview extends \BackendModule
 
     protected $strTemplate = 'dcbe_general_edit';
 
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * @var IFactory
+     */
+    private $factory;
+
+    /**
+     * SendMemberAttendancesOverview constructor.
+     *
+     * @param DataContainer|null $dataContainer
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct(DataContainer $dataContainer = null)
+    {
+        parent::__construct($dataContainer);
+
+        $this->connection = System::getContainer()->get('database_connection');
+        $this->factory    = System::getContainer()->get('metamodels.factory');
+    }
 
     /**
      * Generate the module
      *
      * @return string
      */
-    public function generate()
+    public function generate(): string
     {
-        if (!\BackendUser::getInstance()->isAdmin) {
+        if (!BackendUser::getInstance()->isAdmin) {
             return sprintf('<p class="tl_gerror">%s</p>', 'keine Berechtigung');
         }
 
@@ -54,14 +88,14 @@ class SendMemberAttendancesOverview extends \BackendModule
         $output     = '';
         $formSubmit = 'send_member_attendances_overview';
 
-        if ($formSubmit === \Input::post('FORM_SUBMIT')) {
+        if ($formSubmit === Input::post('FORM_SUBMIT')) {
             $this->sendMessages();
         }
 
         $output .= '<p>Dieses Tool versendet die Teilnahmestatus aus dem Losverfahren für die Anmeldungen, die noch nicht versandt wurden oder die sich nach dem letzen Versenden geändert haben.</p>';
 
-        $members   = self::getNotSentAttendancesGroupedByMember();
-        $noMembers = (0 === count($members));
+        $members   = $this->getNotSentAttendancesGroupedByMember();
+        $noMembers = (0 === \count($members));
 
         if ($noMembers) {
             $output .= '<p class="tl_info">Es gibt keine Mitglieder mit noch nicht versandten Teilnehmerübersichten.</p>';
@@ -78,6 +112,7 @@ class SendMemberAttendancesOverview extends \BackendModule
 HTML;
 
             $m = 0;
+            /** @var array $attendanceIds */
             foreach ($members as $memberId => $attendanceIds) {
                 $member = MemberModel::findByPk($memberId);
                 $class  = (++$m % 2) ? ' class="tl_bg"' : '';
@@ -88,7 +123,7 @@ HTML;
                     if (0 === $a) {
                         $output .= sprintf(
                             '<td rowspan="%s"%s>%s %s</td>',
-                            count($attendanceIds),
+                            \count($attendanceIds),
                             $class,
                             $member->firstname,
                             $member->lastname
@@ -115,15 +150,44 @@ HTML;
 HTML;
         }
 
-        $buttons[] = sprintf(
-            '<input type="submit" name="start" id="start" class="tl_submit" accesskey="s" value="%s"%s />',
-            'Benachrichtigungen sofort verschicken',
-            ($noMembers) ? ' disabled="disabled"' : ''
+        $buttonTemplate   = new ContaoBackendViewTemplate('dc_general_button');
+        $buttonAttributes = [
+            'type'      => 'submit',
+            'name'      => 'start',
+            'id'        => 'start',
+            'class'     => 'tl_submit',
+            'accesskey' => 's',
+        ];
+        if ($noMembers) {
+            $buttonAttributes['disabled'] = 'disabled';
+        }
+        $buttonTemplate->setData(
+            [
+                'label'      => 'Benachrichtigungen sofort verschicken',
+                'attributes' => $buttonAttributes,
+            ]
         );
+
+        $buttons['save'] = $buttonTemplate->parse();
+
+        $submitButtons = ['toggleIcon' => Image::getHtml('navcol.svg')];
+        $editButtons   = $buttons;
+        if (array_key_exists('save', $editButtons)) {
+            $submitButtons['save'] = $editButtons['save'];
+            unset($editButtons['save']);
+        }
+
+        if (0 < \count($editButtons)) {
+            $submitButtons['buttonGroup'] = $editButtons;
+        }
+
+        $submitButtonTemplate = new ContaoBackendViewTemplate('dc_general_submit_button');
+        $submitButtonTemplate->setData($submitButtons);
+
 
         $this->Template->subHeadline = 'Teilnahmeübersicht an Eltern verschicken';
         $this->Template->table       = $formSubmit;
-        $this->Template->editButtons = $buttons;
+        $this->Template->editButtons = preg_replace('/(\s\s+|\t|\n)/', '', $submitButtonTemplate->parse());
         $this->Template->fieldsets   = [
             [
                 'class'   => 'tl_box',
@@ -138,22 +202,30 @@ HTML;
      *
      * @return array
      */
-    private static function getNotSentAttendancesGroupedByMember()
+    private function getNotSentAttendancesGroupedByMember(): array
     {
         $attendances = [];
         //Todo check for notification id
-        $query       = \Database::getInstance()->query(
-            <<<'SQL'
-SELECT member.id AS member, attendance.id AS attendance
-FROM tl_member member
-INNER JOIN mm_participant participant ON participant.pmember=member.id
-INNER JOIN tl_ferienpass_attendance attendance ON attendance.participant=participant.id
-WHERE attendance.id NOT IN (SELECT notification.attendance FROM tl_ferienpass_attendance_notification notification WHERE notification.tstamp>attendance.tstamp)
-SQL
-        );
+        $qb2 = $this->connection->createQueryBuilder()
+            ->select('notification.attendance')
+            ->from('tl_ferienpass_attendance_notification', 'notification')
+            ->where('notification.tstamp>attendance.tstamp');
 
-        while ($query->next()) {
-            $attendances[$query->member][] = $query->attendance;
+        $statement = $this->connection->createQueryBuilder()
+            ->select('member.id AS member', 'attendance.id AS attendance')
+            ->from('tl_member', 'member')
+            ->innerJoin('member', 'mm_participant', 'participant', 'participant.pmember=member.id')
+            ->innerJoin(
+                'participant',
+                'tl_ferienpass_attendance',
+                'attendance',
+                'attendance.participant=participant.id'
+            )
+            ->where($qb2->expr()->notIn('attendance.id', $qb2->getSQL()))
+            ->execute();
+
+        while ($rows = $statement->fetch(\PDO::FETCH_OBJ)) {
+            $attendances[$rows->member][] = $rows->attendance;
         }
 
         return $attendances;
@@ -178,7 +250,7 @@ SQL
         $successful = 0;
         $failed     = 0;
 
-        foreach (self::getNotSentAttendancesGroupedByMember() as $memberId => $attendanceIds) {
+        foreach ($this->getNotSentAttendancesGroupedByMember() as $memberId => $attendanceIds) {
             if (empty($attendanceIds)) {
                 continue;
             }
@@ -194,14 +266,14 @@ SQL
 
             // Send notification
             $sent = $notification->send(
-                self::getNotificationTokens(
+                $this->getNotificationTokens(
                     $member,
                     $attendances
                 )
             );
 
             // Mark attendance notification as sent
-            if (in_array(true, $sent)) {
+            if (\in_array(true, $sent, true)) {
                 $time   = time();
                 $values = array_map(
                     function ($attendance) use ($time, $notificationId) {
@@ -211,9 +283,9 @@ SQL
                 );
 
                 \Database::getInstance()->query(
-                    'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)' .
-                    ' VALUES ' . implode(', ', $values) .
-                    ' ON DUPLICATE KEY UPDATE tstamp=' . $time
+                    'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)'.
+                    ' VALUES '.implode(', ', $values).
+                    ' ON DUPLICATE KEY UPDATE tstamp='.$time
                 );
 
                 $successful++;
@@ -243,25 +315,20 @@ SQL
      *
      * @return array
      */
-    private static function getNotificationTokens(MemberModel $member, array $attendances)
+    private function getNotificationTokens(MemberModel $member, array $attendances): array
     {
-        global $container;
-
-        /** @var IMetaModelsServiceContainer $serviceContainer */
-        $serviceContainer = $container['metamodels-service-container'];
-
         $tokens = [];
         //@todo
-        $data   = [
+        $data = [
             'attendances'               => $attendances,
             'member'                    => $member,
-            'offerRenderSettings'       => $serviceContainer->getFactory()->getMetaModel('mm_ferienpass')->getView(4),
-            'participantRenderSettings' => $serviceContainer->getFactory()->getMetaModel('mm_participant')->getView(0)
+            'offerRenderSettings'       => $this->factory->getMetaModel('mm_ferienpass')->getView(4),
+            'participantRenderSettings' => $this->factory->getMetaModel('mm_participant')->getView(0),
         ];
 
         // Add all member fields
         foreach ($member->row() as $k => $v) {
-            $tokens['member_' . $k] = $v;
+            $tokens['member_'.$k] = $v;
         }
 
         // Parse applications and add them to the tokens

@@ -66,7 +66,7 @@ class ApplicationSystemFactory
     /**
      * @return Lot
      */
-    public function createLot(): Lot
+    public static function createLot(): Lot
     {
         return new Lot(ApplicationSystemModel::findLot());
     }

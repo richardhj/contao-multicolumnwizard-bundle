@@ -14,6 +14,7 @@
 namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
 
 
+use Contao\ZipWriter;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FilesystemInterface;
 use MetaModels\IItems;
@@ -80,7 +81,7 @@ class SendToBrowser implements FilesystemInterface
     public function processFiles(array $files): void
     {
         // Generate a zip file
-        $zipWriter = new \ZipWriter($this->getModel()->getTmpPath() . '/export.zip');
+        $zipWriter = new ZipWriter($this->getModel()->getTmpPath() . '/export.zip');
 
         foreach ($files as $file) {
             $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);

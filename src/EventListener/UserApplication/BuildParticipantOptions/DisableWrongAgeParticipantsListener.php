@@ -21,6 +21,7 @@ use Richardhj\ContaoFerienpassBundle\Helper\GetFerienpassConfigTrait;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
 {
@@ -34,7 +35,7 @@ class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
      *
      * @return void
      * @throws \RuntimeException
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function handle(BuildParticipantOptionsForUserApplicationEvent $event): void
     {

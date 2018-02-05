@@ -37,34 +37,36 @@ class BuildWidgetListener
     }
 
     /**
-     * @param BuildWidgetEvent $event The event.
+     * Set the filter parameters when filtering is enabled.
      *
-     * @throws \RuntimeException
+     * @param BuildWidgetEvent $event The event.
      */
     public function handle(BuildWidgetEvent $event): void
     {
         $environment = $event->getEnvironment();
         $model       = $event->getModel();
         $property    = $event->getProperty();
+        $extra       = $property->getExtra();
 
         if ('metamodel_filterparams' !== $property->getName()
             || 'tl_ferienpass_dataprocessing' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 
-        $element = DataProcessing::findByPk($model->getId());
-        if (!$element->metamodel_filtering) {
+        if (!$model->getProperty('metamodel_filtering')) {
             $property->setExcluded(true);
 
             return;
         }
 
-        $extra          = $property->getExtra();
-        $filterSettings = $this->filterSettingFactory
-            ->createCollection($element->metamodel_filtering);
+        try {
+            $filterSettings = $this->filterSettingFactory
+                ->createCollection($model->getProperty('metamodel_filtering'));
+        } catch (\RuntimeException $e) {
+            return;
+        }
 
         $extra['subfields'] = $filterSettings->getParameterDCA();
         $property->setExtra($extra);
     }
-
 }

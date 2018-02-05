@@ -44,7 +44,7 @@ class ConvertDomElementToNativeWidgetEvent
     /**
      * Event name
      */
-    const NAME = 'ferienpass.data-processing.xml.convert-dom-to-widget';
+    public const NAME = 'richardhj.ferienpass.data-processing.xml.convert-dom-to-widget';
 
     /**
      * ConvertDomElementToNativeWidgetEvent constructor.

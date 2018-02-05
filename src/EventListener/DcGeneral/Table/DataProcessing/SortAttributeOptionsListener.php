@@ -44,6 +44,8 @@ class SortAttributeOptionsListener
     }
 
     /**
+     * Fetch the available attributes and set them as options.
+     *
      * @param GetPropertyOptionsEvent $event The event.
      */
     public function handle(GetPropertyOptionsEvent $event): void

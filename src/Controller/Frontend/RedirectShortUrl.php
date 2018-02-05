@@ -20,11 +20,10 @@ use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\GenerateFrontendUrlEvent;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
-use MetaModels\Factory;
 use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IFactory;
 use MetaModels\Item;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 /**
  * This controller handles the redirect of short urls /{id}.
@@ -33,7 +32,7 @@ class RedirectShortUrl
 {
 
     /**
-     * @var Factory
+     * @var IFactory
      */
     private $factory;
 
@@ -45,10 +44,10 @@ class RedirectShortUrl
     /**
      * RedirectShortUrl constructor.
      *
-     * @param Factory                  $factory    The MetaModels factory.
+     * @param IFactory                 $factory    The MetaModels factory.
      * @param EventDispatcherInterface $dispatcher The event dispatcher.
      */
-    public function __construct(Factory $factory, EventDispatcherInterface $dispatcher)
+    public function __construct(IFactory $factory, EventDispatcherInterface $dispatcher)
     {
         $this->factory    = $factory;
         $this->dispatcher = $dispatcher;
@@ -56,16 +55,15 @@ class RedirectShortUrl
 
     /**
      * @param int     $itemId  The MetaModel item id of the offer.
-     * @param Request $request The request.
      *
      * @return void
      *
      * @throws \UnexpectedValueException When the item id is not numeric
      * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
-     * @throws \Contao\CoreBundle\Exception\PageNotFoundException
+     * @throws PageNotFoundException
      * @throws RedirectResponseException
      */
-    public function __invoke($itemId, Request $request)
+    public function __invoke($itemId)
     {
         if (!is_numeric($itemId)) {
             throw new \UnexpectedValueException('Item ID is no ID, something must be broken.');
@@ -76,10 +74,10 @@ class RedirectShortUrl
             throw new PageNotFoundException('MetaModel could not be found.');
         }
 
-        $viewId         = System::getContainer()->getParameter('richardhj.ferienpass.metamodel_list.view.id');
-        $listPageId     = System::getContainer()->getParameter('richardhj.ferienpass.list_page.id');
+        $viewId         = 1;//System::getContainer()->getParameter('richardhj.ferienpass.metamodel_list.view.id');
+        $listPageId     = 2;//System::getContainer()->getParameter('richardhj.ferienpass.list_page.id');
         $filter         = $metaModel->getEmptyFilter();
-        $filterVariants = clone $filter;
+        $filterVariants = $filter->createCopy();
 
         $filter->addFilterRule(new StaticIdList([$itemId]));
         $item = $metaModel->findByFilter($filter)->getItem();

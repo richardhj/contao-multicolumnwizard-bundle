@@ -31,6 +31,8 @@ interface FilesystemInterface
      * @param IItems $items
      *
      * @return FilesystemInterface
+     *
+     * @deprecated
      */
     public function setItems(IItems $items): self;
 

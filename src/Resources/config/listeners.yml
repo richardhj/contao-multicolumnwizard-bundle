@@ -147,3 +147,17 @@ services:
             - "@event_dispatcher"
         tags:
             - { name: 'contao.hook', hook: 'closeAccount' }
+
+    richardhj.ferienpass.hook_listener.insert_tags:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\InsertTagsListener
+        arguments:
+            - "@richardhj.ferienpass.application_system.firstcome"
+        tags:
+            - { name: 'contao.hook', hook: 'replaceInsertTags' }
+
+    richardhj.ferienpass.hook_listener.system_messages:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\SystemMessagesListener
+        arguments:
+            - "@richardhj.ferienpass.application_system"
+        tags:
+            - { name: 'contao.hook', hook: 'getSystemMessages' }
