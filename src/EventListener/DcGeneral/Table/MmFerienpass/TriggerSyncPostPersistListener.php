@@ -38,6 +38,8 @@ class TriggerSyncPostPersistListener
             return;
         }
 
+        return;
+
         /** @type \Model\Collection|DataProcessing $processing */
         $processing = DataProcessing::findBy('sync', '1');
         while (null !== $processing && $processing->next()) {

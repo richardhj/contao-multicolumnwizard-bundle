@@ -54,3 +54,17 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\TriggerSyncPostPersistListener
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.frontend_initial_data:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeInitialDataListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.frontend_permission_check:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeePermissionCheckListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: 10 }
