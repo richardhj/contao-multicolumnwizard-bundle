@@ -19,7 +19,7 @@
     "php": "^7.1",
     "codefog/contao-haste": "~4.11",
     "contao-community-alliance/meta-palettes": "^2.0",
-    "contao-community-alliance/events-contao-bindings": "dev-feature/contao4",
+    "contao-community-alliance/events-contao-bindings": "~4.0@dev",
     "contao/core-bundle": "^4.5",
     "contao/calendar-bundle": "^4.4",
     "eluceo/ical": "^0.8",
