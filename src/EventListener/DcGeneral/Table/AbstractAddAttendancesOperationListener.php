@@ -67,7 +67,7 @@ abstract class AbstractAddAttendancesOperationListener
         }
 
         $extra            = $command->getExtra();
-        $extra['icon']    = 'bundles/richardhjcontaoferienpass/img/users.png';
+        $extra['icon']    = 'bundles/richardhjcontaoferienpass/img/edit_attendances.svg';
         $extra['idparam'] = 'pid';
 
         $collection->addCommand($command);
