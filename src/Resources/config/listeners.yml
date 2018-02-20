@@ -1,4 +1,17 @@
 services:
+    richardhj.ferienpass.metamodels.attribute.offer_date.factory:
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\AttributeTypeFactory
+        arguments:
+            - '@database_connection'
+            - '@event_dispatcher'
+        tags:
+            - { name: metamodels.attribute_factory }
+
+    #richardhj.metamodels.filter_from_to_date_period.factory:
+    #    class: Richardhj\MetaModelsAttributeDatePeriodBundle\MetaModels\FilterSetting\FromToDatePeriodFilterSettingTypeFactory
+    #    tags:
+    #        - { name: metamodels.filter_factory }
+
     richardhj.ferienpass.metamodels.attribute.age.factory:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\Age\AttributeTypeFactory
         arguments:
