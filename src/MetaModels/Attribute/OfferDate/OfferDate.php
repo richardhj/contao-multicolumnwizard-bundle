@@ -216,7 +216,7 @@ class OfferDate extends BaseComplex
      *
      * @return array
      */
-    protected function getSetValues($period, $id): array
+    protected function getSetValues($period, $id): ?array
     {
         if ('' === $period['start'] && '' === $period['end']) {
             return null;
