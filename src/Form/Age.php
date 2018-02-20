@@ -13,12 +13,14 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Form;
 
+use Richardhj\ContaoFerienpassBundle\Widget\Age as AgeWidget;
+
 
 /**
  * Class Age
  * @package Richardhj\ContaoFerienpassBundle\Form
  */
-class Age extends \Richardhj\ContaoFerienpassBundle\Widget\Age
+class Age extends AgeWidget
 {
 
     /**

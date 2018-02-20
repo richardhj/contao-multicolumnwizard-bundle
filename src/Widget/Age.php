@@ -13,11 +13,13 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Widget;
 
+use Contao\Validator;
 use Contao\Widget;
 
 
 /**
  * Class Age
+ *
  * @package Richardhj\ContaoFerienpassBundle\Widget
  */
 class Age extends Widget
@@ -133,28 +135,28 @@ class Age extends Widget
                 $arrOption['input_format'] .= '</label>';
             }
 
-            $arrLineInputs = [];
+            $arrLineInputs      = [];
             $arrLineInputValues = [];
 
             if ($i === $this->checked_line) {
                 $arrLineInputValues = array_values(array_filter(trimsplit(',', $this->varValue)));
             }
 
-            for ($ii = 0; $ii < substr_count($arrOption['input_format'], '%s'); $ii++) {
+            for ($ii = 0, $iiMax = substr_count($arrOption['input_format'], '%s'); $ii < $iiMax; $ii++) {
                 $arrLineInputs[] = sprintf(
-                    '<input type="text" name="%s" id="ctrl_%s" class="%s" value="%s"%s onfocus="Backend.getScrollOffset()">',
+                    '<input type="text" name="%s" id="ctrl_%s" class="%s" value="%s"%s>',
                     $this->strName.'[values]['.$i.']['.$ii.']',
                     $this->strId.'_'.$i.'_'.$ii,
-                    (TL_MODE == 'BE') ? 'tl_text' : 'text',
+                    ('BE' === TL_MODE) ? 'tl_text' : 'text',
                     !empty($arrLineInputValues) ? $arrLineInputValues[$ii] : '',
-                    (TL_MODE == 'BE') ? ' style="width: 18px;text-align: center"' : ''
+                    ('BE' === TL_MODE) ? ' style="width: 18px;text-align: center"' : ''
                 );
             }
 
             $strInputFields = vsprintf($arrOption['input_format'], $arrLineInputs);
 
             $this->arrOptionsParsed[] = sprintf(
-                '<input type="radio" name="%s" id="opt_%s" class="tl_radio" value="%s"%s%s onfocus="Backend.getScrollOffset()"> <label for="opt_%s">%s',
+                '<input type="radio" name="%s" id="opt_%s" class="tl_radio" value="%s"%s%s> <label for="opt_%s">%s',
                 $this->strName.'[line]',
                 $this->strId.'_'.$i,
                 $i,
@@ -174,7 +176,7 @@ class Age extends Widget
      *
      * @return string The "checked" attribute or an empty string
      */
-    protected function isChecked($intCurrentLine)
+    protected function isChecked($intCurrentLine): string
     {
         // Mark default option as checked
         if ($this->checked_line === false && $this->arrWidgetLines[$intCurrentLine]['default']) {
@@ -196,13 +198,13 @@ class Age extends Widget
         foreach ($arrWidgetLines as $i => $arrWidgetLine) {
             $strDerivedSaveFormat = preg_replace('/[1-9][0-9]*/', '%s', $this->varValue);
 
-            if ($strDerivedSaveFormat == $arrWidgetLine['save_format']) {
+            if ($strDerivedSaveFormat === $arrWidgetLine['save_format']) {
                 $intCheckedLine = $i;
                 break;
             }
         }
 
-        $this->intCheckedLine = ($intCheckedLine !== null) ? $intCheckedLine : false;
+        $this->intCheckedLine = $intCheckedLine ?? false;
     }
 
 
@@ -211,11 +213,11 @@ class Age extends Widget
      */
     public function validate()
     {
-        $arrSubmit = $this->getPost($this->strName);
-        $intSelectedLine = (int)$arrSubmit['line'];
-        $arrWidgetLine = $this->arrWidgetLines[$intSelectedLine];
+        $arrSubmit          = $this->getPost($this->strName);
+        $intSelectedLine    = (int)$arrSubmit['line'];
+        $arrWidgetLine      = $this->arrWidgetLines[$intSelectedLine];
         $intRequestedInputs = substr_count($arrWidgetLine['input_format'], '%s');
-        $arrLineInputs = [];
+        $arrLineInputs      = [];
 
         for ($i = 0; $i < $intRequestedInputs; $i++) {
             $value = $arrSubmit['values'][$intSelectedLine][$i];
@@ -231,7 +233,7 @@ class Age extends Widget
             }
 
             // Check for natural values
-            if (!\Validator::isNatural($value)) {
+            if (!Validator::isNatural($value)) {
                 $this->addError($GLOBALS['TL_LANG']['ERR']['natural']);
             }
 
@@ -263,7 +265,7 @@ class Age extends Widget
      *
      * @return string
      */
-    public function generate()
+    public function generate(): string
     {
         $arrOptions = $this->options_parsed;
 
@@ -271,7 +273,7 @@ class Age extends Widget
         return sprintf(
             '<fieldset id="ctrl_%s" class="tl_radio_container%s"><legend>%s%s%s%s</legend>%s</fieldset>%s',
             $this->strId,
-            (($this->strClass != '') ? ' '.$this->strClass : ''),
+            (('' !== $this->strClass) ? ' '.$this->strClass : ''),
             ($this->mandatory ? '<span class="invisible">'.$GLOBALS['TL_LANG']['MSC']['mandatory'].'</span> ' : ''),
             $this->strLabel,
             ($this->mandatory ? '<span class="mandatory">*</span>' : ''),
