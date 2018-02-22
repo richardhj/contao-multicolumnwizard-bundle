@@ -174,20 +174,21 @@ class ItemListRenderingListener
      *
      * @return string
      */
-    private function translateLabel($transString, $definitionName, array $parameters = []): string
+    private function translateLabel($transString, $definitionName, array $parameters = [])
     {
         $translator = $this->translator;
         try {
-            if ($transString !== ($label = $translator->trans($transString, $parameters, 'contao_'.$definitionName))) {
+            $label = $translator->trans($definitionName.'.'.$transString, $parameters, 'contao_'.$definitionName);
+            if ($label !== $definitionName.'.'.$transString) {
                 return $label;
             }
         } catch (InvalidArgumentException $e) {
             // Ok. Next try.
         }
 
-
         try {
-            if ($transString !== ($label = $translator->trans('MSC.'.$transString, $parameters, 'contao_default'))) {
+            $label = $translator->trans('MSC.'.$transString, $parameters, 'contao_default');
+            if ($label !== $transString) {
                 return $label;
             }
         } catch (InvalidArgumentException $e) {
