@@ -174,3 +174,14 @@ services:
             - "@richardhj.ferienpass.application_system"
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages' }
+
+    richardhj.ferienpass.listener.host_editing.item_list_rendering:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\ItemListRenderingListener
+        arguments:
+            - '@event_dispatcher'
+            - '@contao.translation.translator'
+            - '@metamodels.view_combination'
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.render-item-list', method: handleRenderItemList }
+            - { name: kernel.event_listener, event: 'metamodels.parse-item', method: addApplicationListLink }
+            - { name: kernel.event_listener, event: 'metamodels.parse-item', method: modifyActionButtons }

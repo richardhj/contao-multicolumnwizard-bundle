@@ -72,9 +72,7 @@ $GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['n'] = 'Ich biete das Angebo
 $GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['y'] = 'Ich biete das Angebot mehrmals (an mehreren Terminen) an';
 
 $GLOBALS['TL_LANG']['MSC']['editParticipant'] = 'Bearbeiten';
-$GLOBALS['TL_LANG']['MSC']['addNewParticipant'] = 'Teilnehmer hinzufügen';
 $GLOBALS['TL_LANG']['MSC']['editOffer'] = 'Bearbeiten';
-$GLOBALS['TL_LANG']['MSC']['addNewOffer'] = 'Neues Angebot';
 $GLOBALS['TL_LANG']['MSC']['editHost'] = 'Daten aktualisieren';
 
 $GLOBALS['TL_LANG']['MSC']['host_logo_save']  = 'Logo speichern';
