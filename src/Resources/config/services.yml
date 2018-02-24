@@ -31,3 +31,9 @@ services:
         class: Richardhj\ContaoFerienpassBundle\Model\Offer
         arguments:
             - '@metamodels.factory'
+
+    richardhj.ferienpass.pass_releases:
+        class: Richardhj\ContaoFerienpassBundle\Util\PassReleases
+        arguments:
+            - '@metamodels.factory'
+            - '@database_connection'

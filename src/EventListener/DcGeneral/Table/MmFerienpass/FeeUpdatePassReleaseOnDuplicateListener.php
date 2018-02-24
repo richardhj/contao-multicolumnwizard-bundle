@@ -18,6 +18,7 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Event\PreDuplicateModelEvent;
 use MetaModels\DcGeneral\Data\Model;
+use Richardhj\ContaoFerienpassBundle\Util\PassReleases;
 
 class FeeUpdatePassReleaseOnDuplicateListener
 {
@@ -28,18 +29,26 @@ class FeeUpdatePassReleaseOnDuplicateListener
     private $scopeMatcher;
 
     /**
+     * @var PassReleases
+     */
+    private $passReleases;
+
+    /**
      * FrontendPermissionCheckListener constructor.
      *
      * @param RequestScopeDeterminator $scopeMatcher
+     * @param PassReleases             $passReleases
      */
-    public function __construct(RequestScopeDeterminator $scopeMatcher)
+    public function __construct(RequestScopeDeterminator $scopeMatcher, PassReleases $passReleases)
     {
         $this->scopeMatcher = $scopeMatcher;
+        $this->passReleases = $passReleases;
     }
 
     /**
      * @param PreDuplicateModelEvent $event The event.
      *
+     * @throws \RuntimeException
      * @throws AccessDeniedException
      */
     public function handle(PreDuplicateModelEvent $event): void
@@ -55,7 +64,12 @@ class FeeUpdatePassReleaseOnDuplicateListener
             return;
         }
 
+        $passRelease = $this->passReleases->getPassReleaseToEdit();
+        if (null === $passRelease) {
+            throw new \RuntimeException('Sorry, can\'t file the pass release.');
+        }
+
         $item = $model->getItem();
-        $item->set('pass_release', '2');
+        $item->set('pass_release', $passRelease->get('id'));
     }
 }

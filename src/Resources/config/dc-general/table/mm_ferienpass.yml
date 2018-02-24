@@ -59,6 +59,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeInitialDataListener
         arguments:
             - '@cca.dc-general.scope-matcher'
+            - '@richardhj.ferienpass.pass_releases'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }
 
@@ -73,5 +74,6 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeUpdatePassReleaseOnDuplicateListener
         arguments:
             - '@cca.dc-general.scope-matcher'
+            - '@richardhj.ferienpass.pass_releases'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-duplicate', method: handle, priority: -10 }

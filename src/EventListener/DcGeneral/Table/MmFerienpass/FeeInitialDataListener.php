@@ -19,6 +19,7 @@ use Contao\FrontendUser;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Event\PreEditModelEvent;
 use MetaModels\DcGeneral\Data\Model;
+use Richardhj\ContaoFerienpassBundle\Util\PassReleases;
 
 class FeeInitialDataListener
 {
@@ -29,18 +30,26 @@ class FeeInitialDataListener
     private $scopeMatcher;
 
     /**
+     * @var PassReleases
+     */
+    private $passReleases;
+
+    /**
      * FrontendPermissionCheckListener constructor.
      *
      * @param RequestScopeDeterminator $scopeMatcher
+     * @param PassReleases             $passReleases
      */
-    public function __construct(RequestScopeDeterminator $scopeMatcher)
+    public function __construct(RequestScopeDeterminator $scopeMatcher, PassReleases $passReleases)
     {
         $this->scopeMatcher = $scopeMatcher;
+        $this->passReleases = $passReleases;
     }
 
     /**
      * @param PreEditModelEvent $event The event.
      *
+     * @throws \RuntimeException
      * @throws AccessDeniedException
      */
     public function handle(PreEditModelEvent $event): void
@@ -68,8 +77,13 @@ class FeeInitialDataListener
         }
 
         // Set current pass_release.
+        $passRelease = $this->passReleases->getPassReleaseToEdit();
+        if (null === $passRelease) {
+            throw new \RuntimeException('Sorry, can\'t file the pass release.');
+        }
+
         if (null === $item->get('pass_release')) {
-            $item->set('pass_release', '99');
+            $item->set('pass_release', $passRelease->get('id'));
         }
     }
 }
