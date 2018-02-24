@@ -45,6 +45,23 @@ class ItemListRenderingListener
     private $viewCombination;
 
     /**
+     * ItemListRenderingListener constructor.
+     *
+     * @param EventDispatcherInterface $dispatcher The event dispatcher.
+     * @param TranslatorInterface      $translator The translator.
+     * @param ViewCombination          $viewCombination The current view combinations.
+     */
+    public function __construct(
+        EventDispatcherInterface $dispatcher,
+        TranslatorInterface $translator,
+        ViewCombination $viewCombination
+    ) {
+        $this->dispatcher      = $dispatcher;
+        $this->translator      = $translator;
+        $this->viewCombination = $viewCombination;
+    }
+
+    /**
      * Set the jumpTo for later purpose.
      *
      * @param RenderItemListEvent $event The event.
@@ -117,17 +134,22 @@ class ItemListRenderingListener
 
         $result = $event->getResult();
 
+        // Set buttons disabled if over.
         if (false === self::offerIsEditableForHost($event->getItem())) {
-            foreach (['edit', 'delete', 'copy', 'createvariant'] as $action) {
+            foreach (['edit', 'delete', 'createvariant'] as $action) {
                 if (isset($result['actions'][$action])) {
-                    // Add css class.
                     $result['actions'][$action]['class'] .= ' disabled';
                 }
             }
         }
 
         // Add attribute.
-        $parsed['actions']['jumpTo']['attribute'] = 'data-lightbox';
+        $result['actions']['jumpTo']['attribute'] = 'data-lightbox';
+
+        // Remove copy action for variants.
+        if ($item->isVariant()) {
+            unset($result['actions']['copy']);
+        }
 
         $event->setResult($result);
     }

@@ -185,3 +185,10 @@ services:
             - { name: kernel.event_listener, event: 'metamodels.render-item-list', method: handleRenderItemList }
             - { name: kernel.event_listener, event: 'metamodels.parse-item', method: addApplicationListLink }
             - { name: kernel.event_listener, event: 'metamodels.parse-item', method: modifyActionButtons }
+
+    richardhj.ferienpass.listener.host_editing.complay_with_host_editing_end:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\ComplyWithEditingEndListener
+        arguments:
+            - "@cca.dc-general.scope-matcher"
+        tags:
+            - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 50 }
