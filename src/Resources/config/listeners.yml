@@ -192,3 +192,11 @@ services:
             - "@cca.dc-general.scope-matcher"
         tags:
             - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 50 }
+
+    richardhj.ferienpass.listener.host_editing.load_default_infotable:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\LoadDefaultInfotableListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+            - '@metamodels.view_combination'
+        tags:
+            - { name: kernel.event_listener, event: dc-general.view.contao2backend.decode-property-value-for-widget, method: handle }
