@@ -15,12 +15,11 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerie
 
 
 use Contao\CoreBundle\Exception\AccessDeniedException;
-use Contao\FrontendUser;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
-use ContaoCommunityAlliance\DcGeneral\Event\PreEditModelEvent;
+use ContaoCommunityAlliance\DcGeneral\Event\PreDuplicateModelEvent;
 use MetaModels\DcGeneral\Data\Model;
 
-class FeeInitialDataListener
+class FeeUpdatePassReleaseOnDuplicateListener
 {
 
     /**
@@ -39,11 +38,11 @@ class FeeInitialDataListener
     }
 
     /**
-     * @param PreEditModelEvent $event The event.
+     * @param PreDuplicateModelEvent $event The event.
      *
      * @throws AccessDeniedException
      */
-    public function handle(PreEditModelEvent $event): void
+    public function handle(PreDuplicateModelEvent $event): void
     {
         $environment  = $event->getEnvironment();
         $definition   = $environment->getDataDefinition();
@@ -56,20 +55,7 @@ class FeeInitialDataListener
             return;
         }
 
-        $item      = $model->getItem();
-        $attribute = $item->getMetaModel()->getAttribute('host');
-
-        /** @var FrontendUser $user */
-        $user = FrontendUser::getInstance();
-
-        // Set current ferienpass host.
-        if (null === $item->get('host')) {
-            $item->set('host', $attribute->widgetToValue($user->ferienpass_host, $item));
-        }
-
-        // Set current pass_release.
-        if (null === $item->get('pass_release')) {
-            $item->set('pass_release', '99');
-        }
+        $item = $model->getItem();
+        $item->set('pass_release', '2');
     }
 }

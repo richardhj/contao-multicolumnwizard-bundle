@@ -17,4 +17,6 @@ $GLOBALS['TL_LANG']['mm_ferienpass']['edit_attendances'][1] = 'Anmeldungen zu An
 
 $GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_add_item']       = 'Neues Angebot';
 $GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_edit_item']      = 'Bearbeiten';
+$GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_copy_item']      = 'Kopieren';
+$GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_delete_item']    = 'Löschen';
 $GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_create_variant'] = 'Neuen zusätzlichen Termin';

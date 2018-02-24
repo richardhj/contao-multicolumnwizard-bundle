@@ -47,8 +47,8 @@ class ItemListRenderingListener
     /**
      * ItemListRenderingListener constructor.
      *
-     * @param EventDispatcherInterface $dispatcher The event dispatcher.
-     * @param TranslatorInterface      $translator The translator.
+     * @param EventDispatcherInterface $dispatcher      The event dispatcher.
+     * @param TranslatorInterface      $translator      The translator.
      * @param ViewCombination          $viewCombination The current view combinations.
      */
     public function __construct(
@@ -65,8 +65,10 @@ class ItemListRenderingListener
      * Set the jumpTo for later purpose.
      *
      * @param RenderItemListEvent $event The event.
+     *
+     * @return void
      */
-    public function handleRenderItemList(RenderItemListEvent $event)
+    public function handleRenderItemList(RenderItemListEvent $event): void
     {
         $caller = $event->getCaller();
         if ('mm_ferienpass' !== $event->getList()->getMetaModel()->getTableName()) {
@@ -80,8 +82,10 @@ class ItemListRenderingListener
      * Add the application list jumpTo as action.
      *
      * @param ParseItemEvent $event
+     *
+     * @return void
      */
-    public function addApplicationListLink(ParseItemEvent $event)
+    public function addApplicationListLink(ParseItemEvent $event): void
     {
         $screen    = $this->viewCombination->getScreen('mm_ferienpass');
         $settings  = $event->getRenderSettings();
@@ -121,8 +125,10 @@ class ItemListRenderingListener
      * Disable the actions when editing is not allowed.
      *
      * @param ParseItemEvent $event
+     *
+     * @return void
      */
-    public function modifyActionButtons(ParseItemEvent $event)
+    public function modifyActionButtons(ParseItemEvent $event): void
     {
         $screen    = $this->viewCombination->getScreen('mm_ferienpass');
         $item      = $event->getItem();
@@ -161,9 +167,14 @@ class ItemListRenderingListener
      *
      * @return bool
      */
-    private static function offerIsEditableForHost(IItem $offer): bool
+    private static function offerIsEditableForHost(IItem $offer): ?bool
     {
-        return (time() <= self::getHostEditEnd($offer));
+        $end = self::getHostEditEnd($offer);
+        if (null === $end) {
+            return null;
+        }
+
+        return (time() <= $end);
     }
 
     /**
@@ -171,11 +182,14 @@ class ItemListRenderingListener
      *
      * @param IItem $offer
      *
-     * @return mixed
+     * @return int The host editing end as unix timestamp.
      */
-    private static function getHostEditEnd(IItem $offer)
+    private static function getHostEditEnd(IItem $offer): ?int
     {
         $passRelease = $offer->get('pass_release');
+        if (null === $passRelease) {
+            return null;
+        }
 
         return $passRelease[MetaModelSelect::SELECT_RAW]['host_edit_end'];
     }
@@ -196,7 +210,7 @@ class ItemListRenderingListener
      *
      * @return string
      */
-    private function translateLabel($transString, $definitionName, array $parameters = [])
+    private function translateLabel($transString, $definitionName, array $parameters = []): string
     {
         $translator = $this->translator;
         try {

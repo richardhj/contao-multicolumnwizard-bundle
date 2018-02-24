@@ -48,7 +48,7 @@ class ComplyWithEditingEndListener
      *
      * @throws DcGeneralRuntimeException
      */
-    public function handleEvent(ActionEvent $event)
+    public function handleEvent(ActionEvent $event): void
     {
         if (!$this->scopeDeterminator->currentScopeIsFrontend()) {
             return;
@@ -71,16 +71,30 @@ class ComplyWithEditingEndListener
      *
      * @throws DcGeneralRuntimeException
      */
-    public function process(EnvironmentInterface $environment)
+    public function process(EnvironmentInterface $environment): void
     {
         $definition      = $environment->getDataDefinition();
         $basicDefinition = $definition->getBasicDefinition();
+        $dataProvider    = $environment->getDataProvider();
+
         if ('mm_ferienpass' !== $definition->getName()) {
             return;
         }
 
-        $dataProvider = $environment->getDataProvider();
-        $modelId      = ModelId::fromSerialized($environment->getInputProvider()->getParameter('id'));
+        switch ($environment->getInputProvider()->getParameter('act')) {
+            case 'edit':
+            case 'delete':
+                $modelId = ModelId::fromSerialized($environment->getInputProvider()->getParameter('id'));
+                break;
+            case 'createvariant':
+                $modelId = ModelId::fromSerialized($environment->getInputProvider()->getParameter('source'));
+                break;
+
+            default:
+                // Copy is allowed. The others assumably as well.
+                return;
+        }
+
         /** @var Model $model */
         $model = $dataProvider->fetch($dataProvider->getEmptyConfig()->setId($modelId->getId()));
 
@@ -99,9 +113,14 @@ class ComplyWithEditingEndListener
      *
      * @return bool
      */
-    private static function offerIsEditableForHost(IItem $offer): bool
+    private static function offerIsEditableForHost(IItem $offer): ?bool
     {
-        return (time() <= self::getHostEditEnd($offer));
+        $end = self::getHostEditEnd($offer);
+        if (null === $end) {
+            return null;
+        }
+
+        return (time() <= $end);
     }
 
     /**
@@ -109,11 +128,14 @@ class ComplyWithEditingEndListener
      *
      * @param IItem $offer
      *
-     * @return mixed
+     * @return int The host editing end as unix timestamp.
      */
-    private static function getHostEditEnd(IItem $offer)
+    private static function getHostEditEnd(IItem $offer): ?int
     {
         $passRelease = $offer->get('pass_release');
+        if (null === $passRelease) {
+            return null;
+        }
 
         return $passRelease[MetaModelSelect::SELECT_RAW]['host_edit_end'];
     }
