@@ -141,7 +141,7 @@ class ItemListRenderingListener
         $result = $event->getResult();
 
         // Set buttons disabled if over.
-        if (false === self::offerIsEditableForHost($event->getItem())) {
+        if (false === self::offerIsEditableForHost($item)) {
             foreach (['edit', 'delete', 'createvariant'] as $action) {
                 if (isset($result['actions'][$action])) {
                     $result['actions'][$action]['class'] .= ' disabled';
@@ -154,6 +154,11 @@ class ItemListRenderingListener
 
         // Remove copy action for variants.
         if ($item->isVariant()) {
+            unset($result['actions']['copy']);
+        }
+
+        // Remove copy action for items currently being allowed to edit.
+        if (true === self::offerIsEditableForHost($item)) {
             unset($result['actions']['copy']);
         }
 

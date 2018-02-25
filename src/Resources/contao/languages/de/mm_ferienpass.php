@@ -20,3 +20,7 @@ $GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_edit_item']      = 'Bearbeiten';
 $GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_copy_item']      = 'Kopieren';
 $GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_delete_item']    = 'Löschen';
 $GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_create_variant'] = 'Neuen zusätzlichen Termin';
+
+$GLOBALS['TL_LANG']['mm_ferienpass']['details'][0] = 'Ansehen';
+$GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_show_application_list'][0] = 'Teilnehmerliste';
+$GLOBALS['TL_LANG']['mm_ferienpass']['metamodel_show_application_list'][1] = 'Die Teilnehmerliste dieses Angebotes ansehen';

@@ -38,20 +38,6 @@ $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['submit'] = 'Teilnehmer verbindlic
 $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['confirmation'] = 'Es wurden %u Teilnehmer zu diesem Angebot hinzugefügt.';
 $GLOBALS['TL_LANG']['MSC']['document']['export_error'] = 'Ein Fehler beim Export ist aufgetreten';
 
-// Offers management
-// * buttons
-$GLOBALS['TL_LANG']['MSC']['detailsLink'][0] = 'Ansehen';
-$GLOBALS['TL_LANG']['MSC']['detailsLink'][1] = 'Das Angebot in der Vorschau ansehen';
-$GLOBALS['TL_LANG']['MSC']['editLink'][0] = 'Bearbeiten';
-$GLOBALS['TL_LANG']['MSC']['editLink'][1] = 'Dieses Angebot bearbeiten';
-$GLOBALS['TL_LANG']['MSC']['copyLink'][0] = 'Kopieren';
-$GLOBALS['TL_LANG']['MSC']['copyLink'][1] = 'Dieses Angebot als Vorlage verwenden und kopieren';
-$GLOBALS['TL_LANG']['MSC']['createVariantLink'][0] = 'Termin erstellen';
-$GLOBALS['TL_LANG']['MSC']['createVariantLink'][1] = 'Einen neuen Termin für dieses Angebot ertellen';
-$GLOBALS['TL_LANG']['MSC']['applicationlistLink'][0] = 'Teilnehmerliste';
-$GLOBALS['TL_LANG']['MSC']['applicationlistLink'][1] = 'Die Teilnehmerliste dieses Angebotes ansehen';
-$GLOBALS['TL_LANG']['MSC']['deleteLink'][0] = 'Löschen';
-$GLOBALS['TL_LANG']['MSC']['deleteLink'][1] = 'Dieses Angebotes löschen';
 
 $GLOBALS['TL_LANG']['MSC']['downloadList'][0] = 'Teilnehmerliste downloaden';
 $GLOBALS['TL_LANG']['MSC']['downloadList'][1] = 'Die Teilnehmerliste zu diesem Angebot als PDF herunterladen';
