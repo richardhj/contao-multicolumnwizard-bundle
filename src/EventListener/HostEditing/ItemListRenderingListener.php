@@ -150,7 +150,9 @@ class ItemListRenderingListener
         }
 
         // Add attribute.
-        $result['actions']['jumpTo']['attribute'] = 'data-lightbox';
+        if (isset($result['actions']['jumpTo'])) {
+            $result['actions']['jumpTo']['attribute'] = 'data-lightbox';
+        }
 
         // Remove copy action for variants.
         if ($item->isVariant()) {
