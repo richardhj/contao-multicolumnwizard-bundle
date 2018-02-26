@@ -51,6 +51,7 @@ class Editing extends Items
      */
     public function generate()
     {
+        return '';
         global $container;
 
         switch (\Input::get('act')) {
