@@ -52,6 +52,9 @@ class PassReleases
     public function getPassReleaseToEdit(): ?IItem
     {
         $metaModel = $this->factory->getMetaModel('mm_ferienpass_release');
+        if (null === $metaModel) {
+            return null;
+        }
 
         $qb = $this->connection->createQueryBuilder()
             ->select('id')

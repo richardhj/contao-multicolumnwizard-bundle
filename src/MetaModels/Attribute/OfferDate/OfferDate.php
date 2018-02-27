@@ -246,7 +246,7 @@ class OfferDate extends BaseComplex
         if ($where) {
             $builder->andWhere($where['procedure']);
 
-            foreach ($where['params'] as $name => $value) {
+            foreach ((array)$where['params'] as $name => $value) {
                 $builder->setParameter($name, $value);
             }
         }
@@ -298,7 +298,7 @@ class OfferDate extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    public function unsetDataFor($ids)
+    public function unsetDataFor($ids): void
     {
         $where = $this->getWhere($ids);
 
@@ -492,7 +492,7 @@ class OfferDate extends BaseComplex
             ->from($this->getValueTable())
             ->where('att_id=:attr')
             ->groupBy('item_id')
-            ->having($function.' '.$operation.' '.intval($value))
+            ->having($function.' '.$operation.' '.(int)$value)
             ->setParameter('attr', $this->get('id'))
             ->execute();
 

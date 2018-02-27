@@ -71,7 +71,7 @@ class ItemListRenderingListener
     public function handleRenderItemList(RenderItemListEvent $event): void
     {
         $caller = $event->getCaller();
-        if ('mm_ferienpass' !== $event->getList()->getMetaModel()->getTableName()) {
+        if (null === $caller || 'mm_ferienpass' !== $event->getList()->getMetaModel()->getTableName()) {
             return;
         }
 

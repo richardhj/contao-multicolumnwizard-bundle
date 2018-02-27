@@ -268,7 +268,8 @@ class UserAttendances extends Module
                                             $this->participantModel
                                                 ->findById($attendances->participant)
                                                 ->parseAttribute('name')['text']
-                                        )
+                                        ),
+                                        ENT_QUOTES | ENT_HTML5
                                     )
                                              .'\')"';
 

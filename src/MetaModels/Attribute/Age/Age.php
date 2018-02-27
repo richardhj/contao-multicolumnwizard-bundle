@@ -332,7 +332,7 @@ class Age extends BaseComplex
         $checkedLine = null;
 
         foreach ($widgetLines as $i => $widgetLine) {
-            $derivedSaveFormat = preg_replace('/[1-9][0-9]*/', '%s', $value);
+            $derivedSaveFormat = preg_replace('/[1-9]\d*/', '%s', $value);
 
             if ($derivedSaveFormat === $widgetLine['save_format']) {
                 $checkedLine = $i;

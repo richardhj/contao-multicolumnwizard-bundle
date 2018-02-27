@@ -22,46 +22,60 @@ use MetaModels\Filter\Rules\StaticIdList;
 
 /**
  * Class AttendanceAvailable
+ *
  * @package MetaModels\Filter\Setting
  */
 class AttendanceAvailable extends Checkbox
 {
 
     /**
-     * {@inheritdoc}
+     * Tells the filter setting to add all of its rules to the passed filter object.
+     *
+     * The filter rules can evaluate the also passed filter url.
+     *
+     * A filter url hereby is a simple hash of name => value layout, it may eventually be interpreted
+     * by attributes via IMetaModelAttribute::searchFor() method.
+     *
+     * @param IFilter  $filter       The filter to append the rules to.
+     *
+     * @param string[] $filterParams The parameters to evaluate.
+     *
+     * @return void
+     *
+     * @throws \RuntimeException
      */
-    public function prepareRules(IFilter $objFilter, $arrFilterUrl): void
+    public function prepareRules(IFilter $filter, $filterParams): void
     {
         $objMetaModel = $this->getMetaModel();
         $strParamName = $this->getParamName();
         $objAttribute = $objMetaModel->getAttributeById($this->get('attr_id'));
 
         // If is a checkbox defined as "no", 1 has to become -1 like with radio fields.
-        if (isset($arrFilterUrl[$strParamName])) {
-            $arrFilterUrl[$strParamName] =
-                ('1' === $arrFilterUrl[$strParamName] && 'no' === $this->get('ynmode')
+        if (isset($filterParams[$strParamName])) {
+            $filterParams[$strParamName] =
+                ('1' === $filterParams[$strParamName] && 'no' === $this->get('ynmode')
                     ? '-1'
-                    : $arrFilterUrl[$strParamName]);
+                    : $filterParams[$strParamName]);
         }
 
-        if ($objAttribute && $strParamName && !empty($arrFilterUrl[$strParamName])) {
+        if ($objAttribute && $strParamName && !empty($filterParams[$strParamName])) {
             // Param -1 has to be '' meaning 'really empty'.
-            $arrFilterUrl[$strParamName] = ('-1' === $arrFilterUrl[$strParamName] ? '' : $arrFilterUrl[$strParamName]);
+            $filterParams[$strParamName] = ('-1' === $filterParams[$strParamName] ? '' : $filterParams[$strParamName]);
 
             $strQuery = sprintf(
                 <<<'SQL'
                 SELECT item.id
 FROM %1$s AS item
 LEFT JOIN (
-  SELECT offer, COUNT(id) as current_participants
+  SELECT offer, COUNT(id) AS current_participants
   FROM %2$s
   GROUP BY %2$s.offer
-) as attendance ON attendance.offer = item.id
+) AS attendance ON attendance.offer = item.id
 INNER JOIN (
-  SELECT start as startDateTime, item_id, MIN(start) as minStartDateTime
+  SELECT START AS startDateTime, item_id, MIN(START) AS minStartDateTime
   FROM tl_metamodel_offer_date
   GROUP BY tl_metamodel_offer_date.item_id
-) as dates ON dates.item_id = item.id AND startDateTime = minStartDateTime
+) AS dates ON dates.item_id = item.id AND startDateTime = minStartDateTime
 WHERE (
   item.%3$s <> 1
   OR (item.%3$s = 1 AND (item.%4$s > current_participants OR ISNULL(current_participants)))
@@ -77,11 +91,11 @@ SQL
             );
 
             $objFilterRule = new SimpleQuery($strQuery, [], 'id', $objMetaModel->getServiceContainer()->getDatabase());
-            $objFilter->addFilterRule($objFilterRule);
+            $filter->addFilterRule($objFilterRule);
 
             return;
         }
 
-        $objFilter->addFilterRule(new StaticIdList(null));
+        $filter->addFilterRule(new StaticIdList(null));
     }
 }
