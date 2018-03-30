@@ -77,3 +77,10 @@ services:
             - '@richardhj.ferienpass.pass_releases'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-duplicate', method: handle, priority: -10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.frontend_unset_date_on_createvariant:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeUnsetDateOnCreateVariantListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }

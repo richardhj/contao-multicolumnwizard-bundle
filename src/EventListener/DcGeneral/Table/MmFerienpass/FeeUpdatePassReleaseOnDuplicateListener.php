@@ -71,5 +71,6 @@ class FeeUpdatePassReleaseOnDuplicateListener
 
         $item = $model->getItem();
         $item->set('pass_release', $passRelease->get('id'));
+        $item->set('date_period', null);
     }
 }
