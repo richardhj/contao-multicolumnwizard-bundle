@@ -14,10 +14,10 @@
 namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
 
 
+use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
-use Dropbox\Exception_BadRequest;
-use Dropbox\Exception_NetworkIO;
+use League\Flysystem\MountManager;
 use Richardhj\ContaoFerienpassBundle\Flysystem\Plugin\DropboxDelta;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FilesystemInterface;
@@ -77,6 +77,8 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
      * @param IItems $items
      *
      * @return FilesystemInterface
+     *
+     * @deprecated
      */
     public function setItems(IItems $items): FilesystemInterface
     {
@@ -88,13 +90,13 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
     /**
      * {@inheritdoc}
      */
-    public function processFiles(array $files)
+    public function processFiles(array $files): void
     {
-        // Make sure to mount dropbox
-        $mountManager = $this->getModel()->getMountManager('dropbox');
+        /** @var MountManager $mountManager */
+        $mountManager = System::getContainer()->get('oneup_flysystem.mount_manager');
 
         foreach ($files as $file) {
-            try {
+//            try {
                 // Trim tmp path from path
                 $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);
 
@@ -103,29 +105,29 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
                     $mountManager->read('local://' . $file['path'])
                 );
 
-            } catch (Exception_BadRequest $e) {
-                // File was not uploaded
-                // often because it is on the ignored file list
-                $this->dispatcher->dispatch(
-                    ContaoEvents::SYSTEM_LOG,
-                    new LogEvent(
-                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
-                        __METHOD__,
-                        TL_GENERAL
-                    )
-                );
-            } catch (Exception_NetworkIO $e) {
-                // File was not uploaded
-                // Connection refused
-                $this->dispatcher->dispatch(
-                    ContaoEvents::SYSTEM_LOG,
-                    new LogEvent(
-                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
-                        __METHOD__,
-                        TL_ERROR
-                    )
-                );
-            }
+//            } catch (Exception_BadRequest $e) {
+//                // File was not uploaded
+//                // often because it is on the ignored file list
+//                $this->dispatcher->dispatch(
+//                    ContaoEvents::SYSTEM_LOG,
+//                    new LogEvent(
+//                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
+//                        __METHOD__,
+//                        TL_GENERAL
+//                    )
+//                );
+//            } catch (Exception_NetworkIO $e) {
+//                // File was not uploaded
+//                // Connection refused
+//                $this->dispatcher->dispatch(
+//                    ContaoEvents::SYSTEM_LOG,
+//                    new LogEvent(
+//                        sprintf('%s. Data processing ID %u', $e->getMessage(), $this->getModel()->id),
+//                        __METHOD__,
+//                        TL_ERROR
+//                    )
+//                );
+//            }
         }
     }
 
@@ -149,14 +151,12 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
             return;
         }
 
-        $mountManager = $this
-            ->getModel()
-            ->getMountManager('dropbox');
+        /** @var MountManager $mountManager */
+        $mountManager = System::getContainer()->get('oneup_flysystem.mount_manager');
 
         $dbx = $mountManager->getFilesystem('dropbox');
         $dbx->addPlugin(new DropboxDelta());
 
-        /** @noinspection PhpUndefinedMethodInspection */
         $delta = $dbx->getDelta($this->getModel()->dropbox_cursor ?: null);
 
         // Save current cursor if "reset" is not set in response

@@ -14,7 +14,9 @@
 namespace Richardhj\ContaoFerienpassBundle\Model;
 
 use Contao\Model;
-use Dropbox\Client as DropboxClient;
+use Contao\System;
+use MetaModels\Filter\Setting\IFilterSettingFactory;
+use MetaModels\IFactory;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem\Dropbox;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem\Local;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem\SendToBrowser;
@@ -22,9 +24,6 @@ use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FilesystemInterface;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\ICal;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FormatInterface;
-use League\Flysystem\Dropbox\DropboxAdapter;
-use League\Flysystem\Filesystem;
-use League\Flysystem\MountManager;
 use MetaModels\Filter\IFilter;
 use MetaModels\IItems;
 use MetaModels\IMetaModel;
@@ -105,6 +104,23 @@ class DataProcessing extends Model
      */
     private $tmpPath;
 
+    /**
+     * @var IFactory
+     */
+    private $metaModelFactory;
+
+    /**
+     * @var IFilterSettingFactory
+     */
+    private $filterSettingFactory;
+
+    public function __construct(\Database\Result $objResult=null)
+    {
+        parent::__construct($objResult);
+
+        $this->metaModelFactory = System::getContainer()->get('metamodels.factory');
+        $this->filterSettingFactory = System::getContainer()->get('metamodels.filter_setting_factory');
+    }
 
     /**
      * @return FormatInterface
@@ -158,58 +174,13 @@ class DataProcessing extends Model
         return $this->fileSystemHandler;
     }
 
-
-    /**
-     * @param array|string $varFilesystems The filesystem(s) you want to be mounted
-     *
-     * @return MountManager
-     */
-    public function getMountManager($varFilesystems = null): MountManager
-    {
-        global $container;
-
-        if (null !== $varFilesystems) {
-            foreach ((array) $varFilesystems as $filesystem) {
-                $this->mountFileSystem($filesystem);
-            }
-        }
-
-        return $container['flysystem.mount-manager'];
-    }
-
-    /**
-     * @param string $fileSystem
-     *
-     * @return \League\Flysystem\FilesystemInterface
-     */
-    public function getFileSystem($fileSystem): \League\Flysystem\FilesystemInterface
-    {
-        return $this
-            ->getMountManager($fileSystem)
-            ->getFilesystem($fileSystem);
-    }
-
-
-    /**
-     * @return IMetaModel
-     */
-    public function getMetaModel(): IMetaModel
-    {
-        if (null === $this->metaModel) {
-            $this->metaModel = Offer::getInstance()->getMetaModel();
-        }
-
-        return $this->metaModel;
-    }
-
-
     /**
      * @return string
      */
     public function getTmpPath(): string
     {
         if (null === $this->tmpPath) {
-            $this->tmpPath = 'system/tmp/' . time();
+            $this->tmpPath = 'system/tmp/'.time();
         }
 
         return $this->tmpPath;
@@ -225,12 +196,17 @@ class DataProcessing extends Model
 
     /**
      * @return IFilter
+     * @throws \RuntimeException
      */
     public function getFilter(): IFilter
     {
         if (null === $this->filter) {
-            $this->filter = $this
-                ->getMetaModel()
+            $metaModel = $this->metaModelFactory->getMetaModel('mm_ferienpass');
+            if (null === $metaModel) {
+                throw new \RuntimeException('Cannot instantiate MetaModel: mm_ferienpass');
+            }
+
+            $this->filter = $metaModel
                 ->getEmptyFilter();
         }
 
@@ -284,14 +260,19 @@ class DataProcessing extends Model
 
     /**
      * Run data processing by its configuration
+     *
+     * @throws \League\Flysystem\RootViolationException
+     * @throws \RuntimeException
      */
-    public function run()
+    public function run(): void
     {
+        $metaModel = $this->metaModelFactory->getMetaModel('mm_ferienpass');
+        if (null === $metaModel) {
+            throw new \RuntimeException('Could not instantiate MetaModel: mm_ferienpass');
+        }
+
         // Provide filter
-        $this
-            ->getMetaModel()
-            ->getServiceContainer()
-            ->getFilterFactory()
+        $this->filterSettingFactory
             ->createCollection($this->metamodel_filtering)
             ->addRules(
                 $this->getFilter(),
@@ -299,8 +280,7 @@ class DataProcessing extends Model
             );
 
         // Find items by filter
-        $this->items = $this
-            ->getMetaModel()
+        $this->items = $metaModel
             ->findByFilter(
                 $this->getFilter(),
                 $this->metamodel_sortby,
@@ -315,10 +295,10 @@ class DataProcessing extends Model
             ->processItems()
             ->getFiles();
 
-        $files = array_merge(
-            $files,
-            $this->fetchStaticFiles()
-        );
+//        $files = array_merge(
+//            $files,
+//            $this->fetchStaticFiles()
+//        );
 
         // Process files
         $this
@@ -326,9 +306,10 @@ class DataProcessing extends Model
             ->processFiles($files);
 
         // Delete tmp path
-        $this
-            ->getMountManager()
-            ->deleteDir('local://' . $this->getTmpPath());
+
+//        /** @var \League\Flysystem\FilesystemInterface $filesystem */
+//        $filesystem = System::getContainer()->get('ferienpass_local_filesystem');
+//        $filesystem->deleteDir('local://'.$this->getTmpPath());
     }
 
 
@@ -337,48 +318,17 @@ class DataProcessing extends Model
      */
     protected function fetchStaticFiles(): array
     {
-        $files      = [];
-        $fileSystem = $this->getFileSystem('local');
+        $files = [];
+        /** @var \League\Flysystem\FilesystemInterface $filesystem */
+        $filesystem = System::getContainer()->get('ferienpass_local_filesystem');
 
-        foreach (deserialize($this->static_dirs, true) as $dirBin) {
-            $path = (\FilesModel::findByPk($dirBin))->path;
-
-            $files = array_merge(
-                $files,
-                $fileSystem->listContents($path)
-            );
+        foreach ((array)deserialize($this->static_dirs, true) as $dirBin) {
+            $path    = \FilesModel::findByPk($dirBin)->path;
+            $files[] = $filesystem->listContents($path, true);
         }
+
+        $files = array_merge(...$files);
 
         return $files;
-    }
-
-
-    /**
-     * @param string $fileSystem
-     */
-    protected function mountFileSystem($fileSystem)
-    {
-        global $container;
-
-        switch ($fileSystem) {
-            case 'local':
-            case 'dbafs':
-                break;
-
-            case 'dropbox':
-                $client  = new DropboxClient(
-                    $this->dropbox_access_token,
-                    $container['ferienpass.dropbox.appSecret']
-                );
-                $adapter = new DropboxAdapter(
-                    $client,
-                    'ferienpass.online/' . $this->path_prefix
-                );
-
-                $this
-                    ->getMountManager()
-                    ->mountFilesystem($fileSystem, new Filesystem($adapter));
-                break;
-        }
     }
 }

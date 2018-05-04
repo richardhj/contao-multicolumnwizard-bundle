@@ -171,33 +171,6 @@ class Dca implements EventSubscriberInterface
 
 
     /**
-     * Get MetaModel attributes grouped by MetaModel
-     *
-     * @category options_callback
-     *
-     * @return array
-     */
-    public function getMetaModelsAttributes()
-    {
-        global $container;
-
-        $return = [];
-
-        /** @var IMetaModelsServiceContainer $serviceContainer */
-        $serviceContainer = $container['metamodels-service-container'];
-
-        foreach ($this->getMetaModels() as $table => $metaModelTitle) {
-            foreach ($serviceContainer->getFactory()->getMetaModel($table)->getAttributes() as $attrName => $attribute)
-            {
-                $return[$table][$attrName] = $attribute->getName();
-            }
-        }
-
-        return $return;
-    }
-
-
-    /**
      * Get MetaModels
      *
      * @category options_callback
@@ -306,7 +279,7 @@ class Dca implements EventSubscriberInterface
     {
         $renderSettings = \Database::getInstance()
             ->prepare('SELECT * FROM tl_metamodel_rendersettings WHERE pid=? ORDER BY name')
-            ->execute(Offer::getInstance()->getMetaModel()->get('id'));
+            ->execute(1);
 
         // Sort the render settings.
         return $renderSettings->fetchEach('name');

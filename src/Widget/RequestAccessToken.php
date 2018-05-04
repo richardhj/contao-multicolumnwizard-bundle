@@ -66,10 +66,11 @@ class RequestAccessToken extends Widget
      */
     public function generate(): string
     {
+        $container = System::getContainer();
         $provider = new DropboxOAuthProvider(
             [
-                'clientId'     => System::getContainer()->getParameter('richardhj.ferienpass.dropbox.app_id'),
-                'clientSecret' => System::getContainer()->getParameter('richardhj.ferienpass.dropbox.app_secret'),
+                'clientId'     => $container->getParameter('richardhj.ferienpass.dropbox.app_id'),
+                'clientSecret' => $container->getParameter('richardhj.ferienpass.dropbox.app_secret'),
             ]
         );
 

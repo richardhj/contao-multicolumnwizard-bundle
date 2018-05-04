@@ -41,5 +41,5 @@ interface FilesystemInterface
      *
      * @return void
      */
-    public function processFiles(array $files);
+    public function processFiles(array $files): void;
 }

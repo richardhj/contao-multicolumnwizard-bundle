@@ -23,6 +23,7 @@ use ContaoCommunityAlliance\MetaPalettes\CcaMetaPalettesBundle;
 use MetaModels\CoreBundle\MetaModelsCoreBundle;
 use MetaModels\FilterCheckboxBundle\MetaModelsFilterCheckboxBundle;
 use MetaModels\FilterFromToBundle\MetaModelsFilterFromToBundle;
+use Oneup\FlysystemBundle\OneupFlysystemBundle;
 use Richardhj\ContaoFerienpassBundle\RichardhjContaoFerienpassBundle;
 use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -52,8 +53,10 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
                         MetaModelsFilterCheckboxBundle::class,
                         MetaModelsFilterFromToBundle::class,
                         CcaMetaPalettesBundle::class,
+                        OneupFlysystemBundle::class,
                     ]
                 ),
+            BundleConfig::create(OneupFlysystemBundle::class),
         ];
     }
 
