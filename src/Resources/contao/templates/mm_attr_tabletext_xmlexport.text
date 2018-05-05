@@ -2,12 +2,12 @@
 
 $dom = new \DOMDocument('1.0', 'utf-8');
 
-$table = $dom->createElement('_' . $this->attribute->get('type'));
+$table = $dom->createElement('_'.$this->attribute->get('type'));
 $table->setAttribute('xmlns:aid', 'http://ns.adobe.com/AdobeInDesign/4.0/');
 $table->setAttribute('aid:table', 'table');
 
-$countCol = count($this->attribute->get('tabletext_cols'));
-$countRow = count($this->raw);
+$countCol = count((array)$this->attribute->get('tabletext_cols'));
+$countRow = count((array)$this->raw);
 
 $originCell = $dom->createElement('_cell');
 $originCell->setAttribute('aid:table', 'cell');
@@ -15,12 +15,12 @@ $originCell->setAttribute('aid:crows', '1');
 $originCell->setAttribute('aid:ccols', '1');
 $originCell->setAttribute('aid:ccolwidth', '150');
 
-foreach ((array) $this->raw as $k => $row) {
+foreach ((array)$this->raw as $k => $row) {
     for ($kk = 0; $kk < $countCol; $kk++) {
-        $i    = array_search($kk, array_column($row, 'col'));
+        $i    = array_search($kk, array_column($row, 'col'), false);
         $cell = clone $originCell;
         if ($i !== false) {
-            $cell->nodeValue = htmlspecialchars(html_entity_decode($row[$i]['value']), ENT_XML1);
+            $cell->nodeValue = htmlspecialchars(html_entity_decode($row[$i]['value']), ENT_QUOTES | ENT_XML1);
         }
 
         $table->appendChild($cell);

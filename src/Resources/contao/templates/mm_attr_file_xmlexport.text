@@ -17,7 +17,7 @@ if (empty($this->raw['value'])) {
 
 //log_message(var_export($this->raw, true), 'xmlexport_file_template.log');
 
-foreach ($this->raw['value'] as $fileUuid) {
+foreach ((array)$this->raw['value'] as $fileUuid) {
 //	log_message(var_export($fileBin, true), 'xmlexport_file_template.log');
 //	log_message(var_export($i, true), 'xmlexport_file_template.log');
     $domFile = $dom->createElement('_file');
@@ -25,7 +25,7 @@ foreach ($this->raw['value'] as $fileUuid) {
     $domLink = $dom->createElement('_link');
     $domLink->setAttribute(
         'href',
-        'file://../' . \FilesModel::findByPk($fileUuid)->path
+        'file://../'.\FilesModel::findByPk($fileUuid)->path
     );
 
     $meta = $dom->createElement('_meta');

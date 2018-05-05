@@ -16,9 +16,11 @@ namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format;
 
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
+use Doctrine\DBAL\Connection;
 use DOMDocument;
 use DOMElement;
 use DOMNode;
+use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IFactory;
 use MetaModels\Render\Setting\IRenderSettingFactory;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing as DataProcessingModel;
@@ -54,6 +56,16 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     private $renderSettingFactory;
 
     /**
+     * @var Filesystem
+     */
+    private $filesystem;
+
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
      * @var EventDispatcherInterface
      */
     private $dispatcher;
@@ -67,33 +79,29 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * @var DataProcessingModel|null
      */
     private $model;
-    /**
-     * @var Filesystem
-     */
-    private $filesystem;
 
     /**
      * Xml constructor.
      *
-     * @param IFactory                 $factory
-     * @param IRenderSettingFactory    $renderSettingFactory
-     * @param Filesystem               $filesystem
-     * @param EventDispatcherInterface $dispatcher
-     * @param string                   $kernelProjectDir
+     * @param IFactory                 $factory              The MetaModels factory.
+     * @param IRenderSettingFactory    $renderSettingFactory The MetaModels render setting factory.
+     * @param Filesystem               $filesystem           The filesystem component.
+     * @param Connection               $connection           The database connection.
+     * @param EventDispatcherInterface $dispatcher           The event dispatcher.
+     * @param string                   $kernelProjectDir     The kernel project dir.
      */
     public function __construct(
         IFactory $factory,
         IRenderSettingFactory $renderSettingFactory,
         Filesystem $filesystem,
+        Connection $connection,
         EventDispatcherInterface $dispatcher,
         string $kernelProjectDir
     ) {
-//        $this->model                = $model;
-//        $this->kernelProjectDir     = System::getContainer()->getParameter('kernel.project_dir');
-//        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory')
         $this->factory              = $factory;
         $this->renderSettingFactory = $renderSettingFactory;
         $this->filesystem           = $filesystem;
+        $this->connection           = $connection;
         $this->dispatcher           = $dispatcher;
         $this->kernelProjectDir     = $kernelProjectDir;
     }
@@ -209,10 +217,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * @param DOMDocument $dom
      *
      * @return DOMElement|null
+     *
+     * @throws \RuntimeException
      */
     protected function itemAsDomNode(IItem $item, DOMDocument $dom): ?DOMElement
     {
-        $variants = null;
+        $items = null;
 
         if ($this->isCombineVariants()) {
             if ($item->isVariant()) {
@@ -220,8 +230,19 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 return null;
             }
 
-            // Fetch variants by using the filter to apply sorting
-            $variants = $item->getVariants($this->model->getFilter());
+            // Fetch variants including varbase
+            $variantsFilter = $this->model->getFilter()->createCopy();
+
+            $idList = $this->connection->createQueryBuilder()
+                ->select('id')
+                ->from('mm_ferienpass')
+                ->where('vargroup=:id')
+                ->setParameter('id', $item->get('id'))
+                ->execute()
+                ->fetchAll(\PDO::FETCH_COLUMN);
+
+            $variantsFilter->addFilterRule(new StaticIdList($idList));
+            $items = $item->getMetaModel()->findByFilter($variantsFilter);
         }
 
         $renderSetting =
@@ -230,7 +251,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         $root = $dom->createElement('Item');
         $root->setAttribute('item_id', $item->get('id'));
 
-        if (null !== $variants && $variants->getCount()) {
+        if ($items->getCount() > 1) {
             $root->setAttribute(
                 'variant_ids',
                 implode(
@@ -239,11 +260,17 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                         function (IItem $variant) {
                             return $variant->get('id');
                         },
-                        iterator_to_array($variants)
+                        array_filter(
+                            iterator_to_array($items),
+                            function (IItem $variant) {
+                                return $variant->isVariant();
+                            }
+                        )
                     )
                 )
             );
-            $variants->reset();
+
+            $items->reset();
         }
 
         foreach ($renderSetting->getSettingNames() as $colName) {
@@ -251,19 +278,19 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $domAttribute = $dom->createElement(static::camelCase($colName));
             $domAttribute->setAttribute('attr_id', $attribute->get('id'));
 
-            if (!($this->isCombineVariants() && $variants->getCount() && $attribute->get('isvariant'))) {
+            if (!($this->isCombineVariants() && $items->getCount() > 1 && $attribute->get('isvariant'))) {
                 $parsed = $item->parseAttribute($colName, 'text', $renderSetting);
                 $this->addParsedToDomAttribute($parsed['text'], $domAttribute);
             } else {
-                while ($variants->next()) {
+                while ($items->next()) {
                     $domVariantValue = $dom->createElement('_variantValue');
-                    $domVariantValue->setAttribute('item_id', $variants->getItem()->get('id'));
+                    $domVariantValue->setAttribute('item_id', $items->getItem()->get('id'));
 
-                    $parsed = $variants->getItem()->parseAttribute($colName, 'text', $renderSetting);
+                    $parsed = $items->getItem()->parseAttribute($colName, 'text', $renderSetting);
                     $this->addParsedToDomAttribute($parsed['text'], $domVariantValue);
                     $domAttribute->appendChild($domVariantValue);
 
-                    if ($variants->offsetExists($variants->key() + 1)) {
+                    if ($items->offsetExists($items->key() + 1)) {
                         $domAttribute->appendChild(
                             $dom->createElement('_variantDelimiter', $this->getVariantDelimiter($attribute))
                         );

@@ -15,6 +15,7 @@ namespace Richardhj\ContaoFerienpassBundle\Model;
 
 use Contao\Model;
 use Contao\System;
+use Doctrine\DBAL\Connection;
 use MetaModels\Filter\Setting\IFilterSettingFactory;
 use MetaModels\IFactory;
 use MetaModels\Render\Setting\IRenderSettingFactory;
@@ -113,6 +114,11 @@ class DataProcessing extends Model
     private $filesystemUtil;
 
     /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
      * @var EventDispatcherInterface
      */
     private $dispatcher;
@@ -138,6 +144,7 @@ class DataProcessing extends Model
         $this->metaModelFactory     = System::getContainer()->get('metamodels.factory');
         $this->filterSettingFactory = System::getContainer()->get('metamodels.filter_setting_factory');
         $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
+        $this->connection           = System::getContainer()->get('database_connection');
         $this->dispatcher           = System::getContainer()->get('event_dispatcher');
         $this->filesystemUtil       = System::getContainer()->get('filesystem');
         $this->kernelProjectDir     = System::getContainer()->getParameter('kernel.project_dir');
@@ -155,6 +162,7 @@ class DataProcessing extends Model
                         $this->metaModelFactory,
                         $this->renderSettingFactory,
                         $this->filesystemUtil,
+                        $this->connection,
                         $this->dispatcher,
                         $this->kernelProjectDir
                     );
@@ -207,13 +215,15 @@ class DataProcessing extends Model
 
     /**
      * @return IFilter
+     *
+     * @throws RuntimeException
      */
-    public function getFilter(): ?IFilter
+    public function getFilter(): IFilter
     {
         if (null === $this->filter) {
             $metaModel = $this->metaModelFactory->getMetaModel('mm_ferienpass');
             if (null === $metaModel) {
-                return null;
+                throw new RuntimeException('Could not instantiate MetaModel: mm_ferienpass');
             }
 
             $this->filter = $metaModel->getEmptyFilter();
