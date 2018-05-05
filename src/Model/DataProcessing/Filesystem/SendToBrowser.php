@@ -17,8 +17,8 @@ namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
 use Contao\ZipWriter;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FilesystemInterface;
-use MetaModels\IItems;
-
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 /**
  * Class SendToBrowser
@@ -29,71 +29,63 @@ class SendToBrowser implements FilesystemInterface
 {
 
     /**
-     * @var DataProcessing|\Model $model
+     * @var string
      */
-    private $model;
+    private $kernelProjectDir;
 
     /**
-     * @var IItems $items
-     */
-    private $items;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct(DataProcessing $model)
-    {
-        $this->model  = $model;
-    }
-
-    /**
-     * @return DataProcessing|\Model
-     */
-    public function getModel(): DataProcessing
-    {
-        return $this->model;
-    }
-
-    /**
-     * @return IItems
-     */
-    public function getItems(): IItems
-    {
-        return $this->items;
-    }
-
-    /**
-     * @param IItems $items
+     * SendToBrowser constructor.
      *
-     * @return FilesystemInterface
+     * @param string $kernelProjectDir The kernel project directory.
      */
-    public function setItems(IItems $items): FilesystemInterface
+    public function __construct(string $kernelProjectDir)
     {
-        $this->items = $items;
-
-        return $this;
+        $this->kernelProjectDir = $kernelProjectDir;
     }
 
     /**
-     * {@inheritdoc}
+     * @param array          $files The file paths to handle.
+     *
+     * @param DataProcessing $model The model.
+     *
+     * @return void
      * @throws \Exception
      */
-    public function processFiles(array $files): void
+    public function processFiles(array $files, DataProcessing $model): void
     {
-        // Generate a zip file
-        $zipWriter = new ZipWriter($this->getModel()->getTmpPath() . '/export.zip');
+        $response = null;
 
-        foreach ($files as $file) {
-            $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);
-            $zipWriter->addFile($path);
+        if (\count($files) > 1) {
+            // Generate a zip file
+            $zipWriter = new ZipWriter($model->getTmpPath().'/export.zip');
+
+            foreach ($files as $path) {
+                $normalizedPath = str_replace($model->getTmpPath().'/', '', $path);
+                $zipWriter->addFile($normalizedPath);
+            }
+
+            $zipWriter->close();
+
+            $response = new BinaryFileResponse(
+                file_get_contents($this->kernelProjectDir.'/'.$model->getTmpPath().'/export.zip')
+            );
+
+            $response->headers->set(
+                'Content-Disposition',
+                $response->headers->makeDisposition(
+                    ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                    $model->export_file_name.'.zip'
+                )
+            );
+        } elseif ($path = array_shift($files)) {
+            $response = new BinaryFileResponse($this->kernelProjectDir.'/'.$path);
         }
 
-        $zipWriter->close();
+        //clearstatcache(false, $file) see http://symfony.com/doc/2.3/components/http_foundation/introduction.html#serving-files
 
-        // Output ZIP
-        header('Content-type: application/octetstream');
-        header('Content-Disposition: attachment; filename="' . $this->getModel()->export_file_name . '.zip"');
-        readfile(TL_ROOT . '/' . $this->getModel()->getTmpPath() . '/export.zip');
-        exit;
+        if (null !== $response) {
+            $response->send();
+            exit;
+        }
     }
 }

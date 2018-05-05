@@ -25,33 +25,15 @@ use MetaModels\IItems;
  */
 interface FormatInterface
 {
+
     /**
-     * FormatInterface constructor.
+     * Process the items and provide the files
+     *
+     * @param IItems         $items The items to process.
      *
      * @param DataProcessing $model
-     */
-    public function __construct(DataProcessing $model);
-
-    /**
-     * @param IItems $items
      *
-     * @return FormatInterface
-     *
-     * @deprecated
+     * @return array
      */
-    public function setItems(IItems $items): self;
-
-    /**
-     * Process the items and provide the files in the expected format
-     *
-     * @return self
-     */
-    public function processItems(): self;
-
-    /**
-     * Get the files in the expected format as an array
-     *
-     * @return array The file information in the format of `listContents`
-     */
-    public function getFiles(): array;
+    public function processItems(IItems $items, DataProcessing $model): array;
 }

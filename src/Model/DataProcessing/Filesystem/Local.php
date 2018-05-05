@@ -16,7 +16,9 @@ namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
 
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FilesystemInterface;
-use MetaModels\IItems;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
 
 
 /**
@@ -28,55 +30,46 @@ class Local implements FilesystemInterface
 {
 
     /**
-     * @var DataProcessing|\Model $model
+     * @var Filesystem
      */
-    private $model;
+    private $filesystem;
 
     /**
-     * @var IItems $items
+     * @var string
      */
-    private $items;
+    private $kernelProjectDir;
 
     /**
-     * @return DataProcessing|\Model
-     */
-    public function getModel()
-    {
-        return $this->model;
-    }
-
-    /**
-     * @param IItems $items
+     * Local constructor.
      *
-     * @return FilesystemInterface
+     * @param Filesystem $filesystem       The filesystem component.
+     * @param string     $kernelProjectDir The kernel project directory.
      */
-    public function setItems(IItems $items): FilesystemInterface
+    public function __construct(Filesystem $filesystem, string $kernelProjectDir)
     {
-        $this->items = $items;
-
-        return $this;
+        $this->filesystem       = $filesystem;
+        $this->kernelProjectDir = $kernelProjectDir;
     }
 
     /**
-     * {@inheritdoc}
+     * @param array          $files The file paths to handle.
+     *
+     * @param DataProcessing $model The model.
+     *
+     * @return void
+     *
+     * @throws IOException
+     * @throws FileNotFoundException
      */
-    public function __construct(DataProcessing $model)
+    public function processFiles(array $files, DataProcessing $model): void
     {
-        $this->model  = $model;
-    }
+        $pathPrefix = $model->path_prefix ? $model->path_prefix.'/' : '';
 
-    /**
-     * {@inheritdoc}
-     */
-    public function processFiles(array $files): void
-    {
-        $pathPrefix = $this->getModel()->path_prefix ? $this->getModel()->path_prefix.'/' : '';
-
-        foreach ($files as $file) {
-            $path = str_replace($this->getModel()->getTmpPath() . '/', '', $file['path']);
-            $this->getModel()->getMountManager()->put(
-                'local://share/' . $pathPrefix . $path,
-                $this->getModel()->getMountManager()->read('local://' . $file['path'])
+        foreach ($files as $path) {
+            $normalizedPath = str_replace($model->getTmpPath().'/', '', $path['path']);
+            $this->filesystem->copy(
+                $this->kernelProjectDir.'/'.$path,
+                $this->kernelProjectDir.'/web/share/'.$pathPrefix.$normalizedPath
             );
         }
     }

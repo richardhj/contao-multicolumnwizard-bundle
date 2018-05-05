@@ -25,5 +25,5 @@ interface TwoWaySyncInterface
     /**
      * @return void
      */
-    public function triggerBackSync();
+    public function triggerBackSync(): void;
 }

@@ -22,6 +22,8 @@ use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FormatInterface;
 use MetaModels\IItem;
 use MetaModels\IItems;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
 
 
 /**
@@ -33,111 +35,68 @@ class ICal implements FormatInterface
 {
 
     /**
-     * @var array
+     * @var Filesystem
      */
-    private $files;
+    private $filesystem;
 
     /**
-     * @var DataProcessing|\Model
+     * @var string
      */
-    private $model;
+    private $kernelProjectDir;
 
     /**
-     * @var IItems
-     */
-    private $items;
-
-    /**
-     * @return DataProcessing|\Model
-     */
-    public function getModel(): DataProcessing
-    {
-        return $this->model;
-    }
-
-    /**
-     * @return IItems
-     */
-    public function getItems(): IItems
-    {
-        return $this->items;
-    }
-
-    /**
-     * @param IItems $items
+     * ICal constructor.
      *
-     * @return FormatInterface
+     * @param Filesystem $filesystem       The filesystem component.
+     * @param string     $kernelProjectDir The kernel project directory.
      */
-    public function setItems(IItems $items): FormatInterface
+    public function __construct(Filesystem $filesystem, string $kernelProjectDir)
     {
-        $this->items = $items;
-
-        return $this;
+        $this->filesystem       = $filesystem;
+        $this->kernelProjectDir = $kernelProjectDir;
     }
 
     /**
+     * Process the items and provide the files
+     *
+     * @param IItems         $items The items to process.
+     *
+     * @param DataProcessing $model
+     *
      * @return array
+     *
+     * @throws IOException
      */
-    public function getFiles(): array
+    public function processItems(IItems $items, DataProcessing $model): array
     {
-        return $this->files;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function __construct(DataProcessing $model)
-    {
-        $this->model = $model;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function processItems(): FormatInterface
-    {
-        $files = [];
-        $path  = sprintf(
+        $path = sprintf(
             '%s/%s.ics',
-            $this->getModel()->getTmpPath(),
-            $this->getModel()->export_file_name
+            $model->getTmpPath(),
+            $model->export_file_name
         );
 
-        try {
-            // Save the iCal in the tmp path
-            $this
-                ->getModel()
-                ->getMountManager()
-                ->put('local://'.$path, $this->createICal());
-        } catch (\UnexpectedValueException $e) {
-            return $this;
-        }
+        // Save the iCal in the tmp path
+        $this->filesystem->dumpFile($this->kernelProjectDir.'/'.$path, $this->createICal($items, $model));
 
-        $files[] = array_merge(
-            $this->getModel()->getMountManager()->getMetadata('local://'.$path),
-            [
-                'basename' => basename($path),
-            ]
-        );
-
-        $this->files = $files;
-
-        return $this;
+        return [$path];
     }
 
     /**
      * Create the iCal for given items
      *
+     * @param IItems         $items
+     *
+     * @param DataProcessing $model
+     *
      * @return string
-     * @throws \UnexpectedValueException
      */
-    private function createICal(): string
+    private function createICal(IItems $items, DataProcessing $model): string
     {
         $calendar       = new Calendar(Environment::get('httpHost'));
-        $iCalProperties = deserialize($this->getModel()->ical_fields);
+        $iCalProperties = deserialize($model->ical_fields);
 
         /** @var IItem $item */
-        foreach ($this->getItems() as $item) {
+        foreach ($items as $item) {
             $dateAttribute = ToolboxOfferDate::fetchDateAttribute($item);
 
             $date = $item->get($dateAttribute->getColName());
@@ -145,7 +104,7 @@ class ICal implements FormatInterface
                 continue;
             }
 
-            foreach ($date as $period) {
+            foreach ((array)$date as $period) {
                 $event = new Event();
 
                 $dateTime = new DateTime('@'.$period['start']);

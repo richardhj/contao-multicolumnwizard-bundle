@@ -38,8 +38,6 @@ class TriggerSyncPostPersistListener
             return;
         }
 
-        return;
-
         /** @type \Model\Collection|DataProcessing $processing */
         $processing = DataProcessing::findBy('sync', '1');
         while (null !== $processing && $processing->next()) {
@@ -59,14 +57,16 @@ class TriggerSyncPostPersistListener
 
                 $ids[] = $model->getId();
 
-                // FIXME getting troubles when using single_xml_file
-                $filterRule = new StaticIdList($ids);
-                $processing->current()
-                    ->getFilter()
-                    ->addFilterRule($filterRule);
+                $filter = $processing->current()->getFilter();
+                if (null !== $filter) {
+                    $processing->current()->setFilter($filter->addFilterRule(new StaticIdList($ids)));
+                }
             }
 
-            $processing->current()->run();
+            try {
+                $processing->current()->run();
+            } catch (\Exception $e) {
+            }
         }
     }
 }

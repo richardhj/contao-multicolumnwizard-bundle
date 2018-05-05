@@ -17,6 +17,7 @@ use Contao\Model;
 use Contao\System;
 use MetaModels\Filter\Setting\IFilterSettingFactory;
 use MetaModels\IFactory;
+use MetaModels\Render\Setting\IRenderSettingFactory;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem\Dropbox;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem\Local;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem\SendToBrowser;
@@ -25,8 +26,12 @@ use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\ICal;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FormatInterface;
 use MetaModels\Filter\IFilter;
-use MetaModels\IItems;
-use MetaModels\IMetaModel;
+use RuntimeException;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
+use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 
 /**
@@ -62,42 +67,25 @@ class DataProcessing extends Model
      */
     protected static $strTable = 'tl_ferienpass_dataprocessing';
 
-
-    /**
-     * @var IMetaModel
-     */
-    private $metaModel;
-
-
     /**
      * @var FormatInterface
      */
     private $formatHandler;
-
 
     /**
      * @var FilesystemInterface
      */
     private $fileSystemHandler;
 
-
-    /**
-     * @var IItems
-     */
-    private $items;
-
-
     /**
      * @var IFilter
      */
     private $filter;
 
-
     /**
      * @var array
      */
     private $filterParams;
-
 
     /**
      * @var string
@@ -114,12 +102,45 @@ class DataProcessing extends Model
      */
     private $filterSettingFactory;
 
-    public function __construct(\Database\Result $objResult=null)
+    /**
+     * @var IRenderSettingFactory
+     */
+    private $renderSettingFactory;
+
+    /**
+     * @var Filesystem
+     */
+    private $filesystemUtil;
+
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
+     * @var string
+     */
+    private $kernelProjectDir;
+
+    /**
+     * DataProcessing constructor.
+     *
+     * @param \Database\Result|null $objResult
+     *
+     * @throws InvalidArgumentException
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    public function __construct(\Database\Result $objResult = null)
     {
         parent::__construct($objResult);
 
-        $this->metaModelFactory = System::getContainer()->get('metamodels.factory');
+        $this->metaModelFactory     = System::getContainer()->get('metamodels.factory');
         $this->filterSettingFactory = System::getContainer()->get('metamodels.filter_setting_factory');
+        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
+        $this->dispatcher           = System::getContainer()->get('event_dispatcher');
+        $this->filesystemUtil       = System::getContainer()->get('filesystem');
+        $this->kernelProjectDir     = System::getContainer()->getParameter('kernel.project_dir');
     }
 
     /**
@@ -130,17 +151,19 @@ class DataProcessing extends Model
         if (null === $this->formatHandler) {
             switch ($this->format) {
                 case 'xml':
-                    $this->formatHandler = new Xml($this);
+                    $this->formatHandler = new Xml(
+                        $this->metaModelFactory,
+                        $this->renderSettingFactory,
+                        $this->filesystemUtil,
+                        $this->dispatcher,
+                        $this->kernelProjectDir
+                    );
                     break;
 
                 case 'ical':
-                    $this->formatHandler = new ICal($this);
+                    $this->formatHandler = new ICal($this->filesystemUtil, $this->kernelProjectDir);
                     break;
             }
-        }
-
-        if (null !== $this->items) {
-            $this->formatHandler->setItems($this->getItems());
         }
 
         return $this->formatHandler;
@@ -154,21 +177,17 @@ class DataProcessing extends Model
         if (null === $this->fileSystemHandler) {
             switch ($this->filesystem) {
                 case 'local':
-                    $this->fileSystemHandler = new Local($this);
+                    $this->fileSystemHandler = new Local($this->filesystemUtil, $this->kernelProjectDir);
                     break;
 
                 case 'sendToBrowser':
-                    $this->fileSystemHandler = new SendToBrowser($this);
+                    $this->fileSystemHandler = new SendToBrowser($this->kernelProjectDir);
                     break;
 
                 case 'dropbox':
-                    $this->fileSystemHandler = new Dropbox($this);
+                    $this->fileSystemHandler = new Dropbox($this->kernelProjectDir);
                     break;
             }
-        }
-
-        if (null !== $this->items) {
-            $this->fileSystemHandler->setItems($this->getItems());
         }
 
         return $this->fileSystemHandler;
@@ -180,34 +199,24 @@ class DataProcessing extends Model
     public function getTmpPath(): string
     {
         if (null === $this->tmpPath) {
-            $this->tmpPath = 'system/tmp/'.time();
+            $this->tmpPath = 'system/tmp/'.uniqid('', true);
         }
 
         return $this->tmpPath;
     }
 
     /**
-     * @return IItems
-     */
-    public function getItems(): IItems
-    {
-        return $this->items;
-    }
-
-    /**
      * @return IFilter
-     * @throws \RuntimeException
      */
-    public function getFilter(): IFilter
+    public function getFilter(): ?IFilter
     {
         if (null === $this->filter) {
             $metaModel = $this->metaModelFactory->getMetaModel('mm_ferienpass');
             if (null === $metaModel) {
-                throw new \RuntimeException('Cannot instantiate MetaModel: mm_ferienpass');
+                return null;
             }
 
-            $this->filter = $metaModel
-                ->getEmptyFilter();
+            $this->filter = $metaModel->getEmptyFilter();
         }
 
         return $this->filter;
@@ -244,7 +253,6 @@ class DataProcessing extends Model
         return $this->filterParams;
     }
 
-
     /**
      * @param array $filterParams
      *
@@ -257,32 +265,30 @@ class DataProcessing extends Model
         return $this;
     }
 
-
     /**
      * Run data processing by its configuration
      *
-     * @throws \League\Flysystem\RootViolationException
-     * @throws \RuntimeException
+     * @throws \Exception
      */
     public function run(): void
     {
         $metaModel = $this->metaModelFactory->getMetaModel('mm_ferienpass');
-        if (null === $metaModel) {
-            throw new \RuntimeException('Could not instantiate MetaModel: mm_ferienpass');
+        if (null === $metaModel || null === $filter = $this->getFilter()) {
+            throw new RuntimeException('Could not instantiate MetaModel: mm_ferienpass');
         }
 
         // Provide filter
         $this->filterSettingFactory
             ->createCollection($this->metamodel_filtering)
             ->addRules(
-                $this->getFilter(),
+                $filter,
                 $this->getFilterParams()
             );
 
         // Find items by filter
-        $this->items = $metaModel
+        $items = $metaModel
             ->findByFilter(
-                $this->getFilter(),
+                $filter,
                 $this->metamodel_sortby,
                 $this->metamodel_offset,
                 $this->metamodel_limit,
@@ -292,26 +298,21 @@ class DataProcessing extends Model
         // Fetch files from format handler
         $files = $this
             ->getFormatHandler()
-            ->processItems()
-            ->getFiles();
+            ->processItems($items, $this);
 
-//        $files = array_merge(
-//            $files,
-//            $this->fetchStaticFiles()
-//        );
+        $files = array_merge(
+            $files,
+            $this->fetchStaticFiles()
+        );
 
         // Process files
         $this
             ->getFileSystemHandler()
-            ->processFiles($files);
+            ->processFiles($files, $this);
 
         // Delete tmp path
-
-//        /** @var \League\Flysystem\FilesystemInterface $filesystem */
-//        $filesystem = System::getContainer()->get('ferienpass_local_filesystem');
-//        $filesystem->deleteDir('local://'.$this->getTmpPath());
+        $this->filesystemUtil->remove($this->kernelProjectDir.'/'.$this->getTmpPath());
     }
-
 
     /**
      * @return array
@@ -319,12 +320,14 @@ class DataProcessing extends Model
     protected function fetchStaticFiles(): array
     {
         $files = [];
-        /** @var \League\Flysystem\FilesystemInterface $filesystem */
-        $filesystem = System::getContainer()->get('ferienpass_local_filesystem');
 
         foreach ((array)deserialize($this->static_dirs, true) as $dirBin) {
             $path    = \FilesModel::findByPk($dirBin)->path;
-            $files[] = $filesystem->listContents($path, true);
+            $files[] = scandir($this->kernelProjectDir.'/'.$path, SCANDIR_SORT_NONE);
+        }
+
+        if ([] === $files) {
+            return [];
         }
 
         $files = array_merge(...$files);

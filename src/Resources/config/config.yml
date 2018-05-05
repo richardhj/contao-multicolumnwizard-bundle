@@ -11,30 +11,3 @@ parameters:
 
     # Age check method can be - exact or - vague_on_year
     richardhj.ferienpass.age_check_method: exact
-
-    oneup_flysystem:
-        adapters:
-            ferienpass_dropbox:
-                dropbox:
-                    client: richardhj.ferienpass.dropbox_client
-                    prefix: 'ferienpass.online'
-            ferienpass_local:
-                local:
-                    directory: "%kernel.root_dir%"
-                    lazy: ~ # boolean (default "false")
-                    writeFlags: ~
-                    linkHandling: ~
-                    permissions: ~
-        filesystems:
-            ferienpass_local:
-                adapter: ferienpass_local
-                cache: ~
-                alias: ~
-                mount: local
-                visibility: ~
-            ferienpass_dropbox:
-                adapter: ferienpass_dropbox
-                cache: ~
-                alias: ~
-                mount: dropbox
-                visibility: ~

@@ -200,3 +200,11 @@ services:
             - '@metamodels.view_combination'
         tags:
             - { name: kernel.event_listener, event: dc-general.view.contao2backend.decode-property-value-for-widget, method: handle }
+
+    richardhj.ferienpass.listener.data_processing.xml.convert_xml_elements:
+        class: Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml\ConvertDomElementToNativeWidgetListener
+        tags:
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.data-processing.xml.convert-dom-to-widget', method: 'convertSimpleAttributes', priority: -10 }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.data-processing.xml.convert-dom-to-widget', method: 'convertOfferDateAttribute' }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.data-processing.xml.convert-dom-to-widget', method: 'convertTableTextAttribute' }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.data-processing.xml.convert-dom-to-widget', method: 'convertFileAttribute' }

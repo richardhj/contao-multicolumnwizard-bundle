@@ -37,8 +37,3 @@ services:
         arguments:
             - '@metamodels.factory'
             - '@database_connection'
-
-    richardhj.ferienpass.dropbox_client:
-        class: Spatie\Dropbox\Client
-        arguments:
-            - "authorization-token"

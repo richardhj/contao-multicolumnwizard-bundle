@@ -97,7 +97,7 @@ class ConvertDomElementToNativeWidgetEvent
      *
      * @return self
      */
-    public function setValue($value)
+    public function setValue($value): self
     {
         $this->value = $value;
         return $this;

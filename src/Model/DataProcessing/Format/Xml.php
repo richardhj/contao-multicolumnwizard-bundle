@@ -20,18 +20,19 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use MetaModels\IFactory;
-use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
+use MetaModels\Render\Setting\IRenderSettingFactory;
+use Richardhj\ContaoFerienpassBundle\Model\DataProcessing as DataProcessingModel;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml\ConvertDomElementToNativeWidgetEvent;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml\Exception\UnsupportedDomElementChangeException;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing\FormatInterface;
-use League\Flysystem\MountManager;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\IItem;
 use MetaModels\IItems;
-use MetaModels\IMetaModelsServiceContainer;
 use Symfony\Component\Config\Util\Exception\InvalidXmlException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
 
 
 /**
@@ -43,74 +44,58 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 {
 
     /**
-     * @var array
-     */
-    private $files;
-
-    /**
-     * @var DataProcessing|\Model
-     */
-    private $model;
-
-    /**
-     * @var IItems
-     */
-    private $items;
-
-    /**
      * @var IFactory
      */
     private $factory;
+
+    /**
+     * @var IRenderSettingFactory
+     */
+    private $renderSettingFactory;
 
     /**
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
-    private $tableName = 'mm_ferienpass';
-
     /**
-     * {@inheritdoc}
+     * @var string
      */
-    public function __construct(DataProcessing $model)
-    {
-        $this->model = $model;
-    }
+    private $kernelProjectDir;
 
     /**
-     * {@inheritdoc}
+     * @var DataProcessingModel|null
      */
-    public function getFiles(): array
-    {
-        return $this->files;
-    }
-
+    private $model;
     /**
-     * @return DataProcessing
+     * @var Filesystem
      */
-    public function getModel(): DataProcessing
-    {
-        return $this->model;
-    }
+    private $filesystem;
 
     /**
-     * @return IItems
-     */
-    public function getItems(): IItems
-    {
-        return $this->items;
-    }
-
-    /**
-     * @param IItems $items
+     * Xml constructor.
      *
-     * @return FormatInterface
+     * @param IFactory                 $factory
+     * @param IRenderSettingFactory    $renderSettingFactory
+     * @param Filesystem               $filesystem
+     * @param EventDispatcherInterface $dispatcher
+     * @param string                   $kernelProjectDir
      */
-    public function setItems(IItems $items): FormatInterface
-    {
-        $this->items = $items;
-
-        return $this;
+    public function __construct(
+        IFactory $factory,
+        IRenderSettingFactory $renderSettingFactory,
+        Filesystem $filesystem,
+        EventDispatcherInterface $dispatcher,
+        string $kernelProjectDir
+    ) {
+//        $this->model                = $model;
+//        $this->kernelProjectDir     = System::getContainer()->getParameter('kernel.project_dir');
+//        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory')
+        $this->factory              = $factory;
+        $this->renderSettingFactory = $renderSettingFactory;
+        $this->filesystem           = $filesystem;
+        $this->dispatcher           = $dispatcher;
+        $this->kernelProjectDir     = $kernelProjectDir;
     }
 
     /**
@@ -118,7 +103,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      */
     public function isCombineVariants(): bool
     {
-        return $this->getModel()->combine_variants;
+        return $this->model->combine_variants;
     }
 
     /**
@@ -126,86 +111,59 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      */
     public function isXmlSingleFile(): bool
     {
-        return $this->getModel()->xml_single_file;
+        return $this->model->xml_single_file;
     }
 
     /**
-     * @param IAttribute $attribute
+     * Process the items and provide the files
      *
-     * @return string
+     * @param IItems              $items The items to process.
+     *
+     * @param DataProcessingModel $model
+     *
+     * @return array
+     *
+     * @throws IOException
      */
-    public function getVariantDelimiter(IAttribute $attribute): string
+    public function processItems(IItems $items, DataProcessingModel $model): array
     {
-        $delimiter = '';
-
-        $delimiterConfigs = deserialize($this->getModel()->variant_delimiters, true);
-        foreach ((array)$delimiterConfigs as $delimiterConfig) {
-            if ('' === $delimiterConfig['metamodel_attribute']
-                || $attribute->getColName() === $delimiterConfig['metamodel_attribute']
-            ) {
-                $delimiter = sprintf(
-                    '%2$s%1$s%3$s',
-                    $delimiterConfig['delimiter'],
-                    'before' === $delimiterConfig['newline_position'] ? PHP_EOL : '',
-                    'after' === $delimiterConfig['newline_position'] ? PHP_EOL : ''
-                );
-                break;
-            }
+        if (0 === $items->getCount()) {
+            return [];
         }
 
-        return $delimiter;
-    }
+        $this->model = $model;
 
-    /**
-     * {@inheritdoc}
-     * @throws \League\Flysystem\FilesystemNotFoundException
-     * @throws \InvalidArgumentException
-     */
-    public function processItems(): FormatInterface
-    {
-        if (null === $this->getItems()) {
-            $this->files = [];
-
-            return $this;
-        }
-
-        foreach ($this->getXml() as $k => $xml) {
+        $files = [];
+        foreach ($this->getXml($items) as $id => $xml) {
             $path = sprintf(
                 '%s/xml/%s.xml',
-                $this->getModel()->getTmpPath(),
-                ($this->isXmlSingleFile() ? 'items' : 'item_'.$k)
+                $model->getTmpPath(),
+                ($this->isXmlSingleFile() ? 'items' : 'item_'.$id)
             );
 
-            // Save xml in tmp path
-            $this
-                ->getModel()
-                ->getMountManager()
-                ->put('local://'.$path, $xml);
+            $this->filesystem->dumpFile($this->kernelProjectDir.'/'.$path, $xml);
+            $files[] = $path;
         }
 
-        // Fetch all files in xml tmp path
-        $this->files = $this
-            ->getModel()
-            ->getMountManager()
-            ->listContents(sprintf('local://%s/xml', $this->getModel()->getTmpPath()));
-
-        return $this;
+        return $files;
     }
 
     /**
      * @param array  $files
      * @param string $originFileSystem
      */
-    public function backSyncFiles(array $files, string $originFileSystem = 'local')
+    public function syncFilesFromRemoteSystem(array $files, string $originFileSystem = 'local'): void
     {
         $this->syncXmlFilesWithModel($files, $originFileSystem);
     }
 
     /**
+     * @param IItems $items
+     *
      * @return array The xml contents as array in the format ['item_id'=>'xml'] or simply ['xml'] when creating a
      *               single xml file
      */
-    protected function getXml(): array
+    protected function getXml(IItems $items): array
     {
         $return = [];
 
@@ -214,13 +172,13 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
         // Add comment
         $commentTemplate = new \FrontendTemplate('dataprocessing_xml_comment');
-        $commentTemplate->setData($this->getModel()->row());
+        $commentTemplate->setData($this->model->row());
         $dom->appendChild($dom->createComment($commentTemplate->parse()));
 
         if ($this->isXmlSingleFile()) {
             $root = $dom->createElement('Items');
 
-            foreach ($this->getItems() as $item) {
+            foreach ($items as $item) {
                 $domItem = $this->itemAsDomNode($item, $dom);
                 if (null !== $domItem) {
                     $root->appendChild($domItem);
@@ -231,7 +189,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 
             $return[] = $dom->saveXML();
         } else {
-            foreach ($this->getItems() as $item) {
+            foreach ($items as $item) {
                 $domClone = clone $dom;
                 $domItem  = $this->itemAsDomNode($item, $domClone);
                 if (null !== $domItem) {
@@ -263,10 +221,11 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             }
 
             // Fetch variants by using the filter to apply sorting
-            $variants = $item->getVariants($this->getModel()->getFilter());
+            $variants = $item->getVariants($this->model->getFilter());
         }
 
-        $renderSetting = $item->getMetaModel()->getView($this->getModel()->metamodel_view);
+        $renderSetting =
+            $this->renderSettingFactory->createCollection($item->getMetaModel(), $this->model->metamodel_view);
 
         $root = $dom->createElement('Item');
         $root->setAttribute('item_id', $item->get('id'));
@@ -329,10 +288,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         try {
             $this->importXmlToNode($parsed, $domAttribute);
         } catch (InvalidXmlException $e) {
-            $domAttribute->nodeValue = htmlspecialchars(
-                html_entity_decode($parsed),
-                ENT_XML1
-            ) ?: ' '; // Prohibit empty string
+            $domAttribute->nodeValue =
+                htmlspecialchars(html_entity_decode($parsed), ENT_QUOTES | ENT_XML1) ?: ' '; // Prohibit empty string
         }
     }
 
@@ -376,69 +333,69 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      */
     protected function syncXmlFilesWithModel(array $files, string $filesystem)
     {
-        /** @var MountManager $mountManager */
-        $mountManager = $this->getModel()->getMountManager($filesystem);
-        $metaModel    = $this->factory->getMetaModel($this->tableName);
-
-        foreach ($files as $file) {
-            if ('application/xml' !== $file['mimetype']) {
-                continue;
-            }
-
-            // Load XML document.
-            $dom = new DOMDocument('1.0', 'utf-8');
-            $dom->loadXML($mountManager->read($filesystem.'://'.$file['path']));
-
-            /** @type DOMElement $root */
-            $root = $dom->getElementsByTagName('Item')->item(0);
-            $item = $metaModel->findById($root->getAttribute('item_id'));
-
-            $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',', $root->getAttribute('variant_ids')));
-
-            /** @var DOMElement $element */
-            foreach ($root->getElementsByTagName('*') as $element) {
-                if (!$element->hasAttribute('attr_id')) {
-                    // Child nodes irrespectively node hierarchy are here too, skip them.
-                    continue;
-                }
-
-                $attribute = $item->getMetaModel()->getAttributeById($element->getAttribute('attr_id'));
-                if (null === $attribute) {
-                    continue;
-                }
-
-                if ($itemHasVariants && $attribute->get('isvariant')) {
-                    /** @var DOMElement $variantValue */
-                    foreach ($element->getElementsByTagName('_variantValue') as $variantValue) {
-                        $variant = $metaModel->findById($variantValue->getAttribute('item_id'));
-
-                        // Check for a proper variant
-                        if ($variant->get('vargroup') !== $item->get('id')) {
-                            $this->dispatcher->dispatch(
-                                ContaoEvents::SYSTEM_LOG,
-                                new LogEvent(
-                                    sprintf(
-                                        'Item ID %u is not a proper variant of item ID %u. Rough changes between database and xml file make the processing unable to synchronize attribute ID %u. Data processing ID %u',
-                                        $variant->get('id'),
-                                        $item->get('id'),
-                                        $attribute->get('id'),
-                                        $this->getModel()->id
-                                    ),
-                                    __METHOD__,
-                                    TL_ERROR
-                                )
-                            );
-
-                            continue;
-                        }
-
-                        $this->trackAttributeChange($variantValue, $attribute, $variant);
-                    }
-                } else {
-                    $this->trackAttributeChange($element, $attribute, $item);
-                }
-            }
-        }
+//        /** @var MountManager $mountManager */
+//        $mountManager = $this->getModel()->getMountManager($filesystem);
+//        $metaModel    = $this->factory->getMetaModel($this->tableName);
+//
+//        foreach ($files as $file) {
+//            if ('application/xml' !== $file['mimetype']) {
+//                continue;
+//            }
+//
+//            // Load XML document.
+//            $dom = new DOMDocument('1.0', 'utf-8');
+//            $dom->loadXML($mountManager->read($filesystem.'://'.$file['path']));
+//
+//            /** @type DOMElement $root */
+//            $root = $dom->getElementsByTagName('Item')->item(0);
+//            $item = $metaModel->findById($root->getAttribute('item_id'));
+//
+//            $itemHasVariants = $this->isCombineVariants() && !empty(trimsplit(',', $root->getAttribute('variant_ids')));
+//
+//            /** @var DOMElement $element */
+//            foreach ($root->getElementsByTagName('*') as $element) {
+//                if (!$element->hasAttribute('attr_id')) {
+//                    // Child nodes irrespectively node hierarchy are here too, skip them.
+//                    continue;
+//                }
+//
+//                $attribute = $item->getMetaModel()->getAttributeById($element->getAttribute('attr_id'));
+//                if (null === $attribute) {
+//                    continue;
+//                }
+//
+//                if ($itemHasVariants && $attribute->get('isvariant')) {
+//                    /** @var DOMElement $variantValue */
+//                    foreach ($element->getElementsByTagName('_variantValue') as $variantValue) {
+//                        $variant = $metaModel->findById($variantValue->getAttribute('item_id'));
+//
+//                        // Check for a proper variant
+//                        if ($variant->get('vargroup') !== $item->get('id')) {
+//                            $this->dispatcher->dispatch(
+//                                ContaoEvents::SYSTEM_LOG,
+//                                new LogEvent(
+//                                    sprintf(
+//                                        'Item ID %u is not a proper variant of item ID %u. Rough changes between database and xml file make the processing unable to synchronize attribute ID %u. Data processing ID %u',
+//                                        $variant->get('id'),
+//                                        $item->get('id'),
+//                                        $attribute->get('id'),
+//                                        $this->getModel()->id
+//                                    ),
+//                                    __METHOD__,
+//                                    TL_ERROR
+//                                )
+//                            );
+//
+//                            continue;
+//                        }
+//
+//                        $this->trackAttributeChange($variantValue, $attribute, $variant);
+//                    }
+//                } else {
+//                    $this->trackAttributeChange($element, $attribute, $item);
+//                }
+//            }
+//        }
     }
 
     /**
@@ -450,7 +407,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      */
     protected function trackAttributeChange(DOMElement $domAttribute, IAttribute $attribute, IItem $item)
     {
-        $view   = $item->getMetaModel()->getView($this->getModel()->metamodel_view);
+        $view   =
+            $this->renderSettingFactory->createCollection($item->getMetaModel(), $this->model->metamodel_view);
         $parsed = $item->parseAttribute(
             $attribute->getColName(),
             'text',
@@ -476,13 +434,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                         'Attribute "%s" for item variant ID %u was synced from xml file. Data processing ID %u',
                         $attribute->getColName(),
                         $item->get('id'),
-                        $this->getModel()->id
+                        $this->model->id
                     ),
                     __METHOD__,
                     TL_GENERAL
                 )
             );
-
         } catch (UnsupportedDomElementChangeException $e) {
             // Check for the attribute data being changed.
             $testDom     = new DOMDocument('1.0', 'utf-8');
@@ -505,7 +462,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                             $domAttribute->nodeValue,
                             $testElement->nodeValue,
                             var_export($parsed['raw'], true),
-                            $this->getModel()->id
+                            $this->model->id
                         ),
                         __METHOD__,
                         TL_ERROR
@@ -523,12 +480,11 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * @param IItem      $item
      *
      * @return mixed The attribute's data in the same format as the attribute's "raw" data
+     *
      * @throws UnsupportedDomElementChangeException
      */
     private function domElementToNativeWidget(DOMElement $element, IAttribute $attribute, IItem $item)
     {
-        $this->dispatcher->addSubscriber(new Format\Xml\ConvertSubscriber());
-
         $event = new ConvertDomElementToNativeWidgetEvent($element, $attribute, $item);
         $this->dispatcher->dispatch($event::NAME, $event);
 
@@ -542,6 +498,33 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
                 $attribute->get('type')
             )
         );
+    }
+
+    /**
+     * @param IAttribute $attribute
+     *
+     * @return string
+     */
+    private function getVariantDelimiter(IAttribute $attribute): string
+    {
+        $delimiter = '';
+
+        $delimiterConfigs = deserialize($this->model->variant_delimiters, true);
+        foreach ((array)$delimiterConfigs as $delimiterConfig) {
+            if ('' === $delimiterConfig['metamodel_attribute']
+                || $attribute->getColName() === $delimiterConfig['metamodel_attribute']
+            ) {
+                $delimiter = sprintf(
+                    '%2$s%1$s%3$s',
+                    $delimiterConfig['delimiter'],
+                    'before' === $delimiterConfig['newline_position'] ? PHP_EOL : '',
+                    'after' === $delimiterConfig['newline_position'] ? PHP_EOL : ''
+                );
+                break;
+            }
+        }
+
+        return $delimiter;
     }
 
     /**

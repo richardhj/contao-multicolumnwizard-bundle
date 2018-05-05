@@ -308,7 +308,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_dataprocessing'] = [
                             'condition'          => 'mm_ferienpass',
                             'chosen'             => true,
                             'includeBlankOption' => true,
-                            'style'              => 'width:250px',
+                            'style'              => 'width:200px',
                         ],
                     ],
                     'delimiter'           => [
@@ -332,7 +332,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_dataprocessing'] = [
                             'after',
                         ],
                         'eval'      => [
-                            'style' => 'width:50px',
+                            'style' => 'width:150px',
                         ],
                     ],
                 ],

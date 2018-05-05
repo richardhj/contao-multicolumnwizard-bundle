@@ -64,7 +64,10 @@ class FilterOptionsListener
             ->setParameter('metamodel', $metaModel->get('id'))
             ->execute();
 
-        $options = $statement->fetchAll(\PDO::FETCH_COLUMN, 'name');
+        $options = [];
+        foreach ($statement->fetchAll(\PDO::FETCH_OBJ) as $option) {
+            $options[$option->id] = $option->name;
+        }
 
         $event->setOptions($options);
     }

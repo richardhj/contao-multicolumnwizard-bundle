@@ -53,10 +53,8 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
                         MetaModelsFilterCheckboxBundle::class,
                         MetaModelsFilterFromToBundle::class,
                         CcaMetaPalettesBundle::class,
-                        OneupFlysystemBundle::class,
                     ]
                 ),
-            BundleConfig::create(OneupFlysystemBundle::class),
         ];
     }
 

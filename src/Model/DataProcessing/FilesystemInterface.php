@@ -21,25 +21,11 @@ interface FilesystemInterface
 {
 
     /**
-     * FilesystemInterface constructor.
+     * @param array          $files The file paths to handle.
      *
-     * @param DataProcessing $model
-     */
-    public function __construct(DataProcessing $model);
-
-    /**
-     * @param IItems $items
-     *
-     * @return FilesystemInterface
-     *
-     * @deprecated
-     */
-    public function setItems(IItems $items): self;
-
-    /**
-     * @param array $files
+     * @param DataProcessing $model The model.
      *
      * @return void
      */
-    public function processFiles(array $files): void;
+    public function processFiles(array $files, DataProcessing $model): void;
 }

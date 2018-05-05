@@ -19,10 +19,12 @@ use Contao\System;
 use Contao\TextField;
 use Contao\Widget;
 use ContaoCommunityAlliance\DcGeneral\Contao\Compatibility\DcCompat;
+use ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\Dropbox as DropboxOAuthProvider;
 use Stevenmaguire\OAuth2\Client\Provider\DropboxResourceOwner;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
 
 /**
@@ -34,43 +36,49 @@ class RequestAccessToken extends Widget
 {
 
     /**
-     * Submit user input
-     *
-     * @var boolean
-     */
-    protected $blnSubmitInput = true;
-
-
-    /**
-     * Add a for attribute
-     *
-     * @var boolean
-     */
-    protected $blnForAttribute = true;
-
-
-    /**
-     * Template
-     *
      * @var string
      */
-    protected $strTemplate = 'be_widget';
+    private $dropboxClientId;
 
+    /**
+     * @var string
+     */
+    private $dropboxClientSecret;
+
+    /**
+     * Initialize the object
+     *
+     * @param array $attributes An optional attributes array
+     *
+     * @throws InvalidArgumentException
+     */
+    public function __construct($attributes = null)
+    {
+        parent::__construct($attributes);
+
+        $container = System::getContainer();
+
+        $this->dropboxClientId     = $container->getParameter('richardhj.ferienpass.dropbox.app_id');
+        $this->dropboxClientSecret = $container->getParameter('richardhj.ferienpass.dropbox.app_secret');
+
+        $this->blnSubmitInput  = true;
+        $this->blnForAttribute = true;
+        $this->strTemplate     = 'be_widget';
+    }
 
     /**
      * generate widget
      *
      * @return string
-     * @throws \ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException
-     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @throws DcGeneralRuntimeException
      */
     public function generate(): string
     {
-        $container = System::getContainer();
+
         $provider = new DropboxOAuthProvider(
             [
-                'clientId'     => $container->getParameter('richardhj.ferienpass.dropbox.app_id'),
-                'clientSecret' => $container->getParameter('richardhj.ferienpass.dropbox.app_secret'),
+                'clientId'     => $this->dropboxClientId,
+                'clientSecret' => $this->dropboxClientSecret,
             ]
         );
 
@@ -147,7 +155,8 @@ class RequestAccessToken extends Widget
                     ]
                 )
             );
-
+        } catch (\InvalidArgumentException $e) {
+            return '';
         } catch (IdentityProviderException $e) {
             $model->setProperty('dropbox_access_token', null);
             $model->setProperty('dropbox_uid', null);
