@@ -5,6 +5,8 @@ services:
           - '@metamodels.factory'
           - '@metamodels.render_setting_factory'
           - '@event_dispatcher'
+          - '%richardhj.ferienpass.metamodel_list.view.id%'
+          - '%richardhj.ferienpass.metamodel_list.page.id%'
 
     richardhj.ferienpass.controller.dropbox_webhook:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook

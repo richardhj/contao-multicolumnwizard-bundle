@@ -48,20 +48,37 @@ class RedirectShortUrl
     private $dispatcher;
 
     /**
+     * @var int
+     */
+    private $listViewId;
+
+    /**
+     * @var int
+     */
+    private $listPageId;
+
+    /**
      * RedirectShortUrl constructor.
      *
      * @param IFactory                 $factory              The MetaModels factory.
      * @param IRenderSettingFactory    $renderSettingFactory The MetaModels render setting factory.
      * @param EventDispatcherInterface $dispatcher           The event dispatcher.
+     * @param int                      $listViewId           The render setting ID of the list view (having jumpToPage
+     *                                                       settings).
+     * @param int                      $listPageId           The page ID of the list view.
      */
     public function __construct(
         IFactory $factory,
         IRenderSettingFactory $renderSettingFactory,
-        EventDispatcherInterface $dispatcher
+        EventDispatcherInterface $dispatcher,
+        int $listViewId,
+        int $listPageId
     ) {
         $this->factory              = $factory;
         $this->dispatcher           = $dispatcher;
         $this->renderSettingFactory = $renderSettingFactory;
+        $this->listViewId           = $listViewId;
+        $this->listPageId           = $listPageId;
     }
 
     /**
@@ -85,8 +102,6 @@ class RedirectShortUrl
             throw new PageNotFoundException('MetaModel could not be found.');
         }
 
-        $viewId         = 1;//System::getContainer()->getParameter('richardhj.ferienpass.metamodel_list.view.id');
-        $listPageId     = 2;//System::getContainer()->getParameter('richardhj.ferienpass.list_page.id');
         $filter         = $metaModel->getEmptyFilter();
         $filterVariants = $filter->createCopy();
 
@@ -98,16 +113,16 @@ class RedirectShortUrl
 
             if ($item instanceof Item && (null === $variants || 0 === $variants->getCount())) {
                 // Redirect directly to the reader page
-                $view = $this->renderSettingFactory->createCollection($item->getMetaModel(), $viewId);
+                $view       = $this->renderSettingFactory->createCollection($item->getMetaModel(), $this->listViewId);
                 $jumpToLink = $item->buildJumpToLink($view);
                 throw new RedirectResponseException($jumpToLink['url'], 301);
             }
 
             // Redirect to the list page with the vargroup as filter
             /** @var PageModel|Model $jumpTo */
-            $jumpTo = PageModel::findById($listPageId);
+            $jumpTo = PageModel::findById($this->listPageId);
             if (null === $jumpTo) {
-                throw new PageNotFoundException('List page could not be found: '.$listPageId);
+                throw new PageNotFoundException('List page could not be found: '.$this->listPageId);
             }
 
             $params   = '/vargroup/'.$item->get('vargroup').'#jumpToMmList';
