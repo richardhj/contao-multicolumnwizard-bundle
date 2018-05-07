@@ -23,6 +23,7 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\IFactory;
 use MetaModels\Item;
+use MetaModels\Render\Setting\IRenderSettingFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -37,6 +38,11 @@ class RedirectShortUrl
     private $factory;
 
     /**
+     * @var IRenderSettingFactory
+     */
+    private $renderSettingFactory;
+
+    /**
      * @var EventDispatcherInterface
      */
     private $dispatcher;
@@ -44,17 +50,22 @@ class RedirectShortUrl
     /**
      * RedirectShortUrl constructor.
      *
-     * @param IFactory                 $factory    The MetaModels factory.
-     * @param EventDispatcherInterface $dispatcher The event dispatcher.
+     * @param IFactory                 $factory              The MetaModels factory.
+     * @param IRenderSettingFactory    $renderSettingFactory The MetaModels render setting factory.
+     * @param EventDispatcherInterface $dispatcher           The event dispatcher.
      */
-    public function __construct(IFactory $factory, EventDispatcherInterface $dispatcher)
-    {
-        $this->factory    = $factory;
-        $this->dispatcher = $dispatcher;
+    public function __construct(
+        IFactory $factory,
+        IRenderSettingFactory $renderSettingFactory,
+        EventDispatcherInterface $dispatcher
+    ) {
+        $this->factory              = $factory;
+        $this->dispatcher           = $dispatcher;
+        $this->renderSettingFactory = $renderSettingFactory;
     }
 
     /**
-     * @param int     $itemId  The MetaModel item id of the offer.
+     * @param int $itemId The MetaModel item id of the offer.
      *
      * @return void
      *
@@ -87,8 +98,9 @@ class RedirectShortUrl
 
             if ($item instanceof Item && (null === $variants || 0 === $variants->getCount())) {
                 // Redirect directly to the reader page
-                $url = $item->buildJumpToLink($item->getMetaModel()->getView($viewId))['url'];
-                throw new RedirectResponseException($url, 301);
+                $view = $this->renderSettingFactory->createCollection($item->getMetaModel(), $viewId);
+                $jumpToLink = $item->buildJumpToLink($view);
+                throw new RedirectResponseException($jumpToLink['url'], 301);
             }
 
             // Redirect to the list page with the vargroup as filter
