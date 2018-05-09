@@ -279,9 +279,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $domAttribute->setAttribute('attr_id', $attribute->get('id'));
 
             if (!($this->isCombineVariants() && $items->getCount() > 1 && $attribute->get('isvariant'))) {
+                // No variants or no variant values that differ
+                // Simply parse the attribute passed at the beginning
                 $parsed = $item->parseAttribute($colName, 'text', $renderSetting);
                 $this->addParsedToDomAttribute($parsed['text'], $domAttribute);
             } else {
+                // Walk each item (varbase + variants)
                 while ($items->next()) {
                     $domVariantValue = $dom->createElement('_variantValue');
                     $domVariantValue->setAttribute('item_id', $items->getItem()->get('id'));
