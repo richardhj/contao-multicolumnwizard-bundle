@@ -11,7 +11,7 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
+namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant;
 
 
 use Contao\CoreBundle\Exception\AccessDeniedException;
@@ -52,17 +52,17 @@ class FeePermissionCheckListener
         $model        = $event->getModel();
 
         if (!$model instanceof Model
-            || 'mm_ferienpass' !== $dataProvider
+            || 'mm_participant' !== $dataProvider
             || !$this->scopeMatcher->currentScopeIsFrontend()) {
             return;
         }
 
         $item      = $model->getItem();
-        $attribute = $item->getMetaModel()->getAttribute('host');
+        $attribute = $item->getMetaModel()->getAttribute('pmember');
 
         /** @var FrontendUser $user */
         $user = FrontendUser::getInstance();
-        if (null !== $model->getId() && $attribute->valueToWidget($item->get('host')) !== $user->ferienpass_host) {
+        if (null !== $model->getId() && $attribute->valueToWidget($item->get('pmember')) !== $user->id) {
             throw new AccessDeniedException('Access denied for: '.ModelId::fromModel($model)->getSerialized());
         }
     }
