@@ -87,6 +87,13 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
 
+    richardhj.ferienpass.listener.user_application.disable_copy_participant_action:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\DisableCopyParticipantActionListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.parse-item', method: 'handle' }
+
     richardhj.ferienpass.listener.notification.attendance_status_new:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\NewAttendanceStatusListener
         tags:
