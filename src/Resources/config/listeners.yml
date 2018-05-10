@@ -172,6 +172,8 @@ services:
         class: Richardhj\ContaoFerienpassBundle\HookListener\InsertTagsListener
         arguments:
             - "@richardhj.ferienpass.application_system.firstcome"
+            - '@request_stack'
+            - '%secret%'
         tags:
             - { name: 'contao.hook', hook: 'replaceInsertTags' }
 

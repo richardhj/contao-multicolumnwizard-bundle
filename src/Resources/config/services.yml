@@ -8,6 +8,13 @@ services:
           - '%richardhj.ferienpass.metamodel_list.view.id%'
           - '%richardhj.ferienpass.metamodel_list.page.id%'
 
+    richardhj.ferienpass.controller.export_attendances:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Frontend\ExportAttendances
+        arguments:
+          - '@metamodels.render_setting_factory'
+          - '%richardhj.ferienpass.metamodel_list.view.id%'
+          - '%secret%'
+
     richardhj.ferienpass.controller.dropbox_webhook:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook
 
