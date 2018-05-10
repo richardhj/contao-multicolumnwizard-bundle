@@ -16,6 +16,7 @@ namespace Richardhj\ContaoFerienpassBundle\Module;
 use Contao\BackendTemplate;
 use Contao\Controller;
 use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
 use Contao\Input;
 use Contao\Message;
@@ -25,6 +26,7 @@ use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Doctrine\DBAL\Connection;
 use MetaModels\IItem;
+use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
@@ -35,6 +37,7 @@ use Haste\Form\Form;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 
 /**
@@ -51,7 +54,7 @@ class UserApplication extends Module
     protected $strTemplate = 'mod_offer_applicationlist';
 
     /**
-     * @var IItem
+     * @var IItem|null
      */
     private $offer;
 
@@ -71,6 +74,11 @@ class UserApplication extends Module
     private $scopeMatcher;
 
     /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+    /**
      * @var FrontendUser
      */
     private $frontendUser;
@@ -88,10 +96,12 @@ class UserApplication extends Module
     {
         parent::__construct($module, $column);
 
-        $this->scopeMatcher = System::getContainer()->get('cca.dc-general.scope-matcher');
-        $this->dispatcher   = System::getContainer()->get('event_dispatcher');
-        $this->offer        = $this->fetchOffer();
-        $this->frontendUser = FrontendUser::getInstance();
+        $this->offer            = $this->fetchOffer();
+        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
+        $this->dispatcher       = System::getContainer()->get('event_dispatcher');
+        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->requestStack     = System::getContainer()->get('request_stack');
+        $this->frontendUser     = FrontendUser::getInstance();
     }
 
     /**
@@ -128,7 +138,7 @@ class UserApplication extends Module
         if ($this->scopeMatcher->currentScopeIsBackend()) {
             $template = new BackendTemplate('be_wildcard');
 
-            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->wildcard = '### '.Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
             $template->title    = $this->headline;
             $template->id       = $this->id;
             $template->link     = $this->name;
@@ -156,7 +166,7 @@ class UserApplication extends Module
     /**
      * Generate the module
      */
-    protected function compile()
+    protected function compile(): void
     {
         // Stop if the procedure is not used
         if (!$this->offer->get('applicationlist_active')) {
@@ -262,7 +272,7 @@ class UserApplication extends Module
                 }
 
                 // Reload page to show confirmation message
-                Controller::reload();
+                throw new RedirectResponseException($this->requestStack->getCurrentRequest()->getUri());
             }
 
             // Get the form as string

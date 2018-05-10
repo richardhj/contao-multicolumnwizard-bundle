@@ -31,6 +31,7 @@
     "metamodels/core": "^2.1",
     "metamodels/filter_fromto": "^2.1@dev",
     "metamodels/filter_checkbox": "^2.1@dev",
+    "patchwork/utf8": "^1.3",
     "richardhj/contao-model-events": "~1.1",
     "stevenmaguire/oauth2-dropbox": "^3.0",
     "spatie/dropbox-api": "^1.6",

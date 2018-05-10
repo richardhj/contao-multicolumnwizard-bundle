@@ -347,15 +347,15 @@ class Attendance extends Model
         /** @var Connection $connection */
         $connection = System::getContainer()->get('database_connection');
 
-        return (bool)$connection->createQueryBuilder()
-            ->select('id')
-            ->from(static::$strTable)
-            ->where('participant=:participant')
-            ->andWhere('offer=:offer')
-            ->setParameter('participant', $participantId)
-            ->setParameter('offer', $offerId)
-            ->execute()
-            ->rowCount();
+        return 0 === $connection->createQueryBuilder()
+                ->select('id')
+                ->from(static::$strTable)
+                ->where('participant=:participant')
+                ->andWhere('offer=:offer')
+                ->setParameter('participant', $participantId)
+                ->setParameter('offer', $offerId)
+                ->execute()
+                ->rowCount();
     }
 
     /**

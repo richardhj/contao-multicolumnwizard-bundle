@@ -43,11 +43,7 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
 
         $newStatus = self::findStatusForAttendance($attendance);
         $oldStatus = $attendance->getStatus();
-        if (null === $oldStatus) {
-            throw new \RuntimeException('Old status not given.');
-        }
-
-        if ($newStatus->id === $oldStatus->id) {
+        if (null !== $oldStatus || $newStatus->id === $oldStatus->id) {
             return;
         }
 
