@@ -14,9 +14,16 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle, priority: -10 }
 
-    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.frontend_permission_check:
+    richardhj.ferienpass.listener.dc_general.table.mm_participant.frontend_permission_check:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\FeePermissionCheckListener
         arguments:
             - '@cca.dc-general.scope-matcher'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: 10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_participant.frontend_permission_check:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\FeeInitialDataListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }

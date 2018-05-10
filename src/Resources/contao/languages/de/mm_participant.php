@@ -13,3 +13,4 @@
 
 
 $GLOBALS['TL_LANG']['mm_participant']['metamodel_add_item'] = 'Teilnehmer hinzufügen';
+$GLOBALS['TL_LANG']['mm_participant']['metamodel_edit_item'] = 'Bearbeiten';
