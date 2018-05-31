@@ -34,6 +34,7 @@ use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceExce
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Translation\TranslatorInterface;
 
 
 /**
@@ -77,6 +78,11 @@ class UserAttendances extends Module
     private $frontendUser;
 
     /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * UserAttendances constructor.
      *
      * @param ModuleModel $module
@@ -93,6 +99,7 @@ class UserAttendances extends Module
         $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
         $this->dispatcher       = System::getContainer()->get('event_dispatcher');
         $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->translator       = System::getContainer()->get('translator');
         $this->frontendUser     = FrontendUser::getInstance();
     }
 
@@ -243,10 +250,9 @@ class UserAttendances extends Module
                             break;
 
                         case 'details':
-                            $url       =
-                                $item->buildJumpToLink(
-                                    $this->offerModel->getMetaModel()->getView(4)
-                                )['url'];//@todo make configurable
+                            $url       = $item->buildJumpToLink(
+                                $this->offerModel->getMetaModel()->getView(4)
+                            )['url'];//@todo make configurable
                             $attribute = $this->openLightbox ? ' data-lightbox="' : '';
 
                             $value = sprintf(
@@ -254,7 +260,7 @@ class UserAttendances extends Module
                                 $url,
                                 $f[0],
                                 $attribute,
-                                $GLOBALS['TL_LANG']['MSC'][$f[0]]
+                                $this->translator->trans('MSC.'.$f[0], [], 'contao_default')
                             );
                             break;
 
@@ -263,7 +269,7 @@ class UserAttendances extends Module
                                 $url       = static::addToUrl('action=delete::'.$attendances->id.'::'.REQUEST_TOKEN);
                                 $attribute = ' onclick="return confirm(\''.htmlspecialchars(
                                         sprintf(
-                                            $GLOBALS['TL_LANG']['MSC']['attendanceConfirmDeleteLink'],
+                                            $this->translator->trans('MSC.attendanceConfirmDeleteLink', [], 'contao_default'),
                                             $item->parseAttribute('name')['text'],
                                             $this->participantModel
                                                 ->findById($attendances->participant)
@@ -273,12 +279,17 @@ class UserAttendances extends Module
                                     )
                                              .'\')"';
 
+                                $minus24hours = time() - 86400;
+                                $disabled     = (ToolboxOfferDate::offerStart($item) < $minus24hours)
+                                                && $attendances->tstamp >= $minus24hours;
+
                                 $value = sprintf(
-                                    '<a href="%s" class="%s"%s>%s</a>',
-                                    $url,
+                                    '<a href="%s" class="%s%s"%s>%s</a>',
+                                    !$disabled ? $url : '',
                                     $f[0],
+                                    $disabled ? ' disabled' : '',
                                     $attribute,
-                                    $GLOBALS['TL_LANG']['MSC'][$f[0]]
+                                    $this->translator->trans('MSC.'.$f[0], [], 'contao_default')
                                 );
                             } else {
                                 $value = '';
