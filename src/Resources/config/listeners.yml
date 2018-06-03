@@ -190,6 +190,7 @@ services:
             - '@event_dispatcher'
             - '@contao.translation.translator'
             - '@metamodels.view_combination'
+            - '@richardhj.ferienpass.pass_releases'
         tags:
             - { name: kernel.event_listener, event: 'metamodels.render-item-list', method: handleRenderItemList }
             - { name: kernel.event_listener, event: 'metamodels.parse-item', method: addApplicationListLink }

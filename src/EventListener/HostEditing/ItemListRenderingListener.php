@@ -22,6 +22,7 @@ use MetaModels\Events\ParseItemEvent;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\IItem;
 use MetaModels\ViewCombination\ViewCombination;
+use Richardhj\ContaoFerienpassBundle\Util\PassReleases;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -45,20 +46,29 @@ class ItemListRenderingListener
     private $viewCombination;
 
     /**
+     * @var PassReleases
+     */
+    private $passReleases;
+
+    /**
      * ItemListRenderingListener constructor.
      *
-     * @param EventDispatcherInterface $dispatcher      The event dispatcher.
-     * @param TranslatorInterface      $translator      The translator.
-     * @param ViewCombination          $viewCombination The current view combinations.
+     * @param EventDispatcherInterface $dispatcher The event dispatcher.
+     * @param TranslatorInterface $translator The translator.
+     * @param ViewCombination $viewCombination The current view combinations.
+     * @param PassReleases $passReleases
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
         TranslatorInterface $translator,
-        ViewCombination $viewCombination
-    ) {
-        $this->dispatcher      = $dispatcher;
-        $this->translator      = $translator;
+        ViewCombination $viewCombination,
+        PassReleases $passReleases
+    )
+    {
+        $this->dispatcher = $dispatcher;
+        $this->translator = $translator;
         $this->viewCombination = $viewCombination;
+        $this->passReleases = $passReleases;
     }
 
     /**
@@ -87,10 +97,10 @@ class ItemListRenderingListener
      */
     public function addApplicationListLink(ParseItemEvent $event): void
     {
-        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
-        $settings  = $event->getRenderSettings();
-        $jumpTo    = PageModel::findByPk($settings->get('$jump-to-application-list'));
-        $item      = $event->getItem();
+        $screen = $this->viewCombination->getScreen('mm_ferienpass');
+        $settings = $event->getRenderSettings();
+        $jumpTo = PageModel::findByPk($settings->get('$jump-to-application-list'));
+        $item = $event->getItem();
         $metaModel = $item->getMetaModel();
         $tableName = $metaModel->getTableName();
 
@@ -98,14 +108,13 @@ class ItemListRenderingListener
             || null === $jumpTo
             || '3' !== $screen['meta']['id']
             || !$event->getItem()->get('applicationlist_active')
-            || ($event->getItem()->isVariantBase() && $event->getItem()->getVariants(null)->getCount())
         ) {
             return;
         }
 
         $parsed = $event->getResult();
 
-        $generateFrontendUrlEvent = new GenerateFrontendUrlEvent($jumpTo->row(), '/'.$parsed['raw']['alias']);
+        $generateFrontendUrlEvent = new GenerateFrontendUrlEvent($jumpTo->row(), '/' . $parsed['raw']['alias']);
         $this->dispatcher->dispatch(
             ContaoEvents::CONTROLLER_GENERATE_FRONTEND_URL,
             $generateFrontendUrlEvent
@@ -115,7 +124,7 @@ class ItemListRenderingListener
             'label' => $this->translateLabel('metamodel_show_application_list.0', $metaModel->getTableName()),
             'title' => $this->translateLabel('metamodel_show_application_list.1', $metaModel->getTableName()),
             'class' => 'applicationlist',
-            'href'  => $generateFrontendUrlEvent->getUrl(),
+            'href' => $generateFrontendUrlEvent->getUrl(),
         ];
 
         $event->setResult($parsed);
@@ -130,8 +139,8 @@ class ItemListRenderingListener
      */
     public function modifyActionButtons(ParseItemEvent $event): void
     {
-        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
-        $item      = $event->getItem();
+        $screen = $this->viewCombination->getScreen('mm_ferienpass');
+        $item = $event->getItem();
         $metaModel = $item->getMetaModel();
 
         if ('3' !== $screen['meta']['id'] || 'mm_ferienpass' !== $metaModel->getTableName()) {
@@ -160,7 +169,7 @@ class ItemListRenderingListener
         }
 
         // Remove copy action for items currently being allowed to edit.
-        if (true === self::offerIsEditableForHost($item)) {
+        if (true === self::offerIsEditableForHost($item) && null !== $this->passReleases->getPassReleaseToEdit()) {
             unset($result['actions']['copy']);
         }
 
@@ -209,11 +218,11 @@ class ItemListRenderingListener
      * 2. Try to translate with the prefix 'MSC.'.
      * 3. Return the input value as nothing worked out.
      *
-     * @param string $transString    The non translated label for the button.
+     * @param string $transString The non translated label for the button.
      *
      * @param string $definitionName The data definition of the current item.
      *
-     * @param array  $parameters     The parameters to pass to the translator.
+     * @param array $parameters The parameters to pass to the translator.
      *
      * @return string
      */
@@ -221,8 +230,8 @@ class ItemListRenderingListener
     {
         $translator = $this->translator;
         try {
-            $label = $translator->trans($definitionName.'.'.$transString, $parameters, 'contao_'.$definitionName);
-            if ($label !== $definitionName.'.'.$transString) {
+            $label = $translator->trans($definitionName . '.' . $transString, $parameters, 'contao_' . $definitionName);
+            if ($label !== $definitionName . '.' . $transString) {
                 return $label;
             }
         } catch (InvalidArgumentException $e) {
@@ -230,7 +239,7 @@ class ItemListRenderingListener
         }
 
         try {
-            $label = $translator->trans('MSC.'.$transString, $parameters, 'contao_default');
+            $label = $translator->trans('MSC.' . $transString, $parameters, 'contao_default');
             if ($label !== $transString) {
                 return $label;
             }
