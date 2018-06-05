@@ -15,10 +15,12 @@ namespace Richardhj\ContaoFerienpassBundle\Module;
 
 use Contao\BackendTemplate;
 use Contao\Controller;
+use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
 use Contao\Input;
 use Contao\Module;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use ModuleModel;
 use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
@@ -33,6 +35,7 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -140,7 +143,7 @@ class UserAttendances extends Module
          * Delete attendance
          */
         if (0 === strpos(Input::get('action'), 'delete')) {
-            $id = Input::get('id');
+            $id                 = Input::get('id');
             $attendanceToDelete = Attendance::findByPk($id);
 
             if (null === $attendanceToDelete) {
@@ -171,7 +174,14 @@ class UserAttendances extends Module
                 $attendanceToDelete->delete();
 
                 Message::addConfirmation($GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation']);
-                Controller::redirect(static::addToUrl('action='));
+                /** @var RequestStack $requestStack */
+                $requestStack = System::getContainer()->get('request_stack');
+                $request      = $requestStack->getCurrentRequest();
+                $urlBuilder   = UrlBuilder::fromUrl($request->getUri());
+                $urlBuilder->unsetQueryParameter('action');
+                $urlBuilder->unsetQueryParameter('id');
+
+                throw new RedirectResponseException($urlBuilder->getUrl());
             }
         }
 
