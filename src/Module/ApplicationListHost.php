@@ -28,6 +28,8 @@ use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use Doctrine\DBAL\Connection;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\IItem;
+use MetaModels\Render\Setting\IRenderSettingFactory;
+use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
@@ -39,6 +41,7 @@ use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\Translation\TranslatorInterface;
 
 
 /**
@@ -72,6 +75,16 @@ class ApplicationListHost extends Module
     private $scopeMatcher;
 
     /**
+     * @var IRenderSettingFactory
+     */
+    private $renderSettingFactory;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * @var Frontend
      */
     private $frontendUser;
@@ -89,10 +102,12 @@ class ApplicationListHost extends Module
     {
         parent::__construct($module, $column);
 
-        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
-        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
-        $this->offer            = $this->fetchOffer();
-        $this->frontendUser     = FrontendUser::getInstance();
+        $this->scopeMatcher         = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->participantModel     = System::getContainer()->get('richardhj.ferienpass.model.participant');
+        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
+        $this->translator           = System::getContainer()->get('translator');
+        $this->offer                = $this->fetchOffer();
+        $this->frontendUser         = FrontendUser::getInstance();
     }
 
     /**
@@ -129,25 +144,26 @@ class ApplicationListHost extends Module
         if ($this->scopeMatcher->currentScopeIsBackend()) {
             $template = new BackendTemplate('be_wildcard');
 
-            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
             $template->title    = $this->headline;
             $template->id       = $this->id;
             $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
 
             return $template->parse();
         }
 
         if (null === $this->offer) {
             throw new PageNotFoundException(
-                'Item not found: '.ModelId::fromValues(
+                'Item not found: ' . ModelId::fromValues(
                     $this->offer->getMetaModel()->getTableName(),
                     $this->offer->get('id')
                 )->getSerialized()
             );
         }
 
-        $hostId = $this->offer->get('host')[MetaModelSelect::SELECT_RAW]['id'];
+        $hostData = $this->offer->get('host');
+        $hostId   = $hostData[MetaModelSelect::SELECT_RAW]['id'];
 
         if ($this->frontendUser->ferienpass_host !== $hostId) {
             throw new AccessDeniedException('Access denied');
@@ -164,18 +180,21 @@ class ApplicationListHost extends Module
     /**
      * Generate the module
      */
-    protected function compile()
+    protected function compile(): void
     {
         if (!$this->offer->get('applicationlist_active')) {
-            Message::addError($GLOBALS['TL_LANG']['MSC']['applicationList']['inactive']);
+            Message::addError($this->translator->trans('MSC.applicationList.inactive', [], 'contao_default'));
             $this->Template->message = Message::generate();
 
             return;
         }
 
         $maxParticipants = $this->offer->get('applicationlist_max');
-        $view            = $this->participantModel->getMetaModel()->getView($this->metamodel_child_list_view);
-        /** @var array $fields */
+        $view            = $this->renderSettingFactory->createCollection(
+            $this->participantModel->getMetaModel(),
+            $this->metamodel_child_list_view
+        );
+
         $fields           = $view->getSettingNames();
         $attendances      = Attendance::findByOffer($this->offer->get('id'));
         $statusConfirmed  = AttendanceStatus::findConfirmed()->id;
@@ -185,7 +204,7 @@ class ApplicationListHost extends Module
         if (null !== $attendances) {
             // Create table head
             foreach ($fields as $field) {
-                $rows[0][] = $this->participantModel->getAttribute($field)->get('name');
+                $rows[0][] = $this->participantModel->getMetaModel()->getAttribute($field)->get('name');
             }
 
             // Walk each attendee
@@ -207,7 +226,8 @@ class ApplicationListHost extends Module
 
                     // Inherit parent's data
                     if ('' === $value) {
-                        $value = $participant->get('pmember')[$field];
+                        $pmember = $participant->get('pmember');
+                        $value   = $pmember[$field];
                     }
 
                     $values[] = $value;
@@ -218,7 +238,7 @@ class ApplicationListHost extends Module
         }
 
         if (empty($rows)) {
-            Message::addWarning($GLOBALS['TL_LANG']['MSC']['noAttendances']);
+            Message::addWarning($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
         } else {
             $this->useHeader        = true;
             $this->max_participants = $maxParticipants;
@@ -241,7 +261,7 @@ class ApplicationListHost extends Module
             $urlBuilder = UrlBuilder::fromUrl(Environment::get('uri'));
             if ('download_list' === $urlBuilder->getQueryParameter('action')) {
                 if (null === ($document = Document::findByPk($this->document))) {
-                    Message::addError($GLOBALS['TL_LANG']['MSC']['document']['export_error']);
+                    Message::addError($this->translator->trans('MSC.document.export_error', [], 'contao_default'));
                 } else {
                     $document->outputToBrowser($attendances);
                 }
@@ -264,7 +284,7 @@ class ApplicationListHost extends Module
     /**
      * Add the rendered meta model of this offer to the template
      */
-    protected function addRenderedMetaModelToTemplate()
+    protected function addRenderedMetaModelToTemplate(): void
     {
         $itemRenderer = new ItemList();
         $itemRenderer
