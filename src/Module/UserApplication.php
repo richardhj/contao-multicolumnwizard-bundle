@@ -38,6 +38,7 @@ use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceExce
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Translation\TranslatorInterface;
 
 
 /**
@@ -79,6 +80,11 @@ class UserApplication extends Module
     private $requestStack;
 
     /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * @var FrontendUser
      */
     private $frontendUser;
@@ -101,6 +107,7 @@ class UserApplication extends Module
         $this->dispatcher       = System::getContainer()->get('event_dispatcher');
         $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
         $this->requestStack     = System::getContainer()->get('request_stack');
+        $this->translator       = System::getContainer()->get('translator');
         $this->frontendUser     = FrontendUser::getInstance();
     }
 
@@ -138,18 +145,18 @@ class UserApplication extends Module
         if ($this->scopeMatcher->currentScopeIsBackend()) {
             $template = new BackendTemplate('be_wildcard');
 
-            $template->wildcard = '### '.Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
             $template->title    = $this->headline;
             $template->id       = $this->id;
             $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
 
             return $template->parse();
         }
 
         if (null === $this->offer) {
             throw new PageNotFoundException(
-                'Item not found: '.ModelId::fromValues(
+                'Item not found: ' . ModelId::fromValues(
                     $this->offer->getMetaModel()->getTableName(),
                     $this->offer->get('id')
                 )->getSerialized()
@@ -170,14 +177,14 @@ class UserApplication extends Module
     {
         // Stop if the procedure is not used
         if (!$this->offer->get('applicationlist_active')) {
-            $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'];
+            $this->Template->info = $this->translator->trans('MSC.applicationList.inactive', [], 'contao_default');
 
             return;
         }
 
         // Stop if the offer is in the past
         if (time() >= ToolboxOfferDate::offerStart($this->offer)) {
-            $this->Template->info = $GLOBALS['TL_LANG']['MSC']['applicationList']['past'];
+            $this->Template->info = $this->translator->trans('MSC.applicationList.past', [], 'contao_default');
 
             return;
         }
@@ -216,7 +223,7 @@ class UserApplication extends Module
             $participants = $this->participantModel->findByParent($this->frontendUser->id);
 
             if (0 === $participants->getCount()) {
-                Message::addInfo($GLOBALS['TL_LANG']['MSC']['noParticipants']);
+                Message::addInfo($this->translator->trans('MSC.noParticipants', [], 'contao_default'));
             }
 
             // Build options
@@ -236,7 +243,7 @@ class UserApplication extends Module
 
             // Create form instance
             $form = new Form(
-                'al'.$this->id, 'POST', function ($haste) {
+                'al' . $this->id, 'POST', function ($haste) {
                 /** @noinspection PhpUndefinedMethodInspection */
                 return $haste->getFormId() === \Input::post('FORM_SUBMIT');
             }
@@ -245,24 +252,43 @@ class UserApplication extends Module
             $form->addFormField(
                 'participant',
                 [
-                    'label'     => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['label'],
+                    'label'     => $this->translator->trans(
+                        'MSC.applicationList.participant.label',
+                        [],
+                        'contao_default'
+                    ),
                     'inputType' => 'select_disabled_options',
                     'eval'      => [
                         'options'     => $options,
-                        'addSubmit'   => true,
-                        'slabel'      => $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'],
                         'multiple'    => true,
                         'mandatory'   => true,
                         'chosen'      => true,
-                        'placeholder' => 'Hier klicken und Teilnehmer auswählen' //@todo lang
+                        'placeholder' => $this->translator->trans(
+                            'MSC.applicationList.participant.placeholder',
+                            [],
+                            'contao_default'
+                        )
                     ],
                 ]
+            );
+
+            // Let's add  a submit button
+            $form->addFormField(
+                'submit',
+                array(
+                    'label'     => $this->translator->trans(
+                        'MSC.applicationList.participant.slabel',
+                        [],
+                        'contao_default'
+                    ),
+                    'inputType' => 'submit'
+                )
             );
 
             // Validate the form
             if ($form->validate()) {
                 // Process new applications
-                foreach ((array)$form->fetch('participant') as $participant) {
+                foreach ((array) $form->fetch('participant') as $participant) {
                     // Trigger event and let the application system set the attendance
                     $event = new UserSetApplicationEvent(
                         $this->offer,

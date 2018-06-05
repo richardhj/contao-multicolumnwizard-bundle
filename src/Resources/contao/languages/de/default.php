@@ -22,6 +22,7 @@ $GLOBALS['TL_LANG']['MSC']['applicationList']['active'] = 'Dieses Angebot verwen
 $GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'] = 'Dieses Angebot verwendet <strong>nicht</strong> das Online-Anmeldeverfahren.';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['past'] = 'Dieses Angebot liegt in der Vergangenheit.';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['label'] = 'Teilnehmer auswählen';
+$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['placeholder'] = 'Hier klicken und Teilnehmer auswählen';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['ok'] = '%s';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'] = '%s (bereits angemeldet)';
 $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'] = '%s (ungeignet für das Alter)';
