@@ -13,6 +13,7 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Helper;
 
+use Contao\System;
 use Richardhj\ContaoFerienpassBundle\Model\Config;
 use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use MetaModels\Attribute\IAttribute;
@@ -100,6 +101,9 @@ class ToolboxOfferDate
             return $offer;
         }
 
-        return $offer = Offer::getInstance()->findById($offer);
+        /** @var Offer $offerModel */
+        $offerModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
+
+        return $offerModel->findById($offer);
     }
 }
