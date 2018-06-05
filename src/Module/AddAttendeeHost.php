@@ -26,8 +26,9 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Doctrine\DBAL\Connection;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\IItem;
+use MetaModels\Item;
+use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
-use Richardhj\ContaoFerienpassBundle\MetaModels\FrontendEditingItem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
@@ -35,6 +36,7 @@ use Haste\Form\Form;
 use MetaModels\Attribute\IAttribute;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\Translation\TranslatorInterface;
 
 
 /**
@@ -61,6 +63,11 @@ class AddAttendeeHost extends Module
      * @var Connection
      */
     private $connection;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
 
     /**
      * @var Participant
@@ -93,6 +100,7 @@ class AddAttendeeHost extends Module
         $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
         $this->connection       = System::getContainer()->get('database_connection');
         $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
+        $this->translator       = System::getContainer()->get('translator');
         $this->offer            = $this->fetchOffer();
         $this->frontendUser     = FrontendUser::getInstance();
     }
@@ -130,18 +138,18 @@ class AddAttendeeHost extends Module
         if ($this->scopeMatcher->currentScopeIsBackend()) {
             $template = new BackendTemplate('be_wildcard');
 
-            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
             $template->title    = $this->headline;
             $template->id       = $this->id;
             $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
 
             return $template->parse();
         }
 
         if (null === $this->offer) {
             throw new PageNotFoundException(
-                'Item not found: '.ModelId::fromValues(
+                'Item not found: ' . ModelId::fromValues(
                     $this->offer->getMetaModel()->getTableName(),
                     $this->offer->get('id')
                 )->getSerialized()
@@ -235,7 +243,7 @@ class AddAttendeeHost extends Module
 
         // Exit if a new item creation is not allowed
         if (!$dca->iscreatable) {
-            Message::addError($GLOBALS['TL_LANG']['MSC']['tableClosedInfo']);
+            Message::addError($this->translator->trans('MSC.tableClosedInfo', [], 'contao_default'));
 
             $this->Template->message = Message::generate();
 
@@ -266,7 +274,10 @@ class AddAttendeeHost extends Module
             ]
         );
 
-        $form->addSubmitFormField('submit', $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['submit']);
+        $form->addSubmitFormField(
+            'submit',
+            $this->translator->trans('MSC.addAttendeeHost.submit', [], 'contao_default')
+        );
 
         if ($form->validate()) {
             /** @var array $participantsToAdd */
@@ -275,7 +286,7 @@ class AddAttendeeHost extends Module
             // Create a new model for each participant
             /** @var array $participantRow */
             foreach ($participantsToAdd as $participantRow) {
-                $participant = new FrontendEditingItem($this->participantModel->getMetaModel(), []);
+                $participant = new Item($this->participantModel->getMetaModel(), []);
 
                 // Set each attribute in participant model
                 foreach ($participantRow as $attributeName => $value) {
