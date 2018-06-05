@@ -147,6 +147,7 @@ class Participant extends AbstractSimpleMetaModel
             return false;
         }
 
-        return $parentId === $child->get('pmember')['id'];
+        /** @noinspection TypeUnsafeComparisonInspection */
+        return $parentId == $child->get('pmember')['id'];
     }
 }
