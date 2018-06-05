@@ -111,11 +111,11 @@ class UserAttendances extends Module
         if ($this->scopeMatcher->currentScopeIsBackend()) {
             $template = new BackendTemplate('be_wildcard');
 
-            $template->wildcard = '### '.utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]).' ###';
+            $template->wildcard = '### ' . utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
             $template->title    = $this->headline;
             $template->id       = $this->id;
             $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id='.$this->id;
+            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
 
             return $template->parse();
         }
@@ -140,23 +140,18 @@ class UserAttendances extends Module
          * Delete attendance
          */
         if (0 === strpos(Input::get('action'), 'delete')) {
-            list(, $id, $rt) = trimsplit('::', Input::get('action'));
+            $id = Input::get('id');
             $attendanceToDelete = Attendance::findByPk($id);
 
-            if (!System::getContainer()->get('security.csrf.token_manager')->isTokenValid(
-            // Validate request token
-                new CsrfToken(System::getContainer()->getParameter('contao.csrf_token_name'), $rt)
-            )) {
-                Message::addError($GLOBALS['TL_LANG']['XPT']['tokenRetry']);
-            } elseif (null === $attendanceToDelete) {
+            if (null === $attendanceToDelete) {
                 // Check for existence
-                Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteNotFound']);
+                Message::addError('Anmeldung schon gelöscht');
             } elseif (!$this->participantModel->isProperChild(
                 $attendanceToDelete->participant,
                 $this->frontendUser->id
             )) {
                 // Check for permission
-                Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteMissingPermission']);
+                Message::addError('keine Berechtigung');
                 $this->dispatcher->dispatch(
                     new LogEvent(
                         sprintf(
@@ -260,16 +255,21 @@ class UserAttendances extends Module
                                 $url,
                                 $f[0],
                                 $attribute,
-                                $this->translator->trans('MSC.'.$f[0], [], 'contao_default')
+                                $this->translator->trans('MSC.' . $f[0], [], 'contao_default')
                             );
                             break;
 
                         case 'recall':
                             if (ToolboxOfferDate::offerStart($item) >= time()) {
-                                $url       = static::addToUrl('action=delete::'.$attendances->id.'::'.REQUEST_TOKEN);
-                                $attribute = ' onclick="return confirm(\''.htmlspecialchars(
+                                $url = \Environment::get('uri') . '?action=delete&id=' . $attendances->id;
+
+                                $attribute = ' onclick="return confirm(\'' . htmlspecialchars(
                                         sprintf(
-                                            $this->translator->trans('MSC.attendanceConfirmDeleteLink', [], 'contao_default'),
+                                            $this->translator->trans(
+                                                'MSC.attendanceConfirmDeleteLink',
+                                                [],
+                                                'contao_default'
+                                            ),
                                             $item->parseAttribute('name')['text'],
                                             $this->participantModel
                                                 ->findById($attendances->participant)
@@ -277,7 +277,7 @@ class UserAttendances extends Module
                                         ),
                                         ENT_QUOTES | ENT_HTML5
                                     )
-                                             .'\')"';
+                                             . '\')"';
 
                                 $minus24hours = time() - 86400;
                                 $disabled     = (ToolboxOfferDate::offerStart($item) < $minus24hours)
@@ -289,7 +289,7 @@ class UserAttendances extends Module
                                     $f[0],
                                     $disabled ? ' disabled' : '',
                                     $attribute,
-                                    $this->translator->trans('MSC.'.$f[0], [], 'contao_default')
+                                    $this->translator->trans('MSC.' . $f[0], [], 'contao_default')
                                 );
                             } else {
                                 $value = '';
