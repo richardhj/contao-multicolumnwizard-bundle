@@ -122,7 +122,7 @@ class AddAttendeeHost extends Module
             ->setParameter('item', Input::get('auto_item'))
             ->execute();
 
-        $id = $statement->fetch(\PDO::FETCH_OBJ)->id;
+        $id = $statement->fetchColumn();
 
         return $metaModel->findById($id);
     }
@@ -156,7 +156,8 @@ class AddAttendeeHost extends Module
             );
         }
 
-        $hostId = $this->offer->get('host')[MetaModelSelect::SELECT_RAW]['id'];
+        $hostData = $this->offer->get('host');
+        $hostId   = $hostData[MetaModelSelect::SELECT_RAW]['id'];
 
         if ($this->frontendUser->ferienpass_host !== $hostId) {
             throw new AccessDeniedException('Access denied');
@@ -177,7 +178,7 @@ class AddAttendeeHost extends Module
      * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
      * @throws \RuntimeException
      */
-    protected function compile()
+    protected function compile(): void
     {
         $form = new Form(
             'tl_add_attendee_host', 'POST', function ($haste) {
@@ -286,31 +287,81 @@ class AddAttendeeHost extends Module
             // Create a new model for each participant
             /** @var array $participantRow */
             foreach ($participantsToAdd as $participantRow) {
-                $participant = new Item($this->participantModel->getMetaModel(), []);
-
-                // Set each attribute in participant model
-                foreach ($participantRow as $attributeName => $value) {
-                    $participant->set($attributeName, $value);
-                }
-
-                $participant->save();
-
-                // Create an attendance for this participant and offer
-                $attendance              = new Attendance();
-                $attendance->tstamp      = time();
-                $attendance->created     = time();
-                $attendance->offer       = $this->offer->get('id');
-                $attendance->participant = $participant->get('id');
-                $attendance->save();
+                $this->addParticipant($participantRow);
             }
 
             Message::addConfirmation(
-                sprintf($GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['confirmation'], \count($participantsToAdd))
+                sprintf(
+                    $this->translator->trans('MSC.addAttendeeHost.confirmation', [], 'contao_default'),
+                    \count($participantsToAdd)
+                )
             );
             Controller::reload();
         }
 
         $this->Template->message = Message::generate();
         $this->Template->form    = $form->generate();
+    }
+
+    private function addParticipant(array $row): void
+    {
+        $expr = $this->connection->getExpressionBuilder();
+
+        // Try to find an existing participant
+        $statement = $this->connection->createQueryBuilder()
+            ->select('p.id')
+            ->from('mm_participant', 'p')
+            ->leftJoin('p', 'tl_member', 'm', 'p.pmember=m.id')
+            ->where($expr->orX('p.phone=:phone', 'm.phone=:phone', 'p.email=:email', 'm.email=:email'))
+            ->andWhere($expr->andX('p.firstname=:firstname', 'p.lastname=:lastname'))
+            ->setParameter('phone', $row['phone'])
+            ->setParameter('email', $row['email'])
+            ->setParameter('firstname', $row['firstname'])
+            ->setParameter('lastname', $row['lastanme'])
+            ->execute();
+
+        if (false !== $participantId = $statement->fetchColumn()) {
+            $this->createAttendance($participantId);
+
+            return;
+        }
+
+        $participant = new Item($this->participantModel->getMetaModel(), $row);
+
+        // Try to find an existing member for this participant
+        $statement = $this->connection->createQueryBuilder()
+            ->select('m.id')
+            ->from('tl_member', 'm')
+            ->where($expr->orX('m.phone=:phone', 'm.email=:email'))
+            ->setParameter('phone', $row['phone'])
+            ->setParameter('email', $row['email'])
+            ->execute();
+
+        if (false !== $memberId = $statement->fetchColumn()) {
+            $participant->set('pmember', $memberId);
+        }
+
+        // current bug to have the combinedvalues get saved
+        $participant->set('name', null);
+
+        $participant->save();
+
+        $this->createAttendance($participant->get('id'));
+    }
+
+    /**
+     * Create an attendance for this offer and given participant.
+     *
+     * @param int $participantId
+     */
+    private function createAttendance(int $participantId): void
+    {
+        $attendance = new Attendance();
+
+        $attendance->tstamp      = time();
+        $attendance->created     = time();
+        $attendance->offer       = $this->offer->get('id');
+        $attendance->participant = $participantId;
+        $attendance->save();
     }
 }
