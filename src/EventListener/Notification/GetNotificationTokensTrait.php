@@ -34,24 +34,30 @@ trait GetNotificationTokensTrait
 
         // Add all offer fields
         foreach ($offer->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['offer_'.$name] = $offer->parseAttribute($name)['text'];
+            $parsed = $offer->parseAttribute($name);
+
+            $tokens['offer_' . $name] = $parsed['text'];
         }
 
         // Add all the participant fields
         foreach ($participant->getMetaModel()->getAttributes() as $name => $attribute) {
-            $tokens['participant_'.$name] = $participant->parseAttribute($name)['text'];
+            $parsed = $participant->parseAttribute($name);
+
+            $tokens['participant_' . $name] = $parsed['text'];
         }
 
         // Add all the parent's member fields
-        foreach ((array)$participant->get('pmember') as $k => $v) {
-            $tokens['member_'.$k] = $v;
+        foreach ((array) $participant->get('pmember') as $k => $v) {
+            $tokens['member_' . $k] = $v;
         }
 
         // Add the participant's email
         $tokens['participant_email'] = $tokens['participant_email'] ?: $tokens['member_email'];
 
         // Add the host's email
-        $tokens['host_email'] = $offer->get($offer->getMetaModel()->get('owner_attribute'))['email'];
+        $host = $offer->get('host');
+
+        $tokens['host_email'] = $host['email'];
 
         // Add the admin's email
         $tokens['admin_email'] = $GLOBALS['TL_ADMIN_EMAIL'];
