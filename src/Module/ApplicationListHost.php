@@ -26,6 +26,7 @@ use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use Doctrine\DBAL\Connection;
+use Haste\DateTime\DateTime;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\IItem;
 use MetaModels\Render\Setting\IRenderSettingFactory;
@@ -204,7 +205,11 @@ class ApplicationListHost extends Module
         if (null !== $attendances) {
             // Create table head
             foreach ($fields as $field) {
-                $rows[0][] = $this->participantModel->getMetaModel()->getAttribute($field)->get('name');
+                if ($field === 'dateOfBirth') {
+                    $rows[0][] = 'Alter';
+                } else {
+                    $rows[0][] = $this->participantModel->getMetaModel()->getAttribute($field)->get('name');
+                }
             }
 
             // Walk each attendee
@@ -222,12 +227,24 @@ class ApplicationListHost extends Module
                 }
 
                 foreach ($fields as $field) {
-                    $value = $participant->parseAttribute($field, null, $view)['text'];
+                    $pmember = $participant->get('pmember');
+
+                    if ($field === 'dateOfBirth') {
+                        $date  = new DateTime('@' . $participant->get($field));
+                        $value = $date->getAge();
+                    } else {
+                        $value = $participant->parseAttribute($field, null, $view)['text'];
+                    }
 
                     // Inherit parent's data
                     if ('' === $value) {
-                        $pmember = $participant->get('pmember');
-                        $value   = $pmember[$field];
+                        $value = $pmember[$field];
+                    }
+
+                    if ($field === 'phone' && '' !== $pmember['mobile']) {
+                        $value .= ' / ' . $pmember['mobile'];
+
+                        $value = ltrim($value, '/ ');
                     }
 
                     $values[] = $value;
