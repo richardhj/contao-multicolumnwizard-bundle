@@ -312,7 +312,14 @@ class AddAttendeeHost extends Module
             ->select('p.id')
             ->from('mm_participant', 'p')
             ->leftJoin('p', 'tl_member', 'm', 'p.pmember=m.id')
-            ->where($expr->orX('p.phone=:phone', 'm.phone=:phone', 'p.email=:email', 'm.email=:email'))
+            ->where(
+                $expr->orX(
+                    $expr->andX('p.phone<>\'\'', 'p.phone=:phone'),
+                    $expr->andX('m.phone<>\'\'', 'm.phone=:phone'),
+                    $expr->andX('p.email<>\'\'', 'p.email=:email'),
+                    $expr->andX('m.email<>\'\'', 'm.email=:email')
+                )
+            )
             ->andWhere($expr->andX('p.firstname=:firstname', 'p.lastname=:lastname'))
             ->setParameter('phone', $row['phone'])
             ->setParameter('email', $row['email'])
@@ -332,7 +339,12 @@ class AddAttendeeHost extends Module
         $statement = $this->connection->createQueryBuilder()
             ->select('m.id')
             ->from('tl_member', 'm')
-            ->where($expr->orX('m.phone=:phone', 'm.email=:email'))
+            ->where(
+                $expr->orX(
+                    $expr->andX('m.phone<>\'\'', 'm.phone=:phone'),
+                    $expr->andX('m.email<>\'\'', 'm.email=:email')
+                )
+            )
             ->setParameter('phone', $row['phone'])
             ->setParameter('email', $row['email'])
             ->execute();
