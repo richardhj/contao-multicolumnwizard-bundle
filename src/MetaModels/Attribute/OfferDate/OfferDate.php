@@ -121,7 +121,7 @@ class OfferDate extends BaseComplex
                 ->execute();
 
             // Walk every row.
-            foreach ((array)$values[$id] as $period) {
+            foreach ((array) $values[$id] as $period) {
                 if (null === ($setValues = $this->getSetValues($period, $id))) {
                     continue;
                 }
@@ -176,7 +176,7 @@ class OfferDate extends BaseComplex
             ->setParameter('items', $idList, Connection::PARAM_INT_ARRAY)
             ->execute();
 
-        return $statement->fetchAll(\PDO::FETCH_COLUMN, 'item_id');
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 
 
@@ -226,8 +226,8 @@ class OfferDate extends BaseComplex
             'tstamp'  => time(),
             'att_id'  => $this->get('id'),
             'item_id' => $id,
-            'start'   => (int)$period['start'],
-            'end'     => (int)$period['end'],
+            'start'   => (int) $period['start'],
+            'end'     => (int) $period['end'],
         ];
     }
 
@@ -246,7 +246,7 @@ class OfferDate extends BaseComplex
         if ($where) {
             $builder->andWhere($where['procedure']);
 
-            foreach ((array)$where['params'] as $name => $value) {
+            foreach ((array) $where['params'] as $name => $value) {
                 $builder->setParameter($name, $value);
             }
         }
@@ -283,11 +283,11 @@ class OfferDate extends BaseComplex
         $whereIds = '';
 
         if ($ids) {
-            $whereIds = \is_array($ids) ? ' AND item_id IN ('.implode(',', $ids).')' : ' AND item_id='.$ids;
+            $whereIds = \is_array($ids) ? ' AND item_id IN (' . implode(',', $ids) . ')' : ' AND item_id=' . $ids;
         }
 
         $return = [
-            'procedure' => 'att_id=?'.$whereIds,
+            'procedure' => 'att_id=?' . $whereIds,
             'params'    => [$this->get('id')],
         ];
 
@@ -355,7 +355,7 @@ class OfferDate extends BaseComplex
 
         $parsedDates = [];
 
-        foreach ((array)$template->raw as $period) {
+        foreach ((array) $template->raw as $period) {
             $parsedDate = [];
 
             if ((new \Date($period['start']))->dayBegin !== (new \Date($period['end']))->dayBegin) {
@@ -492,10 +492,12 @@ class OfferDate extends BaseComplex
             ->from($this->getValueTable())
             ->where('att_id=:attr')
             ->groupBy('item_id')
-            ->having($function.' '.$operation.' '.(int)$value)
+            ->having($function . ' ' . $operation . ' ' . (int) $value)
             ->setParameter('attr', $this->get('id'))
             ->execute();
 
-        return $statement->fetch(\PDO::FETCH_COLUMN, 'item_id');
+        $result = $statement->fetchAll(\PDO::FETCH_COLUMN);
+
+        return false !== $result ? $result : [];
     }
 }

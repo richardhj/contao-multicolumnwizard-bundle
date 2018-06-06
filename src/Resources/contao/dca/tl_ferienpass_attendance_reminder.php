@@ -140,7 +140,7 @@ $GLOBALS['TL_DCA'][$table] = [
                     ->setParameter('type', 'application_list_reminder')
                     ->execute();
 
-                return $notifications->fetchAll(\PDO::FETCH_COLUMN, 'title');
+                return $notifications->fetchAll(\PDO::FETCH_COLUMN, 1);
             },
             'eval'             => [
                 'mandatory'          => true,

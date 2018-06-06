@@ -71,7 +71,7 @@ class Age extends BaseComplex
             ->setParameter('id', $this->get('id'))
             ->execute();
 
-        return $statement->fetchAll(\PDO::FETCH_COLUMN, 'item_id');
+        return $statement->fetchAll(\PDO::FETCH_COLUMN);
     }
 
 
@@ -88,7 +88,7 @@ class Age extends BaseComplex
         if ($where) {
             $builder->andWhere($where['procedure']);
 
-            foreach ((array)$where['params'] as $name => $value) {
+            foreach ((array) $where['params'] as $name => $value) {
                 $builder->setParameter($name, $value);
             }
         }
@@ -123,14 +123,14 @@ class Age extends BaseComplex
 
         // insert into tl_metamodel_age … on duplicate key update
 
-        $query       = 'INSERT INTO '.$this->getValueTable().' %s';
+        $query       = 'INSERT INTO ' . $this->getValueTable() . ' %s';
         $queryUpdate = 'UPDATE %s';
 
         // Set data
         foreach ($ids as $id) {
             $database
                 ->prepare(
-                    $query.' ON DUPLICATE KEY '.str_replace(
+                    $query . ' ON DUPLICATE KEY ' . str_replace(
                         'SET ',
                         '',
                         $database
@@ -164,7 +164,7 @@ class Age extends BaseComplex
 
         return [
             'tstamp'  => time(),
-            'att_id'  => (int)$this->get('id'),
+            'att_id'  => (int) $this->get('id'),
             'item_id' => $id,
             'lower'   => $lower,
             'upper'   => $upper,
@@ -198,7 +198,7 @@ class Age extends BaseComplex
         if ($where) {
             $builder->andWhere($where['procedure']);
 
-            foreach ((array)$where['params'] as $name => $value) {
+            foreach ((array) $where['params'] as $name => $value) {
                 $builder->setParameter($name, $value);
             }
         }
@@ -283,14 +283,14 @@ class Age extends BaseComplex
 
         if ($ids) {
             if (\is_array($ids)) {
-                $whereIds = ' AND item_id IN ('.implode(',', $ids).')';
+                $whereIds = ' AND item_id IN (' . implode(',', $ids) . ')';
             } else {
-                $whereIds = ' AND item_id='.$ids;
+                $whereIds = ' AND item_id=' . $ids;
             }
         }
 
         $return = [
-            'procedure' => 'att_id=?'.$whereIds,
+            'procedure' => 'att_id=?' . $whereIds,
             'params'    => [$this->get('id')],
         ];
 
