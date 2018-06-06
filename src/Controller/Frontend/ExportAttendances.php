@@ -148,7 +148,7 @@ class ExportAttendances
                     }
 
                     //$event->setLocation()
-                    if ($attendance->getStatus() === AttendanceStatus::findError()) {
+                    if ($attendance->getStatus() !== AttendanceStatus::findConfirmed()) {
                         $event->setCancelled(true);
                     }
 
