@@ -130,7 +130,10 @@ class UserApplication extends Module
             ->setParameter('item', Input::get('auto_item'))
             ->execute();
 
-        $id = $statement->fetch(\PDO::FETCH_OBJ)->id;
+        $id = $statement->fetchColumn();
+        if (false === $id) {
+            return null;
+        }
 
         return $metaModel->findById($id);
     }

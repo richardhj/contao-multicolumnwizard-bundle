@@ -123,6 +123,9 @@ class AddAttendeeHost extends Module
             ->execute();
 
         $id = $statement->fetchColumn();
+        if (false === $id) {
+            return null;
+        }
 
         return $metaModel->findById($id);
     }
