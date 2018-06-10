@@ -10,6 +10,7 @@ richardhj.ferienpass.export_attendances:
     path: /share/anmeldungen-ferienpass-{memberId}-{token}.{_format}
     defaults:
         _scope: frontend
+        _token_check: false
         _controller: richardhj.ferienpass.controller.export_attendances
         _format: ics
     requirements:

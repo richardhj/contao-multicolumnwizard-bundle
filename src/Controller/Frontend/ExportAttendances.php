@@ -24,6 +24,8 @@ use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 
 /**
@@ -70,11 +72,13 @@ class ExportAttendances
      * @param string  $token    The token.
      * @param string  $_format  The desired format, e.g. ics
      * @param Request $request  The current request.
+     *
+     * @return Response
      */
     public function __invoke(int $memberId, string $token, string $_format, Request $request)
     {
         if (null === $member = MemberModel::findByPk($memberId)) {
-            throw new PageNotFoundException('Member ID not found: '.$memberId);
+            throw new PageNotFoundException('Member ID not found: ' . $memberId);
         }
 
         $expectedToken = hash('ripemd128', implode('', [$member->id, $_format, $this->secret]));
@@ -84,16 +88,22 @@ class ExportAttendances
         }
 
         if ('ics' !== $_format) {
-            throw new PageNotFoundException('Format not supported: '.$_format);
+            throw new PageNotFoundException('Format not supported: ' . $_format);
         }
 
         $attendances = Attendance::findByParent($memberId);
 
-        header('Content-Type: text/calendar; charset=utf-8');
-        header('Content-Disposition: attachment; filename="cal.ics"');
-        echo $this->createICal($attendances, $request);
+        $response = new Response($this->createICal($attendances, $request));
+        $response->headers->set('Content-Type', 'text/calendar');
 
-        exit;
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            'cal.ics'
+        );
+
+        $response->headers->set('Content-Disposition', $disposition);
+
+        return $response;
     }
 
     /**
@@ -122,19 +132,19 @@ class ExportAttendances
                     continue;
                 }
 
-                foreach ((array)$date as $period) {
+                foreach ((array) $date as $period) {
                     $event = new Event();
 
-                    $dateTime = new DateTime('@'.$period['start']);
+                    $dateTime = new DateTime('@' . $period['start']);
                     $event->setDtStart($dateTime);
-                    $dateTime = new DateTime('@'.$period['end']);
+                    $dateTime = new DateTime('@' . $period['end']);
                     $event->setDtEnd($dateTime);
 
-                    $event->setSummary('Ferienpass '.$participant->get('firstname').': '.$item->get('name'));
+                    $event->setSummary('Ferienpass ' . $participant->get('firstname') . ': ' . $item->get('name'));
 
-                    $dateTime = new DateTime('@'.$attendance->created);
+                    $dateTime = new DateTime('@' . $attendance->created);
                     $event->setCreated($dateTime);
-                    $dateTime = new DateTime('@'.$attendance->tstamp);
+                    $dateTime = new DateTime('@' . $attendance->tstamp);
                     $event->setModified($dateTime);
 
                     if ($item instanceof Item) {
@@ -142,7 +152,7 @@ class ExportAttendances
                             $this->renderSettingFactory->createCollection($item->getMetaModel(), $this->listViewId);
                         $jumpToLink = $item->buildJumpToLink($view);
                         if (true === $jumpToLink['deep']) {
-                            $url = $request->getSchemeAndHttpHost().'/'.$jumpToLink['url'];
+                            $url = $request->getSchemeAndHttpHost() . '/' . $jumpToLink['url'];
                             $event->setUrl($url);
                         }
                     }
