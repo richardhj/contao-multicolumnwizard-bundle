@@ -17,7 +17,6 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildPa
 use Contao\Date;
 use Haste\DateTime\DateTime;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
-use Richardhj\ContaoFerienpassBundle\Helper\GetFerienpassConfigTrait;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;

@@ -14,7 +14,6 @@
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
 use Contao\BackendTemplate;
-use Contao\Controller;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
 use Contao\Input;
@@ -24,6 +23,7 @@ use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use ModuleModel;
 use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
+use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
@@ -36,7 +36,6 @@ use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceExce
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Translation\TranslatorInterface;
 
 
@@ -114,7 +113,7 @@ class UserAttendances extends Module
         if ($this->scopeMatcher->currentScopeIsBackend()) {
             $template = new BackendTemplate('be_wildcard');
 
-            $template->wildcard = '### ' . utf8_strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
+            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
             $template->title    = $this->headline;
             $template->id       = $this->id;
             $template->link     = $this->name;

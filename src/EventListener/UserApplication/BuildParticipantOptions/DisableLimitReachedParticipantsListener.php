@@ -17,7 +17,6 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildPa
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
-use Richardhj\ContaoFerienpassBundle\Helper\GetFerienpassConfigTrait;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
