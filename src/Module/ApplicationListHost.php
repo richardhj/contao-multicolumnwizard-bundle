@@ -236,7 +236,7 @@ class ApplicationListHost extends Module
                         $date  = new DateTime('@' . $participant->get($field));
                         $value = $date->getAge();
                     } else {
-                        $value = $participant->parseAttribute($field, null, $view)['text'];
+                        $value = $participant->parseAttribute($field, 'text', $view)['text'];
                     }
 
                     // Inherit parent's data
