@@ -43,7 +43,7 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
 
         $newStatus = self::findStatusForAttendance($attendance);
         $oldStatus = $attendance->getStatus();
-        if (null !== $oldStatus || $newStatus->id === $oldStatus->id) {
+        if (null !== $oldStatus && $newStatus->id === $oldStatus->id) {
             return;
         }
 
