@@ -14,7 +14,6 @@
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
 use Contao\BackendTemplate;
-use Contao\Controller;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
@@ -23,7 +22,6 @@ use Contao\Message;
 use Contao\Module;
 use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
-use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Doctrine\DBAL\Connection;
 use MetaModels\IItem;
 use Patchwork\Utf8;
@@ -158,12 +156,7 @@ class UserApplication extends Module
         }
 
         if (null === $this->offer) {
-            throw new PageNotFoundException(
-                'Item not found: ' . ModelId::fromValues(
-                    $this->offer->getMetaModel()->getTableName(),
-                    $this->offer->get('id')
-                )->getSerialized()
-            );
+            throw new PageNotFoundException('Item not found.');
         }
 
         if ('' !== $this->customTpl) {

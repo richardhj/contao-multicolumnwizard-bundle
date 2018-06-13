@@ -158,12 +158,7 @@ class ApplicationListHost extends Module
         }
 
         if (null === $this->offer) {
-            throw new PageNotFoundException(
-                'Item not found: ' . ModelId::fromValues(
-                    $this->offer->getMetaModel()->getTableName(),
-                    $this->offer->get('id')
-                )->getSerialized()
-            );
+            throw new PageNotFoundException('Item not found.');
         }
 
         $hostData = $this->offer->get('host');
