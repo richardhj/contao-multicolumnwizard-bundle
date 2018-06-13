@@ -145,6 +145,7 @@ services:
             - "@richardhj.ferienpass.application_system"
         tags:
             - { name: kernel.event_listener, event: 'model.delete', method: handle }
+            - { name: kernel.event_listener, event: 'dc-general.model.post-delete', method: handleDcGeneral }
 
     richardhj.ferienpass.listener.application_system.lot.attendance_status:
         class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\LotAttendanceStatusListener

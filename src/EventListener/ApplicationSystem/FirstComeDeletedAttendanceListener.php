@@ -15,6 +15,7 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem;
 
 
 use Contao\Model\Event\DeleteModelEvent;
+use ContaoCommunityAlliance\DcGeneral\Event\PostDeleteModelEvent;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
@@ -42,5 +43,21 @@ class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListen
         if ($offer = $attendance->getOffer()) {
             Attendance::updateStatusByOffer($offer->get('id'));
         }
+    }
+
+    /**
+     * Update all attendance statuses for one offer.
+     *
+     * @param PostDeleteModelEvent $event
+     *
+     * @return void
+     */
+    public function handleDcGeneral(PostDeleteModelEvent $event): void
+    {
+        if (!($this->applicationSystem instanceof FirstCome)) {
+            return;
+        }
+
+        Attendance::updateStatusByOffer($event->getModel()->getProperty('offer'));
     }
 }
