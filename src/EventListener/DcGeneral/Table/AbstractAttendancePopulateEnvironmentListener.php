@@ -17,7 +17,6 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table;
 use ContaoCommunityAlliance\DcGeneral\Contao\InputProvider;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionInterface;
-use ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException;
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
@@ -35,7 +34,7 @@ abstract class AbstractAttendancePopulateEnvironmentListener
     {
         $environment   = $event->getEnvironment();
         $definition    = $environment->getDataDefinition();
-        $inputProvider = $environment->getInputProvider() ?: new InputProvider(); // FIXME Why is inputProvider null?
+        $inputProvider = new InputProvider();
 
         if (null === ($pid = $inputProvider->getParameter('pid'))
             || $definition->getName() !== Attendance::getTable()
@@ -50,24 +49,24 @@ abstract class AbstractAttendancePopulateEnvironmentListener
         // Set parent data provider corresponding to pid
         $definition->getBasicDefinition()->setParentDataProvider($modelId->getDataProviderName());
 
-        // Remove redundant legend (offer_legend in offer view)
-        $palette = $definition->getPalettesDefinition()->getPaletteByName('default');
-        switch ($modelId->getDataProviderName()) {
-            case 'mm_ferienpass':
-                try {
-                    $palette->removeLegend($palette->getLegend('offer'));
-                } catch (DcGeneralRuntimeException $e) {
-                    // Legend (already) removed. Nothing to do here.
-                }
-                break;
-
-            case 'mm_participant':
-                try {
-                    $palette->removeLegend($palette->getLegend('participant'));
-                } catch (DcGeneralRuntimeException $e) {
-                    // Legend (already) removed. Nothing to do here.
-                }
-                break;
-        }
+//        // Remove redundant legend (offer_legend in offer view)
+//        $palette = $definition->getPalettesDefinition()->getPaletteByName('default');
+//        switch ($modelId->getDataProviderName()) {
+//            case 'mm_ferienpass':
+//                try {
+//                    $palette->removeLegend($palette->getLegend('offer'));
+//                } catch (DcGeneralRuntimeException $e) {
+//                    // Legend (already) removed. Nothing to do here.
+//                }
+//                break;
+//
+//            case 'mm_participant':
+//                try {
+//                    $palette->removeLegend($palette->getLegend('participant'));
+//                } catch (DcGeneralRuntimeException $e) {
+//                    // Legend (already) removed. Nothing to do here.
+//                }
+//                break;
+//        }
     }
 }

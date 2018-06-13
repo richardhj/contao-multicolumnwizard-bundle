@@ -11,25 +11,17 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-use Contao\MemberModel;
 use Contao\System;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use MetaModels\IItem;
 use MetaModels\Items;
 
 
-$table = Richardhj\ContaoFerienpassBundle\Model\Attendance::getTable();
-
-
-/**
- * DCA
- */
-$GLOBALS['TL_DCA'][$table] = [
+$GLOBALS['TL_DCA']['tl_ferienpass_attendance'] = [
 
     // Config
     'config' => [
         'dataContainer' => 'General',
-        'notDeletable'  => true,
         'sql'           => [
             'keys' => [
                 'id'                => 'primary',
@@ -40,13 +32,10 @@ $GLOBALS['TL_DCA'][$table] = [
 
     'dca_config'   => [
         'data_provider'  => [
-//            'parent'  => [
-//                'source' => Offer::getInstance()->getTable(),
-//            ],
-            'default'                                  => [
-                'source' => $table,
+            'default'        => [
+                'source' => 'tl_ferienpass_attendance',
             ],
-            'mm_ferienpass'       => [
+            'mm_ferienpass'  => [
                 'source' => 'mm_ferienpass',
             ],
             'mm_participant' => [
@@ -54,10 +43,10 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
         ],
         'child_list'     => [
-            'mm_ferienpass' => [
+            'mm_ferienpass'            => [
                 'fields' => ['tstamp'],
             ],
-            $table                               => [
+            'tl_ferienpass_attendance' => [
                 'fields' => [
                     'created',
                     'offer',
@@ -69,7 +58,7 @@ $GLOBALS['TL_DCA'][$table] = [
         'childCondition' => [
             [
                 'from'   => 'mm_ferienpass',
-                'to'     => $table,
+                'to'     => 'tl_ferienpass_attendance',
                 'setOn'  => [
                     [
                         'to_field'   => 'offer',
@@ -86,7 +75,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             [
                 'from'   => 'mm_participant',
-                'to'     => $table,
+                'to'     => 'tl_ferienpass_attendance',
                 'setOn'  => [
                     [
                         'to_field'   => 'participant',
@@ -108,76 +97,54 @@ $GLOBALS['TL_DCA'][$table] = [
     'list'         => [
         'sorting'           => [
             'mode'         => 1,
-//            'flag'                  => 6,
-//            'mode'         => 0,
-            'fields'       => [
-//                'sorting'
-////                'tstamp',
-////                'offer',
-////                'participant',
-////                'status',
-            ],
+            'fields'       => [],
             'headerFields' => [
                 'id',
-//                Offer::getInstance()->getMetaModel()->getAttribute(Richardhj\ContaoFerienpassBundle\Model\Config::getInstance()->offer_attribute_name)->getColName(),
             ],
             'panelLayout'  => 'filter',
         ],
-        'label'             =>
-            [
-                'showColumns' => true,
+        'label'             => [
+            'showColumns' => true,
+        ],
+        'global_operations' => [
+            'back' => [
+                'label'      => &$GLOBALS['TL_LANG']['MSC']['backBT'],
+                'href'       => 'mod=&table=',
+                'class'      => 'header_back',
+                'attributes' => 'onclick="Backend.getScrollOffset();"',
             ],
-        'global_operations' =>
-            [
-                'back' =>
-                    [
-                        'label'      => &$GLOBALS['TL_LANG']['MSC']['backBT'],
-                        'href'       => 'mod=&table=',
-                        'class'      => 'header_back',
-                        'attributes' => 'onclick="Backend.getScrollOffset();"',
-                    ],
-                'all'  =>
-                    [
-                        'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
-                        'href'       => 'act=select',
-                        'class'      => 'header_edit_all',
-                        'attributes' => 'onclick="Backend.getScrollOffset();"',
-                    ],
+            'all'  => [
+                'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
+                'href'       => 'act=select',
+                'class'      => 'header_edit_all',
+                'attributes' => 'onclick="Backend.getScrollOffset();"',
             ],
+        ],
         'operations'        => [
-//            'cut'  => [
-//                'label'      => &$GLOBALS['TL_LANG'][$table]['cut'],
-//                'href'       => 'act=paste&amp;mode=cut',
-//                'icon'       => 'cut.gif',
-//                'attributes' => 'onclick="Backend.getScrollOffset()"',
-//            ],
-            'show' =>
-                [
-                    'label' => &$GLOBALS['TL_LANG'][$table]['show'],
-                    'href'  => 'act=show',
-                    'icon'  => 'show.gif',
-                ],
-//            'toggle_status' => [
-//                'label'                => &$GLOBALS['TL_LANG'][$table]['toggle_status'],
-//                'attributes'           => 'onclick="Backend.getScrollOffset();"',
-//                'haste_ajax_operation' => [
-//                    'field'   => 'status',
-//                    'options' => [
-//                        [
-//                            'value' => '1',
-//                            'icon'  => 'assets/ferienpass/core/img/equalizer.png',
-//                        ],
-//                        [
-//                            'value' => '2',
-//                            'icon'  => 'visible.gif',
-//                        ],
-//                    ],
-//                ],
-//            ],
+            'edit'   => [
+                'label'      => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['edit'],
+                'href'       => 'act=edit',
+                'icon'       => 'edit.svg',
+                'attributes' => 'onclick="Backend.getScrollOffset()"',
+            ],
+            'delete' => [
+                'label'      => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['delete'],
+                'href'       => 'act=delete',
+                'icon'       => 'delete.svg',
+                'attributes' => sprintf(
+                    'onclick="if (!confirm(\'%s\')) return false; Backend.getScrollOffset();"',
+                    $GLOBALS['TL_LANG']['MSC']['deleteConfirm']
+                )
+            ],
+            'show'   => [
+                'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['show'],
+                'href'  => 'act=show',
+                'icon'  => 'show.svg',
+            ],
         ],
     ],
 
-//    // Meta Palettes
+    // Meta Palettes
     'metapalettes' => [
         'default' => [
             'offer'       => [
@@ -195,49 +162,54 @@ $GLOBALS['TL_DCA'][$table] = [
     // Fields
     'fields'       => [
         'id'          => [
-            'sql' => "int(10) unsigned NOT NULL auto_increment",
+            'sql' => 'int(10) unsigned NOT NULL auto_increment',
         ],
         'tstamp'      => [
-            'label' => &$GLOBALS['TL_LANG'][$table]['tstamp'],
-            'eval'  => ['rgxp' => 'datim'],
+            'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['tstamp'],
+            'eval'  => [
+                'rgxp' => 'datim'
+            ],
             'sql'   => "int(10) unsigned NOT NULL default '0'",
-//            'flag' => 5,
         ],
         'sorting'     => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         'created'     => [
-            'label' => &$GLOBALS['TL_LANG'][$table]['created'],
+            'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['created'],
             'eval'  => ['rgxp' => 'datim'],
             'sql'   => "int(10) unsigned NOT NULL default '0'",
         ],
         'offer'       => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['offer'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['offer'],
             'inputType' => 'tableLookup',
             'eval'      => [
                 'mandatory'        => true,
                 'foreignTable'     => 'mm_ferienpass',
                 'fieldType'        => 'radio',
                 'listFields'       => [
-                    'name'
+                    'name',
+                    'tl_metamodel_offer_date.start'
                 ],
                 'searchFields'     => [
                     'name',
+                    'date'
                 ],
                 'matchAllKeywords' => true,
-                // Exclude varbases if they have children
-                'sqlWhere'         => sprintf(
-                    '%1$s.varbase=0 OR (%1$s.varbase=1 AND (SELECT COUNT(*) FROM %1$s c WHERE c.varbase=0 AND c.vargroup=%1$s.id)=0)',
-                    'mm_ferienpass'
-                ),
+                'joins'            => [
+                    'tl_metamodel_offer_date' => [
+                        'type' => 'INNER JOIN',
+                        'fkey' => 'id',
+                        'jkey' => 'item_id'
+                    ]
+                ],
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
-                iterator_to_array((System::getContainer()->get('richardhj.ferienpass.model.offer')->findAll() ?: new Items([]))),
+                iterator_to_array(
+                    (System::getContainer()->get('richardhj.ferienpass.model.offer')->findAll() ?: new Items([]))
+                ),
                 function (array $carry, IItem $item) {
-                    $carry[$item->get('id')] = $item->get(
-                        'name'
-                    );
+                    $carry[$item->get('id')] = $item->get('name');
 
                     return $carry;
                 },
@@ -246,7 +218,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'filter'    => true,
         ],
         'participant' => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['participant'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['participant'],
             'inputType' => 'tableLookup',
             'eval'      => [
                 'mandatory'        => true,
@@ -254,24 +226,22 @@ $GLOBALS['TL_DCA'][$table] = [
                 'fieldType'        => 'radio',
                 'listFields'       => [
                     'name',
-//                    'dateOfBirth',
-                    MemberModel::getTable().'.firstname',
-                    MemberModel::getTable().'.lastname',
+                    'tl_member.firstname',
+                    'tl_member.lastname',
 
                 ],
-                'customLabels' => [
-                    'Name des Teilnehmers',
-//                    'Geburtsdatum',
+                'customLabels'     => [
+                    'Name Teilnehmer_in',
                     'Vorname Eltern',
                     'Nachname Eltern',
                 ],
-                'searchFields' => [
+                'searchFields'     => [
                     'name',
-                    MemberModel::getTable().'.firstname',
-                    MemberModel::getTable().'.lastname',
+                    'tl_member.firstname',
+                    'tl_member.lastname',
                 ],
                 'joins'            => [
-                    MemberModel::getTable() => [
+                    'tl_member' => [
                         'type' => 'INNER JOIN',
                         'jkey' => 'id',
                         'fkey' => 'pmember',
@@ -281,11 +251,11 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'reference' => array_reduce(
-                iterator_to_array((System::getContainer()->get('richardhj.ferienpass.model.participant')->findAll() ?: new Items([]))),
+                iterator_to_array(
+                    (System::getContainer()->get('richardhj.ferienpass.model.participant')->findAll() ?: new Items([]))
+                ),
                 function (array $carry, IItem $item) {
-                    $carry[$item->get('id')] = $item->get(
-                        'name'
-                    );
+                    $carry[$item->get('id')] = $item->get('name');
 
                     return $carry;
                 },
@@ -294,7 +264,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'filter'    => true,
         ],
         'status'      => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['status'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_attendance']['status'],
             'inputType' => 'select',
             'options'   => array_reduce(
                 iterator_to_array(AttendanceStatus::findAll()),
@@ -311,7 +281,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'       => "int(10) unsigned NOT NULL default '0'",
             'relation'  => [
                 'type'  => 'hasOne',
-                'table' => AttendanceStatus::getTable(),
+                'table' => 'tl_ferienpass_attendancestatus',
             ],
         ],
     ],
