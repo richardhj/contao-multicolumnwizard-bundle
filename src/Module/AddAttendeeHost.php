@@ -22,7 +22,6 @@ use Contao\Input;
 use Contao\Module;
 use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
-use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use Doctrine\DBAL\Connection;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\IItem;
@@ -348,7 +347,9 @@ class AddAttendeeHost extends Module
             ->execute();
 
         if (false !== $memberId = $statement->fetchColumn()) {
-            $participant->set('pmember', $memberId);
+            $memberAttribute = $this->offer->getAttribute('pmember');
+
+            $participant->set($memberAttribute->getColName(), $memberAttribute->widgetToValue($memberId, $this->offer));
         }
 
         // current bug to have the combinedvalues get saved
