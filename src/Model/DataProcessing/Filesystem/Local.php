@@ -63,13 +63,13 @@ class Local implements FilesystemInterface
      */
     public function processFiles(array $files, DataProcessing $model): void
     {
-        $pathPrefix = $model->path_prefix ? $model->path_prefix.'/' : '';
+        $pathPrefix = $model->path_prefix ? $model->path_prefix . '/' : '';
 
         foreach ($files as $path) {
-            $normalizedPath = str_replace($model->getTmpPath().'/', '', $path['path']);
+            $normalizedPath = str_replace($model->getTmpPath() . '/', '', $path);
             $this->filesystem->copy(
-                $this->kernelProjectDir.'/'.$path,
-                $this->kernelProjectDir.'/web/share/'.$pathPrefix.$normalizedPath
+                $this->kernelProjectDir . '/' . $path,
+                $this->kernelProjectDir . '/web/share/' . $pathPrefix . $normalizedPath
             );
         }
     }
