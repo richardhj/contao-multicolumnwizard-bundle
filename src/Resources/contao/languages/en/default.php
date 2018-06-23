@@ -12,3 +12,8 @@ $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'] = [
     'waitlisted' => 'On Waitlist',
     'error'      => 'Not attending',
 ];
+
+$GLOBALS['TL_LANG']['MSC']['ferienpass.application-system'] = [
+    'firstcome' => 'First Come',
+    'lot'       => 'Lot',
+];

@@ -11,21 +11,17 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-$table = Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem::getTable();
-
-$GLOBALS['TL_DCA'][$table] = [
+$GLOBALS['TL_DCA']['tl_ferienpass_applicationsystem'] = [
 
     // Config
     'config'                => [
         'dataContainer'   => 'General',
         'notCreatable'    => true,
         'notDeletable'    => true,
-        'onload_callback' => [
-            //[Dca::class, 'addDefaultApplicationSystems'],
-        ],
         'sql'             => [
             'keys' => [
-                'id' => 'primary',
+                'id'   => 'primary',
+                'type' => 'unique'
             ],
         ],
     ],
@@ -40,7 +36,6 @@ $GLOBALS['TL_DCA'][$table] = [
         'label'             => [
             'fields'      => [
                 'type',
-                'title',
                 'start',
                 'stop',
             ],
@@ -57,17 +52,17 @@ $GLOBALS['TL_DCA'][$table] = [
         ],
         'operations'        => [
             'edit'   => [
-                'label' => &$GLOBALS['TL_LANG'][$table]['edit'],
+                'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['edit'],
                 'href'  => 'act=edit',
                 'icon'  => 'edit.gif',
             ],
             'toggle' => [
-                'label'          => &$GLOBALS['TL_LANG'][$table]['toggle'],
+                'label'          => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['toggle'],
                 'icon'           => 'visible.gif',
                 'toggleProperty' => 'published',
             ],
             'show'   => [
-                'label' => &$GLOBALS['TL_LANG'][$table]['show'],
+                'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['show'],
                 'href'  => 'act=show',
                 'icon'  => 'show.gif',
             ],
@@ -78,7 +73,6 @@ $GLOBALS['TL_DCA'][$table] = [
     'metapalettes'          => [
         'default' => [
             'config'    => [
-                'title',
                 'type',
             ],
             'published' => [
@@ -100,10 +94,8 @@ $GLOBALS['TL_DCA'][$table] = [
         'type' => [
             'firstcome' => [
                 'maxApplicationsPerDay',
-//                'value1_subfield2',
             ],
             'lot'       => [
-//                'value2_subfield1',
             ],
         ],
     ],
@@ -117,31 +109,21 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
         'type'                  => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['type'],
             'exclude'   => true,
-            'inputType' => 'select',
-            //'options'   => ApplicationSystem::getApplicationSystemNames(),
-            'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'],
+            'inputType' => 'justtextoption',
+            'options'   => [
+                'lot',
+                'firstcome'
+            ],
+            'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.application-system'],
             'eval'      => [
                 'tl_class' => 'w50',
-                'unique'   => true,
-//                'disabled' => true,
-//                'readonly' => true,
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'title'                 => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['title'],
-            'exclude'   => true,
-            'inputType' => 'text',
-            'eval'      => [
-                'maxlength' => 255,
-                'tl_class'  => 'w50',
-            ],
-            'sql'       => "varchar(255) NOT NULL default ''",
-        ],
         'maxApplicationsPerDay' => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['maxApplicationsPerDay'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['maxApplicationsPerDay'],
             'inputType' => 'text',
             'eval'      => [
                 'tl_class' => 'w50',
@@ -150,7 +132,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'       => "int(5) NOT NULL default '0'",
         ],
         'published'             => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['published'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['published'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => [
@@ -160,7 +142,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'       => "char(1) NOT NULL default ''",
         ],
         'start'                 => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['start'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['start'],
             'exclude'   => true,
             'inputType' => 'text',
             'eval'      => [
@@ -171,7 +153,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'       => "varchar(10) NOT NULL default ''",
         ],
         'stop'                  => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['stop'],
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_applicationsystem']['stop'],
             'exclude'   => true,
             'inputType' => 'text',
             'eval'      => [
