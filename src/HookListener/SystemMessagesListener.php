@@ -18,6 +18,7 @@ use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterfac
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\NoOp;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class SystemMessagesListener
 {
@@ -28,13 +29,20 @@ class SystemMessagesListener
     private $applicationSystem;
 
     /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * SystemMessagesListener constructor.
      *
      * @param ApplicationSystemInterface $applicationSystem
+     * @param TranslatorInterface        $translator
      */
-    public function __construct(ApplicationSystemInterface $applicationSystem)
+    public function __construct(ApplicationSystemInterface $applicationSystem, TranslatorInterface $translator)
     {
         $this->applicationSystem = $applicationSystem;
+        $this->translator        = $translator;
     }
 
     /**
@@ -48,7 +56,8 @@ class SystemMessagesListener
     public function onGetSystemMessages(): string
     {
         if (!$this->applicationSystem instanceof NoOp) {
-            $name = $this->applicationSystem->getModel()->title;
+            $type = $this->applicationSystem->getModel()->type;
+            $name = $this->translator->trans('MSC.ferienpass.application-system.' . $type, [], 'contao_default');
 
             return sprintf('<p class="tl_info">Es läuft aktuell das Anmeldesystem <strong>%s</strong></p>', $name);
         }

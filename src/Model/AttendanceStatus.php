@@ -42,7 +42,6 @@ class AttendanceStatus extends Model
      */
     protected static $strTable = 'tl_ferienpass_attendancestatus';
 
-
     /**
      * Find the status whose type is "confirmed"
      *
@@ -52,7 +51,6 @@ class AttendanceStatus extends Model
     {
         return static::findByType('confirmed');
     }
-
 
     /**
      * Find the status whose type is "waiting"
@@ -64,7 +62,6 @@ class AttendanceStatus extends Model
         return static::findByType('waiting');
     }
 
-
     /**
      * Find the status whose type is "on waiting-list"
      *
@@ -74,7 +71,6 @@ class AttendanceStatus extends Model
     {
         return static::findByType('waitlisted');
     }
-
 
     /**
      * Find the status whose type is "error"
@@ -86,7 +82,6 @@ class AttendanceStatus extends Model
         return static::findByType('error');
     }
 
-
     /**
      * Fine one message by its type
      *
@@ -94,8 +89,13 @@ class AttendanceStatus extends Model
      *
      * @return AttendanceStatus
      */
-    public static function findByType($type): ?AttendanceStatus
+    public static function findByType($type): AttendanceStatus
     {
-        return static::findOneBy('type', $type);
+        $model = static::findOneBy('type', $type);
+        if (null === $model) {
+            throw new \OutOfBoundsException('Attendance status not existent: ' . $type);
+        }
+
+        return $model;
     }
 }

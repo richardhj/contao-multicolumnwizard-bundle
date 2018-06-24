@@ -182,6 +182,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\HookListener\SystemMessagesListener
         arguments:
             - "@richardhj.ferienpass.application_system"
+            - '@translator'
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages' }
 
