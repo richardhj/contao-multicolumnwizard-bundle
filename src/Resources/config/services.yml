@@ -18,6 +18,16 @@ services:
     richardhj.ferienpass.controller.dropbox_webhook:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook
 
+    richardhj.ferienpass.controller.backend.erase_personal_data:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Backend\ErasePersonalData
+        arguments:
+            - "@templating"
+            - "@contao.translation.translator"
+            - '@metamodels.factory'
+            - '@database_connection'
+        calls:
+            - [ setContainer, [ '@service_container' ]]
+
     richardhj.ferienpass.application_system.firstcome:
         class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome
         factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createFirstCome]

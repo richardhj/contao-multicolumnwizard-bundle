@@ -13,7 +13,6 @@
 
 use Richardhj\ContaoFerienpassBundle\Helper\Ajax;
 use Richardhj\ContaoFerienpassBundle\Form\MultiColumnWizard;
-use Richardhj\ContaoFerienpassBundle\Form\UploadImage;
 use Richardhj\ContaoFerienpassBundle\Form\SelectDisabledOptions;
 use Richardhj\ContaoFerienpassBundle\Form\OfferDate;
 use Richardhj\ContaoFerienpassBundle\Widget\RequestAccessToken;
@@ -28,7 +27,6 @@ use Richardhj\ContaoFerienpassBundle\Module\UserApplication;
 use Richardhj\ContaoFerienpassBundle\Module\EditingActions;
 use Richardhj\ContaoFerienpassBundle\Module\Editing;
 use Richardhj\ContaoFerienpassBundle\BackendModule\SendMemberAttendancesOverview;
-use Richardhj\ContaoFerienpassBundle\BackendModule\EraseMemberData;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\Document;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder;
@@ -49,9 +47,6 @@ array_insert(
                 'tl_ferienpass_attendance',
                 'mm_ferienpass',
             ],
-        ],
-        'ferienpass_erase_member_data'             => [
-            'callback' => EraseMemberData::class,
         ],
         'ferienpass_send_attendance_confirmations' => [
             'callback' => SendMemberAttendancesOverview::class,
@@ -284,7 +279,7 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
  * Back end form fields
  */
 $GLOBALS['BE_FFL']['fp_age']               = Age::class;
-$GLOBALS['BE_FFL']['offer_date']           = 'Richardhj\ContaoFerienpassBundle\Widget\OfferDate';
+$GLOBALS['BE_FFL']['offer_date']           = \Richardhj\ContaoFerienpassBundle\Widget\OfferDate::class;
 $GLOBALS['BE_FFL']['request_access_token'] = RequestAccessToken::class;
 
 
@@ -295,7 +290,6 @@ $GLOBALS['TL_FFL']['fp_age']                  = \Richardhj\ContaoFerienpassBundl
 $GLOBALS['TL_FFL']['offer_date']              = OfferDate::class;
 $GLOBALS['TL_FFL']['select_disabled_options'] = SelectDisabledOptions::class;
 $GLOBALS['TL_FFL']['multiColumnWizard']       = MultiColumnWizard::class;
-$GLOBALS['TL_FFL']['host_logo']               = \Richardhj\ContaoFerienpassBundle\Form\HostLogo::class;
 
 /**
  * Hooks

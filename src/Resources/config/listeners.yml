@@ -185,6 +185,15 @@ services:
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages' }
 
+    richardhj.ferienpass.hook_listener.register_backend_navigation:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\RegisterBackendNavigationListener
+        arguments:
+            - '@translator'
+            - '@request_stack'
+            - '@router'
+        tags:
+            - { name: 'contao.hook', hook: 'getUserNavigation' }
+
     richardhj.ferienpass.listener.host_editing.item_list_rendering:
         class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\ItemListRenderingListener
         arguments:

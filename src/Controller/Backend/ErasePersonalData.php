@@ -11,113 +11,122 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-namespace Richardhj\ContaoFerienpassBundle\BackendModule;
+namespace Richardhj\ContaoFerienpassBundle\Controller\Backend;
 
-use Contao\BackendModule;
-use Contao\BackendUser;
 use Contao\CheckBox;
-use Contao\DataContainer;
+use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\Image;
-use Contao\Input;
 use Contao\MemberGroupModel;
 use Contao\MemberModel;
-use Contao\System;
+use Contao\Message;
 use Contao\Widget;
-use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
-use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\ReloadEvent;
-use ContaoCommunityAlliance\Contao\Bindings\Events\Message\AddMessageEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
 use Doctrine\DBAL\Connection;
-use MetaModels\IFactory;
-use Richardhj\ContaoFerienpassBundle\Model\Attendance;
-use MetaModels\Filter\Filter;
 use MetaModels\Filter\Rules\SimpleQuery;
 use MetaModels\Filter\Rules\StaticIdList;
+use MetaModels\IFactory;
 use MetaModels\IItem;
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\Exception\InvalidArgumentException;
+use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Templating\EngineInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
-
-/**
- * Class EraseMemberData
- *
- * @package Richardhj\ContaoFerienpassBundle\BackendModule
- */
-class EraseMemberData extends BackendModule
+class ErasePersonalData extends Controller
 {
-
-    protected $strTemplate = 'dcbe_general_edit';
+    /**
+     * The twig engine.
+     *
+     * @var EngineInterface
+     */
+    private $templating;
 
     /**
-     * @var EventDispatcherInterface
+     * The translator.
+     *
+     * @var TranslatorInterface
      */
-    private $dispatcher;
-
+    private $translator;
     /**
      * @var IFactory
      */
     private $factory;
-
     /**
      * @var Connection
      */
     private $connection;
 
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
 
     /**
-     * EraseMemberData constructor.
+     * Create a new instance.
      *
-     * @param DataContainer|null $dataContainer
-     *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @param EngineInterface     $templating The twig engine.
+     * @param TranslatorInterface $translator The translator.
+     * @param IFactory            $factory
+     * @param Connection          $connection
      */
-    public function __construct(DataContainer $dataContainer = null)
-    {
-        parent::__construct($dataContainer);
-
-        $this->dispatcher = System::getContainer()->get('event_dispatcher');
-        $this->factory    = System::getContainer()->get('metamodels.factory');
-        $this->connection = System::getContainer()->get('database_connection');
-        $this->translator = System::getContainer()->get('contao.translation.translator');
+    public function __construct(
+        EngineInterface $templating,
+        TranslatorInterface $translator,
+        IFactory $factory,
+        Connection $connection
+    ) {
+        $this->templating = $templating;
+        $this->translator = $translator;
+        $this->factory    = $factory;
+        $this->connection = $connection;
     }
 
     /**
-     * Generate the module
+     * Invoke this.
      *
-     * @return string
+     * @param Request $request
+     *
+     * @return Response The template data.
      */
-    public function generate(): string
+    public function __invoke(Request $request)
     {
-        if (!BackendUser::getInstance()->isAdmin) {
-            return sprintf('<p class="tl_gerror">%s</p>', 'keine Berechtigung');
+        return new Response(
+            $this->templating->render(
+                'RichardhjContaoFerienpassBundle::Backend/be_erase_personal_data.html.twig',
+                [
+                    'stylesheets'  => [
+                    ],
+                    'headline'     => $this->translator->trans(
+                        'MOD.ferienpass_erase_personal_data.0',
+                        [],
+                        'contao_modules'
+                    ),
+                    'sub_headline' => $this->translator->trans(
+                        'MSC.ferienpass_erase_personal_data.main_headline',
+                        [],
+                        'contao_default'
+                    ),
+                    'form'         => $this->compile($request),
+                ]
+            )
+        );
+    }
+
+    protected function compile(Request $request): string
+    {
+        $output = '';
+
+        $formSubmit  = 'tl_erase_personal_data';
+        $memberGroup = MemberGroupModel::findByPk('2'); // @todo
+        if (null === $memberGroup) {
+            throw new \LogicException('Member group not found: ID 2');
         }
 
-        return parent::generate();
-    }
+        $members               = MemberModel::findBy(['groups=?'], [serialize([$memberGroup->id])]);
+        $attendances           = Attendance::findAll();
+        $participantsMetaModel = $this->factory->getMetaModel('mm_participant');
+        if (null === $participantsMetaModel) {
+            throw new \LogicException('MetaModel not found: mm_participant');
+        }
 
-
-    /**
-     * Generate the module
-     *
-     * @throws InvalidArgumentException
-     */
-    protected function compile()
-    {
-        $output                 = '';
-        $formSubmit             = 'erase_member_data';
-        $memberGroup            = MemberGroupModel::findByPk('2'); // @todo
-        $members                = MemberModel::findBy(['groups=?', 'persist<>1'], [serialize([$memberGroup->id])]);
-        $attendances            = Attendance::findAll();
-        $participantsMetaModel  = $this->factory->getMetaModel('mm_participant');
-        $participantsFilter     = new Filter($participantsMetaModel);
+        $participantsFilter     = $participantsMetaModel->getEmptyFilter();
         $participantsFilterRule = (null === $members)
             ? new StaticIdList([])
             : new SimpleQuery(
@@ -132,7 +141,8 @@ class EraseMemberData extends BackendModule
         $participants = $participantsMetaModel->findByFilter($participantsFilter);
 
         /** @var CheckBox|Widget $checkboxConfirm */
-        $checkboxConfirm            = new CheckBox(null);
+        $checkboxConfirm = new CheckBox(null);
+
         $checkboxConfirm->id        = $checkboxConfirm->name = 'confirm';
         $checkboxConfirm->mandatory = true;
         $checkboxConfirm->options   = [
@@ -142,32 +152,18 @@ class EraseMemberData extends BackendModule
             ],
         ];
 
-        /** @var CheckBox|Widget $checkboxResetPersist */
-        $checkboxResetPersist          = new CheckBox(null);
-        $checkboxResetPersist->id      = $checkboxResetPersist->name = 'resetPersist';
-        $checkboxResetPersist->options = [
-            [
-                'value' => 1,
-                'label' => sprintf(
-                    'Den Status "%s" bei diesen Mitglieder zurücksetzen',
-                    $this->translator->trans('persist', [], 'tl_member')
-                ),
-            ],
-        ];
-
         /** @var CheckBox|Widget $checkboxPreserveAttendances */
         $checkboxPreserveAttendances          = new CheckBox(null);
         $checkboxPreserveAttendances->id      = $checkboxPreserveAttendances->name = 'preserveAttendances';
         $checkboxPreserveAttendances->options = [
             [
                 'value' => 1,
-                'label' => 'Anmeldungen nicht löschen',
+                'label' => 'Anmeldungen nicht löschen (für Statistiken / enthalten keine pers. Daten)',
             ],
         ];
 
-        if ($formSubmit === Input::post('FORM_SUBMIT')) {
+        if ($formSubmit === $request->request->get('FORM_SUBMIT')) {
             $checkboxConfirm->validate();
-            $checkboxResetPersist->validate();
             $checkboxPreserveAttendances->validate();
 
             if (!$checkboxConfirm->hasErrors()) {
@@ -207,22 +203,8 @@ class EraseMemberData extends BackendModule
                         ->execute();
                 }
 
-                // Reset persist status
-                if ('1' === $checkboxResetPersist->value) {
-                    $this->connection->createQueryBuilder()
-                        ->update('tl_member')
-                        ->set('persist', '')
-                        ->where('persist=1')
-                        ->andWhere('groups=:groups')
-                        ->setParameter('groups', serialize([$memberGroup->id]))
-                        ->execute();
-                }
-
-                $this->dispatcher->dispatch(
-                    ContaoEvents::MESSAGE_ADD,
-                    AddMessageEvent::createConfirm('Löschung wurde erfolgreich ausgeführt')
-                );
-                $this->dispatcher->dispatch(ContaoEvents::CONTROLLER_RELOAD, new ReloadEvent());
+                Message::addConfirmation('Löschung wurde erfolgreich ausgeführt');
+                throw new RedirectResponseException($request->getUri());
             }
         }
 
@@ -257,18 +239,10 @@ class EraseMemberData extends BackendModule
         $submitButtonTemplate->setData($submitButtons);
 
         /** @noinspection PhpUndefinedMethodInspection */
-        $output .= '<p>Dieses Tool steht Ihnen zur Verfügung, um alle personenbezogenen Daten der registrierten Eltern zu löschen.</p><h2>Gelöscht werden:</h2>';
-
-        /** @noinspection PhpUndefinedMethodInspection */
         $output .= sprintf(
             <<<'HTML'
-<table class="tl_show">
+<table>
     <tbody>
-    <tr>
-        <th>Beschreibung</th>
-        <th>Tabelle</th>
-        <th>Anzahl zu löschender Datensätze</th>
-    </tr>
     <tr>
         <td>Die Mitglieder, die sich <em>ausschließlich</em> in der Mitgleidergruppe "%7$s" befinden</td>
         <td>%1$s</td>
@@ -285,6 +259,14 @@ class EraseMemberData extends BackendModule
         <td>%6$s</td>
     </tr>
     </tbody>
+    <thead>
+    
+    <tr>
+        <th>Beschreibung</th>
+        <th>Tabelle</th>
+        <th>Anzahl zu löschender Datensätze</th>
+    </tr>
+</thead>
 </table>
 HTML
             ,
@@ -298,17 +280,8 @@ HTML
         );
 
         $output .= $checkboxPreserveAttendances->generateWithError();
-        $output .= $checkboxResetPersist->generateWithError();
         $output .= $checkboxConfirm->generateWithError();
 
-        $this->Template->subHeadline = 'Personenbezogene Daten löschen';
-        $this->Template->table       = $formSubmit;
-        $this->Template->editButtons = preg_replace('/(\s\s+|\t|\n)/', '', $submitButtonTemplate->parse());
-        $this->Template->fieldsets   = [
-            [
-                'class'   => 'tl_box',
-                'palette' => $output,
-            ],
-        ];
+        return $output;
     }
 }

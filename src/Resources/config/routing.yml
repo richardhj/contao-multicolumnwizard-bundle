@@ -22,3 +22,10 @@ richardhj.ferienpass.dropbox_webhook:
         _scope: frontend
         _token_check: false
         _controller: richardhj.ferienpass.controller.dropbox_webhook
+
+richardhj.ferienpass.backend.erase_personal_data:
+    path: /contao/ferienpass/erase_personal_data
+    defaults:
+        _scope: backend
+        _token_check: true
+        _controller: richardhj.ferienpass.controller.backend.erase_personal_data
