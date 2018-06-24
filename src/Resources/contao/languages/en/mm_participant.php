@@ -12,5 +12,6 @@
  */
 
 
+$GLOBALS['TL_LANG']['mm_participant']['id'][0] = 'Participant ID';
 $GLOBALS['TL_LANG']['mm_participant']['edit_attendances'][0] = 'Attendances';
 $GLOBALS['TL_LANG']['mm_participant']['edit_attendances'][1] = 'Edit attendances of participant ID %s';

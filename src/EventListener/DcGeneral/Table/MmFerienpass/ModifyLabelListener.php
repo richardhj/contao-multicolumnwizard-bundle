@@ -18,8 +18,8 @@ use Contao\MemberModel;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ParentView;
 use Haste\DateTime\DateTime;
-use MetaModels\Factory as MetaModelsFactory;
-use Richardhj\ContaoFerienpassBundle\DcGeneral\View\AttendanceAllocationView;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 
@@ -32,13 +32,20 @@ class ModifyLabelListener
     private $participantsModel;
 
     /**
+     * @var ApplicationSystemInterface
+     */
+    private $applicationSystem;
+
+    /**
      * ModifyLabelListener constructor.
      *
-     * @param Participant $participantsModel The participants model.
+     * @param Participant                $participantsModel The participants model.
+     * @param ApplicationSystemInterface $applicationSystem
      */
-    public function __construct(Participant $participantsModel)
+    public function __construct(Participant $participantsModel, ApplicationSystemInterface $applicationSystem)
     {
         $this->participantsModel = $participantsModel;
+        $this->applicationSystem = $applicationSystem;
     }
 
     /**
@@ -48,11 +55,14 @@ class ModifyLabelListener
      */
     public function handle(ModelToLabelEvent $event): void
     {
-        $environment    = $event->getEnvironment();
-        $dataDefinition = $environment->getDataDefinition();
-        $view           = $environment->getView();
+        $environment     = $event->getEnvironment();
+        $dataDefinition  = $environment->getDataDefinition();
+        $basicDefinition = $dataDefinition->getBasicDefinition();
 
-        if (!($view instanceof ParentView && 'tl_ferienpass_attendance' === $dataDefinition->getName())) {
+        if (!($this->applicationSystem instanceof Lot
+              && $environment->getView() instanceof ParentView
+              && 'tl_ferienpass_attendance' === $dataDefinition->getName()
+              && 'mm_ferienpass' === $basicDefinition->getParentDataProvider())) {
             return;
         }
 
@@ -64,7 +74,7 @@ class ModifyLabelListener
             switch ($k) {
                 case 'attendances':
                     $args[$k] = sprintf(
-                        '<a href="contao/main.php?do=metamodel_mm_participant&amp;table=tl_ferienpass_attendance&amp;pid=mm_participant::%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_participant_attendances" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
+                        '<a href="contao?do=metamodel_mm_participant&amp;table=tl_ferienpass_attendance&amp;pid=mm_participant::%1$u&amp;popup=1&amp;nb=1&amp;rt=%4$s" class="open_participant_attendances" title="%3$s" onclick="Backend.openModalIframe({\'width\':768,\'title\':\'%3$s\',\'url\':this.href});return false">%2$s</a>',
                         // Member ID
                         $model->getProperty('participant'),
                         // Link
@@ -91,14 +101,14 @@ class ModifyLabelListener
 
                     // Add age
                     $args[$k] .= sprintf(
-                        '<span class="age"><span title="%2$s" class="content">%1$s</span> Jahre</span>',
+                        '<span class="age"><span title="%2$s" class="value">%1$s</span> Jahre</span>',
                         $dateOfBirth->getAge(),
                         'Alter zum aktuellen Zeitpunkt'
                     );
 
                     // Add postal
                     $args[$k] .= sprintf(
-                        '<span class="postal">PLZ: <span class="content">%s</span></span>',
+                        '<span class="postal">PLZ: <span class="value">%s</span></span>',
                         (null !== $member) ? $member->postal : '-'
                     );
 

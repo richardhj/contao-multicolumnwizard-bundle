@@ -14,6 +14,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ModifyLabelListener
         arguments:
             - '@richardhj.ferienpass.model.participant'
+            - '@richardhj.ferienpass.application_system'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle, priority: -10 }
 

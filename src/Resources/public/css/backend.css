@@ -1459,8 +1459,7 @@
 .attendances_offer_view .attendance-status li span.col_created { font-size: .8rem; }
 .attendances_offer_view .attendance-status li span.col_offer, .attendances_offer_view .attendance-status li span.col_status { display: none; }
 .attendances_offer_view .attendance-status li span.col_participant .name { font-size: 14px; font-weight: bold; }
-.attendances_offer_view .attendance-status li span.col_participant .content { display: inline; }
-.attendances_offer_view .attendance-status li span.col_participant .age .content { cursor: help; text-decoration: dotted; }
+.attendances_offer_view .attendance-status li span.col_participant .value { display: inline; }
+.attendances_offer_view .attendance-status li span.col_participant .age .value { cursor: help; text-decoration: dotted; }
 .attendances_offer_view .attendance-status li span.tl_right_nowrap { display: none; }
 .attendances_offer_view .attendance-status li + li { margin-top: 2px; }
-.attendances_offer_view .attendance-status span.content { margin: 0!important; background: none!important; border: 0!important; }
