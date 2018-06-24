@@ -59,10 +59,10 @@ class ModifyLabelListener
         $dataDefinition  = $environment->getDataDefinition();
         $basicDefinition = $dataDefinition->getBasicDefinition();
 
-        if (!($this->applicationSystem instanceof Lot
-              && $environment->getView() instanceof ParentView
-              && 'tl_ferienpass_attendance' === $dataDefinition->getName()
-              && 'mm_ferienpass' === $basicDefinition->getParentDataProvider())) {
+        if (!($this->applicationSystem instanceof Lot)
+            || !($environment->getView() instanceof ParentView)
+            || 'tl_ferienpass_attendance' !== $dataDefinition->getName()
+            || 'mm_ferienpass' !== $basicDefinition->getParentDataProvider()) {
             return;
         }
 
