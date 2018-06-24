@@ -12,5 +12,6 @@
  */
 
 
+$GLOBALS['TL_LANG']['mm_ferienpass']['id'][0] = 'Offer ID';
 $GLOBALS['TL_LANG']['mm_ferienpass']['edit_attendances'][0] = 'Attendances';
 $GLOBALS['TL_LANG']['mm_ferienpass']['edit_attendances'][1] = 'Edit attendances for offer ID %s';

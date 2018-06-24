@@ -1444,6 +1444,7 @@
 .attendances_offer_view .tl_header { margin-bottom: 2em; }
 .attendances_offer_view .status-assignment { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; }
 .attendances_offer_view .attendance-status { border: 1px solid #dddddd; -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; width: 30%; }
+.attendances_offer_view .attendance-status:not(:last-child) { margin-right: 1em; }
 .attendances_offer_view .attendance-status h2 { background: #f9f9f9; margin: 0; padding: 1em; }
 .attendances_offer_view .attendance-status h2:before { display: inline-block; font: normal normal normal 14px/1 FontAwesome; font-size: inherit; text-rendering: auto; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; content: ""; padding-right: 0.5em; font-size: 1.2em; }
 .attendances_offer_view .attendance-status.-confirmed h2:before { color: #8caf23; }
@@ -1455,10 +1456,11 @@
 .attendances_offer_view .attendance-status ul { height: 100%; }
 .attendances_offer_view .attendance-status li { background: #fcfcfc; margin: 0.75em; padding: 0.5em; border: 1px solid #f3f3f3; -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; cursor: move; }
 .attendances_offer_view .attendance-status li span { background: none; border: 0; display: block; }
-.attendances_offer_view .attendance-status li span.col_0 { font-size: 10px; }
-.attendances_offer_view .attendance-status li span.col_1, .attendances_offer_view .attendance-status li span.col_3 { display: none; }
-.attendances_offer_view .attendance-status li span.col_2 .name { font-size: 14px; font-weight: bold; }
-.attendances_offer_view .attendance-status li span.col_2 .content { display: inline; }
-.attendances_offer_view .attendance-status li span.col_2 .age .content { cursor: help; text-decoration: dotted; }
+.attendances_offer_view .attendance-status li span.col_created { font-size: .8rem; }
+.attendances_offer_view .attendance-status li span.col_offer, .attendances_offer_view .attendance-status li span.col_status { display: none; }
+.attendances_offer_view .attendance-status li span.col_participant .name { font-size: 14px; font-weight: bold; }
+.attendances_offer_view .attendance-status li span.col_participant .content { display: inline; }
+.attendances_offer_view .attendance-status li span.col_participant .age .content { cursor: help; text-decoration: dotted; }
 .attendances_offer_view .attendance-status li span.tl_right_nowrap { display: none; }
 .attendances_offer_view .attendance-status li + li { margin-top: 2px; }
+.attendances_offer_view .attendance-status span.content { margin: 0!important; background: none!important; border: 0!important; }

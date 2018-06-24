@@ -1,11 +1,14 @@
 services:
-    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.set_custom_view:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\SetCustomViewListener
+    richardhj.ferienpass.listener.dc-general.table.mm_ferienpass.lot_attendance_list_view_handler:
+        class: Richardhj\ContaoFerienpassBundle\DcGeneral\View\ActionHandler\LotAttendanceAllocationViewHandler
+        public: true
         arguments:
-            - '@cca.dc-general.scope-matcher'
+            - "@cca.dc-general.scope-matcher"
+            - "@translator"
+            - "@cca.translator.contao_translator"
             - '@richardhj.ferienpass.application_system'
         tags:
-            - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', method: handle, priority: 150 }
+            - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 150 }
 
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.modify_label:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ModifyLabelListener

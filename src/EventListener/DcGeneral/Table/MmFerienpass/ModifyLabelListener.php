@@ -16,6 +16,7 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerie
 
 use Contao\MemberModel;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ParentView;
 use Haste\DateTime\DateTime;
 use MetaModels\Factory as MetaModelsFactory;
 use Richardhj\ContaoFerienpassBundle\DcGeneral\View\AttendanceAllocationView;
@@ -47,8 +48,11 @@ class ModifyLabelListener
      */
     public function handle(ModelToLabelEvent $event): void
     {
-        // Not attendances for offer MetaModel
-        if (!$event->getEnvironment()->getView() instanceof AttendanceAllocationView) {
+        $environment    = $event->getEnvironment();
+        $dataDefinition = $environment->getDataDefinition();
+        $view           = $environment->getView();
+
+        if (!($view instanceof ParentView && 'tl_ferienpass_attendance' === $dataDefinition->getName())) {
             return;
         }
 
@@ -64,9 +68,9 @@ class ModifyLabelListener
                         // Member ID
                         $model->getProperty('participant'),
                         // Link
-                        '<i class="fa fa-external-link tl_gray"></i> '.Attendance::countByParticipant(
+                        '<i class="fa fa-external-link tl_gray"></i> ' . Attendance::countByParticipant(
                             $model->getProperty('participant')
-                        ).' Anmeldungen gesamt',
+                        ) . ' Anmeldungen gesamt',
                         // Member edit description
                         sprintf($GLOBALS['TL_LANG']['tl_member']['edit'][1], $model->getProperty('participant')),
                         REQUEST_TOKEN
@@ -82,7 +86,7 @@ class ModifyLabelListener
                         return;
                     }
 
-                    $dateOfBirth = new DateTime('@'.$participant->get('dateOfBirth'));
+                    $dateOfBirth = new DateTime('@' . $participant->get('dateOfBirth'));
                     $member      = MemberModel::findById($participant->get('pmember'));
 
                     // Add age
