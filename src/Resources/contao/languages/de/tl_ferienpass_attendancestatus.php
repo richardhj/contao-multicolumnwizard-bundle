@@ -34,12 +34,6 @@ $GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['notification_onChange'][0
 $GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['notification_onChange'][1] = 'Bitte wählen Sie die Benachrichtigung aus, welche ausgeführt werden soll, sobald dieser Status nach einer Statusänderung erreicht wird.';
 $GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['cssClass'][0] = 'CSS-Klasse';
 $GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['cssClass'][1] = 'Bitte geben Sie die CSS-Klasse für das Frontend ein.';
-$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['locked'][0] = 'fixiert';
-$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['locked'][1] = 'Bei einer automatischen Status-Zuordnung wird der Status einer Anmeldung mit diesem Status nicht verändert.';
-$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['increasesCount'][0] = 'erhöht Position';
-$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['increasesCount'][1] = 'Anmeldungen dieses Status erhöhen die Anzahl der Anmeldungen.';
-$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['enableManualAssignment'][0] = 'manuelle Zuordnung';
-$GLOBALS['TL_LANG']['tl_ferienpass_attendancestatus']['enableManualAssignment'][1] = 'Sie können diesen Status im Backend zuweisen.';
 
 /**
  * Actions

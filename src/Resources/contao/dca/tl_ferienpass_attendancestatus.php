@@ -49,9 +49,6 @@ $GLOBALS['TL_DCA'][$table] = [
                 'notification_new',
                 'notification_onChange',
                 'cssClass',
-                'locked',
-                'increasesCount',
-                'enableManualAssignment',
             ],
             'showColumns' => true,
         ],
@@ -90,9 +87,6 @@ $GLOBALS['TL_DCA'][$table] = [
                 'notification_onChange',
                 'cssClass',
                 'messageType',
-                'locked',
-                'increasesCount',
-                'enableManualAssignment',
             ],
         ],
     ],
@@ -126,24 +120,6 @@ $GLOBALS['TL_DCA'][$table] = [
                 'tl_class'  => 'w50',
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ],
-        'increasesCount'         => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['increasesCount'],
-            'exclude'   => true,
-            'inputType' => 'checkbox',
-            'eval'      => [
-                'tl_class' => 'w50',
-            ],
-            'sql'       => "char(1) NOT NULL default ''",
-        ],
-        'locked'                 => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['locked'],
-            'exclude'   => true,
-            'inputType' => 'checkbox',
-            'eval'      => [
-                'tl_class' => 'w50',
-            ],
-            'sql'       => "char(1) NOT NULL default ''",
         ],
         'notification_new'       => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['notification_new'],
@@ -195,15 +171,5 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'enableManualAssignment' => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['enableManualAssignment'],
-            'exclude'   => true,
-            'inputType' => 'checkbox',
-            'eval'      => [
-                'tl_class' => 'w50',
-            ],
-            'sql'       => "char(1) NOT NULL default ''",
-        ],
-
     ],
 ];

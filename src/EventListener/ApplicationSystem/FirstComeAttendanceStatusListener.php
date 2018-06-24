@@ -41,7 +41,7 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
             return;
         }
 
-        $newStatus = self::findStatusForAttendance($attendance);
+        $newStatus = $this->findStatusForAttendance($attendance);
         $oldStatus = $attendance->getStatus();
         if (null !== $oldStatus && $newStatus->id === $oldStatus->id) {
             return;
@@ -70,20 +70,18 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
      * @param PrePersistModelEvent $event
      *
      * @return void
-     * @throws \Exception
      */
     public function handleDcGeneral(PrePersistModelEvent $event): void
     {
-        if (!$this->applicationSystem instanceof FirstCome) {
-            return;
-        }
-        if (Attendance::getTable() !== $event->getEnvironment()->getDataDefinition()->getName()) {
+        $environment = $event->getEnvironment();
+        if (!($this->applicationSystem instanceof FirstCome)
+            || 'tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 
         $model      = $event->getModel();
         $attendance = Attendance::findByPk($model->getId());
-        $newStatus  = self::findStatusForAttendance($attendance);
+        $newStatus  = $this->findStatusForAttendance($attendance);
         $oldStatus  = $attendance->getStatus();
         if (null === $oldStatus) {
             throw new \RuntimeException('Old status not given.');
@@ -112,28 +110,31 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
      * @param Attendance $attendance
      *
      * @return AttendanceStatus
-     * @throws \Exception
      */
-    protected static function findStatusForAttendance(Attendance $attendance): AttendanceStatus
+    private function findStatusForAttendance(Attendance $attendance): AttendanceStatus
     {
-        // Is current status locked?
-        if (null !== $attendance->getStatus() && $attendance->getStatus()->locked) {
-            return $attendance->getStatus();
-        }
+        $currentStatus = $attendance->getStatus();
+        $offer         = $attendance->getOffer();
+        $participant   = $attendance->getParticipant();
 
-        // Attendances are not up to date because participant or offer might be deleted
-        if (null === $attendance->getOffer() || null === $attendance->getParticipant()) {
+        // Attendances are not up to date because participant or offer have been deleted
+        if (null === $offer || null === $participant) {
             return AttendanceStatus::findError();
         }
 
-        $max = $attendance->getOffer()->get('applicationlist_max');
+        // Automatic assignment only for attendances being on waiting list
+        if (null !== $currentStatus && 'waitlisted' !== $currentStatus->type) {
+            return $currentStatus;
+        }
+
+        $max = $offer->get('applicationlist_max');
 
         // Offers without usage of application list or without limit
-        if (!$max || !$attendance->getOffer()->get('applicationlist_active')) {
+        if (!$max || !$offer->get('applicationlist_active')) {
             return AttendanceStatus::findConfirmed();
         }
 
-        $position = $attendance->getPosition();
+        $position = $this->getPosition($attendance);
         if (null !== $position) {
             if ($position < $max) {
                 return AttendanceStatus::findConfirmed();
@@ -143,11 +144,38 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
         }
 
         // Attendance not saved yet
-        if (Attendance::countParticipants($attendance->getOffer()->get('id')) < $max) {
+        if (Attendance::countParticipants($offer->get('id')) < $max) {
             return AttendanceStatus::findConfirmed();
         }
 
         return AttendanceStatus::findWaitlisted();
     }
 
+    /**
+     * Get attendance's current position
+     *
+     * @param Attendance $attendance
+     *
+     * @return integer|null if participant not in attendance list (yet) or has error status
+     */
+    private function getPosition(Attendance $attendance): ?int
+    {
+        $attendances = Attendance::findByOffer($attendance->offer);
+        if (null === $attendances) {
+            return null;
+        }
+
+        for ($i = 0; $attendances->next(); $i++) {
+            $status = $attendance->current()->getStatus();
+            if (null === $status || ($status->type !== 'confirmed' && $status->type !== 'waitlisted')) {
+                continue;
+            }
+
+            if ($attendances->current()->participant === $attendance->participant) {
+                return $i;
+            }
+        }
+
+        return null;
+    }
 }

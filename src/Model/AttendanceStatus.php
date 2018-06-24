@@ -23,12 +23,9 @@ use Contao\Model;
  * @property string  $cssClass
  * @property string  $type
  * @property string  $title
- * @property bool    $increasesCount
- * @property bool    $locked
  * @property integer $notification_new
  * @property integer $notification_onChange
  * @property string  $messageType
- * @property bool    $enableManualAssignment
  *
  * @package Ferienpass
  */

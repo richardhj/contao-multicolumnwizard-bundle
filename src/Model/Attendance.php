@@ -75,35 +75,6 @@ class Attendance extends Model
     }
 
     /**
-     * Get attendance's current position
-     *
-     * @return integer|null if participant not in attendance list (yet) or has error status
-     * @throws \Exception
-     */
-    public function getPosition(): ?int
-    {
-        /** @var Attendance|\Model\Collection $attendances */
-        $attendances = static::findByOffer($this->offer);
-        // Collection is already ordered now
-        if (null === $attendances) {
-            return null;
-        }
-
-        for ($i = 0; $attendances->next(); $i++) {
-            if (!$attendances->current()->getStatus()->increasesCount) {
-                --$i;
-                continue;
-            }
-
-            if ($attendances->current()->participant === $this->participant) {
-                return $i;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * @return AttendanceStatus|null
      */
     public function getStatus(): ?AttendanceStatus
