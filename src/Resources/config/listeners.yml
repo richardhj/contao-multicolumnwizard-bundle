@@ -195,6 +195,15 @@ services:
         tags:
             - { name: 'contao.hook', hook: 'getUserNavigation' }
 
+    richardhj.ferienpass.hook_listener.execute_post_actions:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\AttendanceAllocationAjaxListener
+        arguments:
+            - '@request_stack'
+            - '@event_dispatcher'
+            - '@cca.translator.contao_translator'
+        tags:
+            - { name: 'contao.hook', hook: 'executePostActions' }
+
     richardhj.ferienpass.listener.host_editing.item_list_rendering:
         class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\ItemListRenderingListener
         arguments:

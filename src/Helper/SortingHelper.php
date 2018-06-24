@@ -13,9 +13,9 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Helper;
 
-
 use ContaoCommunityAlliance\DcGeneral\Controller\ModelCollector;
 use ContaoCommunityAlliance\DcGeneral\Controller\SortingManager;
+use ContaoCommunityAlliance\DcGeneral\Data\CollectionInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\DataProviderInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\DefaultCollection;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelIdInterface;
@@ -23,7 +23,7 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelInterface;
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\DcGeneral\Factory\DcGeneralFactory;
 use ContaoCommunityAlliance\Translator\TranslatorInterface;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
 class SortingHelper
@@ -40,44 +40,56 @@ class SortingHelper
      */
     private $dataProvider;
 
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
 
     /**
      * SortingHelper constructor.
      *
-     * @param $table
+     * @param                          $table
+     * @param EventDispatcherInterface $dispatcher
+     * @param TranslatorInterface      $translator
      */
-    public function __construct($table)
+    public function __construct($table, EventDispatcherInterface $dispatcher, TranslatorInterface $translator)
     {
         $this->createDcGeneral($table);
-        $this->dataProvider = $this->environment->getDataProvider();
-    }
 
+        $this->dataProvider = $this->environment->getDataProvider();
+        $this->dispatcher   = $dispatcher;
+        $this->translator   = $translator;
+    }
 
     /**
      * Update the sorting to set a given model after a given model or at the top if none given
      *
-     * @param ModelIdInterface      $model
-     * @param ModelIdInterface|null $previousModel
+     * @param ModelIdInterface      $modelId
+     * @param ModelIdInterface|null $previousModelId
      */
-    public function setAttendanceAfter(ModelIdInterface $model, ModelIdInterface $previousModel = null)
+    public function setAttendanceAfter(ModelIdInterface $modelId, ModelIdInterface $previousModelId = null): void
     {
-        $model = $this->convertModelIdToModel($model);
+        $model = $this->convertModelIdToModel($modelId);
 
-        if (null !== $previousModel) {
-            $previousModel = $this->convertModelIdToModel($previousModel);
+        if (null !== $previousModelId) {
+            $previousModel = $this->convertModelIdToModel($previousModelId);
         }
 
         $models = new DefaultCollection();
         $models->push($model);
 
-        $siblings = self::findSiblings($model);
+        $siblings = $this->findSiblings($model);
 
-        $sortingManager = new SortingManager($models, $siblings, 'sorting', $previousModel);
-        $result = $sortingManager->getResults();
+        $sortingManager = new SortingManager($models, $siblings, 'sorting', $previousModel ?? null);
+        $result         = $sortingManager->getResults();
 
         $this->dataProvider->saveEach($result);
     }
-
 
     /**
      * Convert a ModelId to a DC General conform model instance
@@ -86,25 +98,24 @@ class SortingHelper
      *
      * @return ModelInterface
      */
-    private function convertModelIdToModel(ModelIdInterface $modelId)
+    private function convertModelIdToModel(ModelIdInterface $modelId): ModelInterface
     {
         $modelCollector = new ModelCollector($this->environment);
 
         return $modelCollector->getModel($modelId->getId(), $modelId->getDataProviderName());
     }
 
-
     /**
      * @param ModelInterface $model
      *
-     * @return \ContaoCommunityAlliance\DcGeneral\Data\CollectionInterface|ModelInterface[]|\string[]
+     * @return CollectionInterface|ModelInterface[]|string[]
      */
     private function findSiblings(ModelInterface $model)
     {
         $config = $this->environment->getBaseConfigRegistry()->getBaseConfig();
         $config->setSorting(['sorting' => 'ASC']);
 
-        $filters = $config->getFilter();
+        $filters   = $config->getFilter();
         $filters[] = [
             'operation' => '=',
             'property'  => 'offer',
@@ -120,7 +131,6 @@ class SortingHelper
         return $this->dataProvider->fetchAll($config);
     }
 
-
     /**
      * Create the dc-general and return it's environment instance.
      *
@@ -128,45 +138,19 @@ class SortingHelper
      *
      * @return EnvironmentInterface
      */
-    private function createDcGeneral($containerName)
+    private function createDcGeneral($containerName): EnvironmentInterface
     {
-        global $container;
-        /** @var EventDispatcher $dispatcher */
-        $dispatcher = $container['event-dispatcher'];
-
         $factory = new DcGeneralFactory();
+
         $dcGeneral = $factory
             ->setContainerName($containerName)
-            ->setEventDispatcher($dispatcher)
-            ->setTranslator($this->getTranslator())
+            ->setEventDispatcher($this->dispatcher)
+            ->setTranslator($this->translator)
             ->createDcGeneral();
 
         $this->environment = $dcGeneral->getEnvironment();
 
         return $this->environment;
-    }
-
-
-    /**
-     * Get the translator from the service container.
-     *
-     * @return TranslatorInterface
-     *
-     * @throws \RuntimeException When the DIC or translator have not been correctly initialized.
-     */
-    private function getTranslator()
-    {
-        if (!($container = $GLOBALS['container']) instanceof \Pimple) {
-            throw new \RuntimeException('The dependency container has not been initialized correctly.');
-        }
-
-        $translator = $container['translator'];
-
-        if (!$translator instanceof TranslatorInterface) {
-            throw new \RuntimeException('The dependency container has not been initialized correctly.');
-        }
-
-        return $translator;
     }
 
 }

@@ -11,7 +11,6 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-use Richardhj\ContaoFerienpassBundle\Helper\Ajax;
 use Richardhj\ContaoFerienpassBundle\Form\MultiColumnWizard;
 use Richardhj\ContaoFerienpassBundle\Form\SelectDisabledOptions;
 use Richardhj\ContaoFerienpassBundle\Form\OfferDate;
@@ -290,8 +289,3 @@ $GLOBALS['TL_FFL']['fp_age']                  = \Richardhj\ContaoFerienpassBundl
 $GLOBALS['TL_FFL']['offer_date']              = OfferDate::class;
 $GLOBALS['TL_FFL']['select_disabled_options'] = SelectDisabledOptions::class;
 $GLOBALS['TL_FFL']['multiColumnWizard']       = MultiColumnWizard::class;
-
-/**
- * Hooks
- */
-$GLOBALS['TL_HOOKS']['executePostActions'][] = [Ajax::class, 'handleOfferAttendancesView'];
