@@ -247,8 +247,8 @@ class UserAttendances extends Module
                             /** @var AttendanceStatus $status */
                             $status = AttendanceStatus::findByPk($attendances->status);
                             $value  = sprintf(
-                                '<span class="state %s">%s</span>',
-                                $status->cssClass,
+                                '<span class="attendance-status attendance-status--%s">%s</span>',
+                                $status->type,
                                 $status->title ?: $status->name
                             );
                             break;

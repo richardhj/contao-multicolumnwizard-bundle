@@ -48,7 +48,6 @@ $GLOBALS['TL_DCA'][$table] = [
                 'title',
                 'notification_new',
                 'notification_onChange',
-                'cssClass',
             ],
             'showColumns' => true,
         ],
@@ -85,7 +84,6 @@ $GLOBALS['TL_DCA'][$table] = [
             'config' => [
                 'notification_new',
                 'notification_onChange',
-                'cssClass',
                 'messageType',
             ],
         ],
@@ -93,17 +91,17 @@ $GLOBALS['TL_DCA'][$table] = [
 
     // Fields
     'fields'       => [
-        'id'                     => [
-            'sql' => "int(10) unsigned NOT NULL auto_increment",
+        'id'                    => [
+            'sql' => 'int(10) unsigned NOT NULL auto_increment',
         ],
-        'tstamp'                 => [
+        'tstamp'                => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'type'                   => [
+        'type'                  => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['type'],
             'exclude'   => true,
-            'inputType' => 'select',
-            'options'   => System::getContainer()->getParameter('richardhj.ferienpass.attendance_status'),
+            'inputType' => 'justtextoption',
+            'options'   => ['confirmed', 'waitlisted', 'waiting', 'error'],
             'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'],
             'eval'      => [
                 'tl_class' => 'w50',
@@ -111,7 +109,7 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(64) NOT NULL default ''",
         ],
-        'title'                  => [
+        'title'                 => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['title'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -121,11 +119,11 @@ $GLOBALS['TL_DCA'][$table] = [
             ],
             'sql'       => "varchar(255) NOT NULL default ''",
         ],
-        'notification_new'       => [
+        'notification_new'      => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['notification_new'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getNotificationChoices'],
+            'options_callback' => [Dca::class, 'getNotificationChoices'],
             'eval'             => [
                 'includeBlankOption' => true,
                 'chosen'             => true,
@@ -134,11 +132,11 @@ $GLOBALS['TL_DCA'][$table] = [
             'sql'              => "int(10) unsigned NOT NULL default '0'",
             'relation'         => ['type' => 'hasOne', 'table' => Notification::getTable()],
         ],
-        'notification_onChange'  => [
+        'notification_onChange' => [
             'label'            => &$GLOBALS['TL_LANG'][$table]['notification_onChange'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => ['Richardhj\ContaoFerienpassBundle\Helper\Dca', 'getNotificationChoices'],
+            'options_callback' => [Dca::class, 'getNotificationChoices'],
             'eval'             => [
                 'includeBlankOption' => true,
                 'chosen'             => true,
@@ -150,17 +148,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'table' => Notification::getTable(),
             ],
         ],
-        'cssClass'               => [
-            'label'     => &$GLOBALS['TL_LANG'][$table]['cssClass'],
-            'exclude'   => true,
-            'inputType' => 'text',
-            'eval'      => [
-                'tl_class'  => 'w50',
-                'mandatory' => true,
-            ],
-            'sql'       => "varchar(255) NOT NULL default ''",
-        ],
-        'messageType'            => [
+        'messageType'           => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['messageType'],
             'exclude'   => true,
             'inputType' => 'select',

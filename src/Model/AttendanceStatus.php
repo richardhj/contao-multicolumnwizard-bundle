@@ -20,7 +20,6 @@ use Contao\Model;
  * Class AttendanceStatus
  *
  * @property string  $name
- * @property string  $cssClass
  * @property string  $type
  * @property string  $title
  * @property integer $notification_new

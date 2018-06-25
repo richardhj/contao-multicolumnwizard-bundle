@@ -305,7 +305,6 @@ class Dca implements EventSubscriberInterface
             $status[] = [
                 'type'     => $number,
                 'name'     => lcfirst($statusName),
-                'cssClass' => $statusName,
             ];
         }
 
