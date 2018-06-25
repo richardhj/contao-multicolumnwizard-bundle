@@ -23,21 +23,4 @@ use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 class ApplicationSystemFactoryTest extends TestCase
 {
 
-    public function testCreate()
-    {
-        $applicationSystem = ApplicationSystemFactory::create();
-        $this->assertInstanceOf(ApplicationSystemInterface::class, $applicationSystem);
-    }
-
-    public function testCreateFirstCome()
-    {
-        $applicationSystem = ApplicationSystemFactory::createFirstCome();
-        $this->assertInstanceOf(FirstCome::class, $applicationSystem);
-    }
-
-    public function testCreateLot()
-    {
-        $applicationSystem = ApplicationSystemFactory::createLot();
-        $this->assertInstanceOf(Lot::class, $applicationSystem);
-    }
 }

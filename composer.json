@@ -72,7 +72,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Richardhj\\ContaoFerienpassBundle\\Test\\": "tests/Test"
+      "Richardhj\\ContaoFerienpassBundle\\Test\\": "tests/"
     }
   },
   "extra": {

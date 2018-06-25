@@ -16,11 +16,12 @@ namespace Richardhj\ContaoFerienpassBundle\Test\Controller\Frontend;
 
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
-use MetaModels\Factory;
+use Contao\PageModel;
 use MetaModels\Filter\Filter;
-use MetaModels\Filter\IFilter;
 use MetaModels\IFactory;
 use MetaModels\IMetaModel;
+use MetaModels\Render\Setting\IRenderSettingFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use Richardhj\ContaoFerienpassBundle\Controller\Frontend\RedirectShortUrl;
@@ -77,37 +78,52 @@ class RedirectShortUrlTest extends TestCase
         return $filter;
     }
 
-    private function mockDispatcher()
+    /**
+     * @return MockObject|EventDispatcherInterface
+     */
+    private function mockEventDispatcher()
     {
-        $dispatcher = $this->createMock(EventDispatcherInterface::class);
-
-        /** @var EventDispatcherInterface|PHPUnit_Framework_MockObject_MockObject $dispatcher */
-        return $dispatcher;
+        return $this->getMockBuilder(EventDispatcherInterface::class)
+            ->getMockForAbstractClass();
     }
 
-    public function testMaliscousId()
+    /**
+     * @return MockObject|IRenderSettingFactory
+     */
+    private function mockRenderSettings()
+    {
+        return $this->getMockBuilder(IRenderSettingFactory::class)
+            ->getMockForAbstractClass();
+    }
+
+    private function getPageId()
+    {
+        return PageModel::findOneByPublished(true)->id;
+    }
+
+    public function testMaliciousId(): void
     {
         $this->expectException(\UnexpectedValueException::class);
 
-        $controller = new RedirectShortUrl($this->mockFactory(), $this->mockDispatcher());
+        $controller = new RedirectShortUrl($this->mockFactory(), $this->mockRenderSettings(), $this->mockEventDispatcher(), 1, $this->getPageId());
         $controller('wrong.html');
     }
 
-    public function testItemNotFound()
+    public function testItemNotFound(): void
     {
         $this->expectException(PageNotFoundException::class);
 
-        $controller = new RedirectShortUrl($this->mockFactory(), $this->mockDispatcher());
+        $controller = new RedirectShortUrl($this->mockFactory(), $this->mockRenderSettings(), $this->mockEventDispatcher(), 1, $this->getPageId());
         $controller(99);
     }
 
-    public function testRedirectSuccessfully()
+    public function testRedirectSuccessfully(): void
     {
         $this->expectException(RedirectResponseException::class);
 
         $factory = $this->mockFactory();
 
-        $controller = new RedirectShortUrl($factory, $this->mockDispatcher());
+        $controller = new RedirectShortUrl($factory, $this->mockRenderSettings(), $this->mockEventDispatcher(), 1, $this->getPageId());
 
         $controller(99);
     }
