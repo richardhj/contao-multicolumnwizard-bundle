@@ -45,8 +45,7 @@ class LotAttendanceStatusListener extends AbstractApplicationSystemListener
         $data = $event->getData();
 
         // Set status
-        $newStatus      = AttendanceStatus::findWaiting();
-        $data['status'] = $newStatus->id;
+        $data['status'] = AttendanceStatus::findWaiting()->id;
 
         // Update sorting afterwards
         $lastAttendance = Attendance::findLastByOfferAndStatus($model->offer, $data['status']);

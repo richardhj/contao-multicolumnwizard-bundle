@@ -47,7 +47,8 @@ class NewAttendanceListener extends AbstractApplicationSystemListener
 
         // Check if participant id allowed here and attendance not existent yet
         if (Attendance::isNotExistent($participant->get('id'), $offer->get('id'))) {
-            $attendance              = new Attendance();
+            $attendance = new Attendance();
+
             $attendance->tstamp      = $time;
             $attendance->created     = $time;
             $attendance->offer       = $offer->get('id');
