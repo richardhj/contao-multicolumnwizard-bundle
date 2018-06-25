@@ -16,6 +16,8 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
 
 use Contao\Model\Event\PostSaveModelEvent;
 use NotificationCenter\Model\Notification;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
@@ -23,6 +25,21 @@ class ChangedAttendanceStatusListener
 {
 
     use GetNotificationTokensTrait;
+
+    /**
+     * @var ApplicationSystemInterface
+     */
+    private $applicationSystem;
+
+    /**
+     * ChangedAttendanceStatusListener constructor.
+     *
+     * @param ApplicationSystemInterface $applicationSystem
+     */
+    public function __construct(ApplicationSystemInterface $applicationSystem)
+    {
+        $this->applicationSystem = $applicationSystem;
+    }
 
     /**
      * Send the corresponding notification if the attendance status was changed
@@ -48,8 +65,12 @@ class ChangedAttendanceStatusListener
             return;
         }
 
+        // Only send notifications when application system is "first come"
+        if (!($this->applicationSystem instanceof FirstCome)) {
+            return;
+        }
+
         /** @var Notification $notification */
-        /** @noinspection PhpUndefinedMethodInspection */
         $notification = Notification::findByPk($currentStatus->notification_onChange);
 
         // Send the notification if one is set

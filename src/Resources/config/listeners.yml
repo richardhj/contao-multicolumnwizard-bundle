@@ -103,6 +103,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\ChangedAttendanceStatusListener
         tags:
             - { name: kernel.event_listener, event: 'model.post-save', method: 'handle' }
+        arguments: ['@richardhj.ferienpass.application_system']
 
     richardhj.ferienpass.listener.notification.cron_reminders:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Notification\TriggerCronRemindersListener
