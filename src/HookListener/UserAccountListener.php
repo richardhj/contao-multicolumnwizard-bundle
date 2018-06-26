@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
@@ -13,11 +14,11 @@
 namespace Richardhj\ContaoFerienpassBundle\HookListener;
 
 
-use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
-use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
+use Contao\CoreBundle\Monolog\ContaoContext;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class UserAccountListener
 {
@@ -28,9 +29,21 @@ class UserAccountListener
     private $participantsModel;
 
     /**
-     * @var EventDispatcherInterface
+     * @var LoggerInterface
      */
-    private $dispatcher;
+    private $logger;
+
+    /**
+     * UserAccountListener constructor.
+     *
+     * @param Participant     $participantsModel
+     * @param LoggerInterface $logger
+     */
+    public function __construct(Participant $participantsModel, LoggerInterface $logger)
+    {
+        $this->participantsModel = $participantsModel;
+        $this->logger            = $logger;
+    }
 
     /**
      * Delete a member's participants and attendances
@@ -47,7 +60,7 @@ class UserAccountListener
         }
 
         // Delete attendances
-        $attendances = Attendance::findByParent($userId);
+        $attendances      = Attendance::findByParent($userId);
         $countAttendances = (null !== $attendances) ? $attendances->count() : 0;
 
         while (null !== $attendances && $attendances->next()) {
@@ -55,25 +68,22 @@ class UserAccountListener
         }
 
         // Delete participants
-        $participants = $this->participantsModel->findByParent($userId);
+        $participants      = $this->participantsModel->findByParent($userId);
         $countParticipants = $participants->getCount();
 
         while ($participants->next()) {
             $this->participantsModel->getMetaModel()->delete($participants->getItem());
         }
 
-        $this->dispatcher->dispatch(
-            ContaoEvents::SYSTEM_LOG,
-            new LogEvent(
-                sprintf(
-                    '%u participants and %u attendances for member ID %u has been deleted',
-                    $countParticipants,
-                    $countAttendances,
-                    $userId
-                ),
-                __METHOD__,
-                TL_GENERAL
-            )
+        $this->logger->log(
+            LogLevel::INFO,
+            sprintf(
+                '%u participants and %u attendances for member ID %u has been deleted',
+                $countParticipants,
+                $countAttendances,
+                $userId
+            ),
+            ['contao' => new ContaoContext(__METHOD__, TL_GENERAL)]
         );
     }
 }

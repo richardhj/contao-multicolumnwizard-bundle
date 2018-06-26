@@ -166,9 +166,10 @@ services:
         class: Richardhj\ContaoFerienpassBundle\HookListener\UserAccountListener
         arguments:
             - "@richardhj.ferienpass.model.participant"
-            - "@event_dispatcher"
+            - '@logger'
         tags:
             - { name: 'contao.hook', hook: 'closeAccount' }
+            - { name: 'monolog.logger', channel: 'richardhj_contaoferienpass' }
 
     richardhj.ferienpass.hook_listener.insert_tags:
         class: Richardhj\ContaoFerienpassBundle\HookListener\InsertTagsListener
