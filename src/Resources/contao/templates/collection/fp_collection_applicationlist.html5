@@ -1,28 +1,23 @@
 <?php
 
+use Contao\MemberModel;
+use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
-use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Util\Format;
 
-foreach ($this->items as $c) {
-    $countParticipants += count($c);
-}
-$maxParticipants            =
-    \Richardhj\ContaoFerienpassBundle\Model\Offer::getInstance()->findById($this->collection->offer)->get('applicationlist_max');
-$countParticipantsConfirmed = min($countParticipants, $maxParticipants);
-
-$strParticipantParentColName = Participant::getInstance()->getOwnerAttribute()->getColName();
+/** @var AttendanceStatus[] $attendanceStatuses */
+$attendanceStatuses = $this->attendanceStatuses;
 
 ?>
 <div style="line-height:16px; font-size:12px;">
     <table cellspacing="0" cellpadding="0" border="0">
-        <?php foreach ($this->items as $status => $items): ?>
+        <?php foreach ($this->attendees as $status => $attendances): ?>
             <tr>
                 <td colspan="6">&nbsp;</td>
             </tr>
             <tr>
                 <td colspan="6" style="font-size:16px;font-weight:bold">
-                    <?= AttendanceStatus::findByPk($status)->title ?>
+                    <?= $attendanceStatuses[$status]->title ?>
                 </td>
             </tr>
             <tr>
@@ -38,19 +33,28 @@ $strParticipantParentColName = Participant::getInstance()->getOwnerAttribute()->
             <tr>
                 <td colspan="6" style="font-size:5px;line-height:5px; border-bottom: 2px solid #898989">&nbsp;</td>
             </tr>
-            <?php foreach ($items as $i => $item): ?>
+            <?php /** @var Attendance[] $attendances */
+            foreach ($attendances as $i => $attendee): ?>
+                <?php
+                $participant = $attendee->getParticipant();
+                $parent = null;
+                if ($participant->get('pmember')) {
+                    $parent = MemberModel::findByPk($participant->get('pmember'));
+                }
+                ?>
                 <tr>
                     <td colspan="6" style="font-size:5px;line-height:5px
-                    <?php if ($i != 0): ?>; border-top: 1px solid #c4c4c4<?php endif; ?>">&nbsp;</td>
+                    <?php if (0 !== $i): ?>; border-top: 1px solid #c4c4c4<?php endif; ?>">&nbsp;
+                    </td>
                 </tr>
                 <tr>
-                    <td><?php echo $item['participant_firstname']; ?></td>
-                    <td><?php echo $item['participant_lastname']; ?></td>
-                    <td><?php echo $item['participant_phone'] ?: $item['participant_pmember']['phone']; ?></td>
-                    <td><?php echo $item['participant_mobile'] ?: $item['participant_pmember']['mobile']; ?></td>
+                    <td><?php echo $participant->get('firstname'); ?></td>
+                    <td><?php echo $participant->get('lastname') ?></td>
+                    <td><?php echo $participant->get('phone') ?: $parent->phone; ?></td>
+                    <td><?php echo $participant->get('mobile') ?: $parent->mobile; ?></td>
                     <!--            <td>-->
                     <?php //echo $this->items[$i]['participant_email'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['email']; ?><!--</td>-->
-                    <td><?php echo $item['participant_agreement_photo'] ? 'ja' : 'nein'; ?></td>
+                    <td><?php echo $participant->get('agreement_photo') ? 'ja' : 'nein'; ?></td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
@@ -67,11 +71,11 @@ $strParticipantParentColName = Participant::getInstance()->getOwnerAttribute()->
         </tr>
         <tr>
             <td colspan="5" style="font-size:14px; text-align:right; font-weight: bold">Maximale Teilnehmerzahl:</td>
-            <td style="font-size:14px; font-weight: bold"> <?php echo $maxParticipants; ?></td>
+            <td style="font-size:14px; font-weight: bold"> <?php echo $this->maxParticipants; ?></td>
         </tr>
         <tr>
             <td colspan="5" style="font-size:14px; text-align:right; font-weight: bold">Insgesamt angemeldet:</td>
-            <td style="font-size:14px; font-weight: bold"> <?php echo $countParticipants; ?></td>
+            <td style="font-size:14px; font-weight: bold"> <?php echo $this->countParticipants; ?></td>
         </tr>
         <tr>
             <td colspan="6">&nbsp;</td>

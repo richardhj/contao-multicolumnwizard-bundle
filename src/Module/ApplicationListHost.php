@@ -23,7 +23,6 @@ use Contao\Input;
 use Contao\Module;
 use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
-use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use Doctrine\DBAL\Connection;
 use Haste\DateTime\DateTime;
@@ -31,11 +30,11 @@ use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\IItem;
 use MetaModels\Render\Setting\IRenderSettingFactory;
 use Patchwork\Utf8;
+use Richardhj\ContaoFerienpassBundle\ApplicationList\Document;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
-use Richardhj\ContaoFerienpassBundle\Model\Document;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\ItemList;
 use Richardhj\ContaoFerienpassBundle\Model\Offer;
@@ -275,11 +274,9 @@ class ApplicationListHost extends Module
 
             $urlBuilder = UrlBuilder::fromUrl(Environment::get('uri'));
             if ('download_list' === $urlBuilder->getQueryParameter('action')) {
-                if (null === ($document = Document::findByPk($this->document))) {
-                    Message::addError($this->translator->trans('MSC.document.export_error', [], 'contao_default'));
-                } else {
-                    $document->outputToBrowser($attendances);
-                }
+                $document = new Document($this->offer);
+
+                $document->outputToBrowser();
             }
 
             // Add download button
