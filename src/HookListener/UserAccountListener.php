@@ -60,17 +60,13 @@ class UserAccountListener
         }
 
         // Delete attendances
-        $attendances      = Attendance::findByParent($userId);
-        $countAttendances = (null !== $attendances) ? $attendances->count() : 0;
-
+        $attendances = Attendance::findByParent($userId);
         while (null !== $attendances && $attendances->next()) {
             $attendances->delete();
         }
 
         // Delete participants
-        $participants      = $this->participantsModel->findByParent($userId);
-        $countParticipants = $participants->getCount();
-
+        $participants = $this->participantsModel->findByParent($userId);
         while ($participants->next()) {
             $this->participantsModel->getMetaModel()->delete($participants->getItem());
         }
@@ -78,9 +74,7 @@ class UserAccountListener
         $this->logger->log(
             LogLevel::INFO,
             sprintf(
-                '%u participants and %u attendances for member ID %u has been deleted',
-                $countParticipants,
-                $countAttendances,
+                'Participants and attendances for member ID %u have been deleted',
                 $userId
             ),
             ['contao' => new ContaoContext(__METHOD__, TL_GENERAL)]
