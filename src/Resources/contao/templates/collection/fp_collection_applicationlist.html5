@@ -39,7 +39,8 @@ $attendanceStatuses = $this->attendanceStatuses;
                 $participant = $attendee->getParticipant();
                 $parent = null;
                 if ($participant->get('pmember')) {
-                    $parent = MemberModel::findByPk($participant->get('pmember'));
+                    $pmember = $participant->get('pmember');
+                    $parent = MemberModel::findByPk($pmember['id']);
                 }
                 ?>
                 <tr>
