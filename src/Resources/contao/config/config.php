@@ -27,7 +27,6 @@ use Richardhj\ContaoFerienpassBundle\Module\EditingActions;
 use Richardhj\ContaoFerienpassBundle\Module\Editing;
 use Richardhj\ContaoFerienpassBundle\BackendModule\SendMemberAttendancesOverview;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
-use Richardhj\ContaoFerienpassBundle\Model\Document;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
@@ -53,11 +52,6 @@ array_insert(
         'ferienpass_data_processings'              => [
             'tables' => [
                 'tl_ferienpass_dataprocessing',
-            ],
-        ],
-        'ferienpass_documents'                     => [
-            'tables' => [
-                'tl_ferienpass_document',
             ],
         ],
         'ferienpass_application_systems'           => [
@@ -86,7 +80,6 @@ $GLOBALS['TL_MODELS']['tl_ferienpass_attendance']          = Attendance::class;
 $GLOBALS['TL_MODELS']['tl_ferienpass_applicationsystem']   = ApplicationSystem::class;
 $GLOBALS['TL_MODELS']['tl_ferienpass_attendancestatus']    = AttendanceStatus::class;
 $GLOBALS['TL_MODELS']['tl_ferienpass_attendance_reminder'] = AttendanceReminder::class;
-$GLOBALS['TL_MODELS']['tl_ferienpass_document']            = Document::class;
 $GLOBALS['TL_MODELS']['tl_ferienpass_dataprocessing']      = DataProcessing::class;
 
 
@@ -98,13 +91,6 @@ if ('BE' === TL_MODE) {
     $GLOBALS['TL_CSS'][]        = 'bundles/richardhjcontaoferienpass/css/be_mm_ferienpass.css';
     $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/richardhjcontaoferienpass/js/be_mm_ferienpass.js';
 }
-
-
-/**
- * Permissions are access settings for user and groups (fields in tl_user and tl_user_group)
- */
-//@todo $GLOBALS['TL_PERMISSIONS'][] = 'iso_modules';
-
 
 /**
  * Front end modules

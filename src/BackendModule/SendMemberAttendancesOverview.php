@@ -22,6 +22,7 @@ use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
 use Doctrine\DBAL\Connection;
 use MetaModels\IFactory;
+use MetaModels\Render\Setting\IRenderSettingFactory;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use MetaModels\Render\Template;
 use NotificationCenter\Model\Notification;
@@ -37,8 +38,6 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 class SendMemberAttendancesOverview extends \BackendModule
 {
 
-    protected $strTemplate = 'dcbe_general_edit';
-
     /**
      * @var Connection
      */
@@ -48,6 +47,11 @@ class SendMemberAttendancesOverview extends \BackendModule
      * @var IFactory
      */
     private $factory;
+
+    /**
+     * @var IRenderSettingFactory
+     */
+    private $renderSettingFactory;
 
     /**
      * SendMemberAttendancesOverview constructor.
@@ -61,8 +65,10 @@ class SendMemberAttendancesOverview extends \BackendModule
     {
         parent::__construct($dataContainer);
 
-        $this->connection = System::getContainer()->get('database_connection');
-        $this->factory    = System::getContainer()->get('metamodels.factory');
+        $this->strTemplate          = 'dcbe_general_edit';
+        $this->connection           = System::getContainer()->get('database_connection');
+        $this->factory              = System::getContainer()->get('metamodels.factory');
+        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
     }
 
     /**
@@ -79,11 +85,10 @@ class SendMemberAttendancesOverview extends \BackendModule
         return parent::generate();
     }
 
-
     /**
      * Generate the module
      */
-    protected function compile()
+    protected function compile(): void
     {
         $output     = '';
         $formSubmit = 'send_member_attendances_overview';
@@ -115,9 +120,18 @@ HTML;
             /** @var array $attendanceIds */
             foreach ($members as $memberId => $attendanceIds) {
                 $member = MemberModel::findByPk($memberId);
-                $class  = (++$m % 2) ? ' class="tl_bg"' : '';
+                if (null === $member) {
+                    continue;
+                }
+
+                $class = (++$m % 2) ? ' class="tl_bg"' : '';
                 foreach ($attendanceIds as $a => $attendanceId) {
-                    $attendance = Attendance::findByPk($attendanceId);
+                    $attendance  = Attendance::findByPk($attendanceId);
+                    $participant = $attendance->getParticipant();
+                    $offer       = $attendance->getOffer();
+                    if (null === $participant || null === $offer) {
+                        continue;
+                    }
 
                     $output .= '<tr>';
                     if (0 === $a) {
@@ -132,12 +146,12 @@ HTML;
                     $output .= sprintf(
                         '<td%s>%s</td>',
                         $class,
-                        $attendance->getParticipant()->parseAttribute('name')['text']
+                        $participant->parseAttribute('name')['text']
                     );
                     $output .= sprintf(
                         '<td%s>%s</td>',
                         $class,
-                        $attendance->getOffer()->parseAttribute('name')['text']
+                        $offer->parseAttribute('name')['text']
                     );
                     $output .= sprintf('<td%s>%s</td>', $class, $attendance->getStatus()->title);
                     $output .= '</tr>';
@@ -196,7 +210,6 @@ HTML;
         ];
     }
 
-
     /**
      * Fetch all attendances that were not sent already grouped by member
      *
@@ -231,18 +244,16 @@ HTML;
         return $attendances;
     }
 
-
     /**
      * Trigger notification for all members
      */
-    private function sendMessages()
+    private function sendMessages(): void
     {
         //@todo
         $notificationId = 6;
         /** @var Notification $notification */
         /** @noinspection PhpUndefinedMethodInspection */
         $notification = Notification::findByPk($notificationId);
-
         if (null === $notification) {
             return;
         }
@@ -256,7 +267,11 @@ HTML;
             }
 
             // Convert id vars to models
-            $member      = MemberModel::findByPk($memberId);
+            $member = MemberModel::findByPk($memberId);
+            if (null === $member) {
+                continue;
+            }
+
             $attendances = array_map(
                 function ($id) {
                     return Attendance::findByPk($id);
@@ -283,9 +298,9 @@ HTML;
                 );
 
                 \Database::getInstance()->query(
-                    'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)'.
-                    ' VALUES '.implode(', ', $values).
-                    ' ON DUPLICATE KEY UPDATE tstamp='.$time
+                    'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)' .
+                    ' VALUES ' . implode(', ', $values) .
+                    ' ON DUPLICATE KEY UPDATE tstamp=' . $time
                 );
 
                 $successful++;
@@ -317,18 +332,30 @@ HTML;
      */
     private function getNotificationTokens(MemberModel $member, array $attendances): array
     {
-        $tokens = [];
-        //@todo
+        $tokens      = [];
+        $attendances = array_filter(
+            $attendances,
+            function (Attendance $attendance) {
+                return (null !== $attendance->getOffer() && null !== $attendance->getParticipant());
+            }
+        );
+
+        $metaModelFerienpass  = $this->factory->getMetaModel('mm_ferienpass');
+        $metaModelParticipant = $this->factory->getMetaModel('mm_participant');
+        if (null === $metaModelFerienpass || null === $metaModelParticipant) {
+            return [];
+        }
+
         $data = [
             'attendances'               => $attendances,
             'member'                    => $member,
-            'offerRenderSettings'       => $this->factory->getMetaModel('mm_ferienpass')->getView(4),
-            'participantRenderSettings' => $this->factory->getMetaModel('mm_participant')->getView(0),
+            'offerRenderSettings'       => $this->renderSettingFactory->createCollection($metaModelFerienpass, 4),
+            'participantRenderSettings' => $this->renderSettingFactory->createCollection($metaModelParticipant),
         ];
 
         // Add all member fields
         foreach ($member->row() as $k => $v) {
-            $tokens['member_'.$k] = $v;
+            $tokens['member_' . $k] = $v;
         }
 
         // Parse applications and add them to the tokens
