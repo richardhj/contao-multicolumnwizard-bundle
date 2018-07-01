@@ -14,20 +14,10 @@
 use ContaoCommunityAlliance\MetaPalettes\MetaPalettes;
 
 
-$table = \MemberModel::getTable();
+$GLOBALS['TL_DCA']['tl_member']['list']['label']['fields'][] = 'ferienpass_host:mm_host.name';
 
-
-/**
- * List
- */
-$GLOBALS['TL_DCA'][$table]['list']['label']['fields'][] = 'ferienpass_host';
-
-
-/**
- * Palettes
- */
 MetaPalettes::appendBefore(
-    $table,
+    'tl_member',
     'address',
     [
         'ferienpass' => [
@@ -36,23 +26,8 @@ MetaPalettes::appendBefore(
     ]
 );
 
-
-/**
- * Fields
- */
-$GLOBALS['TL_DCA'][$table]['fields']['persist'] = [
-    'label'     => &$GLOBALS['TL_LANG'][$table]['persist'],
-    'exclude'   => true,
-    'inputType' => 'checkbox',
-    'eval'      => [
-        'tl_class'   => 'w50 m12',
-        'feEditable' => true,
-    ],
-    'sql'       => "char(1) NOT NULL default ''",
-];
-
-$GLOBALS['TL_DCA'][$table]['fields']['ferienpass_host'] = [
-    'label'         => &$GLOBALS['TL_LANG'][$table]['ferienpass_host'],
+$GLOBALS['TL_DCA']['tl_member']['fields']['ferienpass_host'] = [
+    'label'         => &$GLOBALS['TL_LANG']['tl_member']['ferienpass_host'],
     'exclude'       => true,
     'inputType'     => 'select',
     'foreignKey'    => 'mm_host.name',
@@ -66,10 +41,8 @@ $GLOBALS['TL_DCA'][$table]['fields']['ferienpass_host'] = [
     ],
     'save_callback' => [
         function ($value, \DataContainer $dc) {
-            if ('' === $value) {
-                if (in_array('1', deserialize($dc->activeRecord->groups), true)) {
-                    throw new \Exception($GLOBALS['TL_LANG']['ERR']['missingHostForMember']);
-                }
+            if ('' === $value && in_array('1', deserialize($dc->activeRecord->groups), true)) {
+                throw new \RuntimeException($GLOBALS['TL_LANG']['ERR']['missingHostForMember']);
             }
 
             return $value;
