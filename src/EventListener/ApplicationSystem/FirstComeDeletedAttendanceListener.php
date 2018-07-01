@@ -54,7 +54,9 @@ class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListen
      */
     public function handleDcGeneral(PostDeleteModelEvent $event): void
     {
-        if (!($this->applicationSystem instanceof FirstCome)) {
+        $environment = $event->getEnvironment();
+        if (!($this->applicationSystem instanceof FirstCome)
+            || 'tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 

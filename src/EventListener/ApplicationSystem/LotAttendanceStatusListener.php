@@ -68,11 +68,9 @@ class LotAttendanceStatusListener extends AbstractApplicationSystemListener
      */
     public function handleDcGeneral(PrePersistModelEvent $event): void
     {
-        if (!$this->applicationSystem instanceof Lot) {
-            return;
-        }
-
-        if (Attendance::getTable() !== $event->getEnvironment()->getDataDefinition()->getName()) {
+        $environment = $event->getEnvironment();
+        if (!($this->applicationSystem instanceof Lot)
+            || 'tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 
