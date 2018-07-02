@@ -274,4 +274,3 @@ $GLOBALS['BE_FFL']['request_access_token'] = RequestAccessToken::class;
 $GLOBALS['TL_FFL']['fp_age']                  = \Richardhj\ContaoFerienpassBundle\Form\Age::class;
 $GLOBALS['TL_FFL']['offer_date']              = OfferDate::class;
 $GLOBALS['TL_FFL']['select_disabled_options'] = SelectDisabledOptions::class;
-$GLOBALS['TL_FFL']['multiColumnWizard']       = MultiColumnWizard::class;

@@ -100,9 +100,7 @@ class SelectDisabledOptions extends FormSelectMenu
             return false;
         }
 
-        if (!is_array($input)) {
-            $input = [$input];
-        }
+        $input = (array) $input;
 
         // Check each option
         foreach ($input as $strInput) {
