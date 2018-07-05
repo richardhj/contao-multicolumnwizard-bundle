@@ -22,7 +22,7 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelIdInterface;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelInterface;
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\DcGeneral\Factory\DcGeneralFactory;
-use ContaoCommunityAlliance\Translator\TranslatorInterface;
+use ContaoCommunityAlliance\Translator\TranslatorInterface as CcaTranslator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
@@ -46,7 +46,7 @@ class SortingHelper
     private $dispatcher;
 
     /**
-     * @var TranslatorInterface
+     * @var CcaTranslator
      */
     private $translator;
 
@@ -55,15 +55,16 @@ class SortingHelper
      *
      * @param                          $table
      * @param EventDispatcherInterface $dispatcher
-     * @param TranslatorInterface      $translator
+     * @param CcaTranslator            $translator
      */
-    public function __construct($table, EventDispatcherInterface $dispatcher, TranslatorInterface $translator)
+    public function __construct($table, EventDispatcherInterface $dispatcher, CcaTranslator $translator)
     {
-        $this->createDcGeneral($table);
+        // Respect the order.
+        $this->translator = $translator;
+        $this->dispatcher = $dispatcher;
 
+        $this->createDcGeneral($table);
         $this->dataProvider = $this->environment->getDataProvider();
-        $this->dispatcher   = $dispatcher;
-        $this->translator   = $translator;
     }
 
     /**
@@ -152,5 +153,4 @@ class SortingHelper
 
         return $this->environment;
     }
-
 }

@@ -56,7 +56,7 @@ class OfferDate extends \Richardhj\ContaoFerienpassBundle\Widget\OfferDate
             }
 
             $return .= sprintf(
-                '<a data-operation="%s" href="%s" class="widgetImage" title="%s">%s</a> ',
+                '<a data-operations="%s" href="%s" class="widgetImage" title="%s">%s</a> ',
                 $button,
                 str_replace(
                     'index.php',

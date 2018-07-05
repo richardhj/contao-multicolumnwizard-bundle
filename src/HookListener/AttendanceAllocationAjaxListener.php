@@ -16,7 +16,7 @@ namespace Richardhj\ContaoFerienpassBundle\HookListener;
 use Contao\Versions;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException;
-use ContaoCommunityAlliance\Translator\TranslatorInterface;
+use ContaoCommunityAlliance\Translator\TranslatorInterface as CcaTranslator;
 use Richardhj\ContaoFerienpassBundle\Helper\SortingHelper;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -37,7 +37,7 @@ class AttendanceAllocationAjaxListener
     private $dispatcher;
 
     /**
-     * @var TranslatorInterface
+     * @var CcaTranslator
      */
     private $translator;
 
@@ -46,12 +46,12 @@ class AttendanceAllocationAjaxListener
      *
      * @param RequestStack             $requestStack
      * @param EventDispatcherInterface $dispatcher
-     * @param TranslatorInterface      $translator
+     * @param CcaTranslator            $translator
      */
     public function __construct(
         RequestStack $requestStack,
         EventDispatcherInterface $dispatcher,
-        TranslatorInterface $translator
+        CcaTranslator $translator
     ) {
         $this->requestStack = $requestStack;
         $this->dispatcher   = $dispatcher;

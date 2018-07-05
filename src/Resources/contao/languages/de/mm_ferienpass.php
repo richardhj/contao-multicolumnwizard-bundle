@@ -12,6 +12,7 @@
  */
 
 
+$GLOBALS['TL_LANG']['mm_ferienpass']['id'][0] = 'Angebot-ID';
 $GLOBALS['TL_LANG']['mm_ferienpass']['edit_attendances'][0] = 'Anmeldungen';
 $GLOBALS['TL_LANG']['mm_ferienpass']['edit_attendances'][1] = 'Anmeldungen zu Angebot ID %s einsehen und bearbeiten';
 

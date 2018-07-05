@@ -34,7 +34,7 @@ class OfferDate extends \MultiColumnWizard
         \System::importStatic('Database');
 
         $columnFields = [
-            'start' => [
+            'start'  => [
                 'label'     => &$GLOBALS['TL_LANG']['MSC']['offer_date']['start'],
                 'inputType' => 'text',
                 'eval'      => [
@@ -42,7 +42,7 @@ class OfferDate extends \MultiColumnWizard
                     'style' => 'width:150px'
                 ],
             ],
-            'end'   => [
+            'end'    => [
                 'label'     => &$GLOBALS['TL_LANG']['MSC']['offer_date']['end'],
                 'inputType' => 'text',
                 'eval'      => [
