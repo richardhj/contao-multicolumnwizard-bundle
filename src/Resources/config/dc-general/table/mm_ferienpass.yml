@@ -10,6 +10,16 @@ services:
         tags:
             - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 150 }
 
+    richardhj.ferienpass.listener.dc-general.table.mm_ferienpass.export_attendee_emails_handler:
+        class: Richardhj\ContaoFerienpassBundle\DcGeneral\View\ActionHandler\ExportAttendeeEmailsHandler
+        public: true
+        arguments:
+            - "@cca.dc-general.scope-matcher"
+            - '@database_connection'
+            - '@translator'
+        tags:
+            - { name: kernel.event_listener, event: dc-general.action, method: handleEvent }
+
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.modify_label:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ModifyLabelListener
         arguments:
@@ -88,3 +98,9 @@ services:
             - '@cca.dc-general.scope-matcher'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.export_attendee_emails_button:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ExportAttendeeEmailsButtonListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-select-mode-buttons', method: handle }
+        arguments: ['@translator']
