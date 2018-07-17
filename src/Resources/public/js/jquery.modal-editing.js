@@ -82,7 +82,7 @@
                         element = (null === options.containerToUpdate)
                             ? $(options.container).closest('[class^="ce_"],[class^="mod_"]')
                             : $(options.containerToUpdate);
-                        element.addClass('ajax-reload-element-overlay');
+                        element.after('<div class="loading__overlay"><div class="loading__loader"><div class="loading__checkmark loading__checkmark--draw"></div></div></div>');
 
                         // Update list view
                         $.ajax({
@@ -95,6 +95,13 @@
                             .done(function (response) {
                                 if ('ok' === response.status) {
                                     element.replaceWith(response.html);
+
+                                    $('.loading__loader').addClass('loading__loader--complete');
+                                    $('.loading__checkmark').toggle();
+
+                                    setTimeout(function () {
+                                        $('.loading__overlay').remove();
+                                    }, 800);
                                 }
                                 else {
                                     location.reload();
@@ -108,7 +115,7 @@
                  * Open modal (after click on trigger)
                  */
                 event.preventDefault();
-                modalContainer.addClass('modal-loading');
+                modalContainer.after('<div class="loading__overlay"><div class="loading__loader"><div class="loading__checkmark loading__checkmark--draw"></div></div></div>');
 
                 // Load the content for the modal container
                 $.ajax({
@@ -136,7 +143,13 @@
                             });
 
                             modal.dialog('option', 'buttons', buttons);
-                            modalContainer.removeClass('modal-loading');
+
+                            $('.loading__loader').addClass('loading__loader--complete');
+                            $('.loading__checkmark').toggle();
+
+                            setTimeout(function () {
+                                $('.loading__overlay').remove();
+                            }, 800);
                         }
                         else {
                             location.reload();
