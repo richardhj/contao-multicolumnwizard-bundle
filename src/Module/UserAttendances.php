@@ -20,6 +20,7 @@ use Contao\Input;
 use Contao\Module;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
+use MetaModels\Render\Setting\IRenderSettingFactory;
 use ModuleModel;
 use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
@@ -35,6 +36,7 @@ use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -46,13 +48,6 @@ use Symfony\Component\Translation\TranslatorInterface;
  */
 class UserAttendances extends Module
 {
-
-    /**
-     * Template
-     *
-     * @var string
-     */
-    protected $strTemplate = 'mod_user_attendances';
 
     /**
      * @var Offer
@@ -85,6 +80,16 @@ class UserAttendances extends Module
     private $translator;
 
     /**
+     * @var IRenderSettingFactory
+     */
+    private $renderSettingFactory;
+
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+    /**
      * UserAttendances constructor.
      *
      * @param ModuleModel $module
@@ -97,12 +102,15 @@ class UserAttendances extends Module
     {
         parent::__construct($module, $column);
 
-        $this->offerModel       = System::getContainer()->get('richardhj.ferienpass.model.offer');
-        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
-        $this->dispatcher       = System::getContainer()->get('event_dispatcher');
-        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
-        $this->translator       = System::getContainer()->get('translator');
-        $this->frontendUser     = FrontendUser::getInstance();
+        $this->strTemplate          = 'mod_user_attendances';
+        $this->offerModel           = System::getContainer()->get('richardhj.ferienpass.model.offer');
+        $this->participantModel     = System::getContainer()->get('richardhj.ferienpass.model.participant');
+        $this->dispatcher           = System::getContainer()->get('event_dispatcher');
+        $this->scopeMatcher         = System::getContainer()->get('cca.dc-general.scope-matcher');
+        $this->translator           = System::getContainer()->get('translator');
+        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
+        $this->requestStack         = System::getContainer()->get('request_stack');
+        $this->frontendUser         = FrontendUser::getInstance();
     }
 
     /**
@@ -136,15 +144,14 @@ class UserAttendances extends Module
      * @throws ServiceCircularReferenceException
      * @throws InvalidArgumentException
      */
-    protected function compile()
+    protected function compile(): void
     {
-        /*
-         * Delete attendance
-         */
-        if (0 === strpos(Input::get('action'), 'delete')) {
-            $id                 = Input::get('id');
-            $attendanceToDelete = Attendance::findByPk($id);
+        /** @var Request $request */
+        $request = $this->requestStack->getCurrentRequest();
 
+        // Delete attendance
+        if ('delete' === $request->query->get('action')) {
+            $attendanceToDelete = Attendance::findByPk($request->query->get('id'));
             if (null === $attendanceToDelete) {
                 // Check for existence
                 Message::addError('Anmeldung schon gelöscht');
@@ -173,10 +180,8 @@ class UserAttendances extends Module
                 $attendanceToDelete->delete();
 
                 Message::addConfirmation($GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation']);
-                /** @var RequestStack $requestStack */
-                $requestStack = System::getContainer()->get('request_stack');
-                $request      = $requestStack->getCurrentRequest();
-                $urlBuilder   = UrlBuilder::fromUrl($request->getUri());
+
+                $urlBuilder = UrlBuilder::fromUrl($request->getUri());
                 $urlBuilder->unsetQueryParameter('action');
                 $urlBuilder->unsetQueryParameter('id');
 
@@ -184,146 +189,89 @@ class UserAttendances extends Module
             }
         }
 
-        /*
-         * Create table
-         */
         $attendances = Attendance::findByParent($this->frontendUser->id);
 
-        $rows   = [];
-        $fields = [
-            'offer.name',
-            'participant.name',
-            /*'offer.date_period',*/
-            'state',
-            'details',
-            'recall',
-        ];
-
+        $rows = [];
         if (null !== $attendances) {
             // Create table head
-            foreach ($fields as $field) {
-                $f   = trimsplit('.', $field);
-                $key = (strpos($field, '.') !== false) ? $f[1] : $field;
+            $row = [
+                'offer_name'       => $this->offerModel->getMetaModel()->getAttribute('name')->getName(),
+                'participant_name' => $this->participantModel->getMetaModel()->getAttribute('name')->getName(),
+                'offer_date'       => $this->offerModel->getMetaModel()->getAttribute('date_period')->getName(),
+                'state'            => $this->translator->trans('MSC.state', [], 'contao_default'),
+                'details'          => '&nbsp;',
+                'recall'           => '&nbsp;'
+            ];
 
-                switch ($f[0]) {
-                    case 'offer':
-                        $rows[0][] = $this->offerModel->getMetaModel()->getAttribute($key)->getName();
-                        break;
-
-                    case 'participant':
-                        $rows[0][] = $this->participantModel->getMetaModel()->getAttribute($key)->getName();
-                        break;
-
-                    case 'details':
-                    case 'recall':
-                        $rows[0][] = '&nbsp;';
-                        break;
-
-                    default:
-                        $rows[0][] = $GLOBALS['TL_LANG']['MSC'][$key];
-                        break;
-                }
-            }
+            $rows[] = $row;
 
             // Walk each attendee
             while ($attendances->next()) {
-                $values = [];
+                /** @var \MetaModels\Item|null $offer */
+                $offer       = $attendances->current()->getOffer();
+                $participant = $attendances->current()->getParticipant();
+                $status      = AttendanceStatus::findByPk($attendances->status);
+                $view        = $this->renderSettingFactory->createCollection($offer->getMetaModel(), 4);
+                $detailsLink = $offer->buildJumpToLink($view)['url'];
 
-                foreach ($fields as $field) {
-                    $f = trimsplit('.', $field);
-                    /** @var \MetaModels\Item $item */
-                    $item = $this->offerModel->getMetaModel()->findById($attendances->offer);
+                // Build recall link
+                if (ToolboxOfferDate::offerStart($offer) >= time()) {
+                    $urlBuilder = UrlBuilder::fromUrl($request->getUri())
+                        ->setQueryParameter('action', 'delete')
+                        ->setQueryParameter('id', $attendances->id);
 
-                    switch ($f[0]) {
-                        case 'offer':
-                            $value = $item->parseAttribute($f[1])['text'];
-                            break;
+                    $confirm   = sprintf(
+                        $this->translator->trans('MSC.attendanceConfirmDeleteLink', [], 'contao_default'),
+                        $offer->parseAttribute('name')['text'],
+                        $participant->parseAttribute('name')['text']
+                    );
+                    $attribute =
+                        'onclick="return confirm(\'' . htmlspecialchars($confirm, ENT_QUOTES | ENT_HTML5) . '\')"';
 
-                        case 'participant':
-                            $value = $this->participantModel->findById($attendances->participant)->get($f[1]);
-                            break;
+                    $minus24hours = time() - 86400;
+                    $disabled     =
+                        (ToolboxOfferDate::offerStart($offer) < $minus24hours) && $attendances->tstamp >= $minus24hours;
 
-                        case 'state':
-                            /** @var AttendanceStatus $status */
-                            $status = AttendanceStatus::findByPk($attendances->status);
-                            $value  = sprintf(
-                                '<span class="attendance-status attendance-status--%s">%s</span>',
-                                $status->type,
-                                $status->title ?: $status->name
-                            );
-                            break;
-
-                        case 'details':
-                            $url       = $item->buildJumpToLink(
-                                $this->offerModel->getMetaModel()->getView(4)
-                            )['url'];//@todo make configurable
-                            $attribute = $this->openLightbox ? ' data-lightbox="' : '';
-
-                            $value = sprintf(
-                                '<a href="%s" class="%s"%s>%s</a>',
-                                $url,
-                                $f[0],
-                                $attribute,
-                                $this->translator->trans('MSC.' . $f[0], [], 'contao_default')
-                            );
-                            break;
-
-                        case 'recall':
-                            if (ToolboxOfferDate::offerStart($item) >= time()) {
-                                $url = \Environment::get('uri') . '?action=delete&id=' . $attendances->id;
-
-                                $attribute = ' onclick="return confirm(\'' . htmlspecialchars(
-                                        sprintf(
-                                            $this->translator->trans(
-                                                'MSC.attendanceConfirmDeleteLink',
-                                                [],
-                                                'contao_default'
-                                            ),
-                                            $item->parseAttribute('name')['text'],
-                                            $this->participantModel
-                                                ->findById($attendances->participant)
-                                                ->parseAttribute('name')['text']
-                                        ),
-                                        ENT_QUOTES | ENT_HTML5
-                                    )
-                                             . '\')"';
-
-                                $minus24hours = time() - 86400;
-                                $disabled     = (ToolboxOfferDate::offerStart($item) < $minus24hours)
-                                                && $attendances->tstamp >= $minus24hours;
-
-                                $value = sprintf(
-                                    '<a href="%s" class="%s%s"%s>%s</a>',
-                                    !$disabled ? $url : '',
-                                    $f[0],
-                                    $disabled ? ' disabled' : '',
-                                    $attribute,
-                                    $this->translator->trans('MSC.' . $f[0], [], 'contao_default')
-                                );
-                            } else {
-                                $value = '';
-                            }
-                            break;
-
-                        default:
-                            $value = $attendances->$f[1];
-                            break;
-                    }
-
-                    $values[] = $value;
+                    $recallLink = sprintf(
+                        '<a href="%s" class="%s%s" %s>%s</a>',
+                        !$disabled ? $urlBuilder->getUrl() : '',
+                        'link--recall',
+                        $disabled ? ' link--disabled' : '',
+                        $attribute,
+                        $this->translator->trans('MSC.recall', [], 'contao_default')
+                    );
+                } else {
+                    $recallLink = '&nbsp;';
                 }
 
-                $rows[] = $values;
+                $row = [
+                    'offer_name'       => $offer->parseAttribute('name', 'text', $view)['text'],
+                    'participant_name' => $participant->parseAttribute('name')['text'],
+                    'offer_date'       => $offer->parseAttribute('date_period', 'text', $view)['text'],
+                    'state'            => sprintf(
+                        '<span class="attendance-status attendance-status--%s">%s</span>',
+                        $status->type,
+                        $status->title ?: $status->name
+                    ),
+                    'details'          => sprintf(
+                        '<a href="%s" class="link--details">%s</a>',
+                        $detailsLink,
+                        $this->translator->trans('MSC.details', [], 'contao_default')
+                    ),
+                    'recall'           => $recallLink
+                ];
+
+                $rows[] = $row;
             }
 
             if (\count($rows) <= 1) {
-                Message::addInformation($GLOBALS['TL_LANG']['MSC']['noAttendances']);
+                Message::addInformation($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
             } else {
                 $this->useHeader           = true;
                 $this->Template->dataTable = Table::getDataArray($rows, 'user-attendances', $this);
             }
         } else {
-            Message::addWarning($GLOBALS['TL_LANG']['MSC']['noParticipants']);
+            Message::addWarning($this->translator->trans('MSC.noParticipants', [], 'contao_default'));
         }
 
         $this->Template->message = Message::generate();
