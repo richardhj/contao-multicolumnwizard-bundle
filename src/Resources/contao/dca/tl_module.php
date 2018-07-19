@@ -17,8 +17,6 @@ use Richardhj\ContaoFerienpassBundle\Helper\Dca;
 /**
  * Palettes
  */
-$GLOBALS['TL_DCA']['tl_module']['palettes']['items_editing_actions'] = '{title_legend},name,headline,type;{config_legend},metamodel;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
-$GLOBALS['TL_DCA']['tl_module']['palettes']['offer_editing'] = '{title_legend},name,headline,type;{config_legend},metamodel,enableVariants;{redirect_legend},jumpTo;{template_legend:hide},editFormTpl,tableless;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['calendar_offers'] = $GLOBALS['TL_DCA']['tl_module']['palettes']['calendar'];
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_user_application'] = '{title_legend},name,headline,type;{config_legend},metamodel;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_applicationlisthost'] = '{title_legend},name,headline,type;{config_legend},metamodel,metamodel_rendersettings,metamodel_child_list_view,document;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
@@ -30,9 +28,6 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['host_logo'] = '{title_legend},name,
  * Fields
  */
 $GLOBALS['TL_DCA']['tl_module']['fields']['jumpToApplicationList'] = $GLOBALS['TL_DCA']['tl_module']['fields']['jumpTo'];
-//$GLOBALS['TL_DCA']['tl_module']['fields']['metamodel_fetch_item'] = $GLOBALS['TL_DCA']['tl_module']['fields']['metamodel'];
-//$GLOBALS['TL_DCA']['tl_module']['fields']['metamodel_fetch_item']['label'] = &$GLOBALS['TL_LANG']['tl_module']['metamodel_fetch_item'];
-//$GLOBALS['TL_DCA']['tl_module']['fields']['metamodel_fetch_item']['sql'] = "int(10) unsigned NOT NULL default '0'";
 $GLOBALS['TL_DCA']['tl_module']['fields']['jumpToApplicationList']['label'] = &$GLOBALS['TL_LANG']['tl_module']['jumpToApplicationList'];
 
 \Controller::loadDataContainer('tl_content');

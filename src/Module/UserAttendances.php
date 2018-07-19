@@ -25,6 +25,7 @@ use ModuleModel;
 use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use Patchwork\Utf8;
+use Richardhj\ContaoFerienpassBundle\Event\UserAttendancesTableEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
@@ -90,6 +91,11 @@ class UserAttendances extends Module
     private $requestStack;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
      * UserAttendances constructor.
      *
      * @param ModuleModel $module
@@ -110,6 +116,7 @@ class UserAttendances extends Module
         $this->translator           = System::getContainer()->get('translator');
         $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
         $this->requestStack         = System::getContainer()->get('request_stack');
+        $this->eventDispatcher      = System::getContainer()->get('event_dispatcher');
         $this->frontendUser         = FrontendUser::getInstance();
     }
 
@@ -191,10 +198,12 @@ class UserAttendances extends Module
 
         $attendances = Attendance::findByParent($this->frontendUser->id);
 
-        $rows = [];
+        $items = [];
         if (null !== $attendances) {
             // Create table head
-            $row = [
+            $item = [];
+
+            $item['row'] = [
                 'offer_name'       => $this->offerModel->getMetaModel()->getAttribute('name')->getName(),
                 'participant_name' => $this->participantModel->getMetaModel()->getAttribute('name')->getName(),
                 'offer_date'       => $this->offerModel->getMetaModel()->getAttribute('date_period')->getName(),
@@ -203,15 +212,18 @@ class UserAttendances extends Module
                 'recall'           => '&nbsp;'
             ];
 
-            $rows[] = $row;
+            $items[] = $item;
 
             // Walk each attendee
             while ($attendances->next()) {
+                $item = ['attendance' => $attendances->current()];
+
                 /** @var \MetaModels\Item|null $offer */
-                $offer       = $attendances->current()->getOffer();
-                $participant = $attendances->current()->getParticipant();
-                $status      = AttendanceStatus::findByPk($attendances->status);
-                $view        = $this->renderSettingFactory->createCollection($offer->getMetaModel(), 4);
+                $offer       = $item['offer'] = $attendances->current()->getOffer();
+                $participant = $item['participant'] = $attendances->current()->getParticipant();
+                $status      = $item['status'] = AttendanceStatus::findByPk($attendances->status);
+                $view        = $item['view'] = $this->renderSettingFactory->createCollection($offer->getMetaModel(), 4);
+
                 $detailsLink = $offer->buildJumpToLink($view)['url'];
 
                 // Build recall link
@@ -244,7 +256,7 @@ class UserAttendances extends Module
                     $recallLink = '&nbsp;';
                 }
 
-                $row = [
+                $item['row'] = [
                     'offer_name'       => $offer->parseAttribute('name', 'text', $view)['text'],
                     'participant_name' => $participant->parseAttribute('name')['text'],
                     'offer_date'       => $offer->parseAttribute('date_period', 'text', $view)['text'],
@@ -261,8 +273,14 @@ class UserAttendances extends Module
                     'recall'           => $recallLink
                 ];
 
-                $rows[] = $row;
+                $items[] = $item;
             }
+
+            $tableEvent = new UserAttendancesTableEvent($items);
+            $this->dispatcher->dispatch($tableEvent::NAME, $tableEvent);
+            $items = $tableEvent->getItems();
+
+            $rows = array_column($items, 'row');
 
             if (\count($rows) <= 1) {
                 Message::addInformation($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
