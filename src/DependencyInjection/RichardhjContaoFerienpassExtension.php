@@ -32,6 +32,7 @@ class RichardhjContaoFerienpassExtension extends Extension
     private static $files = [
         'config.yml',
         'listeners.yml',
+        'modules.yml',
         'services.yml',
         'dc-general/table/mm_ferienpass.yml',
         'dc-general/table/mm_host.yml',
@@ -49,7 +50,7 @@ class RichardhjContaoFerienpassExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
-        $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         foreach (self::$files as $file) {
             $loader->load($file);
         }

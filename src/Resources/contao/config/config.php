@@ -11,20 +11,11 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-use Richardhj\ContaoFerienpassBundle\Form\MultiColumnWizard;
 use Richardhj\ContaoFerienpassBundle\Form\SelectDisabledOptions;
 use Richardhj\ContaoFerienpassBundle\Form\OfferDate;
 use Richardhj\ContaoFerienpassBundle\Widget\RequestAccessToken;
 use Richardhj\ContaoFerienpassBundle\Widget\Age;
-use Richardhj\ContaoFerienpassBundle\Module\HostEditingList;
 use Richardhj\ContaoFerienpassBundle\Module\HostLogo;
-use Richardhj\ContaoFerienpassBundle\Module\Messages;
-use Richardhj\ContaoFerienpassBundle\Module\UserAttendances;
-use Richardhj\ContaoFerienpassBundle\Module\AddAttendeeHost;
-use Richardhj\ContaoFerienpassBundle\Module\ApplicationListHost;
-use Richardhj\ContaoFerienpassBundle\Module\UserApplication;
-use Richardhj\ContaoFerienpassBundle\Module\EditingActions;
-use Richardhj\ContaoFerienpassBundle\Module\Editing;
 use Richardhj\ContaoFerienpassBundle\BackendModule\SendMemberAttendancesOverview;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder;
@@ -95,21 +86,7 @@ if ('BE' === TL_MODE) {
 /**
  * Front end modules
  */
-$GLOBALS['FE_MOD']['application']['offer_editing']             = Editing::class;
-$GLOBALS['FE_MOD']['application']['items_editing_actions']     = EditingActions::class;
-$GLOBALS['FE_MOD']['application']['offer_user_application']    = UserApplication::class;
-$GLOBALS['FE_MOD']['application']['offer_applicationlisthost'] = ApplicationListHost::class;
-$GLOBALS['FE_MOD']['application']['offer_addattendeehost']     = AddAttendeeHost::class;
-$GLOBALS['FE_MOD']['application']['offers_user_attendances']   = UserAttendances::class;
-$GLOBALS['FE_MOD']['application']['ferienpass_messages']       = Messages::class;
 $GLOBALS['FE_MOD']['user']['host_logo']                        = HostLogo::class;
-
-
-/**
- * Content elements
- */
-$GLOBALS['TL_CTE']['ferienpass']['host_editing_list'] = HostEditingList::class;
-
 
 /**
  * Notification center

@@ -212,21 +212,6 @@ class Dca implements EventSubscriberInterface
     }
 
 
-    /**
-     * Get documents
-     *
-     * @category options_callback
-     *
-     * @return array
-     */
-    public function getDocumentChoices()
-    {
-        $notifications = \Database::getInstance()
-            ->query("SELECT id,name FROM tl_ferienpass_document ORDER BY name");
-
-        return $notifications->fetchEach('name');
-    }
-
 
     /**
      * Get all select attributes for the owner attribute

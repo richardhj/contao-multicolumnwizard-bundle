@@ -13,18 +13,16 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
-use Contao\BackendTemplate;
+use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
 use Contao\Input;
 use Contao\Message;
-use Contao\Module;
-use Contao\System;
-use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use Contao\ModuleModel;
+use Contao\Template;
 use Doctrine\DBAL\Connection;
 use MetaModels\IItem;
-use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
@@ -35,7 +33,8 @@ use Haste\Form\Form;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\TranslatorInterface;
 
 
@@ -44,7 +43,7 @@ use Symfony\Component\Translation\TranslatorInterface;
  *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class UserApplication extends Module
+class UserApplication extends AbstractFrontendModuleController
 {
 
     /**
@@ -68,16 +67,6 @@ class UserApplication extends Module
     private $dispatcher;
 
     /**
-     * @var RequestScopeDeterminator
-     */
-    private $scopeMatcher;
-
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
      * @var TranslatorInterface
      */
     private $translator;
@@ -90,22 +79,19 @@ class UserApplication extends Module
     /**
      * UserApplication constructor.
      *
-     * @param        $module
-     * @param string $column
-     *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @param Participant              $participantModel
+     * @param EventDispatcherInterface $dispatcher
+     * @param TranslatorInterface      $translator
      */
-    public function __construct($module, $column = 'main')
-    {
-        parent::__construct($module, $column);
-
+    public function __construct(
+        Participant $participantModel,
+        EventDispatcherInterface $dispatcher,
+        TranslatorInterface $translator
+    ) {
+        $this->participantModel = $participantModel;
+        $this->dispatcher       = $dispatcher;
+        $this->translator       = $translator;
         $this->offer            = $this->fetchOffer();
-        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
-        $this->dispatcher       = System::getContainer()->get('event_dispatcher');
-        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
-        $this->requestStack     = System::getContainer()->get('request_stack');
-        $this->translator       = System::getContainer()->get('translator');
         $this->frontendUser     = FrontendUser::getInstance();
     }
 
@@ -118,9 +104,9 @@ class UserApplication extends Module
     private function fetchOffer(): ?IItem
     {
         /** @var Offer $metaModel */
-        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
+        $metaModel = $this->get('richardhj.ferienpass.model.offer');
         /** @var Connection $connection */
-        $connection = System::getContainer()->get('database_connection');
+        $connection = $this->get('database_connection');
         $statement  = $connection->createQueryBuilder()
             ->select('id')
             ->from('mm_ferienpass')
@@ -137,52 +123,32 @@ class UserApplication extends Module
     }
 
     /**
-     * @return string
+     * Returns the response.
      *
-     * @throws PageNotFoundException
+     * @param Template|object $template
+     * @param ModuleModel     $model
+     * @param Request         $request
+     *
+     * @return Response
      */
-    public function generate(): string
+    protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        if ($this->scopeMatcher->currentScopeIsBackend()) {
-            $template = new BackendTemplate('be_wildcard');
-
-            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
-            $template->title    = $this->headline;
-            $template->id       = $this->id;
-            $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
-
-            return $template->parse();
-        }
-
         if (null === $this->offer) {
             throw new PageNotFoundException('Item not found.');
         }
 
-        if ('' !== $this->customTpl) {
-            $this->strTemplate = $this->customTpl;
-        }
-
-        return parent::generate();
-    }
-
-    /**
-     * Generate the module
-     */
-    protected function compile(): void
-    {
         // Stop if the procedure is not used
         if (!$this->offer->get('applicationlist_active')) {
-            $this->Template->info = $this->translator->trans('MSC.applicationList.inactive', [], 'contao_default');
+            $template->info = $this->translator->trans('MSC.applicationList.inactive', [], 'contao_default');
 
-            return;
+            return Response::create($template->parse());
         }
 
         // Stop if the offer is in the past
         if (time() >= ToolboxOfferDate::offerStart($this->offer)) {
-            $this->Template->info = $this->translator->trans('MSC.applicationList.past', [], 'contao_default');
+            $template->info = $this->translator->trans('MSC.applicationList.past', [], 'contao_default');
 
-            return;
+            return Response::create($template->parse());
         }
 
         $countParticipants = Attendance::countParticipants($this->offer->get('id'));
@@ -192,25 +158,25 @@ class UserApplication extends Module
 
         if ($maxParticipants) {
             if ($availableParticipants < -10) {
-                $this->Template->booking_state_code = 4;
-                $this->Template->booking_state_text =
+                $template->booking_state_code = 4;
+                $template->booking_state_text =
                     'Es sind keine Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls voll.';
             } elseif ($availableParticipants < 1) {
-                $this->Template->booking_state_code = 3;
-                $this->Template->booking_state_text =
+                $template->booking_state_code = 3;
+                $template->booking_state_text =
                     'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
             } elseif ($availableParticipants < 4) {
-                $this->Template->booking_state_code = 2;
-                $this->Template->booking_state_text =
+                $template->booking_state_code = 2;
+                $template->booking_state_text =
                     'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
             } else {
-                $this->Template->booking_state_code = 1;
-                $this->Template->booking_state_text =
+                $template->booking_state_code = 1;
+                $template->booking_state_text =
                     'Es sind noch Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
             }
         } else {
-            $this->Template->booking_state_code = 0;
-            $this->Template->booking_state_text =
+            $template->booking_state_code = 0;
+            $template->booking_state_text =
                 'Das Angebot hat keine Teilnehmer-Beschränkung.<br>Sie können sich jetzt für das Angebot anmelden.';
         }
 
@@ -239,7 +205,7 @@ class UserApplication extends Module
 
             // Create form instance
             $form = new Form(
-                'al' . $this->id, 'POST', function ($haste) {
+                'al' . $model->id, 'POST', function ($haste) {
                 /** @noinspection PhpUndefinedMethodInspection */
                 return $haste->getFormId() === \Input::post('FORM_SUBMIT');
             }
@@ -294,13 +260,15 @@ class UserApplication extends Module
                 }
 
                 // Reload page to show confirmation message
-                throw new RedirectResponseException($this->requestStack->getCurrentRequest()->getUri());
+                throw new RedirectResponseException($request->getUri());
             }
 
             // Get the form as string
-            $this->Template->form = $form->generate();
+            $template->form = $form->generate();
         }
 
-        $this->Template->message = Message::generate();
+        $template->message = Message::generate();
+
+        return Response::create($template->parse());
     }
 }

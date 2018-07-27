@@ -1,0 +1,46 @@
+services:
+    richardhj.ferienpass.module.user_attendances:
+        class: Richardhj\ContaoFerienpassBundle\Module\UserAttendances
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: user_attendances, category: ferienpass }
+        arguments:
+            - '@richardhj.ferienpass.model.offer'
+            - '@richardhj.ferienpass.model.participant'
+            - '@event_dispatcher'
+            - '@translator'
+            - '@metamodels.render_setting_factory'
+
+    richardhj.ferienpass.module.user_application:
+        class: Richardhj\ContaoFerienpassBundle\Module\UserApplication
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: offer_user_application, category: ferienpass }
+        arguments:
+            - '@richardhj.ferienpass.model.participant'
+            - '@event_dispatcher'
+            - '@translator'
+
+    richardhj.ferienpass.module.add_attendee_host:
+        class: Richardhj\ContaoFerienpassBundle\Module\AddAttendeeHost
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: offer_addattendeehost, category: ferienpass }
+        arguments:
+            - '@database_connection'
+            - '@translator'
+            - '@richardhj.ferienpass.model.participant'
+
+    richardhj.ferienpass.module.application_list_host:
+        class: Richardhj\ContaoFerienpassBundle\Module\ApplicationListHost
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: offer_applicationlisthost, category: ferienpass }
+        arguments:
+            - '@richardhj.ferienpass.model.participant'
+            - '@metamodels.render_setting_factory'
+            - '@translator'

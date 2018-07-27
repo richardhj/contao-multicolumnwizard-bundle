@@ -13,23 +13,19 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
-use Contao\BackendTemplate;
+use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
-use Contao\Environment;
-use Contao\Frontend;
 use Contao\FrontendUser;
 use Contao\Input;
-use Contao\Module;
-use Contao\System;
-use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use Contao\ModuleModel;
+use Contao\Template;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use Doctrine\DBAL\Connection;
 use Haste\DateTime\DateTime;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\IItem;
 use MetaModels\Render\Setting\IRenderSettingFactory;
-use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\ApplicationList\Document;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
@@ -39,8 +35,8 @@ use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\ItemList;
 use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\TranslatorInterface;
 
 
@@ -49,15 +45,8 @@ use Symfony\Component\Translation\TranslatorInterface;
  *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class ApplicationListHost extends Module
+class ApplicationListHost extends AbstractFrontendModuleController
 {
-
-    /**
-     * Template
-     *
-     * @var string
-     */
-    protected $strTemplate = 'mod_offer_applicationlisthost';
 
     /**
      * @var IItem|null
@@ -70,11 +59,6 @@ class ApplicationListHost extends Module
     private $participantModel;
 
     /**
-     * @var RequestScopeDeterminator
-     */
-    private $scopeMatcher;
-
-    /**
      * @var IRenderSettingFactory
      */
     private $renderSettingFactory;
@@ -85,77 +69,40 @@ class ApplicationListHost extends Module
     private $translator;
 
     /**
-     * @var Frontend
+     * @var FrontendUser
      */
     private $frontendUser;
 
     /**
      * ApplicationListHost constructor.
      *
-     * @param \ModuleModel $module
-     * @param string       $column
-     *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @param Participant           $participantModel
+     * @param IRenderSettingFactory $renderSettingFactory
+     * @param TranslatorInterface   $translator
      */
-    public function __construct(\ModuleModel $module, $column = 'main')
-    {
-        parent::__construct($module, $column);
-
-        $this->scopeMatcher         = System::getContainer()->get('cca.dc-general.scope-matcher');
-        $this->participantModel     = System::getContainer()->get('richardhj.ferienpass.model.participant');
-        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
-        $this->translator           = System::getContainer()->get('translator');
+    public function __construct(
+        Participant $participantModel,
+        IRenderSettingFactory $renderSettingFactory,
+        TranslatorInterface $translator
+    ) {
+        $this->participantModel     = $participantModel;
+        $this->renderSettingFactory = $renderSettingFactory;
+        $this->translator           = $translator;
         $this->offer                = $this->fetchOffer();
         $this->frontendUser         = FrontendUser::getInstance();
     }
 
     /**
-     * @return IItem|null
+     * Returns the response.
      *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @param Template|object $template
+     * @param ModuleModel     $model
+     * @param Request         $request
+     *
+     * @return Response
      */
-    private function fetchOffer(): ?IItem
+    protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        /** @var Offer $metaModel */
-        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
-        /** @var Connection $connection */
-        $connection = System::getContainer()->get('database_connection');
-        $statement  = $connection->createQueryBuilder()
-            ->select('id')
-            ->from('mm_ferienpass')
-            ->where('alias=:item')
-            ->setParameter('item', Input::get('auto_item'))
-            ->execute();
-
-        $id = $statement->fetchColumn();
-        if (false === $id) {
-            return null;
-        }
-
-        return $metaModel->findById($id);
-    }
-
-    /**
-     * @return string
-     * @throws AccessDeniedException
-     * @throws PageNotFoundException
-     */
-    public function generate(): string
-    {
-        if ($this->scopeMatcher->currentScopeIsBackend()) {
-            $template = new BackendTemplate('be_wildcard');
-
-            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
-            $template->title    = $this->headline;
-            $template->id       = $this->id;
-            $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
-
-            return $template->parse();
-        }
-
         if (null === $this->offer) {
             throw new PageNotFoundException('Item not found.');
         }
@@ -167,30 +114,18 @@ class ApplicationListHost extends Module
             throw new AccessDeniedException('Access denied');
         }
 
-        if ('' !== $this->customTpl) {
-            $this->strTemplate = $this->customTpl;
-        }
-
-        return parent::generate();
-    }
-
-
-    /**
-     * Generate the module
-     */
-    protected function compile(): void
-    {
         if (!$this->offer->get('applicationlist_active')) {
             Message::addError($this->translator->trans('MSC.applicationList.inactive', [], 'contao_default'));
-            $this->Template->message = Message::generate();
+            $template->message = Message::generate();
 
-            return;
+            return Response::create($template->parse());
         }
 
         $maxParticipants = $this->offer->get('applicationlist_max');
-        $view            = $this->renderSettingFactory->createCollection(
+
+        $view = $this->renderSettingFactory->createCollection(
             $this->participantModel->getMetaModel(),
-            $this->metamodel_child_list_view
+            $model->metamodel_child_list_view
         );
 
         $fields           = $view->getSettingNames();
@@ -202,7 +137,7 @@ class ApplicationListHost extends Module
         if (null !== $attendances) {
             // Create table head
             foreach ($fields as $field) {
-                if ($field === 'dateOfBirth') {
+                if ('dateOfBirth' === $field) {
                     $rows[0][] = 'Alter';
                 } else {
                     $rows[0][] = $this->participantModel->getMetaModel()->getAttribute($field)->get('name');
@@ -224,7 +159,7 @@ class ApplicationListHost extends Module
                 }
 
                 foreach ($fields as $field) {
-                    $pmember = $participant->get('pmember');
+                    $parentMember = $participant->get('pmember');
 
                     if ($field === 'dateOfBirth') {
                         $date  = new DateTime('@' . $participant->get($field));
@@ -235,11 +170,11 @@ class ApplicationListHost extends Module
 
                     // Inherit parent's data
                     if ('' === $value) {
-                        $value = $pmember[$field];
+                        $value = $parentMember[$field];
                     }
 
-                    if ($field === 'phone' && '' !== $pmember['mobile']) {
-                        $value .= ' / ' . $pmember['mobile'];
+                    if ($field === 'phone' && '' !== $parentMember['mobile']) {
+                        $value .= ' / ' . $parentMember['mobile'];
 
                         $value = ltrim($value, '/ ');
                     }
@@ -270,9 +205,9 @@ class ApplicationListHost extends Module
                 return '';
             };
 
-            $this->Template->dataTable = Table::getDataArray($rows, 'application-list', $this, $rowClassCallback);
+            $template->dataTable = Table::getDataArray($rows, 'application-list', $model, $rowClassCallback);
 
-            $urlBuilder = UrlBuilder::fromUrl(Environment::get('uri'));
+            $urlBuilder = UrlBuilder::fromUrl($request->getUri());
             if ('download_list' === $urlBuilder->getQueryParameter('action')) {
                 $document = new Document($this->offer);
 
@@ -280,29 +215,57 @@ class ApplicationListHost extends Module
             }
 
             // Add download button
-            $this->Template->download = $this->document ? sprintf(
+            $template->download = sprintf(
                 '<a href="%1$s" title="%3$s" class="download_list">%2$s</a>',
                 $urlBuilder->setQueryParameter('action', 'download_list')->getUrl(),
-                $GLOBALS['TL_LANG']['MSC']['downloadList'][0],
-                $GLOBALS['TL_LANG']['MSC']['downloadList'][1]
-            ) : '';
+                $this->translator->trans('MSC.downloadList.0', [], 'contao_default'),
+                $this->translator->trans('MSC.downloadList.1', [], 'contao_default')
+            );
         }
 
-        $this->addRenderedMetaModelToTemplate();
-        $this->Template->message = Message::generate();
+        $this->addRenderedMetaModelToTemplate($template, $model);
+        $template->message = Message::generate();
+
+        return Response::create($template->parse());
     }
 
+    /**
+     * @return IItem|null
+     */
+    private function fetchOffer(): ?IItem
+    {
+        /** @var Offer $metaModel */
+        $metaModel = $this->get('richardhj.ferienpass.model.offer');
+        /** @var Connection $connection */
+        $connection = $this->get('database_connection');
+        $statement  = $connection->createQueryBuilder()
+            ->select('id')
+            ->from('mm_ferienpass')
+            ->where('alias=:item')
+            ->setParameter('item', Input::get('auto_item'))
+            ->execute();
+
+        $id = $statement->fetchColumn();
+        if (false === $id) {
+            return null;
+        }
+
+        return $metaModel->findById($id);
+    }
 
     /**
      * Add the rendered meta model of this offer to the template
+     *
+     * @param Template    $template
+     * @param ModuleModel $model
      */
-    protected function addRenderedMetaModelToTemplate(): void
+    protected function addRenderedMetaModelToTemplate(Template $template, ModuleModel $model): void
     {
         $itemRenderer = new ItemList();
         $itemRenderer
-            ->setMetaModel($this->metamodel, $this->metamodel_rendersettings)
+            ->setMetaModel($model->metamodel, $model->metamodel_rendersettings)
             ->addFilterRule(new StaticIdList([$this->offer->get('id')]));
 
-        $this->Template->metamodel = $itemRenderer->render($this->metamodel_noparsing, $this);
+        $template->metamodel = $itemRenderer->render($template->metamodel_noparsing, $this);
     }
 }

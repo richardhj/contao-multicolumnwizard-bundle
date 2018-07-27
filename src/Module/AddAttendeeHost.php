@@ -15,12 +15,16 @@ namespace Richardhj\ContaoFerienpassBundle\Module;
 
 use Contao\BackendTemplate;
 use Contao\Controller;
+use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
+use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
 use Contao\Input;
 use Contao\Module;
+use Contao\ModuleModel;
 use Contao\System;
+use Contao\Template;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use Doctrine\DBAL\Connection;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
@@ -35,6 +39,8 @@ use Haste\Form\Form;
 use MetaModels\Attribute\IAttribute;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\TranslatorInterface;
 
 
@@ -43,20 +49,8 @@ use Symfony\Component\Translation\TranslatorInterface;
  *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class AddAttendeeHost extends Module
+class AddAttendeeHost extends AbstractFrontendModuleController
 {
-
-    /**
-     * Template
-     *
-     * @var string
-     */
-    protected $strTemplate = 'mod_offer_addattendeehost';
-
-    /**
-     * @var RequestScopeDeterminator
-     */
-    private $scopeMatcher;
 
     /**
      * @var Connection
@@ -86,69 +80,30 @@ class AddAttendeeHost extends Module
     /**
      * AddAttendeeHost constructor.
      *
-     * @param \ModuleModel $module
-     * @param string       $column
-     *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @param Connection          $connection
+     * @param TranslatorInterface $translator
+     * @param Participant         $participantModel
      */
-    public function __construct(\ModuleModel $module, $column = 'main')
+    public function __construct(Connection $connection, TranslatorInterface $translator, Participant $participantModel)
     {
-        parent::__construct($module, $column);
-
-        $this->scopeMatcher     = System::getContainer()->get('cca.dc-general.scope-matcher');
-        $this->connection       = System::getContainer()->get('database_connection');
-        $this->participantModel = System::getContainer()->get('richardhj.ferienpass.model.participant');
-        $this->translator       = System::getContainer()->get('translator');
+        $this->connection       = $connection;
+        $this->translator       = $translator;
+        $this->participantModel = $participantModel;
         $this->offer            = $this->fetchOffer();
         $this->frontendUser     = FrontendUser::getInstance();
     }
 
     /**
-     * @return IItem|null
+     * Returns the response.
      *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
-     */
-    private function fetchOffer(): ?IItem
-    {
-        /** @var Offer $metaModel */
-        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
-        $statement = $this->connection->createQueryBuilder()
-            ->select('id')
-            ->from('mm_ferienpass')
-            ->where('alias=:item')
-            ->setParameter('item', Input::get('auto_item'))
-            ->execute();
-
-        $id = $statement->fetchColumn();
-        if (false === $id) {
-            return null;
-        }
-
-        return $metaModel->findById($id);
-    }
-
-    /**
-     * @return string
+     * @param Template|object $template
+     * @param ModuleModel     $model
+     * @param Request         $request
      *
-     * @throws AccessDeniedException
-     * @throws PageNotFoundException
+     * @return Response
      */
-    public function generate(): string
+    protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        if ($this->scopeMatcher->currentScopeIsBackend()) {
-            $template = new BackendTemplate('be_wildcard');
-
-            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
-            $template->title    = $this->headline;
-            $template->id       = $this->id;
-            $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
-
-            return $template->parse();
-        }
-
         if (null === $this->offer) {
             throw new PageNotFoundException('Item not found.');
         }
@@ -160,26 +115,8 @@ class AddAttendeeHost extends Module
             throw new AccessDeniedException('Access denied');
         }
 
-        if ('' !== $this->customTpl) {
-            $this->strTemplate = $this->customTpl;
-        }
-
-        return parent::generate();
-    }
-
-    /**
-     * Generate the module
-     *
-     * @throws \InvalidArgumentException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \RuntimeException
-     */
-    protected function compile(): void
-    {
         $form = new Form(
-            'tl_add_attendee_host', 'POST', function ($haste) {
-            /** @noinspection PhpUndefinedMethodInspection */
+            'tl_add_attendee_host', 'POST', function (Form $haste) {
             return $haste->getFormId() === Input::post('FORM_SUBMIT');
         }
         );
@@ -243,9 +180,9 @@ class AddAttendeeHost extends Module
         if (!$dca->iscreatable) {
             Message::addError($this->translator->trans('MSC.tableClosedInfo', [], 'contao_default'));
 
-            $this->Template->message = Message::generate();
+            $template->message = Message::generate();
 
-            return;
+            return Response::create($template->parse());
         }
 
         // Add all published attributes and override the dca settings in the field definition
@@ -293,11 +230,38 @@ class AddAttendeeHost extends Module
                     \count($participantsToAdd)
                 )
             );
-            Controller::reload();
+            throw new RedirectResponseException($request->getUri());
         }
 
-        $this->Template->message = Message::generate();
-        $this->Template->form    = $form->generate();
+        $template->message = Message::generate();
+        $template->form    = $form->generate();
+
+        return Response::create($template->parse());
+    }
+
+    /**
+     * @return IItem|null
+     *
+     * @throws ServiceNotFoundException
+     * @throws ServiceCircularReferenceException
+     */
+    private function fetchOffer(): ?IItem
+    {
+        /** @var Offer $metaModel */
+        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
+        $statement = $this->connection->createQueryBuilder()
+            ->select('id')
+            ->from('mm_ferienpass')
+            ->where('alias=:item')
+            ->setParameter('item', Input::get('auto_item'))
+            ->execute();
+
+        $id = $statement->fetchColumn();
+        if (false === $id) {
+            return null;
+        }
+
+        return $metaModel->findById($id);
     }
 
     private function addParticipant(array $row): void

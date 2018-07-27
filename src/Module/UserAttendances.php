@@ -13,18 +13,13 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
-use Contao\BackendTemplate;
+use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
-use Contao\Input;
-use Contao\Module;
-use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
+use Contao\Template;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use MetaModels\Render\Setting\IRenderSettingFactory;
-use ModuleModel;
-use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
-use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\Event\UserAttendancesTableEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
@@ -33,12 +28,9 @@ use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\TranslatorInterface;
 
 
@@ -47,7 +39,7 @@ use Symfony\Component\Translation\TranslatorInterface;
  *
  * @package Richardhj\ContaoFerienpassBundle\Module
  */
-class UserAttendances extends Module
+class UserAttendances extends AbstractFrontendModuleController
 {
 
     /**
@@ -66,11 +58,6 @@ class UserAttendances extends Module
     private $dispatcher;
 
     /**
-     * @var RequestScopeDeterminator
-     */
-    private $scopeMatcher;
-
-    /**
      * @var FrontendUser
      */
     private $frontendUser;
@@ -85,77 +72,42 @@ class UserAttendances extends Module
      */
     private $renderSettingFactory;
 
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $eventDispatcher;
 
     /**
      * UserAttendances constructor.
      *
-     * @param ModuleModel $module
-     * @param string      $column
-     *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @param Offer                    $offerModel
+     * @param Participant              $participantModel
+     * @param EventDispatcherInterface $dispatcher
+     * @param TranslatorInterface      $translator
+     * @param IRenderSettingFactory    $renderSettingFactory
      */
-    public function __construct(ModuleModel $module, $column = 'main')
-    {
-        parent::__construct($module, $column);
-
-        $this->strTemplate          = 'mod_user_attendances';
-        $this->offerModel           = System::getContainer()->get('richardhj.ferienpass.model.offer');
-        $this->participantModel     = System::getContainer()->get('richardhj.ferienpass.model.participant');
-        $this->dispatcher           = System::getContainer()->get('event_dispatcher');
-        $this->scopeMatcher         = System::getContainer()->get('cca.dc-general.scope-matcher');
-        $this->translator           = System::getContainer()->get('translator');
-        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
-        $this->requestStack         = System::getContainer()->get('request_stack');
-        $this->eventDispatcher      = System::getContainer()->get('event_dispatcher');
+    public function __construct(
+        Offer $offerModel,
+        Participant $participantModel,
+        EventDispatcherInterface $dispatcher,
+        TranslatorInterface $translator,
+        IRenderSettingFactory $renderSettingFactory
+    ) {
+        $this->offerModel           = $offerModel;
+        $this->participantModel     = $participantModel;
+        $this->dispatcher           = $dispatcher;
+        $this->translator           = $translator;
+        $this->renderSettingFactory = $renderSettingFactory;
         $this->frontendUser         = FrontendUser::getInstance();
     }
 
     /**
-     * {@inheritdoc}
+     * Returns the response.
+     *
+     * @param Template|object     $template
+     * @param \Contao\ModuleModel $model
+     * @param Request             $request
+     *
+     * @return Response
      */
-    public function generate(): string
+    protected function getResponse(Template $template, \Contao\ModuleModel $model, Request $request): Response
     {
-        if ($this->scopeMatcher->currentScopeIsBackend()) {
-            $template = new BackendTemplate('be_wildcard');
-
-            $template->wildcard = '### ' . Utf8::strtoupper($GLOBALS['TL_LANG']['FMD'][$this->type][0]) . ' ###';
-            $template->title    = $this->headline;
-            $template->id       = $this->id;
-            $template->link     = $this->name;
-            $template->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
-
-            return $template->parse();
-        }
-
-        // Set a custom template
-        if ('' !== $this->customTpl) {
-            $this->strTemplate = $this->customTpl;
-        }
-
-        return parent::generate();
-    }
-
-
-    /**
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
-     * @throws InvalidArgumentException
-     */
-    protected function compile(): void
-    {
-        /** @var Request $request */
-        $request = $this->requestStack->getCurrentRequest();
-
         // Delete attendance
         if ('delete' === $request->query->get('action')) {
             $attendanceToDelete = Attendance::findByPk($request->query->get('id'));
@@ -285,13 +237,14 @@ class UserAttendances extends Module
             if (\count($rows) <= 1) {
                 Message::addInformation($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
             } else {
-                $this->useHeader           = true;
-                $this->Template->dataTable = Table::getDataArray($rows, 'user-attendances', $this);
+                $template->dataTable = Table::getDataArray($rows, 'user-attendances', $model);
             }
         } else {
             Message::addWarning($this->translator->trans('MSC.noParticipants', [], 'contao_default'));
         }
 
-        $this->Template->message = Message::generate();
+        $template->message = Message::generate();
+
+        return Response::create($template->parse());
     }
 }

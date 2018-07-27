@@ -41,7 +41,7 @@ class Table
             'class' => $strName,
         ];
 
-        $arrDataTable['useHeader'] = $objModule->useHeader;
+        $arrDataTable['useHeader'] = true;
 
         $arrHeader = [];
         $arrBody = [];
