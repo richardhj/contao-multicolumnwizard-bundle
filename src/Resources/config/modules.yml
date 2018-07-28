@@ -44,3 +44,5 @@ services:
             - '@richardhj.ferienpass.model.participant'
             - '@metamodels.render_setting_factory'
             - '@translator'
+            - '@richardhj.ferienpass.model.offer'
+            - '@database_connection'

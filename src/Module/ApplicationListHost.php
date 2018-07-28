@@ -69,6 +69,16 @@ class ApplicationListHost extends AbstractFrontendModuleController
     private $translator;
 
     /**
+     * @var Offer
+     */
+    private $offerModel;
+
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
      * @var FrontendUser
      */
     private $frontendUser;
@@ -79,15 +89,21 @@ class ApplicationListHost extends AbstractFrontendModuleController
      * @param Participant           $participantModel
      * @param IRenderSettingFactory $renderSettingFactory
      * @param TranslatorInterface   $translator
+     * @param Offer                 $offerModel
+     * @param Connection            $connection
      */
     public function __construct(
         Participant $participantModel,
         IRenderSettingFactory $renderSettingFactory,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        Offer $offerModel,
+        Connection $connection
     ) {
         $this->participantModel     = $participantModel;
         $this->renderSettingFactory = $renderSettingFactory;
         $this->translator           = $translator;
+        $this->offerModel           = $offerModel;
+        $this->connection           = $connection;
         $this->offer                = $this->fetchOffer();
         $this->frontendUser         = FrontendUser::getInstance();
     }
@@ -234,11 +250,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
      */
     private function fetchOffer(): ?IItem
     {
-        /** @var Offer $metaModel */
-        $metaModel = $this->get('richardhj.ferienpass.model.offer');
-        /** @var Connection $connection */
-        $connection = $this->get('database_connection');
-        $statement  = $connection->createQueryBuilder()
+        $statement = $this->connection->createQueryBuilder()
             ->select('id')
             ->from('mm_ferienpass')
             ->where('alias=:item')
@@ -250,7 +262,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
             return null;
         }
 
-        return $metaModel->findById($id);
+        return $this->offerModel->findById($id);
     }
 
     /**
