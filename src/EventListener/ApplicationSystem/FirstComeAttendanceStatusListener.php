@@ -17,6 +17,7 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem;
 use Contao\Model\Event\PreSaveModelEvent;
 use ContaoCommunityAlliance\DcGeneral\Event\PrePersistModelEvent;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
+use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
@@ -38,6 +39,12 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
 
         $attendance = $event->getModel();
         if (!$attendance instanceof Attendance) {
+            return;
+        }
+
+        // Attendances with offer in the past are immutable
+        $offer = $attendance->getOffer();
+        if (time() >= ToolboxOfferDate::offerStart($offer)) {
             return;
         }
 

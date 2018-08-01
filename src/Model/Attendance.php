@@ -19,6 +19,7 @@ use Contao\System;
 use Doctrine\DBAL\Connection;
 use MetaModels\IFactory;
 use MetaModels\IItem;
+use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
@@ -131,10 +132,10 @@ class Attendance extends Model
 
         /** @var \Database\Result $result */
         $result = \Database::getInstance()->query(
-            'SELECT * FROM '.static::$strTable.' WHERE participant IN('.implode(
+            'SELECT * FROM ' . static::$strTable . ' WHERE participant IN(' . implode(
                 ',',
                 $participantIds
-            ).') ORDER BY '.static::getOrderBy()
+            ) . ') ORDER BY ' . static::getOrderBy()
         );
 
         return static::createCollectionFromDbResult($result, static::$strTable);
@@ -342,8 +343,13 @@ class Attendance extends Model
      *
      * @param int $offerId
      */
-    public static function updateStatusByOffer(int $offerId)
+    public static function updateStatusByOffer(int $offerId): void
     {
+        // Do not update the attendances with the offer being in the past
+        if (time() >= ToolboxOfferDate::offerStart($offerId)) {
+            return;
+        }
+
         $attendances = self::findByOffer($offerId);
 
         // Stop if the last attendance was deleted
@@ -351,7 +357,6 @@ class Attendance extends Model
             return;
         }
 
-        // todo does this produces a loop overload?
         while ($attendances->next()) {
             $attendances->save();
         }

@@ -34,7 +34,7 @@ class ToolboxOfferDate
      *
      * @return int|null The timestamp or null if no date given
      */
-    public static function offerStart($offer)
+    public static function offerStart($offer): ?int
     {
         $offer = self::fetchOffer($offer);
         $attribute = self::fetchDateAttribute($offer);
@@ -58,7 +58,7 @@ class ToolboxOfferDate
      *
      * @return int|null The timestamp or null if no date given
      */
-    public static function offerEnd($offer)
+    public static function offerEnd($offer): ?int
     {
         $offer = self::fetchOffer($offer);
         $attribute = self::fetchDateAttribute($offer);
