@@ -95,7 +95,7 @@ class DisableDoubleBookingParticipantsListener
                         // Disable option
                         $options[$k]['disabled'] = true;
                         $options[$k]['label']    = sprintf(
-                            $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['double_booking'],
+                            $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['double_booking'],
                             $option['label'],
                             $overlappingOffer->parseAttribute('name')['text']
                         );

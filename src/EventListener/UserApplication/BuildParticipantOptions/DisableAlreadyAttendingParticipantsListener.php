@@ -60,7 +60,7 @@ class DisableAlreadyAttendingParticipantsListener
                 // Disable option
                 $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
-                    $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'],
+                    $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['already_attending'],
                     $option['label']
                 );
             }

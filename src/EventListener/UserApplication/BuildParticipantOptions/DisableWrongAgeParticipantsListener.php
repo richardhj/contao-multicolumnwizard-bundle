@@ -98,7 +98,7 @@ class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
                 // Disable option
                 $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
-                    $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'],
+                    $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['age_not_allowed'],
                     $option['label']
                 );
             }

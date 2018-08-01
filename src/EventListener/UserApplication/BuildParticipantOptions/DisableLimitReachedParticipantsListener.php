@@ -67,7 +67,7 @@ class DisableLimitReachedParticipantsListener
             if (Attendance::countByParticipantAndDay($option['value']) >= $maxApplicationsPerDay) {
                 $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
-                    $GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'],
+                    $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['limit_reached'],
                     $option['label']
                 );
             }

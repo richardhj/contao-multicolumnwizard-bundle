@@ -15,25 +15,37 @@
 /**
  * Miscellaneous
  */
-// User attendances and application list
 $GLOBALS['TL_LANG']['MSC']['noAttendances'] = 'Es liegen keine Anmeldungen vor.';
 $GLOBALS['TL_LANG']['MSC']['noParticipants'] = 'Sie müssen vorerst Teilnehmer anlegen. {{link_open::26}}Klicken Sie hier.{{link_close}}';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['active'] = 'Dieses Angebot verwendet das Online-Anmeldeverfahren.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['inactive'] = 'Dieses Angebot verwendet <strong>nicht</strong> das Online-Anmeldeverfahren.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['past'] = 'Dieses Angebot liegt in der Vergangenheit.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['label'] = 'Teilnehmer auswählen';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['placeholder'] = 'Hier klicken und Teilnehmer auswählen';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['ok'] = '%s';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['already_attending'] = '%s (bereits angemeldet)';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['age_not_allowed'] = '%s (ungeignet für das Alter)';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['limit_reached'] = '%s (Pro-Tag-Limit erreicht)';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['option']['label']['double_booking'] = '%s (Terminüberschneidung mit "%s")';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['participant']['slabel'] = 'Anmelden';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['message']['confirmed'] = '%s ist angemeldet für dieses Angebot.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['message']['waiting'] = '%s ist vorgemerkt und wartet auf die Zuteilung für dieses Angebot.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['message']['waiting-list'] = '%s steht auf der Warteliste für dieses Angebot.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['message']['error'] = '%s ist für dieses Angebot nicht angemeldet.';
-$GLOBALS['TL_LANG']['MSC']['applicationList']['error'] = 'Ein Fehler ist aufgetreten.';
+
+// User application
+$GLOBALS['TL_LANG']['MSC']['user_application']['active'] = 'Dieses Angebot verwendet das Online-Anmeldeverfahren.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['inactive'] = 'Dieses Angebot verwendet <strong>nicht</strong> das Online-Anmeldeverfahren.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['past'] = 'Dieses Angebot liegt in der Vergangenheit.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['label'] = 'Teilnehmer auswählen';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['placeholder'] = 'Hier klicken und Teilnehmer auswählen';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['ok'] = '%s';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['already_attending'] = '%s (bereits angemeldet)';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['age_not_allowed'] = '%s (ungeignet für das Alter)';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['limit_reached'] = '%s (Pro-Tag-Limit erreicht)';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['double_booking'] = '%s (Terminüberschneidung mit "%s")';
+$GLOBALS['TL_LANG']['MSC']['user_application']['participant']['slabel'] = 'Anmelden';
+$GLOBALS['TL_LANG']['MSC']['user_application']['message']['confirmed'] = '%s ist angemeldet für dieses Angebot.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['message']['waiting'] = '%s ist vorgemerkt und wartet auf die Zuteilung für dieses Angebot.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['message']['waiting-list'] = '%s steht auf der Warteliste für dieses Angebot.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['message']['error'] = '%s ist für dieses Angebot nicht angemeldet.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['error'] = 'Ein Fehler ist aufgetreten.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['vacant_places_label'] = '%d freie Plätze';
+$GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][0] = 'Das Angebot hat keine Teilnehmer-Beschränkung.<br>Sie können sich jetzt für das Angebot anmelden.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][1] = 'Es sind noch Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][2] = 'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][3] = 'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][4] = 'Es sind keine freien Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls sehr voll.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['utilization_text'] = 'Es wollen mehr Kinder teilnehmen, als es Plätze gibt. Die aktuelle Auslastung liegt bei %d %%.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['lot'] = 'Es läuft aktuell das Los-Verfahren. Eine Zusage für die Anmeldung bekommen Sie erst nach dem Stichtag.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['firstcome'] = 'Es läuft aktuell das Windhundprinzip. Das bedeutet, dass Sie sofort auf die Teilnehmerliste geschrieben werden. Die Zusage bekommen Sie sofort im Anschluss.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['variants_list_link'] = 'Alternative Termine zum gleichen Termin';
+
 // Add attendee as host
 $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['submit'] = 'Teilnehmer verbindlich hinzufügen';
 $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['confirmation'] = 'Es wurden %u Teilnehmer zu diesem Angebot hinzugefügt.';

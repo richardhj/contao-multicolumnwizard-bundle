@@ -22,7 +22,11 @@ use Contao\Message;
 use Contao\ModuleModel;
 use Contao\Template;
 use Doctrine\DBAL\Connection;
+use MetaModels\IFactory;
 use MetaModels\IItem;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
@@ -45,11 +49,6 @@ use Symfony\Component\Translation\TranslatorInterface;
  */
 class UserApplication extends AbstractFrontendModuleController
 {
-
-    /**
-     * @var string
-     */
-    protected $strTemplate = 'mod_offer_applicationlist';
 
     /**
      * @var IItem|null
@@ -77,22 +76,46 @@ class UserApplication extends AbstractFrontendModuleController
     private $frontendUser;
 
     /**
+     * @var Offer
+     */
+    private $offerModel;
+
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * @var ApplicationSystemInterface
+     */
+    private $applicationSystem;
+
+    /**
      * UserApplication constructor.
      *
-     * @param Participant              $participantModel
-     * @param EventDispatcherInterface $dispatcher
-     * @param TranslatorInterface      $translator
+     * @param Participant                $participantModel
+     * @param EventDispatcherInterface   $dispatcher
+     * @param TranslatorInterface        $translator
+     * @param Offer                      $offerModel
+     * @param Connection                 $connection
+     * @param ApplicationSystemInterface $applicationSystem
      */
     public function __construct(
         Participant $participantModel,
         EventDispatcherInterface $dispatcher,
-        TranslatorInterface $translator
+        TranslatorInterface $translator,
+        Offer $offerModel,
+        Connection $connection,
+        ApplicationSystemInterface $applicationSystem
     ) {
-        $this->participantModel = $participantModel;
-        $this->dispatcher       = $dispatcher;
-        $this->translator       = $translator;
-        $this->offer            = $this->fetchOffer();
-        $this->frontendUser     = FrontendUser::getInstance();
+        $this->participantModel  = $participantModel;
+        $this->dispatcher        = $dispatcher;
+        $this->translator        = $translator;
+        $this->offerModel        = $offerModel;
+        $this->connection        = $connection;
+        $this->offer             = $this->fetchOffer();
+        $this->frontendUser      = FrontendUser::getInstance();
+        $this->applicationSystem = $applicationSystem;
     }
 
     /**
@@ -103,11 +126,8 @@ class UserApplication extends AbstractFrontendModuleController
      */
     private function fetchOffer(): ?IItem
     {
-        /** @var Offer $metaModel */
-        $metaModel = $this->get('richardhj.ferienpass.model.offer');
-        /** @var Connection $connection */
-        $connection = $this->get('database_connection');
-        $statement  = $connection->createQueryBuilder()
+        // Todo use reader filter
+        $statement = $this->connection->createQueryBuilder()
             ->select('id')
             ->from('mm_ferienpass')
             ->where('alias=:item')
@@ -119,7 +139,7 @@ class UserApplication extends AbstractFrontendModuleController
             return null;
         }
 
-        return $metaModel->findById($id);
+        return $this->offerModel->findById($id);
     }
 
     /**
@@ -139,51 +159,66 @@ class UserApplication extends AbstractFrontendModuleController
 
         // Stop if the procedure is not used
         if (!$this->offer->get('applicationlist_active')) {
-            $template->info = $this->translator->trans('MSC.applicationList.inactive', [], 'contao_default');
+            $template->info = $this->translator->trans('MSC.user_application.inactive', [], 'contao_default');
 
             return Response::create($template->parse());
         }
 
         // Stop if the offer is in the past
         if (time() >= ToolboxOfferDate::offerStart($this->offer)) {
-            $template->info = $this->translator->trans('MSC.applicationList.past', [], 'contao_default');
+            $template->info = $this->translator->trans('MSC.user_application.past', [], 'contao_default');
 
             return Response::create($template->parse());
         }
 
-        $countParticipants = Attendance::countParticipants($this->offer->get('id'));
-        $maxParticipants   = $this->offer->get('applicationlist_max');
+        $countParticipants  = Attendance::countParticipants($this->offer->get('id'));
+        $maxParticipants    = $this->offer->get('applicationlist_max');
+        $actualVacantPlaces = $maxParticipants - $countParticipants;
+        $vacantPlaces       = max(0, $actualVacantPlaces);
+        $utilization        = ($maxParticipants > 0) ? $countParticipants / $maxParticipants : 0;
 
-        $availableParticipants = $maxParticipants - $countParticipants;
+        $template->showVacantPlaces             = $this->applicationSystem instanceof FirstCome && $maxParticipants > 0;
+        $template->showUtilization              = $this->applicationSystem instanceof Lot;
+        $template->showBookingState             = $this->applicationSystem instanceof FirstCome;
+        $template->maxParticipants              = $maxParticipants;
+        $template->utilization                  = $utilization;
+        $template->vacantPlaces                 = $vacantPlaces;
+        $template->variantListHref              = $request->getBaseUrl() . '/' . $this->offer->get('id');
+        $template->variantListLink              = $this->translator->trans('MSC.user_application.variants_list_link', [], 'contao_default');
+        $template->utilizationText              = $this->translator->trans('MSC.user_application.utilization_text', ['utilization' => round($utilization * 100)], 'contao_default');
+        $template->vacantPlacesLabel            = $this->translator->trans('MSC.user_application.vacant_places_label', ['places' => $vacantPlaces], 'contao_default');
+        $template->currentApplicationSystemText = $this->translator->trans('MSC.user_application.current_application_system.' . $this->applicationSystem->getModel()->type, [], 'contao_default');
 
         if ($maxParticipants) {
-            if ($availableParticipants < -10) {
-                $template->booking_state_code = 4;
-                $template->booking_state_text =
-                    'Es sind keine Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls voll.';
-            } elseif ($availableParticipants < 1) {
-                $template->booking_state_code = 3;
-                $template->booking_state_text =
-                    'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
-            } elseif ($availableParticipants < 4) {
-                $template->booking_state_code = 2;
-                $template->booking_state_text =
-                    'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
-            } else {
-                $template->booking_state_code = 1;
-                $template->booking_state_text =
-                    'Es sind noch Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
+            switch (true) {
+                case $actualVacantPlaces < -10:
+                    $template->booking_state_code = 4;
+                    break;
+
+                case $actualVacantPlaces < 1:
+                    $template->booking_state_code = 3;
+                    break;
+
+                case $actualVacantPlaces < 4:
+                    $template->booking_state_code = 2;
+                    break;
+
+                default:
+                    $template->booking_state_code = 1;
+                    break;
             }
         } else {
             $template->booking_state_code = 0;
-            $template->booking_state_text =
-                'Das Angebot hat keine Teilnehmer-Beschränkung.<br>Sie können sich jetzt für das Angebot anmelden.';
         }
 
+        $template->booking_state_text = $this->translator->trans(
+            'MSC.user_application.booking_state.' . $template->booking_state_code,
+            [],
+            'contao_default'
+        );
 
         if (FE_USER_LOGGED_IN && $this->frontendUser->id) {
             $participants = $this->participantModel->findByParent($this->frontendUser->id);
-
             if (0 === $participants->getCount()) {
                 Message::addInfo($this->translator->trans('MSC.noParticipants', [], 'contao_default'));
             }
@@ -215,7 +250,7 @@ class UserApplication extends AbstractFrontendModuleController
                 'participant',
                 [
                     'label'     => $this->translator->trans(
-                        'MSC.applicationList.participant.label',
+                        'MSC.user_application.participant.label',
                         [],
                         'contao_default'
                     ),
@@ -226,7 +261,7 @@ class UserApplication extends AbstractFrontendModuleController
                         'mandatory'   => true,
                         'chosen'      => true,
                         'placeholder' => $this->translator->trans(
-                            'MSC.applicationList.participant.placeholder',
+                            'MSC.user_application.participant.placeholder',
                             [],
                             'contao_default'
                         )
@@ -239,7 +274,7 @@ class UserApplication extends AbstractFrontendModuleController
                 'submit',
                 array(
                     'label'     => $this->translator->trans(
-                        'MSC.applicationList.participant.slabel',
+                        'MSC.user_application.participant.slabel',
                         [],
                         'contao_default'
                     ),

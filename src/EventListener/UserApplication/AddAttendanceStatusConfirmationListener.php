@@ -51,7 +51,7 @@ class AddAttendanceStatusConfirmationListener
 
         Message::add(
             sprintf(
-                $GLOBALS['TL_LANG']['MSC']['applicationList']['message'][$status->type],
+                $GLOBALS['TL_LANG']['MSC']['user_application']['message'][$status->type],
                 $participantName
             ),
             $status->messageType
