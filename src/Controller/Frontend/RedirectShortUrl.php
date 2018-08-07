@@ -122,10 +122,10 @@ class RedirectShortUrl
             /** @var PageModel|Model $jumpTo */
             $jumpTo = PageModel::findById($this->listPageId);
             if (null === $jumpTo) {
-                throw new PageNotFoundException('List page could not be found: '.$this->listPageId);
+                throw new PageNotFoundException('List page could not be found: ' . $this->listPageId);
             }
 
-            $params   = '/vargroup/'.$item->get('vargroup').'#jumpToMmList';
+            $params   = '/vargroup/' . $item->get('vargroup') . '#jumpToMmList';
             $urlEvent = new GenerateFrontendUrlEvent($jumpTo->row(), $params);
             $this->dispatcher->dispatch(
                 ContaoEvents::CONTROLLER_GENERATE_FRONTEND_URL,
@@ -135,7 +135,7 @@ class RedirectShortUrl
         }
 
         throw new PageNotFoundException(
-            'MetaModel item not found: '.ModelId::fromValues($metaModel->getTableName(), $item->get('id'))
+            'MetaModel item not found: ' . ModelId::fromValues($metaModel->getTableName(), $itemId)
                 ->getSerialized()
         );
     }
