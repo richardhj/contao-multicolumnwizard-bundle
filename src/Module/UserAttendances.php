@@ -14,6 +14,7 @@
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
+use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
 use Contao\Template;
@@ -112,26 +113,18 @@ class UserAttendances extends AbstractFrontendModuleController
         if ('delete' === $request->query->get('action')) {
             $attendanceToDelete = Attendance::findByPk($request->query->get('id'));
             if (null === $attendanceToDelete) {
-                // Check for existence
-                Message::addError('Anmeldung schon gelöscht');
-            } elseif (!$this->participantModel->isProperChild(
-                $attendanceToDelete->participant,
-                $this->frontendUser->id
-            )) {
-                // Check for permission
-                Message::addError('keine Berechtigung');
-                $this->dispatcher->dispatch(
-                    new LogEvent(
-                        sprintf(
-                            'User "%s" does not have the permission to delete attendance ID %u',
-                            $this->frontendUser->username,
-                            $attendanceToDelete->id
-                        ),
-                        __METHOD__,
-                        TL_ERROR
-                    )
-                );
-            } elseif (ToolboxOfferDate::offerStart($attendanceToDelete->offer) <= time()) {
+                $urlBuilder = UrlBuilder::fromUrl($request->getUri());
+                $urlBuilder->unsetQueryParameter('action');
+                $urlBuilder->unsetQueryParameter('id');
+
+                throw new RedirectResponseException($urlBuilder->getUrl());
+            }
+
+            if (!$this->participantModel->isProperChild($attendanceToDelete->participant, $this->frontendUser->id)) {
+                throw new AccessDeniedException('Lack of permission to delete order ID ' . $attendanceToDelete->id);
+            }
+
+            if (ToolboxOfferDate::offerStart($attendanceToDelete->offer) <= time()) {
                 // Check for offer's date
                 Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteOfferInPast']);
             } else {

@@ -17,12 +17,11 @@ use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
-use Contao\Input;
 use Contao\Message;
 use Contao\ModuleModel;
 use Contao\Template;
-use Doctrine\DBAL\Connection;
-use MetaModels\IFactory;
+use MetaModels\Filter\Setting\FilterSettingFactory;
+use MetaModels\Filter\Setting\IFilterSettingFactory;
 use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
@@ -31,11 +30,8 @@ use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplica
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
-use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Form\Form;
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -49,11 +45,6 @@ use Symfony\Component\Translation\TranslatorInterface;
  */
 class UserApplication extends AbstractFrontendModuleController
 {
-
-    /**
-     * @var IItem|null
-     */
-    private $offer;
 
     /**
      * @var Participant
@@ -76,19 +67,14 @@ class UserApplication extends AbstractFrontendModuleController
     private $frontendUser;
 
     /**
-     * @var Offer
-     */
-    private $offerModel;
-
-    /**
-     * @var Connection
-     */
-    private $connection;
-
-    /**
      * @var ApplicationSystemInterface
      */
     private $applicationSystem;
+
+    /**
+     * @var IFilterSettingFactory
+     */
+    private $filterSettingFactory;
 
     /**
      * UserApplication constructor.
@@ -96,50 +82,47 @@ class UserApplication extends AbstractFrontendModuleController
      * @param Participant                $participantModel
      * @param EventDispatcherInterface   $dispatcher
      * @param TranslatorInterface        $translator
-     * @param Offer                      $offerModel
-     * @param Connection                 $connection
      * @param ApplicationSystemInterface $applicationSystem
+     * @param FilterSettingFactory       $filterSettingFactory
      */
     public function __construct(
         Participant $participantModel,
         EventDispatcherInterface $dispatcher,
         TranslatorInterface $translator,
-        Offer $offerModel,
-        Connection $connection,
-        ApplicationSystemInterface $applicationSystem
+        ApplicationSystemInterface $applicationSystem,
+        FilterSettingFactory $filterSettingFactory
     ) {
-        $this->participantModel  = $participantModel;
-        $this->dispatcher        = $dispatcher;
-        $this->translator        = $translator;
-        $this->offerModel        = $offerModel;
-        $this->connection        = $connection;
-        $this->offer             = $this->fetchOffer();
-        $this->frontendUser      = FrontendUser::getInstance();
-        $this->applicationSystem = $applicationSystem;
+        $this->participantModel     = $participantModel;
+        $this->dispatcher           = $dispatcher;
+        $this->translator           = $translator;
+        $this->applicationSystem    = $applicationSystem;
+        $this->filterSettingFactory = $filterSettingFactory;
+        $this->frontendUser         = FrontendUser::getInstance();
     }
 
     /**
-     * @return IItem|null
+     * @param string $alias
      *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @return IItem
      */
-    private function fetchOffer(): ?IItem
+    private function fetchOffer(string $alias): IItem
     {
-        // Todo use reader filter
-        $statement = $this->connection->createQueryBuilder()
-            ->select('id')
-            ->from('mm_ferienpass')
-            ->where('alias=:item')
-            ->setParameter('item', Input::get('auto_item'))
-            ->execute();
+        $filterId         = 1;
+        $filterCollection = $this->filterSettingFactory->createCollection($filterId);
+        $metaModel        = $filterCollection->getMetaModel();
+        $filter           = $metaModel->getEmptyFilter();
 
-        $id = $statement->fetchColumn();
-        if (false === $id) {
-            return null;
+        $filterCollection->addRules($filter, ['auto_item' => $alias]);
+        $items = $metaModel->findByFilter($filter);
+        if (0 === $items->getCount()) {
+            throw new PageNotFoundException('Offer not found (filter ID: ' . $filterId . ').');
         }
 
-        return $this->offerModel->findById($id);
+        if ($items->getCount() > 1) {
+            throw new \RuntimeException('Offer ambiguous (filter ID: ' . $filterId . ').');
+        }
+
+        return $items->getItem();
     }
 
     /**
@@ -153,41 +136,55 @@ class UserApplication extends AbstractFrontendModuleController
      */
     protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        if (null === $this->offer) {
-            throw new PageNotFoundException('Item not found.');
-        }
+        $offer = $this->fetchOffer(\Input::get('auto_item'));
 
         // Stop if the procedure is not used
-        if (!$this->offer->get('applicationlist_active')) {
+        if (!$offer->get('applicationlist_active')) {
             $template->info = $this->translator->trans('MSC.user_application.inactive', [], 'contao_default');
 
             return Response::create($template->parse());
         }
 
         // Stop if the offer is in the past
-        if (time() >= ToolboxOfferDate::offerStart($this->offer)) {
+        if (time() >= ToolboxOfferDate::offerStart($offer)) {
             $template->info = $this->translator->trans('MSC.user_application.past', [], 'contao_default');
 
             return Response::create($template->parse());
         }
 
-        $countParticipants  = Attendance::countParticipants($this->offer->get('id'));
-        $maxParticipants    = $this->offer->get('applicationlist_max');
+        $countParticipants  = Attendance::countParticipants($offer->get('id'));
+        $maxParticipants    = $offer->get('applicationlist_max');
         $actualVacantPlaces = $maxParticipants - $countParticipants;
         $vacantPlaces       = max(0, $actualVacantPlaces);
         $utilization        = ($maxParticipants > 0) ? $countParticipants / $maxParticipants : 0;
+        $variantBase        = $offer->getVariantBase();
+        $variants           = $variantBase->getVariants(null);
 
         $template->showVacantPlaces             = $this->applicationSystem instanceof FirstCome && $maxParticipants > 0;
-        $template->showUtilization              = $this->applicationSystem instanceof Lot;
+        $template->showUtilization              = $this->applicationSystem instanceof Lot && $utilization >= 0.8;
         $template->showBookingState             = $this->applicationSystem instanceof FirstCome;
         $template->maxParticipants              = $maxParticipants;
         $template->utilization                  = $utilization;
         $template->vacantPlaces                 = $vacantPlaces;
-        $template->variantListHref              = $request->getBaseUrl() . '/' . $this->offer->get('id');
-        $template->variantListLink              = $this->translator->trans('MSC.user_application.variants_list_link', [], 'contao_default');
-        $template->utilizationText              = $this->translator->trans('MSC.user_application.utilization_text', ['utilization' => round($utilization * 100)], 'contao_default');
-        $template->vacantPlacesLabel            = $this->translator->trans('MSC.user_application.vacant_places_label', ['places' => $vacantPlaces], 'contao_default');
-        $template->currentApplicationSystemText = $this->translator->trans('MSC.user_application.current_application_system.' . $this->applicationSystem->getModel()->type, [], 'contao_default');
+        $template->showVariantListLink          = $variants ? $variants->getCount() > 1 : false;
+        $template->variantListHref              = $request->getBaseUrl() . '/' . $offer->get('id');
+        $template->variantListLink              =
+            $this->translator->trans('MSC.user_application.variants_list_link', [], 'contao_default');
+        $template->utilizationText              = $this->translator->trans(
+            'MSC.user_application.high_utilization_text',
+            ['utilization' => round($utilization * 100)],
+            'contao_default'
+        );
+        $template->vacantPlacesLabel            = $this->translator->trans(
+            'MSC.user_application.vacant_places_label',
+            ['places' => $vacantPlaces],
+            'contao_default'
+        );
+        $template->currentApplicationSystemText = $this->translator->trans(
+            'MSC.user_application.current_application_system.' . $this->applicationSystem->getModel()->type,
+            [],
+            'contao_default'
+        );
 
         if ($maxParticipants) {
             switch (true) {
@@ -233,7 +230,7 @@ class UserApplication extends AbstractFrontendModuleController
                 ];
             }
 
-            $event = new BuildParticipantOptionsForUserApplicationEvent($participants, $this->offer, $options);
+            $event = new BuildParticipantOptionsForUserApplicationEvent($participants, $offer, $options);
             $this->dispatcher->dispatch(BuildParticipantOptionsForUserApplicationEvent::NAME, $event);
 
             $options = $event->getResult();
@@ -288,7 +285,7 @@ class UserApplication extends AbstractFrontendModuleController
                 foreach ((array) $form->fetch('participant') as $participant) {
                     // Trigger event and let the application system set the attendance
                     $event = new UserSetApplicationEvent(
-                        $this->offer,
+                        $offer,
                         $this->participantModel->findById($participant)
                     );
                     $this->dispatcher->dispatch(UserSetApplicationEvent::NAME, $event);

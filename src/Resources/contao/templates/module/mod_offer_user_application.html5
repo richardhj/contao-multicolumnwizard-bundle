@@ -18,7 +18,7 @@
 
 <?php if ($this->showUtilization): ?>
     <p class="utilization"><?= $this->utilizationText ?></p>
-    <?php if ($this->utilization >= 0.8): ?>
+    <?php if ($this->showVariantListLink): ?>
         <a href="<?= $this->variantListHref ?>" class="btn btn--primary">
             <span class="hyperlink_txt"><?= $this->variantListLink ?></span>
         </a>

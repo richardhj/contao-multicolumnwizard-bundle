@@ -17,13 +17,12 @@ use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\FrontendUser;
-use Contao\Input;
 use Contao\ModuleModel;
 use Contao\Template;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
-use Doctrine\DBAL\Connection;
 use Haste\DateTime\DateTime;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
+use MetaModels\Filter\Setting\FilterSettingFactory;
 use MetaModels\IItem;
 use MetaModels\Render\Setting\IRenderSettingFactory;
 use Richardhj\ContaoFerienpassBundle\ApplicationList\Document;
@@ -33,7 +32,6 @@ use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use MetaModels\Filter\Rules\StaticIdList;
 use MetaModels\ItemList;
-use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,11 +45,6 @@ use Symfony\Component\Translation\TranslatorInterface;
  */
 class ApplicationListHost extends AbstractFrontendModuleController
 {
-
-    /**
-     * @var IItem|null
-     */
-    private $offer;
 
     /**
      * @var Participant
@@ -69,19 +62,14 @@ class ApplicationListHost extends AbstractFrontendModuleController
     private $translator;
 
     /**
-     * @var Offer
-     */
-    private $offerModel;
-
-    /**
-     * @var Connection
-     */
-    private $connection;
-
-    /**
      * @var FrontendUser
      */
     private $frontendUser;
+
+    /**
+     * @var FilterSettingFactory
+     */
+    private $filterSettingFactory;
 
     /**
      * ApplicationListHost constructor.
@@ -89,22 +77,18 @@ class ApplicationListHost extends AbstractFrontendModuleController
      * @param Participant           $participantModel
      * @param IRenderSettingFactory $renderSettingFactory
      * @param TranslatorInterface   $translator
-     * @param Offer                 $offerModel
-     * @param Connection            $connection
+     * @param FilterSettingFactory  $filterSettingFactory
      */
     public function __construct(
         Participant $participantModel,
         IRenderSettingFactory $renderSettingFactory,
         TranslatorInterface $translator,
-        Offer $offerModel,
-        Connection $connection
+        FilterSettingFactory $filterSettingFactory
     ) {
         $this->participantModel     = $participantModel;
         $this->renderSettingFactory = $renderSettingFactory;
         $this->translator           = $translator;
-        $this->offerModel           = $offerModel;
-        $this->connection           = $connection;
-        $this->offer                = $this->fetchOffer();
+        $this->filterSettingFactory = $filterSettingFactory;
         $this->frontendUser         = FrontendUser::getInstance();
     }
 
@@ -119,25 +103,22 @@ class ApplicationListHost extends AbstractFrontendModuleController
      */
     protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        if (null === $this->offer) {
-            throw new PageNotFoundException('Item not found.');
-        }
-
-        $hostData = $this->offer->get('host');
+        $offer    = $this->fetchOffer(\Input::get('auto_item'));
+        $hostData = $offer->get('host');
         $hostId   = $hostData[MetaModelSelect::SELECT_RAW]['id'];
 
         if ($this->frontendUser->ferienpass_host !== $hostId) {
             throw new AccessDeniedException('Access denied');
         }
 
-        if (!$this->offer->get('applicationlist_active')) {
+        if (!$offer->get('applicationlist_active')) {
             Message::addError($this->translator->trans('MSC.applicationList.inactive', [], 'contao_default'));
             $template->message = Message::generate();
 
             return Response::create($template->parse());
         }
 
-        $maxParticipants = $this->offer->get('applicationlist_max');
+        $maxParticipants = $offer->get('applicationlist_max');
 
         $view = $this->renderSettingFactory->createCollection(
             $this->participantModel->getMetaModel(),
@@ -145,7 +126,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
         );
 
         $fields           = $view->getSettingNames();
-        $attendances      = Attendance::findByOffer($this->offer->get('id'));
+        $attendances      = Attendance::findByOffer($offer->get('id'));
         $statusConfirmed  = AttendanceStatus::findConfirmed()->id;
         $statusWaitlisted = AttendanceStatus::findWaitlisted()->id;
         $rows             = [];
@@ -169,7 +150,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
                     continue;
                 }
                 if (null === $participant) {
-                    $attendances->current()->delete(); # this will sync the entire list
+                    $attendances->current()->delete();
 
                     continue;
                 }
@@ -225,7 +206,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
 
             $urlBuilder = UrlBuilder::fromUrl($request->getUri());
             if ('download_list' === $urlBuilder->getQueryParameter('action')) {
-                $document = new Document($this->offer);
+                $document = new Document($offer);
 
                 $document->outputToBrowser();
             }
@@ -239,30 +220,35 @@ class ApplicationListHost extends AbstractFrontendModuleController
             );
         }
 
-        $this->addRenderedMetaModelToTemplate($template, $model);
+        $this->addRenderedMetaModelToTemplate($template, $model, $offer);
         $template->message = Message::generate();
 
         return Response::create($template->parse());
     }
 
     /**
-     * @return IItem|null
+     * @param string $alias
+     *
+     * @return IItem
      */
-    private function fetchOffer(): ?IItem
+    private function fetchOffer(string $alias): IItem
     {
-        $statement = $this->connection->createQueryBuilder()
-            ->select('id')
-            ->from('mm_ferienpass')
-            ->where('alias=:item')
-            ->setParameter('item', Input::get('auto_item'))
-            ->execute();
+        $filterId         = 1;
+        $filterCollection = $this->filterSettingFactory->createCollection($filterId);
+        $metaModel        = $filterCollection->getMetaModel();
+        $filter           = $metaModel->getEmptyFilter();
 
-        $id = $statement->fetchColumn();
-        if (false === $id) {
-            return null;
+        $filterCollection->addRules($filter, ['auto_item' => $alias]);
+        $items = $metaModel->findByFilter($filter);
+        if (0 === $items->getCount()) {
+            throw new PageNotFoundException('Offer not found (filter ID: ' . $filterId . ').');
         }
 
-        return $this->offerModel->findById($id);
+        if ($items->getCount() > 1) {
+            throw new \RuntimeException('Offer ambiguous (filter ID: ' . $filterId . ').');
+        }
+
+        return $items->getItem();
     }
 
     /**
@@ -270,13 +256,14 @@ class ApplicationListHost extends AbstractFrontendModuleController
      *
      * @param Template    $template
      * @param ModuleModel $model
+     * @param IItem       $offer
      */
-    protected function addRenderedMetaModelToTemplate(Template $template, ModuleModel $model): void
+    protected function addRenderedMetaModelToTemplate(Template $template, ModuleModel $model, IItem $offer): void
     {
         $itemRenderer = new ItemList();
         $itemRenderer
             ->setMetaModel($model->metamodel, $model->metamodel_rendersettings)
-            ->addFilterRule(new StaticIdList([$this->offer->get('id')]));
+            ->addFilterRule(new StaticIdList([$offer->get('id')]));
 
         $template->metamodel = $itemRenderer->render($template->metamodel_noparsing, $this);
     }

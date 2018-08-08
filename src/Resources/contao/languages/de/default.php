@@ -15,6 +15,8 @@
 /**
  * Miscellaneous
  */
+$GLOBALS['TL_LANG']['MSC']['editParticipant'] = 'Teilnehmer bearbeiten';
+$GLOBALS['TL_LANG']['MSC']['addNewParticipant'] = 'Einen neuen Teilnehmer erstellen';
 $GLOBALS['TL_LANG']['MSC']['noAttendances'] = 'Es liegen keine Anmeldungen vor.';
 $GLOBALS['TL_LANG']['MSC']['noParticipants'] = 'Sie müssen vorerst Teilnehmer anlegen. {{link_open::26}}Klicken Sie hier.{{link_close}}';
 
@@ -41,7 +43,7 @@ $GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][1] = 'Es sind no
 $GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][2] = 'Es sind nur noch wenige Plätze für dieses Angebot verfügbar.<br>Sie können sich jetzt für das Angebot anmelden.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][3] = 'Es sind keine freien Plätze mehr verfügbar,<br>aber Sie können sich auf die Warteliste eintragen.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['booking_state'][4] = 'Es sind keine freien Plätze mehr verfügbar<br>und die Warteliste ist ebenfalls sehr voll.';
-$GLOBALS['TL_LANG']['MSC']['user_application']['utilization_text'] = 'Es wollen mehr Kinder teilnehmen, als es Plätze gibt. Die aktuelle Auslastung liegt bei %d %%.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['high_utilization_text'] = 'Es wollen mehr Kinder teilnehmen, als es Plätze gibt. Die aktuelle Auslastung liegt bei %d %%.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['lot'] = 'Es läuft aktuell das Los-Verfahren. Eine Zusage für die Anmeldung bekommen Sie erst nach dem Stichtag.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['firstcome'] = 'Es läuft aktuell das Windhundprinzip. Das bedeutet, dass Sie sofort auf die Teilnehmerliste geschrieben werden. Die Zusage bekommen Sie sofort im Anschluss.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['variants_list_link'] = 'Alternative Termine zum gleichen Termin';

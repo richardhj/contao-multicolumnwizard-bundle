@@ -22,9 +22,8 @@ services:
             - '@richardhj.ferienpass.model.participant'
             - '@event_dispatcher'
             - '@translator'
-            - '@richardhj.ferienpass.model.offer'
-            - '@database_connection'
             - '@richardhj.ferienpass.application_system'
+            - '@metamodels.filter_setting_factory'
 
     richardhj.ferienpass.module.add_attendee_host:
         class: Richardhj\ContaoFerienpassBundle\Module\AddAttendeeHost
@@ -47,5 +46,4 @@ services:
             - '@richardhj.ferienpass.model.participant'
             - '@metamodels.render_setting_factory'
             - '@translator'
-            - '@richardhj.ferienpass.model.offer'
-            - '@database_connection'
+            - '@metamodels.filter_setting_factory'
