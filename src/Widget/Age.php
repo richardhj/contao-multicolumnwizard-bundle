@@ -149,7 +149,7 @@ class Age extends Widget
                     $this->strId.'_'.$i.'_'.$ii,
                     ('BE' === TL_MODE) ? 'tl_text' : 'text',
                     !empty($arrLineInputValues) ? $arrLineInputValues[$ii] : '',
-                    ('BE' === TL_MODE) ? ' style="width: 25px;text-align: center"' : ''
+                    ('BE' === TL_MODE) ? ' style="width: 35px;text-align: center"' : ''
                 );
             }
 
