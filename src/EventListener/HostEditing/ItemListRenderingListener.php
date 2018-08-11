@@ -202,12 +202,12 @@ class ItemListRenderingListener
      */
     private static function getHostEditEnd(IItem $offer): ?int
     {
-        $passRelease = $offer->get('pass_release');
-        if (null === $passRelease) {
+        $passEdition = $offer->get('pass_edition');
+        if (null === $passEdition) {
             return null;
         }
 
-        return $passRelease[MetaModelSelect::SELECT_RAW]['host_edit_end'];
+        return $passEdition['host_edit_end'];
     }
 
     /**

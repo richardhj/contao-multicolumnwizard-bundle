@@ -55,5 +55,4 @@ services:
     richardhj.ferienpass.pass_releases:
         class: Richardhj\ContaoFerienpassBundle\Util\PassReleases
         arguments:
-            - '@metamodels.factory'
             - '@database_connection'

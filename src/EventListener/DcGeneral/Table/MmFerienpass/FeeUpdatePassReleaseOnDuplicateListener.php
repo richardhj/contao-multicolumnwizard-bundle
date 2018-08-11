@@ -64,13 +64,13 @@ class FeeUpdatePassReleaseOnDuplicateListener
             return;
         }
 
-        $passRelease = $this->passReleases->getPassReleaseToEdit();
-        if (null === $passRelease) {
+        $passEdition = $this->passReleases->getPassReleaseToEdit();
+        if (null === $passEdition) {
             throw new \RuntimeException('Sorry, can\'t file the pass release.');
         }
 
         $item = $model->getItem();
-        $item->set('pass_release', $passRelease->get('id'));
+        $item->set('pass_edition', $passEdition['id']);
         $item->set('date_period', null);
     }
 }

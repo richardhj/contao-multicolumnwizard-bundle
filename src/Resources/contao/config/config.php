@@ -45,6 +45,11 @@ array_insert(
                 'tl_ferienpass_dataprocessing',
             ],
         ],
+        'ferienpass_editions'              => [
+            'tables' => [
+                'tl_ferienpass_edition',
+            ],
+        ],
         'ferienpass_application_systems'           => [
             'tables' => [
                 'tl_ferienpass_applicationsystem',

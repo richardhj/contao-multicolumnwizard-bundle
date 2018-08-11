@@ -58,4 +58,18 @@ class ApplicationSystemFactory
     {
         return new Lot(ApplicationSystemModel::findLot());
     }
+
+    /**
+     * @param mixed $id The id or the pass_edition row with id value.
+     *
+     * @return ApplicationSystemInterface
+     */
+    public static function findForPassEdition($id): ApplicationSystemInterface
+    {
+        $id = $id['id'] ?? $id;
+        $connection = System::getContainer()->get('database_connection');
+//        $statement = $connection->createQueryBuilder()
+//            ->select('*')
+//            ->from('tl_ferienpass_edition')
+    }
 }

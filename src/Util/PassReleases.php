@@ -23,11 +23,6 @@ class PassReleases
 {
 
     /**
-     * @var IFactory
-     */
-    private $factory;
-
-    /**
      * @var Connection
      */
     private $connection;
@@ -35,12 +30,10 @@ class PassReleases
     /**
      * PassReleases constructor.
      *
-     * @param IFactory   $factory    The MetaModels factory.
      * @param Connection $connection The database connection.
      */
-    public function __construct(IFactory $factory, Connection $connection)
+    public function __construct(Connection $connection)
     {
-        $this->factory    = $factory;
         $this->connection = $connection;
     }
 
@@ -49,27 +42,17 @@ class PassReleases
      *
      * @return IItem|null
      */
-    public function getPassReleaseToEdit(): ?IItem
+    public function getPassReleaseToEdit(): ?array
     {
-        $metaModel = $this->factory->getMetaModel('mm_ferienpass_release');
-        if (null === $metaModel) {
-            return null;
-        }
-
         $qb = $this->connection->createQueryBuilder()
-            ->select('id')
-            ->from($metaModel->getTableName())
+            ->select('*')
+            ->from('tl_ferienpass_edition')
             ->where('holiday_begin>:time')
             ->andWhere('host_edit_end>:time')
             ->orderBy('holiday_begin')
-            ->setParameter('time', time());
+            ->setParameter('time', time())
+        ->execute();
 
-        $filter = $metaModel
-            ->getEmptyFilter()
-            ->addFilterRule(SimpleQuery::createFromQueryBuilder($qb));
-
-        $models = $metaModel->findByFilter($filter);
-
-        return $models->getItem();
+        return $qb->fetch(\PDO::FETCH_ASSOC);
     }
 }

@@ -77,13 +77,13 @@ class FeeInitialDataListener
         }
 
         // Set current pass_release.
-        $passRelease = $this->passReleases->getPassReleaseToEdit();
-        if (null === $passRelease) {
+        $passEdition = $this->passReleases->getPassReleaseToEdit();
+        if (null === $passEdition) {
             throw new \RuntimeException('Sorry, can\'t file the pass release.');
         }
 
-        if (null === $item->get('pass_release')) {
-            $item->set('pass_release', $passRelease->get('id'));
+        if (null === $item->get('pass_edition')) {
+            $item->set('pass_edition', $passEdition['id']);
         }
     }
 }
