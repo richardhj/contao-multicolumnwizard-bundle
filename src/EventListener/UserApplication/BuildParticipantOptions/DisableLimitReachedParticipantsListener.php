@@ -14,28 +14,26 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions;
 
 
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
-use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 
 class DisableLimitReachedParticipantsListener
 {
-
     /**
-     * @var ApplicationSystemInterface
+     * @var OfferModel
      */
-    private $applicationSystem;
+    private $offerModel;
 
     /**
      * DisableLimitReachedParticipantsListener constructor.
      *
-     * @param ApplicationSystemInterface $applicationSystem The application system.
+     * @param OfferModel $offerModel
      */
-    public function __construct(ApplicationSystemInterface $applicationSystem)
+    public function __construct(OfferModel $offerModel)
     {
-        $this->applicationSystem = $applicationSystem;
+        $this->offerModel = $offerModel;
     }
 
     /**
@@ -47,13 +45,14 @@ class DisableLimitReachedParticipantsListener
      */
     public function handle(BuildParticipantOptionsForUserApplicationEvent $event): void
     {
-        if (!$this->applicationSystem instanceof FirstCome) {
+        $applicationSystem = $this->offerModel->getApplicationSystem($event->getOffer());
+        if (!($applicationSystem instanceof FirstCome)) {
             return;
         }
 
         $options = $event->getResult();
 
-        $maxApplicationsPerDay = ApplicationSystem::findFirstCome()->maxApplicationsPerDay;
+        $maxApplicationsPerDay = $applicationSystem->getModel()->maxApplicationsPerDay;
         if (!$maxApplicationsPerDay) {
             return;
         }

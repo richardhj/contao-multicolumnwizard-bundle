@@ -17,27 +17,26 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerie
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetOperationButtonEvent;
 use MetaModels\DcGeneral\Data\Model;
 use MetaModels\IItem;
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
+use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 
 class AttendancesOperationButtonListener
 {
-
     /**
-     * @var ApplicationSystemInterface
+     * @var OfferModel
      */
-    private $applicationSystem;
+    private $offerModel;
 
     /**
      * AttendancesOperationButtonListener constructor.
      *
-     * @param ApplicationSystemInterface $applicationSystem The current application system.
+     * @param OfferModel $offerModel
      */
-    public function __construct(ApplicationSystemInterface $applicationSystem)
+    public function __construct(OfferModel $offerModel)
     {
-        $this->applicationSystem = $applicationSystem;
+        $this->offerModel = $offerModel;
     }
 
     /**
@@ -50,8 +49,7 @@ class AttendancesOperationButtonListener
         /** @var Model $model */
         $model = $event->getModel();
 
-        if (!$this->applicationSystem instanceof Lot
-            || 'mm_ferienpass' !== $model->getProviderName()
+        if ('mm_ferienpass' !== $model->getProviderName()
             || 'edit_attendances' !== $event->getCommand()->getName()
         ) {
             return;
@@ -59,6 +57,11 @@ class AttendancesOperationButtonListener
 
         $item = $model->getItem();
         if (!$item instanceof IItem) {
+            return;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($item);
+        if (!($applicationSystem instanceof Lot)) {
             return;
         }
 
@@ -95,4 +98,3 @@ class AttendancesOperationButtonListener
         }
     }
 }
-

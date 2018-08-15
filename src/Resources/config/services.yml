@@ -38,10 +38,6 @@ services:
         factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createLot]
         lazy: true
 
-    richardhj.ferienpass.application_system:
-        class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\AbstractApplicationSystem
-        factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', create]
-
     richardhj.ferienpass.model.participant:
         class: Richardhj\ContaoFerienpassBundle\Model\Participant
         arguments:
@@ -51,8 +47,3 @@ services:
         class: Richardhj\ContaoFerienpassBundle\Model\Offer
         arguments:
             - '@metamodels.factory'
-
-    richardhj.ferienpass.pass_releases:
-        class: Richardhj\ContaoFerienpassBundle\Util\PassReleases
-        arguments:
-            - '@database_connection'

@@ -14,23 +14,23 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem;
 
 
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 
 abstract class AbstractApplicationSystemListener
 {
 
     /**
-     * @var ApplicationSystemInterface
+     * @var OfferModel
      */
-    protected $applicationSystem;
+    protected $offerModel;
 
     /**
      * AbstractApplicationSystemListener constructor.
      *
-     * @param ApplicationSystemInterface $applicationSystem The application system.
+     * @param OfferModel $offerModel
      */
-    public function __construct(ApplicationSystemInterface $applicationSystem)
+    public function __construct(OfferModel $offerModel)
     {
-        $this->applicationSystem = $applicationSystem;
+        $this->offerModel = $offerModel;
     }
 }

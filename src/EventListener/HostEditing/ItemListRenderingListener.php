@@ -17,12 +17,12 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\HostEditing;
 use Contao\PageModel;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\GenerateFrontendUrlEvent;
-use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\Events\ParseItemEvent;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\IItem;
 use MetaModels\ViewCombination\ViewCombination;
-use Richardhj\ContaoFerienpassBundle\Util\PassReleases;
+use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -46,29 +46,28 @@ class ItemListRenderingListener
     private $viewCombination;
 
     /**
-     * @var PassReleases
+     * @var ManagerRegistry
      */
-    private $passReleases;
+    private $doctrine;
 
     /**
      * ItemListRenderingListener constructor.
      *
-     * @param EventDispatcherInterface $dispatcher The event dispatcher.
-     * @param TranslatorInterface $translator The translator.
-     * @param ViewCombination $viewCombination The current view combinations.
-     * @param PassReleases $passReleases
+     * @param EventDispatcherInterface $dispatcher      The event dispatcher.
+     * @param TranslatorInterface      $translator      The translator.
+     * @param ViewCombination          $viewCombination The current view combinations.
+     * @param ManagerRegistry          $doctrine
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
         TranslatorInterface $translator,
         ViewCombination $viewCombination,
-        PassReleases $passReleases
-    )
-    {
-        $this->dispatcher = $dispatcher;
-        $this->translator = $translator;
+        ManagerRegistry $doctrine
+    ) {
+        $this->dispatcher      = $dispatcher;
+        $this->translator      = $translator;
         $this->viewCombination = $viewCombination;
-        $this->passReleases = $passReleases;
+        $this->doctrine        = $doctrine;
     }
 
     /**
@@ -97,10 +96,10 @@ class ItemListRenderingListener
      */
     public function addApplicationListLink(ParseItemEvent $event): void
     {
-        $screen = $this->viewCombination->getScreen('mm_ferienpass');
-        $settings = $event->getRenderSettings();
-        $jumpTo = PageModel::findByPk($settings->get('$jump-to-application-list'));
-        $item = $event->getItem();
+        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
+        $settings  = $event->getRenderSettings();
+        $jumpTo    = PageModel::findByPk($settings->get('$jump-to-application-list'));
+        $item      = $event->getItem();
         $metaModel = $item->getMetaModel();
         $tableName = $metaModel->getTableName();
 
@@ -124,7 +123,7 @@ class ItemListRenderingListener
             'label' => $this->translateLabel('metamodel_show_application_list.0', $metaModel->getTableName()),
             'title' => $this->translateLabel('metamodel_show_application_list.1', $metaModel->getTableName()),
             'class' => 'applicationlist',
-            'href' => $generateFrontendUrlEvent->getUrl(),
+            'href'  => $generateFrontendUrlEvent->getUrl(),
         ];
 
         $event->setResult($parsed);
@@ -139,8 +138,8 @@ class ItemListRenderingListener
      */
     public function modifyActionButtons(ParseItemEvent $event): void
     {
-        $screen = $this->viewCombination->getScreen('mm_ferienpass');
-        $item = $event->getItem();
+        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
+        $item      = $event->getItem();
         $metaModel = $item->getMetaModel();
 
         if ('3' !== $screen['meta']['id'] || 'mm_ferienpass' !== $metaModel->getTableName()) {
@@ -169,7 +168,8 @@ class ItemListRenderingListener
         }
 
         // Remove copy action for items currently being allowed to edit.
-        if (true === self::offerIsEditableForHost($item) && null !== $this->passReleases->getPassReleaseToEdit()) {
+        $passRelease = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
+        if (null !== $passRelease && true === self::offerIsEditableForHost($item)) {
             unset($result['actions']['copy']);
         }
 
@@ -218,11 +218,11 @@ class ItemListRenderingListener
      * 2. Try to translate with the prefix 'MSC.'.
      * 3. Return the input value as nothing worked out.
      *
-     * @param string $transString The non translated label for the button.
+     * @param string $transString    The non translated label for the button.
      *
      * @param string $definitionName The data definition of the current item.
      *
-     * @param array $parameters The parameters to pass to the translator.
+     * @param array  $parameters     The parameters to pass to the translator.
      *
      * @return string
      */

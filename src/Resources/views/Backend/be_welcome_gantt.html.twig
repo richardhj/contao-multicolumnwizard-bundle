@@ -1,0 +1,55 @@
+<h2 class="gantt-headline">Zeitplan</h2>
+<div class="gantt">
+    <div class="gantt__row gantt__row--months">
+        <div class="gantt__row-first"></div>
+        <div class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+            {% for head in header %}
+                <span style="grid-column: {{ head.column.start }}/{{ head.column.stop }};">{{ head.label }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="gantt__row gantt__row--lines">
+        <div class="gantt__row-first"></div>
+        <div class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+            {% for head in header %}
+                {% if not loop.last %}
+                    <span style="grid-column: {{ head.column.start }}/{{ head.column.stop }};"></span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="gantt__row gantt__row--lines">
+        <div class="gantt__row-first"></div>
+        <div class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+            <span class="marker" style="grid-column: {{ marker.column.start }}/{{ marker.column.stop }};"></span>
+        </div>
+    </div>
+    {% for title,row in elements %}
+        <div class="gantt__row{% if row is empty %} gantt__row--empty{% endif %}">
+            <div class="gantt__row-first">
+                <div class="title">{{ title }}</div>
+                {% if row.notifications is defined %}
+                    <ul class="gantt__notifications">
+                        {% for notification in row.notifications %}
+                            <li class="gantt__notification gantt__notification--{{ notification.class }}" title="{{ notification.title }}"><i class="fas fa-{{ notification.fa }}"></i> {{ notification.text }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <ul class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+                {% for element in row %}
+                    <li
+                            style="grid-column: {{ element.column.start }}/{{ element.column.stop }};{% if element.style.background is defined %} background-color: #{{ element.style.background }}; color: #{{ element.style.color }}{% endif %}"
+                            {% if element.isPast %}class="stripes"{% endif %}>
+                        {{ element.label }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
+<div class="gantt-caption">
+    <ul>
+        <li></li>
+    </ul>
+</div>

@@ -18,9 +18,9 @@ use Contao\MemberModel;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ParentView;
 use Haste\DateTime\DateTime;
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 
 class ModifyLabelListener
@@ -32,20 +32,20 @@ class ModifyLabelListener
     private $participantsModel;
 
     /**
-     * @var ApplicationSystemInterface
+     * @var OfferModel
      */
-    private $applicationSystem;
+    private $offerModel;
 
     /**
      * ModifyLabelListener constructor.
      *
-     * @param Participant                $participantsModel The participants model.
-     * @param ApplicationSystemInterface $applicationSystem
+     * @param Participant $participantsModel The participants model.
+     * @param OfferModel  $offerModel
      */
-    public function __construct(Participant $participantsModel, ApplicationSystemInterface $applicationSystem)
+    public function __construct(Participant $participantsModel, OfferModel $offerModel)
     {
         $this->participantsModel = $participantsModel;
-        $this->applicationSystem = $applicationSystem;
+        $this->offerModel        = $offerModel;
     }
 
     /**
@@ -59,8 +59,7 @@ class ModifyLabelListener
         $dataDefinition  = $environment->getDataDefinition();
         $basicDefinition = $dataDefinition->getBasicDefinition();
 
-        if (!($this->applicationSystem instanceof Lot)
-            || !($environment->getView() instanceof ParentView)
+        if (!($environment->getView() instanceof ParentView)
             || 'tl_ferienpass_attendance' !== $dataDefinition->getName()
             || 'mm_ferienpass' !== $basicDefinition->getParentDataProvider()) {
             return;
@@ -68,6 +67,16 @@ class ModifyLabelListener
 
         $model = $event->getModel();
         $args  = $event->getArgs();
+
+        $offer = $this->offerModel->findById($model->getProperty('offer'));
+        if (null === $offer) {
+            return;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof Lot)) {
+            return;
+        }
 
         // Adjust the label
         foreach ($args as $k => $v) {

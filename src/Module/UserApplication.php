@@ -23,13 +23,13 @@ use Contao\Template;
 use MetaModels\Filter\Setting\FilterSettingFactory;
 use MetaModels\Filter\Setting\IFilterSettingFactory;
 use MetaModels\IItem;
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Form\Form;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -67,37 +67,37 @@ class UserApplication extends AbstractFrontendModuleController
     private $frontendUser;
 
     /**
-     * @var ApplicationSystemInterface
-     */
-    private $applicationSystem;
-
-    /**
      * @var IFilterSettingFactory
      */
     private $filterSettingFactory;
 
     /**
+     * @var OfferModel
+     */
+    private $offerModel;
+
+    /**
      * UserApplication constructor.
      *
-     * @param Participant                $participantModel
-     * @param EventDispatcherInterface   $dispatcher
-     * @param TranslatorInterface        $translator
-     * @param ApplicationSystemInterface $applicationSystem
-     * @param FilterSettingFactory       $filterSettingFactory
+     * @param Participant              $participantModel
+     * @param EventDispatcherInterface $dispatcher
+     * @param TranslatorInterface      $translator
+     * @param FilterSettingFactory     $filterSettingFactory
+     * @param OfferModel               $offerModel
      */
     public function __construct(
         Participant $participantModel,
         EventDispatcherInterface $dispatcher,
         TranslatorInterface $translator,
-        ApplicationSystemInterface $applicationSystem,
-        FilterSettingFactory $filterSettingFactory
+        FilterSettingFactory $filterSettingFactory,
+        OfferModel $offerModel
     ) {
         $this->participantModel     = $participantModel;
         $this->dispatcher           = $dispatcher;
         $this->translator           = $translator;
-        $this->applicationSystem    = $applicationSystem;
         $this->filterSettingFactory = $filterSettingFactory;
         $this->frontendUser         = FrontendUser::getInstance();
+        $this->offerModel           = $offerModel;
     }
 
     /**
@@ -152,6 +152,7 @@ class UserApplication extends AbstractFrontendModuleController
             return Response::create($template->parse());
         }
 
+        $applicationSystem  = $this->offerModel->getApplicationSystem($offer);
         $countParticipants  = Attendance::countParticipants($offer->get('id'));
         $maxParticipants    = $offer->get('applicationlist_max');
         $actualVacantPlaces = $maxParticipants - $countParticipants;
@@ -160,9 +161,9 @@ class UserApplication extends AbstractFrontendModuleController
         $variantBase        = $offer->getVariantBase();
         $variants           = $variantBase->getVariants(null);
 
-        $template->showVacantPlaces             = $this->applicationSystem instanceof FirstCome && $maxParticipants > 0;
-        $template->showUtilization              = $this->applicationSystem instanceof Lot && $utilization >= 0.8;
-        $template->showBookingState             = $this->applicationSystem instanceof FirstCome;
+        $template->showVacantPlaces             = $applicationSystem instanceof FirstCome && $maxParticipants > 0;
+        $template->showUtilization              = $applicationSystem instanceof Lot && $utilization >= 0.8;
+        $template->showBookingState             = $applicationSystem instanceof FirstCome;
         $template->maxParticipants              = $maxParticipants;
         $template->utilization                  = $utilization;
         $template->vacantPlaces                 = $vacantPlaces;
@@ -181,7 +182,7 @@ class UserApplication extends AbstractFrontendModuleController
             'contao_default'
         );
         $template->currentApplicationSystemText = $this->translator->trans(
-            'MSC.user_application.current_application_system.' . $this->applicationSystem->getModel()->type,
+            'MSC.user_application.current_application_system.' . $applicationSystem->getModel()->type,
             [],
             'contao_default'
         );

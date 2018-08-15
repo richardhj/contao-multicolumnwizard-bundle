@@ -20,10 +20,10 @@ use Contao\ManagerPlugin\Bundle\Config\ConfigInterface;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
 use ContaoCommunityAlliance\MetaPalettes\CcaMetaPalettesBundle;
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use MetaModels\CoreBundle\MetaModelsCoreBundle;
 use MetaModels\FilterCheckboxBundle\MetaModelsFilterCheckboxBundle;
 use MetaModels\FilterFromToBundle\MetaModelsFilterFromToBundle;
-use Oneup\FlysystemBundle\OneupFlysystemBundle;
 use Richardhj\ContaoFerienpassBundle\RichardhjContaoFerienpassBundle;
 use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -53,6 +53,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
                         MetaModelsFilterCheckboxBundle::class,
                         MetaModelsFilterFromToBundle::class,
                         CcaMetaPalettesBundle::class,
+                        DoctrineBundle::class
                     ]
                 ),
         ];
@@ -70,7 +71,7 @@ class Plugin implements BundlePluginInterface, RoutingPluginInterface
     public function getRouteCollection(LoaderResolverInterface $resolver, KernelInterface $kernel): ?RouteCollection
     {
         return $resolver
-            ->resolve(__DIR__.'/../Resources/config/routing.yml')
-            ->load(__DIR__.'/../Resources/config/routing.yml');
+            ->resolve(__DIR__ . '/../Resources/config/routing.yml')
+            ->load(__DIR__ . '/../Resources/config/routing.yml');
     }
 }

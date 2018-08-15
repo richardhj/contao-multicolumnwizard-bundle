@@ -18,9 +18,10 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Event\PreDuplicateModelEvent;
 use MetaModels\DcGeneral\Data\Model;
-use Richardhj\ContaoFerienpassBundle\Util\PassReleases;
+use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 
-class FeeUpdatePassReleaseOnDuplicateListener
+class FeeUpdatePassEditionOnDuplicateListener
 {
 
     /**
@@ -29,20 +30,20 @@ class FeeUpdatePassReleaseOnDuplicateListener
     private $scopeMatcher;
 
     /**
-     * @var PassReleases
+     * @var ManagerRegistry
      */
-    private $passReleases;
+    private $doctrine;
 
     /**
      * FrontendPermissionCheckListener constructor.
      *
      * @param RequestScopeDeterminator $scopeMatcher
-     * @param PassReleases             $passReleases
+     * @param ManagerRegistry          $doctrine
      */
-    public function __construct(RequestScopeDeterminator $scopeMatcher, PassReleases $passReleases)
+    public function __construct(RequestScopeDeterminator $scopeMatcher, ManagerRegistry $doctrine)
     {
         $this->scopeMatcher = $scopeMatcher;
-        $this->passReleases = $passReleases;
+        $this->doctrine     = $doctrine;
     }
 
     /**
@@ -64,13 +65,13 @@ class FeeUpdatePassReleaseOnDuplicateListener
             return;
         }
 
-        $passEdition = $this->passReleases->getPassReleaseToEdit();
+        $passEdition = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
         if (null === $passEdition) {
             throw new \RuntimeException('Sorry, can\'t file the pass release.');
         }
 
         $item = $model->getItem();
-        $item->set('pass_edition', $passEdition['id']);
+        $item->set('pass_edition', $passEdition->getId());
         $item->set('date_period', null);
     }
 }

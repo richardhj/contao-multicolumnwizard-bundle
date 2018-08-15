@@ -17,7 +17,6 @@ namespace Richardhj\ContaoFerienpassBundle\Model;
 /**
  * Class ApplicationSystem
  *
- * @property string $title
  * @property string $type
  * @property mixed  $maxApplicationsPerDay
  * @package Richardhj\ContaoFerienpassBundle\Model

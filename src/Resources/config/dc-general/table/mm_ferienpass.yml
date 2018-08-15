@@ -6,7 +6,7 @@ services:
             - "@cca.dc-general.scope-matcher"
             - "@translator"
             - "@cca.translator.contao_translator"
-            - '@richardhj.ferienpass.application_system'
+            - '@richardhj.ferienpass.model.offer'
         tags:
             - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 150 }
 
@@ -24,7 +24,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ModifyLabelListener
         arguments:
             - '@richardhj.ferienpass.model.participant'
-            - '@richardhj.ferienpass.application_system'
+            - '@richardhj.ferienpass.model.offer'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle, priority: -10 }
 
@@ -35,10 +35,10 @@ services:
 
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.attendances_operation_button:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\AttendancesOperationButtonListener
-        arguments:
-            - "@richardhj.ferienpass.application_system"
         tags:
             - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-operation-button', method: handle }
+        arguments:
+          ['@richardhj.ferienpass.model.offer']
 
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.add_attendances_table_to_backend_module:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\AddAttendancesTableToBackendModuleListener
@@ -73,7 +73,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeInitialDataListener
         arguments:
             - '@cca.dc-general.scope-matcher'
-            - '@richardhj.ferienpass.pass_releases'
+            - '@doctrine'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }
 
@@ -85,10 +85,10 @@ services:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: 10 }
 
     richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.fronted_update_pass_release_on_duplicate_item:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeUpdatePassReleaseOnDuplicateListener
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeUpdatePassEditionOnDuplicateListener
         arguments:
             - '@cca.dc-general.scope-matcher'
-            - '@richardhj.ferienpass.pass_releases'
+            - '@doctrine'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-duplicate', method: handle, priority: -10 }
 

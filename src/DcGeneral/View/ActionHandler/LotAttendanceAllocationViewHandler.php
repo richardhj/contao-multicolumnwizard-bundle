@@ -20,10 +20,10 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ActionHandl
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\Translator\TranslatorInterface as CcaTranslator;
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
+use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 use Symfony\Component\Translation\TranslatorInterface;
 
 
@@ -31,40 +31,27 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
 {
 
     /**
-     * @var ApplicationSystemInterface
+     * @var OfferModel
      */
-    private $applicationSystem;
+    private $offerModel;
 
     /**
      * AbstractHandler constructor.
      *
-     * @param RequestScopeDeterminator   $scopeDeterminator The request mode determinator.
-     * @param TranslatorInterface        $translator        The translator.
-     * @param CcaTranslator              $ccaTranslator     The cca translator.
-     * @param ApplicationSystemInterface $applicationSystem
+     * @param RequestScopeDeterminator $scopeDeterminator The request mode determinator.
+     * @param TranslatorInterface      $translator        The translator.
+     * @param CcaTranslator            $ccaTranslator     The cca translator.
+     * @param OfferModel               $offerModel
      */
     public function __construct(
         RequestScopeDeterminator $scopeDeterminator,
         TranslatorInterface $translator,
         CcaTranslator $ccaTranslator,
-        ApplicationSystemInterface $applicationSystem
+        OfferModel $offerModel
     ) {
         parent::__construct($scopeDeterminator, $translator, $ccaTranslator);
 
-        $this->applicationSystem = $applicationSystem;
-    }
-
-    /**
-     * Check if the action should be handled.
-     *
-     * @param string $mode   The list mode.
-     * @param Action $action The action.
-     *
-     * @return bool
-     */
-    protected function wantToHandle($mode, Action $action): bool
-    {
-        return ($this->applicationSystem instanceof Lot) && parent::wantToHandle($mode, $action);
+        $this->offerModel = $offerModel;
     }
 
     /**
@@ -87,6 +74,17 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
 
         if ('mm_ferienpass' !== $basicDefinition->getParentDataProvider()) {
             // Set null and the next view handler will handle it.
+            return null;
+        }
+
+        $parentModel = $this->loadParentModel($environment);
+        $offer       = $this->offerModel->findById($parentModel->getId());
+        if (null === $offer) {
+            return null;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof Lot)) {
             return null;
         }
 

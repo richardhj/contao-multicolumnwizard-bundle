@@ -33,18 +33,19 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
      */
     public function handle(PreSaveModelEvent $event): void
     {
-        if (!$this->applicationSystem instanceof FirstCome) {
-            return;
-        }
-
         $attendance = $event->getModel();
-        if (!$attendance instanceof Attendance) {
+        if (!($attendance instanceof Attendance)) {
             return;
         }
 
         // Attendances with offer in the past are immutable
         $offer = $attendance->getOffer();
-        if (time() >= ToolboxOfferDate::offerStart($offer)) {
+        if (null === $offer || time() >= ToolboxOfferDate::offerStart($offer)) {
+            return;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof FirstCome)) {
             return;
         }
 
@@ -81,15 +82,23 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
     public function handleDcGeneral(PrePersistModelEvent $event): void
     {
         $environment = $event->getEnvironment();
-        if (!($this->applicationSystem instanceof FirstCome)
-            || 'tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
+        if ('tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 
         $model      = $event->getModel();
         $attendance = Attendance::findByPk($model->getId());
-        $newStatus  = $this->findStatusForAttendance($attendance);
-        $oldStatus  = $attendance->getStatus();
+        if (null === $offer = $attendance->getOffer()) {
+            return;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof FirstCome)) {
+            return;
+        }
+
+        $newStatus = $this->findStatusForAttendance($attendance);
+        $oldStatus = $attendance->getStatus();
         if (null === $oldStatus) {
             throw new \RuntimeException('Old status not given.');
         }

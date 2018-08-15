@@ -18,26 +18,13 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 
-class PassEditionRepository extends EntityRepository
+class ApplicationSystemRepository extends EntityRepository
 {
+
     /**
-     * @return PassEdition|null
+     * Look up the current pass edition and evaluate the valid application system.
      */
-    public function findOneToEdit(): ?PassEdition
+    public function findForItem()
     {
-        $qb = $this->createQueryBuilder('e')
-            ->andWhere('e.holiday_begin > :time')
-            ->andWhere('host_edit_end > :time')
-            ->orderBy('e.holiday_begin', 'ASC')
-            ->setParameter('time', time())
-            ->getQuery();
-
-        try {
-            $result = $qb->setMaxResults(1)->getOneOrNullResult();
-        } catch (NonUniqueResultException $e) {
-            $result = null;
-        }
-
-        return $result;
     }
 }

@@ -11,10 +11,3 @@ parameters:
 
     # Age check method can be - exact or - vague_on_year
     richardhj.ferienpass.age_check_method: exact
-
-doctrine:
-    orm:
-        entity_managers:
-            default:
-                mappings:
-                    RichardhjContaoFerienpassBundle: ~

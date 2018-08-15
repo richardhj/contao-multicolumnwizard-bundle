@@ -31,18 +31,22 @@ class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListen
      */
     public function handle(DeleteModelEvent $event): void
     {
-        if (!$this->applicationSystem instanceof FirstCome) {
-            return;
-        }
-
         $attendance = $event->getModel();
         if (!$attendance instanceof Attendance) {
             return;
         }
 
-        if ($offer = $attendance->getOffer()) {
-            Attendance::updateStatusByOffer($offer->get('id'));
+        $offer = $attendance->getOffer();
+        if (null === $offer) {
+            return;
         }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof FirstCome)) {
+            return;
+        }
+
+        Attendance::updateStatusByOffer($offer->get('id'));
     }
 
     /**
@@ -55,11 +59,21 @@ class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListen
     public function handleDcGeneral(PostDeleteModelEvent $event): void
     {
         $environment = $event->getEnvironment();
-        if (!($this->applicationSystem instanceof FirstCome)
-            || 'tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
+        if ('tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 
-        Attendance::updateStatusByOffer($event->getModel()->getProperty('offer'));
+        $offerId = $event->getModel()->getProperty('offer');
+        $offer   = $this->offerModel->findById($offerId);
+        if (null === $offer) {
+            return;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof FirstCome)) {
+            return;
+        }
+
+        Attendance::updateStatusByOffer($offerId);
     }
 }

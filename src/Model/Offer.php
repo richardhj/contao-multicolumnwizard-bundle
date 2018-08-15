@@ -13,15 +13,26 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
 
+use Contao\System;
 use MetaModels\Factory;
+use MetaModels\IItem;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 
 
 /**
  * Class Offer
+ *
  * @package Richardhj\ContaoFerienpassBundle\Model
  */
 class Offer extends AbstractSimpleMetaModel
 {
+
+    /**
+     * @var ManagerRegistry
+     */
+    private $doctrine;
 
     /**
      * Offer constructor.
@@ -32,6 +43,15 @@ class Offer extends AbstractSimpleMetaModel
      */
     public function __construct(Factory $factory)
     {
-        parent::__construct($factory,'mm_ferienpass');
+        parent::__construct($factory, 'mm_ferienpass');
+        $this->doctrine = System::getContainer()->get('doctrine');
+    }
+
+    public function getApplicationSystem(IItem $offer): ?ApplicationSystemInterface
+    {
+        $reference   = $offer->get('pass_edition');
+        $passEdition = $this->doctrine->getRepository(PassEdition::class)->find($reference['id']);
+
+        return $passEdition->getCurrentApplicationSystem();
     }
 }

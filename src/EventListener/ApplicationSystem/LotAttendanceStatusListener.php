@@ -32,13 +32,19 @@ class LotAttendanceStatusListener extends AbstractApplicationSystemListener
      */
     public function handle(PreSaveModelEvent $event): void
     {
-        if (!$this->applicationSystem instanceof Lot) {
-            return;
-        }
-
         /** @var Attendance $model */
         $model = $event->getModel();
         if (!$model instanceof Attendance || null !== $model->getStatus()) {
+            return;
+        }
+
+        $offer = $model->getOffer();
+        if (null === $offer) {
+            return;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof Lot)) {
             return;
         }
 
@@ -69,13 +75,23 @@ class LotAttendanceStatusListener extends AbstractApplicationSystemListener
     public function handleDcGeneral(PrePersistModelEvent $event): void
     {
         $environment = $event->getEnvironment();
-        if (!($this->applicationSystem instanceof Lot)
-            || 'tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
+
+        if ('tl_ferienpass_attendance' !== $environment->getDataDefinition()->getName()) {
             return;
         }
 
         $model = $event->getModel();
         if ($model->getProperty('status')) {
+            return;
+        }
+
+        $offer = $this->offerModel->findById($model->getProperty('offer'));
+        if (null === $offer) {
+            return;
+        }
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof Lot)) {
             return;
         }
 

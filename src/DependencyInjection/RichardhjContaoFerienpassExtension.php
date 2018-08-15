@@ -16,12 +16,13 @@ namespace Richardhj\ContaoFerienpassBundle\DependencyInjection;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
 /**
  * This is the Bundle extension.
  */
-class RichardhjContaoFerienpassExtension extends Extension
+class RichardhjContaoFerienpassExtension extends Extension implements PrependExtensionInterface
 {
 
     /**
@@ -38,6 +39,7 @@ class RichardhjContaoFerienpassExtension extends Extension
         'dc-general/table/mm_host.yml',
         'dc-general/table/mm_participant.yml',
         'dc-general/table/tl_ferienpass_dataprocessing.yml',
+        'dc-general/table/tl_ferienpass_edition_task.yml',
     ];
 
     /**
@@ -54,5 +56,25 @@ class RichardhjContaoFerienpassExtension extends Extension
         foreach (self::$files as $file) {
             $loader->load($file);
         }
+    }
+
+    /**
+     * Allow an extension to prepend the extension configurations.
+     *
+     * @param ContainerBuilder $container
+     */
+    public function prepend(ContainerBuilder $container): void
+    {
+        $container->prependExtensionConfig(
+            'doctrine',
+            [
+                'orm' => [
+                    'auto_mapping' => true,
+                    'mappings' => [
+                        'RichardhjContaoFerienpassBundle' => []
+                    ]
+                ]
+            ]
+        );
     }
 }

@@ -116,7 +116,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_applicationsystem'] = [
                 'lot',
                 'firstcome'
             ],
-            'reference' => &$GLOBALS['TL_LANG']['MSC']['ferienpass.application-system'],
+            'reference' => &$GLOBALS['TL_LANG']['MSC']['application_system'],
             'eval'      => [
                 'tl_class' => 'w50',
             ],

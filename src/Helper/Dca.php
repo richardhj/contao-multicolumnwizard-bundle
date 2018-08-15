@@ -66,19 +66,9 @@ class Dca implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            BuildMetaModelOperationsEvent::NAME      => [
-                ['addAttendancesOperationToMetaModelView'],
-            ],
-            MetaModelsEvents::SUBSYSTEM_BOOT_BACKEND => [
-                ['addAttendancesToMetaModelModuleTables'],
-            ],
             PrePersistModelEvent::NAME               => [
                 ['prohibitDuplicateKeyOnSaveAttendance', -100],
                 ['alterNewAttendancePrePersist'],
-            ],
-            PostPersistModelEvent::NAME              => [
-
-                ['handlePassReleaseChanges'],
             ],
         ];
     }

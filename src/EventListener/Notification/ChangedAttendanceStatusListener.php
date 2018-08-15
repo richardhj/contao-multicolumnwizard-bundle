@@ -16,10 +16,10 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
 
 use Contao\Model\Event\PostSaveModelEvent;
 use NotificationCenter\Model\Notification;
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
+use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 
 class ChangedAttendanceStatusListener
 {
@@ -27,18 +27,18 @@ class ChangedAttendanceStatusListener
     use GetNotificationTokensTrait;
 
     /**
-     * @var ApplicationSystemInterface
+     * @var OfferModel
      */
-    private $applicationSystem;
+    private $offerModel;
 
     /**
      * ChangedAttendanceStatusListener constructor.
      *
-     * @param ApplicationSystemInterface $applicationSystem
+     * @param OfferModel $offerModel
      */
-    public function __construct(ApplicationSystemInterface $applicationSystem)
+    public function __construct(OfferModel $offerModel)
     {
-        $this->applicationSystem = $applicationSystem;
+        $this->offerModel = $offerModel;
     }
 
     /**
@@ -65,8 +65,14 @@ class ChangedAttendanceStatusListener
             return;
         }
 
+        $offer = $attendance->getOffer();
+        if (null === $offer) {
+            return;
+        }
+
         // Only send notifications when application system is "first come"
-        if (!($this->applicationSystem instanceof FirstCome)) {
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (!($applicationSystem instanceof FirstCome)) {
             return;
         }
 

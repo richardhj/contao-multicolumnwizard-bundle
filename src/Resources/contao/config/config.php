@@ -15,7 +15,6 @@ use Richardhj\ContaoFerienpassBundle\Form\SelectDisabledOptions;
 use Richardhj\ContaoFerienpassBundle\Form\OfferDate;
 use Richardhj\ContaoFerienpassBundle\Widget\RequestAccessToken;
 use Richardhj\ContaoFerienpassBundle\Widget\Age;
-use Richardhj\ContaoFerienpassBundle\Module\HostLogo;
 use Richardhj\ContaoFerienpassBundle\BackendModule\SendMemberAttendancesOverview;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder;
@@ -48,6 +47,7 @@ array_insert(
         'ferienpass_editions'              => [
             'tables' => [
                 'tl_ferienpass_edition',
+                'tl_ferienpass_edition_task'
             ],
         ],
         'ferienpass_application_systems'           => [
@@ -87,11 +87,6 @@ if ('BE' === TL_MODE) {
     $GLOBALS['TL_CSS'][]        = 'bundles/richardhjcontaoferienpass/css/be_mm_ferienpass.css';
     $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/richardhjcontaoferienpass/js/be_mm_ferienpass.js';
 }
-
-/**
- * Front end modules
- */
-$GLOBALS['FE_MOD']['user']['host_logo']                        = HostLogo::class;
 
 /**
  * Notification center

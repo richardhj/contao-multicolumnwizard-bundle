@@ -14,7 +14,6 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem;
 
 
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\NoOp;
 use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
@@ -28,21 +27,19 @@ class NewAttendanceListener extends AbstractApplicationSystemListener
      * @param UserSetApplicationEvent $event
      *
      * @return void
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException
-     * @throws \Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException
-     * @throws \RuntimeException
-     * @throws \InvalidArgumentException
      */
     public function handle(UserSetApplicationEvent $event): void
     {
-        if ($this->applicationSystem instanceof NoOp) {
+        $offer = $event->getOffer();
+
+        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
+        if (null === $applicationSystem) {
             Message::addError('Zurzeit sind keine Anmeldungen möglich. Bitte versuchen Sie es später.');
 
             return;
         }
 
         $time        = time();
-        $offer       = $event->getOffer();
         $participant = $event->getParticipant();
 
         // Check if participant id allowed here and attendance not existent yet

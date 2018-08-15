@@ -13,12 +13,17 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Entity;
 
+use Contao\System;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\PersistentCollection;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
+use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousApplicationSystem;
 
 /**
  * Class PassEdition
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="Richardhj\ContaoFerienpassBundle\Repository\PassEditionRepository")
  * @ORM\Table(name="tl_ferienpass_edition")
  * @package Richardhj\ContaoFerienpassBundle\Entity
  */
@@ -46,22 +51,21 @@ class PassEdition
     private $title;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer")
+     * @var PersistentCollection
+     * @ORM\OneToMany(targetEntity="PassEditionTask", mappedBy="passEdition")
+     * @ORM\OrderBy({"sorting"="ASC"})
      */
-    private $holidayBegin;
+    private $tasks;
 
     /**
-     * @var int
-     * @ORM\Column(type="integer")
+     * @var ApplicationSystemInterface
      */
-    private $holidayEnd;
+    private $applicationSystem;
 
-    /**
-     * @var int
-     * @ORM\Column(type="integer")
-     */
-    private $hostEditEnd;
+    public function __construct()
+    {
+        $this->tasks = new ArrayCollection();
+    }
 
     /**
      * @return int
@@ -112,50 +116,52 @@ class PassEdition
     }
 
     /**
-     * @return int
+     * @return PersistentCollection
      */
-    public function getHolidayBegin(): int
+    public function getTasks(): PersistentCollection
     {
-        return $this->holidayBegin;
+        return $this->tasks;
     }
 
     /**
-     * @param int $holidayBegin
+     * @param ArrayCollection $tasks
      */
-    public function setHolidayBegin($holidayBegin): void
+    public function setTasks($tasks): void
     {
-        $this->holidayBegin = $holidayBegin;
+        $this->tasks = $tasks;
     }
 
     /**
-     * @return int
+     * Determine the current application system.
+     *
+     * @return ApplicationSystemInterface|null
      */
-    public function getHolidayEnd(): int
+    public function getCurrentApplicationSystem(): ?ApplicationSystemInterface
     {
-        return $this->holidayEnd;
-    }
+        if (null === $this->applicationSystem) {
+            $time  = time();
+            $tasks = $this->getTasks()->filter(
+                function (PassEditionTask $element) use ($time) {
+                    return 'application_system' === $element->getType()
+                           && $time >= $element->getPeriodStart()
+                           && $time < $element->getPeriodStop();
+                }
+            );
 
-    /**
-     * @param int $holidayEnd
-     */
-    public function setHolidayEnd($holidayEnd): void
-    {
-        $this->holidayEnd = $holidayEnd;
-    }
+            if ($tasks->count() > 1) {
+                throw new AmbiguousApplicationSystem('More than one application system is applicable at the moment.');
+            }
 
-    /**
-     * @return int
-     */
-    public function getHostEditEnd(): int
-    {
-        return $this->hostEditEnd;
-    }
+            if ($tasks->isEmpty()) {
+                return null;
+            }
 
-    /**
-     * @param int $hostEditEnd
-     */
-    public function setHostEditEnd($hostEditEnd): void
-    {
-        $this->hostEditEnd = $hostEditEnd;
+            /** @var ApplicationSystemInterface $applicationSystem */
+            $this->applicationSystem = System::getContainer()->get(
+                'richardhj.ferienpass.application_system.' . $tasks->current()->get('application_system')
+            );
+        }
+
+        return $this->applicationSystem;
     }
 }

@@ -18,8 +18,9 @@ use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\FrontendUser;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Event\PreEditModelEvent;
+use Doctrine\Common\Persistence\ManagerRegistry;
 use MetaModels\DcGeneral\Data\Model;
-use Richardhj\ContaoFerienpassBundle\Util\PassReleases;
+use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 
 class FeeInitialDataListener
 {
@@ -30,20 +31,20 @@ class FeeInitialDataListener
     private $scopeMatcher;
 
     /**
-     * @var PassReleases
+     * @var ManagerRegistry
      */
-    private $passReleases;
+    private $doctrine;
 
     /**
      * FrontendPermissionCheckListener constructor.
      *
      * @param RequestScopeDeterminator $scopeMatcher
-     * @param PassReleases             $passReleases
+     * @param ManagerRegistry          $doctrine
      */
-    public function __construct(RequestScopeDeterminator $scopeMatcher, PassReleases $passReleases)
+    public function __construct(RequestScopeDeterminator $scopeMatcher, ManagerRegistry $doctrine)
     {
         $this->scopeMatcher = $scopeMatcher;
-        $this->passReleases = $passReleases;
+        $this->doctrine     = $doctrine;
     }
 
     /**
@@ -77,13 +78,13 @@ class FeeInitialDataListener
         }
 
         // Set current pass_release.
-        $passEdition = $this->passReleases->getPassReleaseToEdit();
+        $passEdition = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
         if (null === $passEdition) {
             throw new \RuntimeException('Sorry, can\'t file the pass release.');
         }
 
         if (null === $item->get('pass_edition')) {
-            $item->set('pass_edition', $passEdition['id']);
+            $item->set('pass_edition', $passEdition->getId());
         }
     }
 }

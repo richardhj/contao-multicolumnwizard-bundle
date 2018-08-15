@@ -14,29 +14,69 @@
 $GLOBALS['TL_DCA']['tl_ferienpass_edition'] = [
 
     // Config
-    'config'                => [
+    'config'       => [
         'dataContainer' => 'General',
+        'ctable'        => ['tl_ferienpass_edition_task'],
         'sql'           => [
             'keys' => [
-                'id'   => 'primary',
+                'id' => 'primary',
+            ],
+        ],
+    ],
+
+    // DCA config
+    'dca_config'   => [
+        'data_provider'  => [
+            'default' => [
+                'source' => 'tl_ferienpass_edition'
+            ],
+
+            'tl_ferienpass_edition_task' => [
+                'source' => 'tl_ferienpass_edition_task'
+            ],
+        ],
+        'childCondition' => [
+            [
+                'from'    => 'tl_ferienpass_edition',
+                'to'      => 'tl_ferienpass_edition_task',
+                'setOn'   =>
+                    [
+                        [
+                            'to_field'   => 'pid',
+                            'from_field' => 'id',
+                        ],
+                    ],
+                'filter'  => [
+                    [
+                        'local'     => 'pid',
+                        'remote'    => 'id',
+                        'operation' => '=',
+                    ],
+                ],
+                'inverse' => [
+                    [
+                        'local'     => 'pid',
+                        'remote'    => 'id',
+                        'operation' => '=',
+                    ],
+                ]
             ],
         ],
     ],
 
     // List
-    'list'                  => [
+    'list'         => [
         'sorting'           => [
             'mode'        => 1,
+            'flag'        => 1,
             'fields'      => ['title'],
             'panelLayout' => 'limit',
         ],
         'label'             => [
-            'fields'      => [
-                'title',
-                'holiday_begin',
-                'holiday_end',
+            'fields' => [
+                'title'
             ],
-            'showColumns' => true,
+            'format' => '%s',
         ],
         'global_operations' => [
             'back' => [
@@ -52,10 +92,18 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition'] = [
                 'href'  => 'act=edit',
                 'icon'  => 'edit.gif',
             ],
-            'toggle' => [
-                'label'          => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['toggle'],
-                'icon'           => 'visible.gif',
-                'toggleProperty' => 'published',
+            'tasks'  => [
+                'label'   => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['tasks'],
+                'href'    => 'table=tl_ferienpass_edition_task',
+                'icon'    => 'bundles/richardhjcontaoferienpass/img/tasks.svg',
+                'idparam' => 'pid'
+            ],
+            'delete' => [
+                'label'      => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['delete'],
+                'href'       => 'act=delete',
+                'icon'       => 'delete.gif',
+                'attributes' => 'onclick="if (!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm']
+                                . '\')) return false; Backend.getScrollOffset();"',
             ],
             'show'   => [
                 'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['show'],
@@ -66,86 +114,29 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition'] = [
     ],
 
     // MetaPalettes
-    'metapalettes'          => [
+    'metapalettes' => [
         'default' => [
-            'title'   => [
+            'title' => [
                 'title',
             ],
-            'periods' => [
-                'holiday_begin',
-                'holiday_end',
-                'host_edit_end'
-            ],
         ],
-    ],
-
-    // MetaSubPalettes
-    'metasubpalettes'       => [
-//        'published' => [
-//            'start',
-//            'stop',
-//        ],
-    ],
-
-    // MetaSubSelectPalttes
-    'metasubselectpalettes' => [
-//        'type' => [
-//            'firstcome' => [
-//                'maxApplicationsPerDay',
-//            ],
-//            'lot'       => [
-//            ],
-//        ],
     ],
 
     // Fields
-    'fields'                => [
-        'id'            => [
+    'fields'       => [
+        'id'     => [
             'sql' => 'int(10) unsigned NOT NULL auto_increment',
         ],
-        'tstamp'        => [
+        'tstamp' => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
         ],
-        'title'         => [
+        'title'  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['title'],
             'inputType' => 'text',
             'eval'      => [
                 'mandatory' => true
             ],
             'sql'       => "varchar(255) NOT NULL default ''"
-        ],
-        'holiday_begin' => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['holiday_begin'],
-            'exclude'   => true,
-            'inputType' => 'text',
-            'eval'      => [
-                'rgxp'       => 'date',
-                'datepicker' => true,
-                'tl_class'   => 'w50 wizard',
-            ],
-            'sql'       => "varchar(10) NOT NULL default ''",
-        ],
-        'holiday_end'   => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['holiday_end'],
-            'exclude'   => true,
-            'inputType' => 'text',
-            'eval'      => [
-                'rgxp'       => 'date',
-                'datepicker' => true,
-                'tl_class'   => 'w50 wizard',
-            ],
-            'sql'       => "varchar(10) NOT NULL default ''",
-        ],
-        'host_edit_end' => [
-            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['host_edit_end'],
-            'exclude'   => true,
-            'inputType' => 'text',
-            'eval'      => [
-                'rgxp'       => 'datim',
-                'datepicker' => true,
-                'tl_class'   => 'w50 wizard',
-            ],
-            'sql'       => "varchar(10) NOT NULL default ''",
         ],
     ],
 ];
