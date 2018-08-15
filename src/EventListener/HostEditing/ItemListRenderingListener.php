@@ -85,6 +85,15 @@ class ItemListRenderingListener
         }
 
         $event->getList()->getView()->set('$jump-to-application-list', $caller->jumpTo_application_list);
+
+        $filterParams  = deserialize($caller->metamodel_filterparams, true);
+        $passEditionId = $filterParams['pass_edition']['value'];
+
+        if ($passEditionId) {
+            $editable = $this->passEditionIsInHostEditingStage($passEditionId);
+
+            $event->getTemplate()->editEnable = $caller->Template->editEnable = $editable;
+        }
     }
 
     /**
@@ -177,7 +186,7 @@ class ItemListRenderingListener
     }
 
     /**
-     * Check whether one offer is editable for the host by checking the edit deadline
+     * Check whether one offer is editable for the host by checking the edit deadline.
      *
      * @param IItem $offer
      *
@@ -185,7 +194,19 @@ class ItemListRenderingListener
      */
     private function offerIsEditableForHost(IItem $offer): bool
     {
-        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($offer->get('pass_edition')['id']);
+        return $this->passEditionIsInHostEditingStage($offer->get('pass_edition')['id']);
+    }
+
+    /**
+     * Check whether one pass edition is in the host editing stage and editable.
+     *
+     * @param int $passEditionId
+     *
+     * @return bool
+     */
+    private function passEditionIsInHostEditingStage(int $passEditionId): bool
+    {
+        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($passEditionId);
         $hostEditingStage = $passEdition->getCurrentHostEditingStage();
 
         return null !== $hostEditingStage;
