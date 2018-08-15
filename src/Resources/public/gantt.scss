@@ -3,7 +3,7 @@ $red: #ff6252;
 $color-marker: $red;
 $color-shadow: #7e8f94;
 $color-header: #172b3b;
-$color-bar: #55de84;
+$color-bar: #63c184;
 
 #tl_messages > h2:first-child {
   display: none;
@@ -58,7 +58,6 @@ $color-bar: #55de84;
 
     &:last-child {
       border-radius: 0 0 4px 4px;
-      overflow: hidden;
     }
 
     &--empty {
@@ -153,13 +152,26 @@ $color-bar: #55de84;
         font-size: 14px;
         min-height: 15px;
         background-color: $color-bar;
-        padding: .25rem .5rem;
         color: #fff;
-        overflow: hidden;
         position: relative;
-        cursor: pointer;
         z-index: 10;
         border-radius: 2px;
+
+        label {
+          cursor: pointer;
+          padding: .25rem;
+          display: block;
+          height: 100%;
+          box-sizing: border-box;
+        }
+
+        input[type="checkbox"] {
+          display: none;
+
+          &:checked + .gantt__tooltip {
+            display: block;
+          }
+        }
 
         &:after {
           content: '';
@@ -219,14 +231,24 @@ $color-bar: #55de84;
   }
 
   &__tooltip {
-    position: relative;
+    position: absolute;
     width: 22rem;
     background: #ffffff;
-    box-shadow: 0 10px 30px -10px $color-shadow;
+    box-shadow: 0 5px 30px -10px $color-shadow;
     padding: 1rem;
     box-sizing: border-box;
-    margin-top: 5rem;
     border-radius: 2px 2px 2px 2px;
+    margin-top: .65rem;
+    margin-left: -1rem;
+    cursor: initial;
+    display: none;
+    color: #333;
+    z-index: 18;
+
+    &-description {
+      line-height: 1.25;
+      color: #777;
+    }
 
     &:before {
       content: "";

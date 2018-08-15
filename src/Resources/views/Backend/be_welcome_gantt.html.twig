@@ -31,7 +31,9 @@
                 {% if row.notifications is defined %}
                     <ul class="gantt__notifications">
                         {% for notification in row.notifications %}
-                            <li class="gantt__notification gantt__notification--{{ notification.class }}" title="{{ notification.title }}"><i class="fas fa-{{ notification.fa }}"></i> {{ notification.text }}</li>
+                            <li class="gantt__notification gantt__notification--{{ notification.class }}"
+                                title="{{ notification.title }}"><i
+                                        class="fas fa-{{ notification.fa }}"></i> {{ notification.text }}</li>
                         {% endfor %}
                     </ul>
                 {% endif %}
@@ -41,7 +43,17 @@
                     <li
                             style="grid-column: {{ element.column.start }}/{{ element.column.stop }};{% if element.style.background is defined %} background-color: #{{ element.style.background }}; color: #{{ element.style.color }}{% endif %}"
                             {% if element.isPast %}class="stripes"{% endif %}>
-                        {{ element.label }}
+                        <label for="toggle-tooltip-{{ element.id }}">{{ element.label }}</label>
+                        <input type="checkbox" id="toggle-tooltip-{{ element.id }}">
+
+                        <div class="gantt__tooltip">
+                            <span class="close"></span>
+                            <h3>{{ element.label }} <a href="{{ element.editLink.href }}" title="{{ element.editLink.title }}"><img src="system/themes/flexible/icons/edit.svg" alt="{{ element.editLink.link }}"></a></h3>
+                            <p class="gantt__tooltip-period">
+                                {{ element.period }}
+                            </p>
+                            <p class="gantt__tooltip-description">{{ element.description }}</p>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
@@ -53,3 +65,24 @@
         <li></li>
     </ul>
 </div>
+<script
+        src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+        crossorigin="anonymous"></script>
+<script>
+    $.noConflict();
+    jQuery(document).ready(function ($) {
+        /* Remove this when css becomes :has() selector */
+        $('.gantt__row-bars input[type="checkbox"]').click(function () {
+            if ($(this).is(':checked')) {
+                $(this).closest('li').css('z-index', '20');
+            } else {
+                $(this).closest('li').css('z-index', '10');
+            }
+        });
+
+        $('.gantt__tooltip .close').click(function () {
+                $(this).closest('li').find('input[type="checkbox"]').click();
+        });
+    });
+</script>

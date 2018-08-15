@@ -11,11 +11,11 @@
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-
 $GLOBALS['TL_LANG']['MOD']['ferienpass_attendances'][0]                   = 'Anmeldungen';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_attendance_status'][0]             = 'Anmeldestatus';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_application_systems'][0]           = 'Anmeldesysteme';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_attendance_reminders'][0]          = 'Anmelde-Erinnerungen';
+$GLOBALS['TL_LANG']['MOD']['ferienpass_editions'][0]                      = 'Ferienpass-Ausgaben';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_erase_personal_data'][0]           = 'Persönliche Daten löschen';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_data_processings'][0]              = 'Datenverarbeitungen';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_send_attendance_confirmations'][0] = 'Teilnahmeübersicht verschicken';

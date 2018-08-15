@@ -217,6 +217,6 @@ services:
 
     richardhj.ferienpass.listener.backend.welcome_gantt_chart:
         class: Richardhj\ContaoFerienpassBundle\EventListener\Backend\WelcomeGanttChartListener
-        arguments: ['@doctrine', '@templating']
+        arguments: ['@doctrine', '@templating', '@translator', '@router']
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages', priority: -10 }

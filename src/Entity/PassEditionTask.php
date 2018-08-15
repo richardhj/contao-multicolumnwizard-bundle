@@ -225,7 +225,7 @@ class PassEditionTask
     /**
      * @return string
      */
-    public function getColor(): string
+    public function getColor(): ?string
     {
         return $this->color;
     }
@@ -241,7 +241,7 @@ class PassEditionTask
     /**
      * @return string
      */
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }

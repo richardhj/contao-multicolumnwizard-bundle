@@ -14,7 +14,6 @@
 
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['title_legend']  = 'Title and type';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['period_legend'] = 'Period';
-$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['chart_legend']  = 'Chart';
 
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type'][0]         = 'Type';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type'][1]         = 'The type of the task.';
@@ -27,9 +26,9 @@ $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['period_start'][1] = 'Determin
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['period_stop'][0]  = 'End';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['period_stop'][1]  = 'Determine the end of the task.';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['color'][0]        = 'Color';
-$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['color'][1]        = 'Set a color for the chart. Overwrites the default color!';
+$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['color'][1]        = 'Set a color for the chart.';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['description'][0]  = 'Description';
-$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['description'][1]  = 'Describe the task (esp. if this is a custom task).';
+$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['description'][1]  = 'Describe the task.';
 
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['new'][0]  = 'New task';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['new'][1]  = 'Create a new task';

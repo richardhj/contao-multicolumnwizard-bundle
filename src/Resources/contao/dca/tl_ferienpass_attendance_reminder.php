@@ -188,7 +188,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'options'   => array_reduce(
                 iterator_to_array(AttendanceStatus::findAll()),
                 function (array $carry, AttendanceStatus $status) {
-                    $carry[$status->id] = $GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'][$status->type];
+                    $carry[$status->id] = $GLOBALS['TL_LANG']['MSC']['attendance_status'][$status->type];
 
                     return $carry;
                 },

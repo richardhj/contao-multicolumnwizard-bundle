@@ -3,22 +3,22 @@
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
- * Copyright (c) 2015-2017 Richard Henkenjohann
+ * Copyright (c) 2015-2018 Richard Henkenjohann
  *
- * @package   richardhj/richardhj/contao-ferienpass
+ * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
- * @copyright 2015-2017 Richard Henkenjohann
- * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 
 /**
  * Miscellaneous
  */
-$GLOBALS['TL_LANG']['MSC']['editParticipant'] = 'Teilnehmer bearbeiten';
+$GLOBALS['TL_LANG']['MSC']['editParticipant']   = 'Teilnehmer bearbeiten';
 $GLOBALS['TL_LANG']['MSC']['addNewParticipant'] = 'Einen neuen Teilnehmer erstellen';
-$GLOBALS['TL_LANG']['MSC']['noAttendances'] = 'Es liegen keine Anmeldungen vor.';
-$GLOBALS['TL_LANG']['MSC']['noParticipants'] = 'Sie müssen vorerst Teilnehmer anlegen. {{link_open::26}}Klicken Sie hier.{{link_close}}';
+$GLOBALS['TL_LANG']['MSC']['noAttendances']     = 'Es liegen keine Anmeldungen vor.';
+$GLOBALS['TL_LANG']['MSC']['noParticipants']    = 'Sie müssen vorerst Teilnehmer anlegen. {{link_open::26}}Klicken Sie hier.{{link_close}}';
 
 // User application
 $GLOBALS['TL_LANG']['MSC']['user_application']['active'] = 'Dieses Angebot verwendet das Online-Anmeldeverfahren.';
@@ -49,6 +49,19 @@ $GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['lo
 $GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['firstcome'] = 'Es läuft aktuell das Windhundprinzip. Das bedeutet, dass Sie sofort auf die Teilnehmerliste geschrieben werden. Die Zusage bekommen Sie sofort im Anschluss.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['variants_list_link'] = 'Alternative Termine zum gleichen Termin';
 
+$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['application_system']['lot']       = 'Es läuft das Los-Verfahren. Die Eltern erhalten zunächst keine Zusage, Sie müssen erst alle Anmeldungen zulosen. Wenn kein Anmeldesystem läuft, sind keine Anmeldungen möglich!';
+$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['application_system']['firstcome'] = 'Es läuft das Windhund-Anmeldeverfahren. Das bedeutet, dass die Eltern sofort auf die Teilnehmerliste geschrieben werden und sofort im Anschluss eine Zusage erhalten. Sie müssen dann nichts mehr tun. Wenn kein Anmeldesystem läuft, sind keine Anmeldungen möglich!';
+$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['holiday']                         = 'Es sind Ferien. Diese Zeitangabe wird vor allem verwendet für die Kalender-Widgets.';
+$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['host_editing_stage']              = 'In der Bearbeitungsphase für Veranstalter können die Veranstalter ihre Angebote erstellen, bearbeiten und löschen.';
+
+$GLOBALS['TL_LANG']['MSC']['attendance_status']['confirmed']  = 'Zusage';
+$GLOBALS['TL_LANG']['MSC']['attendance_status']['waiting']    = 'wartend';
+$GLOBALS['TL_LANG']['MSC']['attendance_status']['waitlisted'] = 'Warteliste';
+$GLOBALS['TL_LANG']['MSC']['attendance_status']['error']      = 'abgelehnt';
+
+$GLOBALS['TL_LANG']['MSC']['application_system']['firstcome'] = 'Windhund-Verfahren';
+$GLOBALS['TL_LANG']['MSC']['application_system']['lot']       = 'Los-Verfahren';
+
 // Add attendee as host
 $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['submit'] = 'Teilnehmer verbindlich hinzufügen';
 $GLOBALS['TL_LANG']['MSC']['addAttendeeHost']['confirmation'] = 'Es wurden %u Teilnehmer zu diesem Angebot hinzugefügt.';
@@ -63,30 +76,8 @@ $GLOBALS['TL_LANG']['MSC']['itemDeleteConfirmation'] = 'Das Angebot wurde erfolg
 $GLOBALS['TL_LANG']['MSC']['attendanceConfirmDeleteLink'] = 'Möchten Sie die Anmeldung für %s (%s) wirklich zurückziehen?';
 $GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation'] = 'Die Anmeldung wurde erfolgreicht zurückgezogen.';
 
-$GLOBALS['TL_LANG']['MSC']['al-states']['confirmed'] = 'angemeldet';
-$GLOBALS['TL_LANG']['MSC']['al-states']['waiting-list'] = 'auf Warteliste';
-$GLOBALS['TL_LANG']['MSC']['al-states']['error'] = 'nicht angemeldet';
-
 $GLOBALS['TL_LANG']['MSC']['state'] = 'Status';
 $GLOBALS['TL_LANG']['MSC']['recall'] = 'Zurückziehen';
-
-$GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['n'] = 'Ich biete das Angebot einmalig an';
-$GLOBALS['TL_LANG']['MSC']['enableVariantsOptions']['y'] = 'Ich biete das Angebot mehrmals (an mehreren Terminen) an';
-
-$GLOBALS['TL_LANG']['MSC']['editParticipant'] = 'Bearbeiten';
-$GLOBALS['TL_LANG']['MSC']['editOffer'] = 'Bearbeiten';
-$GLOBALS['TL_LANG']['MSC']['editHost'] = 'Daten aktualisieren';
-
-$GLOBALS['TL_LANG']['MSC']['host_logo_save']  = 'Logo speichern';
-$GLOBALS['TL_LANG']['MSC']['host_logo_reset'][0] = 'Zurücksetzen';
-$GLOBALS['TL_LANG']['MSC']['host_logo_reset'][1] = 'Zurücksetzen auf Vorgabe';
-
-$GLOBALS['TL_LANG']['MSC']['ferienpass.attendance-status'] = [
-    'confirmed'  => 'Zusage',
-    'waiting'    => 'wartend',
-    'waitlisted' => 'Warteliste',
-    'error'      => 'abgelehnt',
-];
 
 $GLOBALS['TL_LANG']['MSC']['yesno'][0] = 'Nein';
 $GLOBALS['TL_LANG']['MSC']['yesno'][1] = 'Ja';

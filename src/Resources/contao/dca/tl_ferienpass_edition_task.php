@@ -114,10 +114,6 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
             'period' => [
                 'period_start',
                 'period_stop',
-            ],
-            'chart'  => [
-                'color',
-                'description'
             ]
         ],
     ],
@@ -127,10 +123,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         'type' => [
             'custom'             => [
                 'title',
+                'description',
+                'color'
             ],
             'application_system' => [
-                'application_system',
-                //condition
+                'application_system'
             ],
         ],
     ],
