@@ -149,7 +149,7 @@ class ItemListRenderingListener
         $result = $event->getResult();
 
         // Set buttons disabled if over.
-        if (false === self::offerIsEditableForHost($item)) {
+        if (false === $this->offerIsEditableForHost($item)) {
             foreach (['edit', 'delete', 'createvariant'] as $action) {
                 if (isset($result['actions'][$action])) {
                     $result['actions'][$action]['class'] .= ' disabled';
@@ -169,7 +169,7 @@ class ItemListRenderingListener
 
         // Remove copy action for items currently being allowed to edit.
         $passRelease = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
-        if (null !== $passRelease && true === self::offerIsEditableForHost($item)) {
+        if (null !== $passRelease && true === $this->offerIsEditableForHost($item)) {
             unset($result['actions']['copy']);
         }
 
@@ -183,31 +183,12 @@ class ItemListRenderingListener
      *
      * @return bool
      */
-    private static function offerIsEditableForHost(IItem $offer): ?bool
+    private function offerIsEditableForHost(IItem $offer): bool
     {
-        $end = self::getHostEditEnd($offer);
-        if (null === $end) {
-            return null;
-        }
+        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($offer->get('pass_edition')['id']);
+        $hostEditingStage = $passEdition->getCurrentHostEditingStage();
 
-        return (time() <= $end);
-    }
-
-    /**
-     * Get the host edit deadline for a pacific offer
-     *
-     * @param IItem $offer
-     *
-     * @return int The host editing end as unix timestamp.
-     */
-    private static function getHostEditEnd(IItem $offer): ?int
-    {
-        $passEdition = $offer->get('pass_edition');
-        if (null === $passEdition) {
-            return null;
-        }
-
-        return $passEdition['host_edit_end'];
+        return null !== $hostEditingStage;
     }
 
     /**

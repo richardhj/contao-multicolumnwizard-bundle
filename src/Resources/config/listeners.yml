@@ -203,6 +203,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\ComplyWithEditingEndListener
         arguments:
             - "@cca.dc-general.scope-matcher"
+            - '@doctrine'
         tags:
             - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 50 }
 

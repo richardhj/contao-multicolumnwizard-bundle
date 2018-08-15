@@ -21,6 +21,7 @@ use ContaoCommunityAlliance\DcGeneral\Event\PreEditModelEvent;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use MetaModels\DcGeneral\Data\Model;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
+use Richardhj\ContaoFerienpassBundle\Exception\NoPassEditionWithActiveHostEditingStageException;
 
 class FeeInitialDataListener
 {
@@ -50,7 +51,6 @@ class FeeInitialDataListener
     /**
      * @param PreEditModelEvent $event The event.
      *
-     * @throws \RuntimeException
      * @throws AccessDeniedException
      */
     public function handle(PreEditModelEvent $event): void
@@ -80,7 +80,9 @@ class FeeInitialDataListener
         // Set current pass_release.
         $passEdition = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
         if (null === $passEdition) {
-            throw new \RuntimeException('Sorry, can\'t file the pass release.');
+            throw new NoPassEditionWithActiveHostEditingStageException(
+                'No pass edition with active host editing stage found.'
+            );
         }
 
         if (null === $item->get('pass_edition')) {

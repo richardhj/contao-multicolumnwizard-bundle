@@ -20,23 +20,31 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\DcGeneral\Event\ActionEvent;
 use ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException;
-use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\DcGeneral\Data\Model;
 use MetaModels\IItem;
+use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 
 class ComplyWithEditingEndListener
 {
 
     use RequestScopeDeterminatorAwareTrait;
+    /**
+     * @var ManagerRegistry
+     */
+    private $doctrine;
 
     /**
      * EditHandler constructor.
      *
      * @param RequestScopeDeterminator $scopeDeterminator The request mode determinator.
+     * @param ManagerRegistry          $doctrine
      */
-    public function __construct(RequestScopeDeterminator $scopeDeterminator)
+    public function __construct(RequestScopeDeterminator $scopeDeterminator, ManagerRegistry $doctrine)
     {
         $this->setScopeDeterminator($scopeDeterminator);
+
+        $this->doctrine = $doctrine;
     }
 
     /**
@@ -98,7 +106,7 @@ class ComplyWithEditingEndListener
         /** @var Model $model */
         $model = $dataProvider->fetch($dataProvider->getEmptyConfig()->setId($modelId->getId()));
 
-        if (false === self::offerIsEditableForHost($model->getItem())) {
+        if (false === $this->offerIsEditableForHost($model->getItem())) {
             $basicDefinition->setEditable(false);
             $basicDefinition->setCreatable(false);
             $basicDefinition->setDeletable(false);
@@ -113,30 +121,11 @@ class ComplyWithEditingEndListener
      *
      * @return bool
      */
-    private static function offerIsEditableForHost(IItem $offer): ?bool
+    private function offerIsEditableForHost(IItem $offer): bool
     {
-        $end = self::getHostEditEnd($offer);
-        if (null === $end) {
-            return null;
-        }
+        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($offer->get('pass_edition')['id']);
+        $hostEditingStage = $passEdition->getCurrentHostEditingStage();
 
-        return (time() <= $end);
-    }
-
-    /**
-     * Get the host edit deadline for a pacific offer
-     *
-     * @param IItem $offer
-     *
-     * @return int The host editing end as unix timestamp.
-     */
-    private static function getHostEditEnd(IItem $offer): ?int
-    {
-        $passEdition = $offer->get('pass_edition');
-        if (null === $passEdition) {
-            return null;
-        }
-
-        return $passEdition['host_edit_end'];
+        return null !== $hostEditingStage;
     }
 }

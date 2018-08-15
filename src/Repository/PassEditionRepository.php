@@ -16,20 +16,69 @@ namespace Richardhj\ContaoFerienpassBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\Query\Expr;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 
 class PassEditionRepository extends EntityRepository
 {
+
     /**
+     * Find one pass edition that has an active host editing stage.
+     *
      * @return PassEdition|null
      */
     public function findOneToEdit(): ?PassEdition
     {
-        $qb = $this->createQueryBuilder('e')
-            ->andWhere('e.holiday_begin > :time')
-            ->andWhere('host_edit_end > :time')
-            ->orderBy('e.holiday_begin', 'ASC')
-            ->setParameter('time', time())
+        $time = time();
+        $qb0  = $this->_em->createQueryBuilder();
+        $qb   = $this->createQueryBuilder('pass_edition')
+            ->innerJoin(
+                'pass_edition.tasks',
+                'host_editing_stage',
+                Expr\Join::WITH,
+                $qb0->expr()->andX(
+                    $qb0->expr()->eq('host_editing_stage.type', ':host_editing_stage'),
+                    $qb0->expr()->lte('host_editing_stage.periodStart', ':editing_start'),
+                    $qb0->expr()->gte('host_editing_stage.periodStop', ':editing_stop')
+                )
+            )
+            ->setParameter('host_editing_stage', 'host_editing_stage')
+            ->setParameter('editing_start', $time)
+            ->setParameter('editing_stop', $time)
+            ->getQuery();
+
+        try {
+            $result = $qb->setMaxResults(1)->getOneOrNullResult();
+        } catch (NonUniqueResultException $e) {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Find one pass release that has holidays currently.
+     *
+     * @return PassEdition|null
+     */
+    public function findOneWithCurrentHoliday(): ?PassEdition
+    {
+        $time = time();
+        $qb0  = $this->_em->createQueryBuilder();
+        $qb   = $this->createQueryBuilder('pass_edition')
+            ->innerJoin(
+                'pass_edition.tasks',
+                'holiday',
+                Expr\Join::WITH,
+                $qb0->expr()->andX(
+                    $qb0->expr()->eq('holiday.type', ':holiday'),
+                    $qb0->expr()->lte('holiday.periodStart', ':holiday_start'),
+                    $qb0->expr()->gte('holiday.periodStop', ':holiday_stop')
+                )
+            )
+            ->setParameter('holiday', 'holiday')
+            ->setParameter('holiday_start', $time)
+            ->setParameter('holiday_stop', $time)
             ->getQuery();
 
         try {

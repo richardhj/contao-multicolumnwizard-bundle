@@ -182,7 +182,8 @@ class UserApplication extends AbstractFrontendModuleController
             'contao_default'
         );
         $template->currentApplicationSystemText = $this->translator->trans(
-            'MSC.user_application.current_application_system.' . $applicationSystem->getModel()->type,
+            'MSC.user_application.current_application_system.'
+            . ((null !== $applicationSystem) ? $applicationSystem->getModel()->type : 'none'),
             [],
             'contao_default'
         );

@@ -15,10 +15,13 @@ namespace Richardhj\ContaoFerienpassBundle\Entity;
 
 use Contao\System;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\PersistentCollection;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterface;
-use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousApplicationSystem;
+use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousApplicationSystemException;
+use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousHolidayForPassEditionException;
+use Richardhj\ContaoFerienpassBundle\Exception\MissingHolidayForPassEditionException;
 
 /**
  * Class PassEdition
@@ -149,7 +152,9 @@ class PassEdition
             );
 
             if ($tasks->count() > 1) {
-                throw new AmbiguousApplicationSystem('More than one application system is applicable at the moment.');
+                throw new AmbiguousApplicationSystemException(
+                    'More than one application system is applicable at the moment for pass edition ID ' . $this->getId()
+                );
             }
 
             if ($tasks->isEmpty()) {
@@ -158,10 +163,82 @@ class PassEdition
 
             /** @var ApplicationSystemInterface $applicationSystem */
             $this->applicationSystem = System::getContainer()->get(
-                'richardhj.ferienpass.application_system.' . $tasks->current()->get('application_system')
+                'richardhj.ferienpass.application_system.' . $tasks->current()->getApplicationSystem()
             );
         }
 
         return $this->applicationSystem;
+    }
+
+    /**
+     * Get the holiday defined for this pass edition.
+     *
+     * @return PassEditionTask
+     */
+    public function getHoliday(): PassEditionTask
+    {
+        $tasks = $this->getTasks()->filter(
+            function (PassEditionTask $element) {
+                return 'holiday' === $element->getType();
+            }
+        );
+
+        if ($tasks->count() > 1) {
+            throw new AmbiguousHolidayForPassEditionException(
+                'More than one holiday found for the pass edition ID ' . $this->getId()
+            );
+        }
+
+        if ($tasks->isEmpty()) {
+            throw new MissingHolidayForPassEditionException('No holiday found for pass edition ID ' . $this->getId());
+        }
+
+        return $tasks->current();
+    }
+
+    /**
+     * Get the host editing stages for this pass edition.
+     *
+     * @return Collection
+     */
+    public function getHostEditingStages(): Collection
+    {
+        $tasks = $this->getTasks()->filter(
+            function (PassEditionTask $element) {
+                return 'host_editing_stage' === $element->getType();
+            }
+        );
+
+        return $tasks;
+    }
+
+
+    /**
+     * Get the host editing stages for this pass edition.
+     *
+     * @return PassEditionTask|null
+     */
+    public function getCurrentHostEditingStage(): ?PassEditionTask
+    {
+        $time  = time();
+        $tasks = $this->getTasks()->filter(
+            function (PassEditionTask $element) use ($time) {
+                return 'host_editing_stage' === $element->getType()
+                       && $time >= $element->getPeriodStart()
+                       && $time < $element->getPeriodStop();
+            }
+        );
+
+        if ($tasks->count() > 1) {
+            throw new \LogicException(
+                'More than one host editing stage valid at the moment for pass edition ID' . $this->getId()
+            );
+        }
+
+        if ($tasks->isEmpty()) {
+            return null;
+        }
+
+        return $tasks->current();
     }
 }
