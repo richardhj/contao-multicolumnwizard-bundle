@@ -1,9 +1,0 @@
-<?php $this->extend('block_unsearchable'); ?>
-
-<?php $this->block('content'); ?>
-
-<?php if (strlen($this->messages)): ?>
-	<?php echo $this->messages; ?>
-<?php endif; ?>
-
-<?php $this->endblock(); ?>

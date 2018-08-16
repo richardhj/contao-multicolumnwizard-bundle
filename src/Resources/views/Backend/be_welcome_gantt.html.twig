@@ -1,0 +1,88 @@
+<h2 class="gantt-headline">Zeitplan</h2>
+<div class="gantt">
+    <div class="gantt__row gantt__row--months">
+        <div class="gantt__row-first"></div>
+        <div class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+            {% for head in header %}
+                <span style="grid-column: {{ head.column.start }}/{{ head.column.stop }};">{{ head.label }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="gantt__row gantt__row--lines">
+        <div class="gantt__row-first"></div>
+        <div class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+            {% for head in header %}
+                {% if not loop.last %}
+                    <span style="grid-column: {{ head.column.start }}/{{ head.column.stop }};"></span>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="gantt__row gantt__row--lines">
+        <div class="gantt__row-first"></div>
+        <div class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+            <span class="marker" style="grid-column: {{ marker.column.start }}/{{ marker.column.stop }};"></span>
+        </div>
+    </div>
+    {% for title,row in elements %}
+        <div class="gantt__row{% if row is empty %} gantt__row--empty{% endif %}">
+            <div class="gantt__row-first">
+                <div class="title">{{ title }}</div>
+                {% if row.notifications is defined %}
+                    <ul class="gantt__notifications">
+                        {% for notification in row.notifications %}
+                            <li class="gantt__notification gantt__notification--{{ notification.class }}"
+                                title="{{ notification.title }}"><i
+                                        class="fas fa-{{ notification.fa }}"></i> {{ notification.text }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+            <ul class="gantt__row-bars" style="grid-template-columns: repeat({{ grid_columns }}, 1fr)">
+                {% for element in row %}
+                    <li
+                            style="grid-column: {{ element.column.start }}/{{ element.column.stop }};{% if element.style.background is defined %} background-color: #{{ element.style.background }}; color: #{{ element.style.color }}{% endif %}"
+                            {% if element.isPast %}class="stripes"{% endif %}>
+                        <label for="toggle-tooltip-{{ element.id }}">{{ element.label }}</label>
+                        <input type="checkbox" id="toggle-tooltip-{{ element.id }}">
+
+                        <div class="gantt__tooltip">
+                            <span class="close"></span>
+                            <h3>{{ element.label }} <a href="{{ element.editLink.href }}" title="{{ element.editLink.title }}"><img src="system/themes/flexible/icons/edit.svg" alt="{{ element.editLink.link }}"></a></h3>
+                            <p class="gantt__tooltip-period">
+                                {{ element.period }}
+                            </p>
+                            <p class="gantt__tooltip-description">{{ element.description }}</p>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endfor %}
+</div>
+<div class="gantt-caption">
+    <ul>
+        <li></li>
+    </ul>
+</div>
+<script
+        src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+        crossorigin="anonymous"></script>
+<script>
+    $.noConflict();
+    jQuery(document).ready(function ($) {
+        /* Remove this when css becomes :has() selector */
+        $('.gantt__row-bars input[type="checkbox"]').click(function () {
+            if ($(this).is(':checked')) {
+                $(this).closest('li').css('z-index', '20');
+            } else {
+                $(this).closest('li').css('z-index', '10');
+            }
+        });
+
+        $('.gantt__tooltip .close').click(function () {
+                $(this).closest('li').find('input[type="checkbox"]').click();
+        });
+    });
+</script>

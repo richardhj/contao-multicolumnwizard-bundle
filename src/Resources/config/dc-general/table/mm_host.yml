@@ -1,0 +1,7 @@
+services:
+    richardhj.ferienpass.listener.dc_general.table.mm_host.frontend_permission_check:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmHost\FrontendPermissionCheckListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle }

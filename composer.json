@@ -1,7 +1,8 @@
 {
   "name": "richardhj/contao-ferienpass",
+  "license": "proprietary",
   "description": "FERIENPASS extension for Contao Open Source CMS built on the MetaModels extension",
-  "type": "contao-module",
+  "type": "contao-bundle",
   "homepage": "https://ferienpass.online/",
   "authors": [
     {
@@ -15,38 +16,76 @@
     "email": "richard@ferienpass.online"
   },
   "require": {
-    "php": "^7.0",
+    "php": "^7.1",
     "codefog/contao-haste": "~4.11",
-    "contao-community-alliance/dependency-container": "~1.8",
-    "contao-community-alliance/event-dispatcher": "~1.3",
-    "contao-community-alliance/events-contao-bindings": "^3.5",
-    "contao-community-alliance/events-cron": "^1.0",
-    "contao-community-alliance/meta-palettes": "^1.10",
+    "contao/core-bundle": "^4.6",
+    "contao/calendar-bundle": "^4.4",
+    "contao/manager-plugin": "^2.2",
+    "contao-community-alliance/dc-general": "^2.1@beta",
+    "contao-community-alliance/events-contao-bindings": "~4.0@dev",
+    "contao-community-alliance/meta-palettes": "^2.0",
+    "contao-community-alliance/translator": "^2.1",
+    "contao-community-alliance/url-builder": "^1.3",
+    "doctrine/common": "^2.9",
+    "doctrine/collections": "^1.5",
+    "doctrine/persistence": "^1.0",
+    "doctrine/orm": "^2.5",
+    "doctrine/data-fixtures": "^1.0",
+    "doctrine/dbal": "^2.6",
+    "doctrine/doctrine-bundle": "^1.9",
+    "discordier/justtextwidgets": "^1.1",
     "eluceo/ical": "^0.8",
-    "friends-of-contao/contao-associategroups": "^1.3",
+    "league/flysystem": "^1.0",
+    "league/oauth2-client": "^2.3",
+    "metamodels/attribute_select": "^2.1@dev",
+    "metamodels/core": "^2.1",
+    "metamodels/filter_fromto": "^2.1@dev",
+    "metamodels/filter_checkbox": "^2.1@dev",
+    "patchwork/utf8": "^1.3",
+    "psr/log": "^1.0",
+    "richardhj/contao-model-events": "~1.1",
+    "richardhj/contao-multicolumnwizard-frontend": "dev-master",
+    "stevenmaguire/oauth2-dropbox": "^3.0",
+    "spatie/dropbox-api": "^1.6",
     "spatie/flysystem-dropbox": "^1.0",
-    "richardhj/contao-simple-ajax": "^1.1",
-    "metamodels/bundle_all": "^2.0",
-    "netzmacht/contao-flysystem": "^1.0",
-    "richardhj/contao-model-events": "^1.0",
-    "richardhj/contao-upload_preview_field": "*",
-    "richardhj/dc-general-single-model": "dev-feature/tng",
-    "stevenmaguire/oauth2-dropbox": "^2.0",
+    "symfony/config": "^3.3 || ^4.0",
+    "symfony/dependency-injection": "^3.3 || ^4.0",
+    "symfony/doctrine-bridge": "^3.3 || ^4.0",
+    "symfony/event-dispatcher": "^3.3 || ^4.0",
+    "symfony/filesystem": "^3.3 || ^4.0",
+    "symfony/framework-bundle": "^3.3 || ^4.0",
+    "symfony/http-foundation": "^3.3 || ^4.0",
+    "symfony/http-kernel": "^3.3 || ^4.0",
+    "symfony/routing": "^3.3 || ^4.0",
+    "symfony/security-core": "^3.3 || ^4.0",
+    "symfony/templating": "^3.3 || ^4.0",
+    "symfony/translation": "^3.3. || ^4.0",
     "terminal42/contao-conditionalselectmenu": "^3.0",
     "terminal42/contao-tablelookupwizard": "^3.2",
     "terminal42/notification_center": "^1.3"
   },
+  "require-dev": {
+    "metamodels/attribute_alias": "^2.1@dev",
+    "metamodels/attribute_combinedvalues": "^2.1@dev",
+    "metamodels/attribute_decimal": "^2.1@dev",
+    "metamodels/attribute_file": "^2.1@dev",
+    "metamodels/attribute_longtext": "^2.1@dev",
+    "metamodels/attribute_numeric": "^2.1@dev",
+    "metamodels/attribute_tabletext": "^2.1@dev",
+    "metamodels/attribute_text": "^2.1@dev",
+    "metamodels/attribute_url": "^2.1@dev"
+  },
   "autoload": {
-    "psr-0": {
-      "Ferienpass\\": "src/"
+    "psr-4": {
+      "Richardhj\\ContaoFerienpassBundle\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Richardhj\\ContaoFerienpassBundle\\Test\\": "tests/"
     }
   },
   "extra": {
-    "contao": {
-      "sources": {
-        "assets": "assets/ferienpass/core",
-        "module": "system/modules/ferienpass"
-      }
-    }
+    "contao-manager-plugin": "Richardhj\\ContaoFerienpassBundle\\ContaoManager\\Plugin"
   }
 }

@@ -1,0 +1,85 @@
+<?php
+
+use Contao\MemberModel;
+use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
+use Haste\Util\Format;
+
+/** @var AttendanceStatus[] $attendanceStatuses */
+$attendanceStatuses = $this->attendanceStatuses;
+
+?>
+<div style="line-height:16px; font-size:12px;">
+    <table cellspacing="0" cellpadding="0" border="0">
+        <?php foreach ($this->attendees as $status => $attendances): ?>
+            <tr>
+                <td colspan="6">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="6" style="font-size:16px;font-weight:bold">
+                    <?= $attendanceStatuses[$status]->title ?>
+                </td>
+            </tr>
+            <tr>
+                <th width="20%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'firstname'); ?></th>
+                <th width="20%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'lastname'); ?></th>
+                <th width="15%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'phone'); ?></th>
+                <th width="15%" style="font-weight:bold"><?php echo Format::dcaLabel('tl_member', 'mobile'); ?></th>
+                <!--        <th width="19%" style="font-weight:bold">-->
+                <?php //echo Format::dcaLabel('tl_member', 'email'); ?><!--</th>-->
+                <th width="6%" style="font-weight:bold">Fotos</th>
+                <th width="24%" style="font-weight:bold">Notizen/Unterschrift</th>
+            </tr>
+            <tr>
+                <td colspan="6" style="font-size:5px;line-height:5px; border-bottom: 2px solid #898989">&nbsp;</td>
+            </tr>
+            <?php /** @var Attendance[] $attendances */
+            foreach ($attendances as $i => $attendee): ?>
+                <?php
+                $participant = $attendee->getParticipant();
+                $parent = null;
+                if ($participant->get('pmember')) {
+                    $pmember = $participant->get('pmember');
+                    $parent = MemberModel::findByPk($pmember['id']);
+                }
+                ?>
+                <tr>
+                    <td colspan="6" style="font-size:5px;line-height:5px
+                    <?php if (0 !== $i): ?>; border-top: 1px solid #c4c4c4<?php endif; ?>">&nbsp;
+                    </td>
+                </tr>
+                <tr>
+                    <td><?php echo $participant->get('firstname'); ?></td>
+                    <td><?php echo $participant->get('lastname') ?></td>
+                    <td><?php echo $participant->get('phone') ?: $parent->phone; ?></td>
+                    <td><?php echo $participant->get('mobile') ?: $parent->mobile; ?></td>
+                    <!--            <td>-->
+                    <?php //echo $this->items[$i]['participant_email'] ?: $this->items[$i]['participant_'. $strParticipantParentColName]['email']; ?><!--</td>-->
+                    <td><?php echo $participant->get('agreement_photo') ? 'ja' : 'nein'; ?></td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="6" style="font-size:5px;line-height:5px">&nbsp;</td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endforeach; ?>
+
+        <tr>
+            <td colspan="6" style="font-size:5px;line-height:5px; border-top: 1px solid #c4c4c4">&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="6">&nbsp;</td>
+        </tr>
+        <tr>
+            <td colspan="5" style="font-size:14px; text-align:right; font-weight: bold">Maximale Teilnehmerzahl:</td>
+            <td style="font-size:14px; font-weight: bold"> <?php echo $this->maxParticipants; ?></td>
+        </tr>
+        <tr>
+            <td colspan="5" style="font-size:14px; text-align:right; font-weight: bold">Insgesamt angemeldet:</td>
+            <td style="font-size:14px; font-weight: bold"> <?php echo $this->countParticipants; ?></td>
+        </tr>
+        <tr>
+            <td colspan="6">&nbsp;</td>
+        </tr>
+    </table>
+</div>

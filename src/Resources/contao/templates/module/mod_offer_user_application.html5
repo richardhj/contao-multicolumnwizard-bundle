@@ -1,0 +1,51 @@
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<?php if ($this->info): ?>
+    <p class="alert alert--information"><?= $this->info ?></p>
+<?php endif ?>
+
+<?php if ($this->currentApplicationSystemText): ?>
+    <p class="current-application-system"><?= $this->currentApplicationSystemText ?></p>
+<?php endif; ?>
+
+<?php if ($this->showBookingState): ?>
+    <p class="booking-state booking-state--<?= $this->booking_state_code ?>">
+        <?= $this->booking_state_text ?>
+    </p>
+<?php endif; ?>
+
+<?php if ($this->showUtilization): ?>
+    <p class="utilization"><?= $this->utilizationText ?></p>
+    <?php if ($this->showVariantListLink): ?>
+        <a href="<?= $this->variantListHref ?>" class="btn btn--primary">
+            <span class="hyperlink_txt"><?= $this->variantListLink ?></span>
+        </a>
+    <?php endif; ?>
+<?php endif; ?>
+
+<?php if ($this->showVacantPlaces): ?>
+    <div class="vacant-places vacant-places--<?= $this->booking_state_code ?>">
+        <div class="vacant-places__bar vacant-places__bar--<?= $this->booking_state_code ?>"
+             role="progressbar"
+             style="width: <?= ($this->vacantPlaces / $this->maxParticipants) * 100 ?>%;"
+             aria-valuenow="<?= $this->vacantPlaces ?>"
+             aria-valuemin="0"
+             aria-valuemax="<?= $this->maxParticipants ?>">
+            <span class="vacant-places__bar-text"><?= $this->vacantPlacesLabel ?></span>
+        </div>
+    </div>
+<?php endif; ?>
+
+<?php if ($this->message): ?>
+    <?= $this->message ?>
+<?php endif; ?>
+
+<?php if ($this->form): ?>
+    <div class="form">
+        <?= $this->form ?>
+    </div>
+<?php endif ?>
+
+<?php $this->endblock(); ?>

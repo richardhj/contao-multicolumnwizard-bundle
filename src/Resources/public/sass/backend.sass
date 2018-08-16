@@ -1,0 +1,138 @@
+@import "compass/css3"
+$fa-font-path: "../../../components/font-awesome/fonts"
+@import "../../../../components/font-awesome/scss/font-awesome"
+@import "../../../ferienpass-assets/files/sass/variables"
+
+.be_overview .item
+  a
+    display: block
+    width: 105px
+    height: 70px
+    margin: 15px 0
+    padding: 5px
+    float: left
+    text-align: center
+    .fa
+      font-size: 42px
+      line-height: 70px
+      color: #ffffff
+      margin-bottom: 12px
+      &:before
+        background: #1d8db9
+        width: 70px
+        height: 70px
+        display: block
+        +border-radius(100%)
+        margin: 0 auto
+  &.disabled
+    pointer-events: none
+    cursor: default
+    .fa:before
+      background: #999999
+  &:hover
+    .fa:before
+      background: #209bc9
+  span
+    display: block
+
+.tl_listing_container.table_mm_ferienpass
+  a.open_parent
+    white-space: nowrap
+  a[data-applicationlist-state="no-attendances"]
+    background: #dddddd
+    padding: 5px
+    line-height: 3
+    +border-radius(50%)
+  a[data-applicationlist-state="needs-reassignments"]
+    background: $error
+    padding: 5px
+    line-height: 3
+    +border-radius(50%)
+  a[data-applicationlist-state="all-assigned"]
+    background: $confirmation
+    padding: 5px
+    line-height: 3
+    +border-radius(50%)
+
+.attendances_offer_view
+  .tl_header
+    margin-bottom: 2em
+  .status-assignment
+    +display-flex()
+    +justify-content(space-between)
+  //+align-items(stretch)
+  .attendance-status
+    border: 1px solid #dddddd
+    +border-radius(2px)
+    //padding: 2px
+    width: 30%
+    h2
+      background: #f9f9f9
+      margin: 0
+      padding: 1em
+      &:before
+        +fa-icon
+        content: $fa-var-circle
+        padding-right: .5em
+        font-size: 1.2em
+    &.-confirmed h2:before
+      color: #8caf23
+    &.-waiting-list h2:before
+      color: #c09205
+    div.count
+      display: block
+      background: #f9f9f9
+      border-color: #f4f4f4
+      border-width: 1px 0
+      border-style: solid
+      padding: .5em 1em
+      text-align: right
+      position: relative
+      &.ajax-waiting
+        &:before,
+        &:after
+          position: absolute
+          width: 100%
+          height: 100%
+          left: 0
+          top: 0
+        &:before
+          background: transparentize(#f9f9f9, .05)
+          content: ''
+        &:after
+          +fa-icon()
+          @extend .fa-spin
+          content: $fa-var-spinner
+          text-align: center
+          font-size: 2em
+    ul
+      height: 100%
+    li
+      background: #fcfcfc
+      margin: .75em
+      padding: .5em
+      border: 1px solid #f3f3f3
+      +border-radius(2px)
+      cursor: move
+      span
+        background: none
+        border: 0
+        display: block
+        &.col_created
+          font-size: 10px
+        &.col_offer,
+        &.col_3
+          display: none
+        &.col_participant
+          .name
+            font-size: 14px
+            font-weight: bold
+          .content
+            display: inline
+          .age .content
+            cursor: help
+            text-decoration: dotted
+        &.tl_right_nowrap
+          display: none
+    li + li
+      margin-top: 2px

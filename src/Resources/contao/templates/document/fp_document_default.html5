@@ -1,0 +1,48 @@
+<div style="font-size: 62.5%; font-family: Arial, Helvetica, sans-serif">
+    <div style="font-size:12px; line-height: 14px;">
+        <table cellspacing="0" cellpadding="0" border="0">
+            <tr>
+                <td colspan="4" style="text-align:center; font-size:18px"><?= $this->rootPageTitle; ?></td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:center"><?php echo \Environment::get('base'); ?></td>
+            </tr>
+            <tr>
+                <td colspan="4">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="4">&nbsp;</td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold;">Veranstaltung:</td>
+                <td colspan="3"><?= $this->offer->get('name'); ?></td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold;">Veranstaltung am:</td>
+                <td colspan="4"><?php echo \Date::parse(
+                        $this->datimFormat,
+                        \Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate::offerStart($this->offer)
+                    ); ?></td>
+            </tr>
+            <tr>
+                <td style="font-weight:bold;">Dokument erstellt am:</td>
+                <td colspan="4"><?php echo \Date::parse($this->datimFormat); ?></td>
+            </tr>
+            <tr>
+                <td colspan="4">&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="font-size:20px; font-weight:bold;"><?php echo $this->title; ?></td>
+            </tr>
+        </table>
+    </div>
+
+    <p>Eine Verwendung der personenbezogenen Daten außerhalb des Rahmen des Ferienpasses und eine Weitergabe der Daten
+        an Dritte ist untersagt.</p>
+    <p>Bitte lassen Sie sich die Teilnahme mit einer Unterschrift bestätigen.</p>
+
+    <br><br>
+
+    <?php echo $this->attendees; ?>
+
+</div>

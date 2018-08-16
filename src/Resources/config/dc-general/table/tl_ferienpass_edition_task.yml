@@ -1,0 +1,14 @@
+services:
+    richardhj.ferienpass.listener.dc_general.table.pass_edition_task.application_system_options:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\PassEditionTask\ApplicationSystemOptions
+        arguments:
+            - '@doctrine'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-property-options', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.pass_edition_task.modify_label:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\PassEditionTask\ModifyLabelListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle }
+        arguments:
+          ['@translator']

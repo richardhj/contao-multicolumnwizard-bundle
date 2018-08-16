@@ -1,0 +1,38 @@
+services:
+    richardhj.ferienpass.listener.dc_general.table.data_processing.build_widget:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\BuildWidgetListener
+        arguments:
+            - "@metamodels.filter_setting_factory"
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.build-widget', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.data_processing.sort_attribute_options:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\SortAttributeOptionsListener
+        arguments:
+            - "@database_connection"
+            - "@richardhj.ferienpass.model.offer"
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-property-options', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.data_processing.filter_options:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\FilterOptionsListener
+        arguments:
+            - "@database_connection"
+            - "@richardhj.ferienpass.model.offer"
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-property-options', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.data_processing.ical_attribute_options:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\ICalAttributeOptionsListener
+        arguments:
+            - "@metamodels.factory"
+        tags:
+            - { name: kernel.event_listener, event: 'men-at-work.multi-column-wizard.get-options', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.data_processing.delimiter_attribute_options:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing\DelimiterAttributeOptionsListener
+        arguments:
+            - "@metamodels.factory"
+        tags:
+            - { name: kernel.event_listener, event: 'men-at-work.multi-column-wizard.get-options', method: handle }
+

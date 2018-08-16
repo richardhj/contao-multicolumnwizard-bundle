@@ -1,0 +1,49 @@
+services:
+    richardhj.ferienpass.controller.redirect_short_url:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Frontend\RedirectShortUrl
+        arguments:
+          - '@metamodels.factory'
+          - '@metamodels.render_setting_factory'
+          - '@event_dispatcher'
+          - '%richardhj.ferienpass.metamodel_list.view.id%'
+          - '%richardhj.ferienpass.metamodel_list.page.id%'
+
+    richardhj.ferienpass.controller.export_attendances:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Frontend\ExportAttendances
+        arguments:
+          - '@metamodels.render_setting_factory'
+          - '%richardhj.ferienpass.metamodel_list.view.id%'
+          - '%secret%'
+
+    richardhj.ferienpass.controller.dropbox_webhook:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook
+
+    richardhj.ferienpass.controller.backend.erase_personal_data:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Backend\ErasePersonalData
+        arguments:
+            - "@templating"
+            - "@contao.translation.translator"
+            - '@metamodels.factory'
+            - '@database_connection'
+        calls:
+            - [ setContainer, [ '@service_container' ]]
+
+    richardhj.ferienpass.application_system.firstcome:
+        class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome
+        factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createFirstCome]
+        lazy: true
+
+    richardhj.ferienpass.application_system.lot:
+        class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot
+        factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createLot]
+        lazy: true
+
+    richardhj.ferienpass.model.participant:
+        class: Richardhj\ContaoFerienpassBundle\Model\Participant
+        arguments:
+            - '@metamodels.factory'
+
+    richardhj.ferienpass.model.offer:
+        class: Richardhj\ContaoFerienpassBundle\Model\Offer
+        arguments:
+            - '@metamodels.factory'

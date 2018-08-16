@@ -1,0 +1,31 @@
+richardhj.ferienpass.redirect_short_url:
+    path: /{itemId}
+    defaults:
+        _scope: frontend
+        _controller: richardhj.ferienpass.controller.redirect_short_url
+    requirements:
+        itemId: '\d+'
+
+richardhj.ferienpass.export_attendances:
+    path: /share/anmeldungen-ferienpass-{memberId}-{token}.{_format}
+    defaults:
+        _scope: frontend
+        _token_check: false
+        _controller: richardhj.ferienpass.controller.export_attendances
+        _format: ics
+    requirements:
+        memberId: '\d+'
+
+richardhj.ferienpass.dropbox_webhook:
+    path: /ferienpass-dropbox-webhook
+    defaults:
+        _scope: frontend
+        _token_check: false
+        _controller: richardhj.ferienpass.controller.dropbox_webhook
+
+richardhj.ferienpass.backend.erase_personal_data:
+    path: /contao/ferienpass/erase_personal_data
+    defaults:
+        _scope: backend
+        _token_check: true
+        _controller: richardhj.ferienpass.controller.backend.erase_personal_data

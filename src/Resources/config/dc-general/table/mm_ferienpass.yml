@@ -1,0 +1,106 @@
+services:
+    richardhj.ferienpass.listener.dc-general.table.mm_ferienpass.lot_attendance_list_view_handler:
+        class: Richardhj\ContaoFerienpassBundle\DcGeneral\View\ActionHandler\LotAttendanceAllocationViewHandler
+        public: true
+        arguments:
+            - "@cca.dc-general.scope-matcher"
+            - "@translator"
+            - "@cca.translator.contao_translator"
+            - '@richardhj.ferienpass.model.offer'
+        tags:
+            - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 150 }
+
+    richardhj.ferienpass.listener.dc-general.table.mm_ferienpass.export_attendee_emails_handler:
+        class: Richardhj\ContaoFerienpassBundle\DcGeneral\View\ActionHandler\ExportAttendeeEmailsHandler
+        public: true
+        arguments:
+            - "@cca.dc-general.scope-matcher"
+            - '@database_connection'
+            - '@translator'
+        tags:
+            - { name: kernel.event_listener, event: dc-general.action, method: handleEvent }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.modify_label:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ModifyLabelListener
+        arguments:
+            - '@richardhj.ferienpass.model.participant'
+            - '@richardhj.ferienpass.model.offer'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.model-to-label', method: handle, priority: -10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.build_metamodel_operations:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\BuildMetaModelOperationsListener
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.dc-general.events.metamodel.build.metamodel.operations', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.attendances_operation_button:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\AttendancesOperationButtonListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-operation-button', method: handle }
+        arguments:
+          ['@richardhj.ferienpass.model.offer']
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.add_attendances_table_to_backend_module:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\AddAttendancesTableToBackendModuleListener
+        arguments:
+            - "@metamodels.view_combination"
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.boot.backend', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_participant.add_attendances_table_to_backend_module:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant\AddAttendancesTableToBackendModuleListener
+        arguments:
+            - "@metamodels.view_combination"
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.boot.backend', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.attendances_populate_environment:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\PopulateAttendancesEnvironmentListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.factory.populate-environment', method: handle, priority: 200 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpasss.application_list_max_post_persist:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\MaxApplicationsPostPersistListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpasss.trigger_sync_post_persist:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\TriggerSyncPostPersistListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.frontend_initial_data:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeInitialDataListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+            - '@doctrine'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.frontend_permission_check:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeePermissionCheckListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: 10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.fronted_update_pass_release_on_duplicate_item:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeUpdatePassEditionOnDuplicateListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+            - '@doctrine'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-duplicate', method: handle, priority: -10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.frontend_unset_date_on_createvariant:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\FeeUnsetDateOnCreateVariantListener
+        arguments:
+            - '@cca.dc-general.scope-matcher'
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle, priority: -10 }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.export_attendee_emails_button:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ExportAttendeeEmailsButtonListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-select-mode-buttons', method: handle }
+        arguments: ['@translator']
