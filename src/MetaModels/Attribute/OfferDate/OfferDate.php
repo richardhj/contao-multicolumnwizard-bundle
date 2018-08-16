@@ -75,7 +75,7 @@ class OfferDate extends BaseComplex
      *
      * @return string
      */
-    protected function getValueTable()
+    protected function getValueTable(): string
     {
         return 'tl_metamodel_offer_date';
     }
@@ -99,7 +99,7 @@ class OfferDate extends BaseComplex
     /**
      * {@inheritdoc}
      */
-    public function setDataFor($values)
+    public function setDataFor($values): void
     {
         // Check if we have an array.
         if (empty($values)) {
@@ -107,10 +107,8 @@ class OfferDate extends BaseComplex
         }
 
         // Get the ids.
-        $ids = array_keys($values);
-
         // Insert or update the cells.
-        foreach ($ids as $id) {
+        foreach (array_keys($values) as $id) {
             // Delete all entries as we override them
             $this->connection->createQueryBuilder()
                 ->delete($this->getValueTable())
@@ -147,7 +145,7 @@ class OfferDate extends BaseComplex
      *
      * @throws \InvalidArgumentException
      */
-    public function sortIds($idList, $direction)
+    public function sortIds($idList, $direction): array
     {
         switch ($direction) {
             case 'ASC';
@@ -171,7 +169,7 @@ class OfferDate extends BaseComplex
             ->from($this->getMetaModel()->getTableName(), 'item')
             ->leftJoin('item', $this->getValueTable(), 'dateperiod', 'dateperiod.item_id=item.id')
             ->where('item.id IN (:items)')
-            ->groupBy('item.id')
+            ->groupBy('item.id', 'dateperiod.start')
             ->orderBy('sortdate', $direction)
             ->setParameter('items', $idList, Connection::PARAM_INT_ARRAY)
             ->execute();
@@ -349,7 +347,7 @@ class OfferDate extends BaseComplex
     /**
      * {@inheritDoc}
      */
-    protected function prepareTemplate(Template $template, $rowData, $settings)
+    protected function prepareTemplate(Template $template, $rowData, $settings): void
     {
         parent::prepareTemplate($template, $rowData, $settings);
 
@@ -434,11 +432,11 @@ class OfferDate extends BaseComplex
      *
      * @param bool  $inclusive If true, the passed value will be included, if false, it will be excluded.
      *
-     * @return string[]|null The list of item ids of all items matching the condition or null if all match.
+     * @return string[] The list of item ids of all items matching the condition or null if all match.
      *
      * @throws \InvalidArgumentException
      */
-    public function filterGreaterThan($value, $inclusive = false)
+    public function filterGreaterThan($value, $inclusive = false): array
     {
         return $this->getIdsFiltered($value, $inclusive ? '>=' : '>');
     }
@@ -451,11 +449,11 @@ class OfferDate extends BaseComplex
      *
      * @param bool  $inclusive If true, the passed value will be included, if false, it will be excluded.
      *
-     * @return string[]|null The list of item ids of all items matching the condition or null if all match.
+     * @return string[] The list of item ids of all items matching the condition or null if all match.
      *
      * @throws \InvalidArgumentException
      */
-    public function filterLessThan($value, $inclusive = false)
+    public function filterLessThan($value, $inclusive = false): array
     {
         return $this->getIdsFiltered($value, $inclusive ? '<=' : '<');
     }
