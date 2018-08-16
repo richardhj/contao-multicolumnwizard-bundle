@@ -49,8 +49,8 @@ $GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['lo
 $GLOBALS['TL_LANG']['MSC']['user_application']['current_application_system']['firstcome'] = 'Es läuft aktuell das Windhundprinzip. Das bedeutet, dass Sie sofort auf die Teilnehmerliste geschrieben werden. Die Zusage bekommen Sie sofort im Anschluss.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['variants_list_link'] = 'Alternative Termine zum gleichen Termin';
 
-$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['application_system']['lot']       = 'Es läuft das Los-Verfahren. Die Eltern erhalten zunächst keine Zusage, Sie müssen erst alle Anmeldungen zulosen. Wenn kein Anmeldesystem läuft, sind keine Anmeldungen möglich!';
-$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['application_system']['firstcome'] = 'Es läuft das Windhund-Anmeldeverfahren. Das bedeutet, dass die Eltern sofort auf die Teilnehmerliste geschrieben werden und sofort im Anschluss eine Zusage erhalten. Sie müssen dann nichts mehr tun. Wenn kein Anmeldesystem läuft, sind keine Anmeldungen möglich!';
+$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['application_system']['lot']       = 'Es läuft das Los-Verfahren. Die Eltern erhalten zunächst keine Zusage, Sie müssen erst alle Anmeldungen zulosen. Wenn kein Anmeldesystem läuft, sind keine An- oder Abmeldungen möglich!';
+$GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['application_system']['firstcome'] = 'Es läuft das Windhund-Anmeldeverfahren. Das bedeutet, dass die Eltern sofort auf die Teilnehmerliste geschrieben werden und sofort im Anschluss eine Zusage erhalten. Sie müssen dann nichts mehr tun. Wenn kein Anmeldesystem läuft, sind keine An- oder Abmeldungen möglich!';
 $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['holiday']                         = 'Es sind Ferien. Diese Zeitangabe wird vor allem verwendet für die Kalender-Widgets.';
 $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['host_editing_stage']              = 'In der Bearbeitungsphase für Veranstalter können die Veranstalter ihre Angebote erstellen, bearbeiten und löschen.';
 

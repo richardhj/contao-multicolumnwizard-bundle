@@ -33,6 +33,7 @@
     "doctrine/data-fixtures": "^1.0",
     "doctrine/dbal": "^2.6",
     "doctrine/doctrine-bundle": "^1.9",
+    "discordier/justtextwidgets": "^1.1",
     "eluceo/ical": "^0.8",
     "league/flysystem": "^1.0",
     "league/oauth2-client": "^2.3",
