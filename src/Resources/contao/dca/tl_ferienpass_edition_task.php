@@ -15,9 +15,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
 
     // Config
     'config'                => [
-        'dataContainer' => 'General',
-        'ptable'        => 'tl_ferienpass_edition',
-        'sql'           => [
+        'dataContainer'    => 'General',
+        'ptable'           => 'tl_ferienpass_edition',
+        'switchToEdit'     => false,
+        'enableVersioning' => false,
+        'sql'              => [
             'keys' => [
                 'id'  => 'primary',
                 'pid' => 'index'
@@ -63,10 +65,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
     // List
     'list'                  => [
         'sorting'           => [
-            'mode'        => 2,
-            'fields'      => [],
-            'flag'        => 1,
-            'panelLayout' => 'sort,search;limit',
+            'mode'         => 4,
+            'fields'       => ['sorting'],
+            'headerFields' => ['title'],
+            'flag'         => 1,
+            'panelLayout'  => 'sort,search;limit',
         ],
         'label'             => [
             'fields'      => [
