@@ -1,4 +1,16 @@
 services:
+    cca.dc-general.backend_listener.convert_timestamp_widget:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\ConvertTimestampWidgetListener
+        tags:
+        - name: kernel.event_listener
+          event: dc-general.view.contao2backend.decode-property-value-for-widget
+          method: handleDecodePropertyValueForWidgetEvent
+          priority: -10
+        - name: kernel.event_listener
+          event: dc-general.view.contao2backend.encode-property-value-from-widget
+          method: handleEncodePropertyValueFromWidget
+          priority: -10
+
     richardhj.ferienpass.metamodels.attribute.offer_date.factory:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\AttributeTypeFactory
         arguments:
@@ -11,6 +23,11 @@ services:
     #    class: Richardhj\MetaModelsAttributeDatePeriodBundle\MetaModels\FilterSetting\FromToDatePeriodFilterSettingTypeFactory
     #    tags:
     #        - { name: metamodels.filter_factory }
+
+    richardhj.ferienpass.metamodels.filter.pass_edition.factory:
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\PassEditionFilterSettingTypeFactory
+        tags:
+        - { name: metamodels.filter_factory }
 
     richardhj.ferienpass.metamodels.attribute.age.factory:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\Age\AttributeTypeFactory
@@ -220,3 +237,8 @@ services:
         arguments: ['@doctrine', '@templating', '@translator', '@router']
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages', priority: -10 }
+
+    richardhj.ferienpass.listener.item_list.modify_filter_params:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\ItemList\ModifyPassEditionFilterParameterListener
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.item-list-modify-filter', method: handleForFrontendList }
