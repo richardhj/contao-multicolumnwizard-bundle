@@ -61,6 +61,40 @@ class PassEditionRepository extends EntityRepository
      *
      * @return PassEdition|null
      */
+    public function findOneToShowInFrontend(): ?PassEdition
+    {
+        $time = time();
+        $qb0  = $this->_em->createQueryBuilder();
+        $qb   = $this->createQueryBuilder('pass_edition')
+            ->innerJoin(
+                'pass_edition.tasks',
+                'period',
+                Expr\Join::WITH,
+                $qb0->expr()->andX(
+                    $qb0->expr()->eq('period.type', ':period'),
+                    $qb0->expr()->lte('period.periodStart', ':period_start'),
+                    $qb0->expr()->gte('period.periodStop', ':period_stop')
+                )
+            )
+            ->setParameter('period', 'show_offers')
+            ->setParameter('period_start', $time)
+            ->setParameter('period_stop', $time)
+            ->getQuery();
+
+        try {
+            $result = $qb->setMaxResults(1)->getOneOrNullResult();
+        } catch (NonUniqueResultException $e) {
+            $result = null;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Find one pass release that has holidays currently.
+     *
+     * @return PassEdition|null
+     */
     public function findOneWithCurrentHoliday(): ?PassEdition
     {
         $time = time();

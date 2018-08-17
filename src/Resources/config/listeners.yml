@@ -241,4 +241,7 @@ services:
     richardhj.ferienpass.listener.item_list.modify_filter_params:
         class: Richardhj\ContaoFerienpassBundle\EventListener\ItemList\ModifyPassEditionFilterParameterListener
         tags:
+            - { name: kernel.event_listener, event: 'metamodels.render-item-list', method: handleRenderItemList }
             - { name: kernel.event_listener, event: 'metamodels.item-list-modify-filter', method: handleForFrontendList }
+        arguments:
+          ['@doctrine']
