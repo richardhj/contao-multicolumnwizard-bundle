@@ -86,8 +86,13 @@ class ItemListRenderingListener
 
         $event->getList()->getView()->set('$jump-to-application-list', $caller->jumpTo_application_list);
 
-        $filterParams  = deserialize($caller->metamodel_filterparams, true);
-        $passEditionId = $filterParams['pass_edition']['value'];
+        $passEditionId = \Input::get('pass_edition');
+        if (null === $passEditionId) {
+            $passEdition = $this->doctrine->getRepository(PassEdition::class)->findDefaultPassEditionForHost();
+            if ($passEdition instanceof PassEdition) {
+                $passEditionId = $passEdition->getId();
+            }
+        }
 
         if ($passEditionId) {
             $editable = $this->passEditionIsInHostEditingStage($passEditionId);
@@ -173,12 +178,6 @@ class ItemListRenderingListener
 
         // Remove copy action for variants.
         if ($item->isVariant()) {
-            unset($result['actions']['copy']);
-        }
-
-        // Remove copy action for items currently being allowed to edit.
-        $passRelease = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
-        if (null !== $passRelease && true === $this->offerIsEditableForHost($item)) {
             unset($result['actions']['copy']);
         }
 

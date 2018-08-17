@@ -57,6 +57,14 @@ class PassEditionRepository extends EntityRepository
     }
 
     /**
+     * @return PassEdition|null
+     */
+    public function findDefaultPassEditionForHost(): ?PassEdition
+    {
+        return $this->findOneToEdit() ?? $this->findOneToShowInFrontend();
+    }
+
+    /**
      * Find one pass release that has holidays currently.
      *
      * @return PassEdition|null

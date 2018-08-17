@@ -19,6 +19,7 @@ use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Event\PreDuplicateModelEvent;
 use MetaModels\DcGeneral\Data\Model;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
+use Richardhj\ContaoFerienpassBundle\Exception\NoPassEditionWithActiveHostEditingStageException;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 
 class FeeUpdatePassEditionOnDuplicateListener
@@ -49,7 +50,6 @@ class FeeUpdatePassEditionOnDuplicateListener
     /**
      * @param PreDuplicateModelEvent $event The event.
      *
-     * @throws \RuntimeException
      * @throws AccessDeniedException
      */
     public function handle(PreDuplicateModelEvent $event): void
@@ -67,11 +67,13 @@ class FeeUpdatePassEditionOnDuplicateListener
 
         $passEdition = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
         if (null === $passEdition) {
-            throw new \RuntimeException('Sorry, can\'t file the pass release.');
+            throw new NoPassEditionWithActiveHostEditingStageException(
+                'No pass edition with active host editing stage found.'
+            );
         }
 
         $item = $model->getItem();
-        $item->set('pass_edition', $passEdition->getId());
+        $item->set('pass_edition', ['id' => $passEdition->getId()]);
         $item->set('date_period', null);
     }
 }

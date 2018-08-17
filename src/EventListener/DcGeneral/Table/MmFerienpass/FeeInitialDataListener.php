@@ -86,7 +86,7 @@ class FeeInitialDataListener
         }
 
         if (null === $item->get('pass_edition')) {
-            $item->set('pass_edition', $passEdition->getId());
+            $item->set('pass_edition', ['id' => $passEdition->getId()]);
         }
     }
 }

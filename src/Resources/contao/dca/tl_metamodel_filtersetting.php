@@ -17,6 +17,9 @@ $GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['age extends de
     '+config' => ['attr_id', 'urlparam', 'label', 'template'],
 ];
 
+// Pass edition
+$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['pass_edition extends simplelookup'] = [];
+
 // Attendance available
 $GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['attendance_available extends _attribute_']['+config'][] =
     'urlparam';

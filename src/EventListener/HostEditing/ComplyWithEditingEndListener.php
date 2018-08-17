@@ -123,7 +123,12 @@ class ComplyWithEditingEndListener
      */
     private function offerIsEditableForHost(IItem $offer): bool
     {
-        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($offer->get('pass_edition')['id']);
+        $passEditionId = $offer->get('pass_edition')['id'];
+        if (!$passEditionId) {
+            throw new \UnexpectedValueException('pass_edition is not set for offer ID '. $offer->get('id'));
+        }
+
+        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($passEditionId);
         $hostEditingStage = $passEdition->getCurrentHostEditingStage();
 
         return null !== $hostEditingStage;
