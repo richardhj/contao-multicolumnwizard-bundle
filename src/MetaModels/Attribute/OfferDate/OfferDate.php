@@ -18,6 +18,7 @@ use ContaoCommunityAlliance\Contao\Bindings\Events\Date\ParseDateEvent;
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\BaseComplex;
 use MetaModels\IMetaModel;
+use MetaModels\Render\Setting\ISimple as ISimpleRenderSetting;
 use MetaModels\Render\Template;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -344,8 +345,17 @@ class OfferDate extends BaseComplex
     }
 
 
+
     /**
-     * {@inheritDoc}
+     * When rendered via a template, this populates the template with values.
+     *
+     * @param Template $template The Template instance to populate.
+     *
+     * @param array    $rowData  The row data for the current item.
+     *
+     * @param ISimpleRenderSetting  $settings The render settings to use for this attribute.
+     *
+     * @return void
      */
     protected function prepareTemplate(Template $template, $rowData, $settings): void
     {

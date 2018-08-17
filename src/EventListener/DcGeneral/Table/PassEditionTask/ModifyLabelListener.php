@@ -84,8 +84,8 @@ class ModifyLabelListener
 
                 case 'period_start':
                 case 'period_stop':
-                    if (\is_int($arg)) {
-                        $args[$k] = date(Config::get('datimFormat'), $arg);
+                    if ($arg) {
+                        $args[$k] = date(Config::get('datimFormat'), (int) $arg);
                     }
                     break;
             }
