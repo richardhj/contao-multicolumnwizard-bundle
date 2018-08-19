@@ -48,9 +48,9 @@ class OfferDate extends BaseComplex
      *
      * Note that you should not use this directly but use the factory classes to instantiate attributes.
      *
-     * @param IMetaModel               $objMetaModel The MetaModel instance this attribute belongs to.
+     * @param IMetaModel               $metaModel    The MetaModel instance this attribute belongs to.
      *
-     * @param array                    $arrData      The information array, for attribute information, refer to
+     * @param array                    $data         The information array, for attribute information, refer to
      *                                               documentation of table tl_metamodel_attribute and documentation of
      *                                               the certain attribute classes for information what values are
      *                                               understood.
@@ -60,12 +60,12 @@ class OfferDate extends BaseComplex
      * @param EventDispatcherInterface $dispatcher   The event dispatcher.
      */
     public function __construct(
-        IMetaModel $objMetaModel,
-        array $arrData = [],
+        IMetaModel $metaModel,
+        array $data = [],
         Connection $connection = null,
         EventDispatcherInterface $dispatcher = null
     ) {
-        parent::__construct($objMetaModel, $arrData);
+        parent::__construct($metaModel, $data);
 
         $this->connection = $connection;
         $this->dispatcher = $dispatcher;
@@ -81,7 +81,6 @@ class OfferDate extends BaseComplex
         return 'tl_metamodel_offer_date';
     }
 
-
     /**
      * {@inheritdoc}
      */
@@ -95,7 +94,6 @@ class OfferDate extends BaseComplex
 
         return $arrFieldDef;
     }
-
 
     /**
      * {@inheritdoc}
@@ -345,15 +343,14 @@ class OfferDate extends BaseComplex
     }
 
 
-
     /**
      * When rendered via a template, this populates the template with values.
      *
-     * @param Template $template The Template instance to populate.
+     * @param Template             $template The Template instance to populate.
      *
-     * @param array    $rowData  The row data for the current item.
+     * @param array                $rowData  The row data for the current item.
      *
-     * @param ISimpleRenderSetting  $settings The render settings to use for this attribute.
+     * @param ISimpleRenderSetting $settings The render settings to use for this attribute.
      *
      * @return void
      */
