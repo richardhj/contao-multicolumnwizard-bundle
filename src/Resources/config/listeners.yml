@@ -19,10 +19,12 @@ services:
         tags:
             - { name: metamodels.attribute_factory }
 
-    #richardhj.metamodels.filter_from_to_date_period.factory:
-    #    class: Richardhj\MetaModelsAttributeDatePeriodBundle\MetaModels\FilterSetting\FromToDatePeriodFilterSettingTypeFactory
-    #    tags:
-    #        - { name: metamodels.filter_factory }
+    richardhj.ferienpass.metamodels.listener.from_to_offer_date_filter:
+        class: Richardhj\ContaoFerienpassBundle\MetaModels\EventListener\AllowFromToOfferDateListener
+        arguments:
+            - '@metamodels.filter_setting_factory'
+        tags:
+            - { name: kernel.event_listener, event: dc-general.view.contao2backend.get-property-option, method: handle, priority: 10 }
 
     richardhj.ferienpass.metamodels.filter.pass_edition.factory:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\PassEditionFilterSettingTypeFactory
