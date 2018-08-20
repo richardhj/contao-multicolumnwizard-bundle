@@ -1,14 +1,21 @@
 <?php
+
 /**
- * Created by PhpStorm.
- * User: richard
- * Date: 12.08.18
- * Time: 12:04
+ * This file is part of richardhj/contao-ferienpass.
+ *
+ * Copyright (c) 2015-2018 Richard Henkenjohann
+ *
+ * @package   richardhj/contao-ferienpass
+ * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
+ * @copyright 2015-2018 Richard Henkenjohann
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\Backend;
 
 
+use DateTime;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEditionTask;
@@ -32,6 +39,7 @@ class WelcomeGanttChartListener
      * @var TranslatorInterface
      */
     private $translator;
+
     /**
      * @var RouterInterface
      */
@@ -67,20 +75,26 @@ class WelcomeGanttChartListener
         $GLOBALS['TL_CSS'][] = 'bundles/richardhjcontaoferienpass/gantt.scss|static';
         $GLOBALS['TL_CSS'][] = 'https://use.fontawesome.com/releases/v5.2.0/css/all.css';
 
-        $year         = date('Y');
-        $numberDays   = date('z', mktime(0, 0, 0, 12, 31, $year)) + 1;
-        $numberMonths = 12;
+        $numberMonths = 10;
+
+        $startTime = strtotime('-3 months');
+        $startTime = mktime(0, 0, 0, date('n', $startTime), 1, date('Y', $startTime));
+
+        $stopTime = strtotime('+' . $numberMonths . ' months', $startTime);
+        $stopTime = mktime(0, 0, 0, date('n', $stopTime), 1, date('Y', $stopTime));
+
+        $numberDays = (new DateTime('@' . $stopTime))->diff(new DateTime('@' . $startTime))->format('%a');
 
         $header = [];
-        for ($month = 1; $month <= $numberMonths; $month++) {
-            $time = mktime(0, 0, 0, $month, 1, $year);
+        for ($i = 0; $i < $numberMonths; $i++) {
+            $time = strtotime('+' . $i . ' months', $startTime);
 
-            $spanStart = $header[$month - 2]['column']['stop'] ?? 1;
+            $spanStart = $header[$i - 1]['column']['stop'] ?? 1;
 
             $header[] = [
                 'column' => [
                     'start' => $spanStart,
-                    'stop'  => $spanStart + date('t', $time)
+                    'stop'  => $spanStart + date('t', $time),
                 ],
                 'label'  => date('M', $time)
             ];
@@ -88,8 +102,12 @@ class WelcomeGanttChartListener
 
         $marker = [
             'column' => [
-                'start' => date('z', mktime(0, 0, 0, date('n'), 0, $year)) + 2,
-                'stop'  => date('z')
+                'start' => ((int) (new DateTime('@' . mktime(0, 0, 0, date('n'), 0, date('Y'))))
+                        ->diff(new DateTime('@' . $startTime))
+                        ->format('%a')) + 1,
+                'stop'  => ((int) (new DateTime())
+                        ->diff(new DateTime('@' . $startTime))
+                        ->format('%a')) + 2,
             ]
         ];
 
@@ -97,9 +115,12 @@ class WelcomeGanttChartListener
 
         $elements = [];
         foreach ($this->doctrine->getRepository(PassEdition::class)->findAll() as $passEdition) {
+            $passEditionTasks = $passEdition->getTasks();
+            $criteria         = Criteria::create()->where(Criteria::expr()->gte('periodStop', $startTime));
+            $passEditionTasks = $passEditionTasks->matching($criteria);
+
             $tasks = [];
-            /** @var PassEditionTask $task */
-            foreach ($passEdition->getTasks() as $task) {
+            foreach ($passEditionTasks as $task) {
                 $tasks[] = [
                     'id'          => $task->getId(),
                     'label'       => $task->getDisplayTitle(),
@@ -107,8 +128,8 @@ class WelcomeGanttChartListener
                     'description' => $this->getDescription($task),
                     'period'      => sprintf(
                         '%s — %s',
-                        date('d. M H:i', $task->getPeriodStart()),
-                        date('d. M H:i', $task->getPeriodStop())
+                        date('d. M Y H:i', $task->getPeriodStart()),
+                        date('d. M Y H:i', $task->getPeriodStop())
                     ),
                     'editLink'    => [
                         'link'  => $this->translator->trans(
@@ -134,18 +155,26 @@ class WelcomeGanttChartListener
                     ],
                     'stop'        => $task->getPeriodStop(),
                     'isPast'      => $task->getPeriodStop() < $time,
+                    'isCutLeft'   => $task->getPeriodStart() < $startTime,
+                    'isCutRight'  => $task->getPeriodStop() > $stopTime,
                     'style'       => [
                         'background' => $this->getColor($task),
                         'color'      => $this->readableColor($task->getColor())
                     ],
                     'column'      => [
-                        'start' => date('z', $task->getPeriodStart()),
-                        'stop'  => date('z', $task->getPeriodStop())
+                        'start' => ((int) (new DateTime('@' . $task->getPeriodStart()))
+                                ->diff(new DateTime('@' . $startTime))
+                                ->format('%a')) + 1,
+                        'stop'  => ((int) (new DateTime('@' . $task->getPeriodStop()))
+                                ->diff(new DateTime('@' . $startTime))
+                                ->format('%a')) + 2
                     ],
                 ];
             }
 
-            $elements[$passEdition->getTitle()] = $tasks;
+            if (!$passEditionTasks->isEmpty()) {
+                $elements[$passEdition->getTitle()] = $tasks;
+            }
         }
 
         return $this->templating->render(
@@ -190,7 +219,6 @@ class WelcomeGanttChartListener
         if ('host_editing_stage' === $task->getType()) {
             return '119898';
         }
-
 
         if ('application_system' === $task->getType()) {
             return 'e87f89';

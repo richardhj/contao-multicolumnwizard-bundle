@@ -91,6 +91,7 @@ $color-bar: #63c184;
         &.marker {
           border-right: 1px solid $color-marker;
           background-color: rgba(10, 52, 68, 0.05);
+          margin-left: 2px;
         }
       }
     }
@@ -199,6 +200,16 @@ $color-bar: #63c184;
                           rgba(255, 255, 255, 0.1) 5px,
                           rgba(255, 255, 255, 0.1) 12px
           );
+        }
+
+        &.cut-left {
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+        }
+
+        &.cut-right {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
         }
       }
     }
