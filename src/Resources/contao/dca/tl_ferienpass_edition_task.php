@@ -180,6 +180,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         ],
         'application_system' => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['application_system'],
+            'reference' => &$GLOBALS['TL_LANG']['MSC']['application_system'],
             'inputType' => 'select',
             'eval'      => [
                 'mandatory'          => true,
