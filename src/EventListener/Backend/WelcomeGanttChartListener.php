@@ -14,6 +14,7 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\Backend;
 
 
+use Contao\Date;
 use DateTime;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -96,7 +97,7 @@ class WelcomeGanttChartListener
                     'start' => $spanStart,
                     'stop'  => $spanStart + date('t', $time),
                 ],
-                'label'  => date('M', $time)
+                'label'  => Date::parse('M', $time)
             ];
         }
 
@@ -128,8 +129,8 @@ class WelcomeGanttChartListener
                     'description' => $this->getDescription($task),
                     'period'      => sprintf(
                         '%s — %s',
-                        date('d. M Y H:i', $task->getPeriodStart()),
-                        date('d. M Y H:i', $task->getPeriodStop())
+                        Date::parse('D, d. M Y H:i', $task->getPeriodStart()),
+                        Date::parse('D, d. M Y H:i', $task->getPeriodStop())
                     ),
                     'editLink'    => [
                         'link'  => $this->translator->trans(
@@ -155,6 +156,8 @@ class WelcomeGanttChartListener
                     ],
                     'stop'        => $task->getPeriodStop(),
                     'isPast'      => $task->getPeriodStop() < $time,
+                    'isUpcoming'  => $task->getPeriodStart() > $time,
+                    'isActive'    => $task->getPeriodStart() <= $time && $task->getPeriodStop() >= $time,
                     'isCutLeft'   => $task->getPeriodStart() < $startTime,
                     'isCutRight'  => $task->getPeriodStop() > $stopTime,
                     'style'       => [

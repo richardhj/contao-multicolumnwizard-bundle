@@ -42,7 +42,7 @@
                 {% for element in row %}
                     <li
                             style="grid-column: {{ element.column.start }}/{{ element.column.stop }};{% if element.style.background %} background-color: #{{ element.style.background }}; color: #{{ element.style.color }}{% endif %}"
-                            class="{% if element.isPast %}stripes{% endif %}{% if element.isCutLeft %} cut-left{% endif %}{% if element.isCutRight %} cut-right{% endif %}">
+                            class="{% if element.isActive %}stripes{% endif %}{% if element.isCutLeft %} cut-left{% endif %}{% if element.isCutRight %} cut-right{% endif %}">
                         <label for="toggle-tooltip-{{ element.id }}">{{ element.label }}</label>
                         <input type="checkbox" id="toggle-tooltip-{{ element.id }}">
 

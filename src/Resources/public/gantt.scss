@@ -200,6 +200,7 @@ $color-bar: #63c184;
                           rgba(255, 255, 255, 0.1) 5px,
                           rgba(255, 255, 255, 0.1) 12px
           );
+          animation: progess-bar-stripes 1s linear infinite;
         }
 
         &.cut-left {
@@ -243,7 +244,7 @@ $color-bar: #63c184;
 
   &__tooltip {
     position: absolute;
-    width: 22rem;
+    width: 24rem;
     background: #ffffff;
     box-shadow: 0 5px 30px -10px $color-shadow;
     padding: 1rem;
@@ -302,5 +303,11 @@ $color-bar: #63c184;
         transform: rotate(45deg);
       }
     }
+  }
+}
+
+@keyframes progess-bar-stripes {
+  100% {
+    background-position: 17px 0;
   }
 }
