@@ -15,10 +15,15 @@
 namespace Richardhj\ContaoFerienpassBundle\ApplicationSystem;
 
 
+use Richardhj\ContaoFerienpassBundle\Entity\PassEditionTask;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
 interface ApplicationSystemInterface
 {
 
     public function getModel(): ApplicationSystem;
+
+    public function getPassEditionTask(): ?PassEditionTask;
+
+    public function setPassEditionTask(PassEditionTask $task);
 }

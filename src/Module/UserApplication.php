@@ -142,12 +142,16 @@ class UserApplication extends AbstractFrontendModuleController
         if (!$offer->get('applicationlist_active')) {
             $template->info = $this->translator->trans('MSC.user_application.inactive', [], 'contao_default');
 
+            //$this->tagResponse(['ferienpass.offer.' . $offer->get('id')]);
+
             return Response::create($template->parse());
         }
 
         // Stop if the offer is in the past
         if (time() >= ToolboxOfferDate::offerStart($offer)) {
             $template->info = $this->translator->trans('MSC.user_application.past', [], 'contao_default');
+
+            //$this->tagResponse(['ferienpass.offer.' . $offer->get('id')]);
 
             return Response::create($template->parse());
         }
@@ -299,10 +303,33 @@ class UserApplication extends AbstractFrontendModuleController
 
             // Get the form as string
             $template->form = $form->generate();
+
+            $participantCacheTags = array_map(
+                function (IItem $participant) {
+                    return 'ferienpass.participant.' . $participant->get('id');
+                },
+                iterator_to_array($participants)
+            );
+            $this->tagResponse($participantCacheTags);
         }
 
         $template->message = Message::generate();
 
-        return Response::create($template->parse());
+        $this->tagResponse(
+            [
+                //'ferienpass.offer.' . $offer->get('id'),
+                'ferienpass.application_system.' . $applicationSystem->getModel()->type
+            ]
+        );
+
+        $passEditionTask = $applicationSystem->getPassEditionTask();
+        $maxAge          = null !== $passEditionTask ? $passEditionTask->getPeriodStop() - time() : null;
+
+        $response = Response::create($template->parse());
+        if ($maxAge) {
+            $response->setSharedMaxAge($maxAge);
+        }
+
+        return $response;
     }
 }

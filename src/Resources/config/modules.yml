@@ -17,7 +17,7 @@ services:
         calls:
             - [setContainer, ['@service_container']]
         tags:
-            - { name: contao.frontend_module, type: offer_user_application, category: ferienpass }
+            - { name: contao.frontend_module, type: offer_user_application, category: ferienpass, renderStrategy: esi }
         arguments:
             - '@richardhj.ferienpass.model.participant'
             - '@event_dispatcher'

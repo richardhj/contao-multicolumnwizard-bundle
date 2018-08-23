@@ -14,6 +14,7 @@
 namespace Richardhj\ContaoFerienpassBundle\ApplicationSystem;
 
 
+use Richardhj\ContaoFerienpassBundle\Entity\PassEditionTask;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
 class AbstractApplicationSystem implements ApplicationSystemInterface
@@ -23,6 +24,11 @@ class AbstractApplicationSystem implements ApplicationSystemInterface
      * @var ApplicationSystem
      */
     private $model;
+
+    /**
+     * @var PassEditionTask
+     */
+    private $passEditionTask;
 
     /**
      * AbstractApplicationSystem constructor.
@@ -40,5 +46,21 @@ class AbstractApplicationSystem implements ApplicationSystemInterface
     public function getModel(): ApplicationSystem
     {
         return $this->model;
+    }
+
+    /**
+     * @return PassEditionTask
+     */
+    public function getPassEditionTask(): ?PassEditionTask
+    {
+        return $this->passEditionTask;
+    }
+
+    /**
+     * @param PassEditionTask $task
+     */
+    public function setPassEditionTask(PassEditionTask $task): void
+    {
+        $this->passEditionTask = $task;
     }
 }

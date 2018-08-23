@@ -13,6 +13,7 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting;
 
+use Contao\Input;
 use Contao\System;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\Setting\SimpleLookup;
@@ -169,7 +170,7 @@ class PassEdition extends SimpleLookup
      */
     private function determineFilterValue($filterValues, $valueName)
     {
-        if (!isset($filterValues[$valueName])) {
+        if (!$filterValues[$valueName]) {
             $doctrine = System::getContainer()->get('doctrine');
 
             $passEdition = $doctrine->getRepository(PassEditionEntity::class)->findDefaultPassEditionForHost();

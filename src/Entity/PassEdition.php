@@ -161,10 +161,14 @@ class PassEdition
                 return null;
             }
 
+            $task = $tasks->current();
+
             /** @var ApplicationSystemInterface $applicationSystem */
             $this->applicationSystem = System::getContainer()->get(
-                'richardhj.ferienpass.application_system.' . $tasks->current()->getApplicationSystem()
+                'richardhj.ferienpass.application_system.' . $task->getApplicationSystem()
             );
+
+            $applicationSystem->setPassEditionTask($task);
         }
 
         return $this->applicationSystem;
