@@ -168,7 +168,7 @@ class PassEdition
                 'richardhj.ferienpass.application_system.' . $task->getApplicationSystem()
             );
 
-            $applicationSystem->setPassEditionTask($task);
+            $this->applicationSystem->setPassEditionTask($task);
         }
 
         return $this->applicationSystem;

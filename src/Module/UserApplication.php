@@ -101,13 +101,13 @@ class UserApplication extends AbstractFrontendModuleController
     }
 
     /**
+     * @param int    $filterId
      * @param string $alias
      *
      * @return IItem
      */
-    private function fetchOffer(string $alias): IItem
+    private function fetchOffer(int $filterId, string $alias): IItem
     {
-        $filterId         = 1;
         $filterCollection = $this->filterSettingFactory->createCollection($filterId);
         $metaModel        = $filterCollection->getMetaModel();
         $filter           = $metaModel->getEmptyFilter();
@@ -136,7 +136,7 @@ class UserApplication extends AbstractFrontendModuleController
      */
     protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        $offer = $this->fetchOffer(\Input::get('auto_item'));
+        $offer = $this->fetchOffer((int) $model->metamodel_filtering, \Input::get('auto_item'));
 
         // Stop if the procedure is not used
         if (!$offer->get('applicationlist_active')) {
@@ -220,7 +220,7 @@ class UserApplication extends AbstractFrontendModuleController
             'contao_default'
         );
 
-        if (FE_USER_LOGGED_IN && $this->frontendUser->id) {
+        if (FE_USER_LOGGED_IN && $this->frontendUser->id && null !== $applicationSystem) {
             $participants = $this->participantModel->findByParent($this->frontendUser->id);
             if (0 === $participants->getCount()) {
                 Message::addInfo($this->translator->trans('MSC.noParticipants', [], 'contao_default'));
@@ -315,15 +315,20 @@ class UserApplication extends AbstractFrontendModuleController
 
         $template->message = Message::generate();
 
-        $this->tagResponse(
-            [
-                //'ferienpass.offer.' . $offer->get('id'),
-                'ferienpass.application_system.' . $applicationSystem->getModel()->type
-            ]
-        );
+        $maxAge = 0;
+        if (null !== $applicationSystem) {
+            $this->tagResponse(
+                [
+                    //'ferienpass.offer.' . $offer->get('id'),
+                    'ferienpass.application_system.' . $applicationSystem->getModel()->type
+                ]
+            );
 
-        $passEditionTask = $applicationSystem->getPassEditionTask();
-        $maxAge          = null !== $passEditionTask ? $passEditionTask->getPeriodStop() - time() : null;
+            $passEditionTask = $applicationSystem->getPassEditionTask();
+            $maxAge          = null !== $passEditionTask ? $passEditionTask->getPeriodStop() - time() : null;
+        } else {
+            // maxAge is next application system starts.
+        }
 
         $response = Response::create($template->parse());
         if ($maxAge) {

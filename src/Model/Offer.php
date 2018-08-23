@@ -47,6 +47,11 @@ class Offer extends AbstractSimpleMetaModel
         $this->doctrine = System::getContainer()->get('doctrine');
     }
 
+    /**
+     * @param IItem $offer
+     *
+     * @return ApplicationSystemInterface|null
+     */
     public function getApplicationSystem(IItem $offer): ?ApplicationSystemInterface
     {
         $reference   = $offer->get('pass_edition');
