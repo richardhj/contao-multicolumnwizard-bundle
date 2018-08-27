@@ -40,10 +40,12 @@ services:
 
     richardhj.ferienpass.model.participant:
         class: Richardhj\ContaoFerienpassBundle\Model\Participant
+        public: true
         arguments:
             - '@metamodels.factory'
 
     richardhj.ferienpass.model.offer:
         class: Richardhj\ContaoFerienpassBundle\Model\Offer
+        public: true
         arguments:
             - '@metamodels.factory'
