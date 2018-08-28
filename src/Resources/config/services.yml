@@ -27,16 +27,19 @@ services:
             - '@database_connection'
         calls:
             - [ setContainer, [ '@service_container' ]]
+        public: true
 
     richardhj.ferienpass.application_system.firstcome:
         class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome
         factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createFirstCome]
         lazy: true
+        public: true
 
     richardhj.ferienpass.application_system.lot:
         class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot
         factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createLot]
         lazy: true
+        public: true
 
     richardhj.ferienpass.model.participant:
         class: Richardhj\ContaoFerienpassBundle\Model\Participant

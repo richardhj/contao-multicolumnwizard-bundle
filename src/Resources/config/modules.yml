@@ -1,6 +1,7 @@
 services:
     richardhj.ferienpass.module.user_attendances:
         class: Richardhj\ContaoFerienpassBundle\Module\UserAttendances
+        public: true
         calls:
             - [setContainer, ['@service_container']]
         tags:
@@ -14,6 +15,7 @@ services:
 
     richardhj.ferienpass.module.user_application:
         class: Richardhj\ContaoFerienpassBundle\Module\UserApplication
+        public: true
         calls:
             - [setContainer, ['@service_container']]
         tags:
@@ -27,6 +29,7 @@ services:
 
     richardhj.ferienpass.module.add_attendee_host:
         class: Richardhj\ContaoFerienpassBundle\Module\AddAttendeeHost
+        public: true
         calls:
             - [setContainer, ['@service_container']]
         tags:
@@ -38,6 +41,7 @@ services:
 
     richardhj.ferienpass.module.application_list_host:
         class: Richardhj\ContaoFerienpassBundle\Module\ApplicationListHost
+        public: true
         calls:
             - [setContainer, ['@service_container']]
         tags:
