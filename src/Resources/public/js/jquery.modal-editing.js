@@ -1,4 +1,4 @@
-/* ModalEditing, (c) 2016-2017 Richard Henkenjohann */
+/* ModalEditing, (c) 2016-2018 Richard Henkenjohann */
 (function ($) {
     $.fn.modalEditing = function (options) {
         options = $.extend({
@@ -131,14 +131,16 @@
 
                             modalContainer.html(response.html);
 
-                            submit = modalContainer.find('form input[type=submit]');
+                            submit = modalContainer.find('form input[type=submit]:first');
                             buttons = modal.dialog('option', 'buttons');
                             buttons.unshift({
                                 text: submit.attr('value'),
                                 'class': 'origin-' + submit.attr('class'),
                                 click: function () {
+                                    // Submit the button as well as it is required for the HandleSubmitListener of the MM FEE
+                                    modalContainer.find('form')
+                                        .append('<input type="hidden" name="' + submit.attr('name') + '" value="' + submit.val() + '">');
                                     modalContainer.find('form').submit();
-                                    //$(this).dialog('close');
                                 }
                             });
 
