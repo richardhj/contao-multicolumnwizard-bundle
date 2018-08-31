@@ -100,7 +100,9 @@
                                     $('.loading__checkmark').toggle();
 
                                     setTimeout(function () {
-                                        $('.loading__overlay').remove();
+                                        $('.loading__overlay').fadeOut(200, function () {
+                                            $(this).remove();
+                                        });
                                     }, 800);
                                 }
                                 else {
@@ -150,7 +152,9 @@
                             $('.loading__checkmark').toggle();
 
                             setTimeout(function () {
-                                $('.loading__overlay').remove();
+                                $('.loading__overlay').fadeOut(200, function () {
+                                    $(this).remove();
+                                });
                             }, 800);
                         }
                         else {
