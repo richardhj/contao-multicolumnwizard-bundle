@@ -40,8 +40,7 @@ class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingT
         $this
             ->setTypeName('attendance_available')
             ->setTypeIcon('bundles/metamodelsfiltercheckbox/filter_checkbox.png')
-            ->setTypeClass(AttendanceAvailable::class)
-            ->allowAttributeTypes('numeric');
+            ->setTypeClass(AttendanceAvailable::class);
     }
 
 

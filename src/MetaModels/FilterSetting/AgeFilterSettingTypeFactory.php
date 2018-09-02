@@ -32,7 +32,6 @@ class AgeFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
         $this
             ->setTypeName('age')
             ->setTypeIcon('bundles/richardhjcontaoferienpass/img/filter_fp_age.png')
-            ->setTypeClass(Age::class)
-            ->allowAttributeTypes('age');
+            ->setTypeClass(Age::class);
     }
 }
