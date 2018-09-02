@@ -49,6 +49,8 @@ services:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\AttendanceAvailableFilterSettingTypeFactory
         tags:
             - { name: metamodels.filter_factory }
+        arguments:
+          ['@database_connection']
 
     richardhj.ferienpass.metamodels.filter.age.filter_setting_renderer_listener:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\EventListener\AgeFilterSettingTypeRendererListener

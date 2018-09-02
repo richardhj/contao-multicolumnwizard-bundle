@@ -23,13 +23,15 @@ use MetaModels\FrontendIntegration\FrontendFilterOptions;
 
 /**
  * Class Age
+ *
  * @package MetaModels\Filter\Setting
  */
-class Age extends SimpleLookup
+final class Age extends SimpleLookup
 {
 
     /**
      * Overrides the parent implementation to always return true, as this setting is always optional.
+     *
      * @return bool true if all matches shall be returned, false otherwise.
      */
     public function allowEmpty(): bool
@@ -39,6 +41,7 @@ class Age extends SimpleLookup
 
     /**
      * Overrides the parent implementation to always return true, as this setting is always available for FE filtering.
+     *
      * @return bool true as this setting is always available.
      */
     public function enableFEFilterWidget(): bool
@@ -57,59 +60,54 @@ class Age extends SimpleLookup
     }
 
     /**
-     * Retrieve the filter parameter name to react on.
-     * @return string
+     * Tells the filter setting to add all of its rules to the passed filter object.
+     *
+     * The filter rules can evaluate the also passed filter url.
+     *
+     * A filter url hereby is a simple hash of name => value layout, it may eventually be interpreted
+     * by attributes via IMetaModelAttribute::searchFor() method.
+     *
+     * @param IFilter  $filter       The filter to append the rules to.
+     *
+     * @param string[] $filterValues The parameters to evaluate.
+     *
+     * @return void
      */
-    protected function getParamName(): string
+    public function prepareRules(IFilter $filter, $filterValues): void
     {
-        if ($this->get('urlparam')) {
-            return $this->get('urlparam');
-        }
+        $attribute  = $this->getFilteredAttribute();
+        $paramName  = $this->getParamName();
+        $paramValue = $filterValues[$paramName];
 
-        $objAttribute = $this->getMetaModel()->getAttributeById($this->get('attr_id'));
-
-        if ($objAttribute) {
-            return $objAttribute->getColName();
-        }
-
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function prepareRules(IFilter $objFilter, $arrFilterUrl): void
-    {
-        $objMetaModel = $this->getMetaModel();
-        $objAttribute = $objMetaModel->getAttributeById($this->get('attr_id'));
-        $strParamName = $this->getParamName();
-        $strParamValue = $arrFilterUrl[$strParamName];
-
-        if ($objAttribute && $strParamName && $strParamValue) {
-            $objFilter->addFilterRule(new SearchAttribute($objAttribute, $strParamValue));
+        if (null !== $attribute && null !== $paramName && $paramValue) {
+            $filter->addFilterRule(new SearchAttribute($attribute, $paramValue));
 
             return;
         }
 
-        $objFilter->addFilterRule(new StaticIdList(null));
+        $filter->addFilterRule(new StaticIdList(null));
     }
 
     /**
-     * {@inheritdoc}
+     * Retrieve a list of all registered parameters from the setting.
+     *
+     * @return array
      */
     public function getParameters(): array
     {
-        return ($strParamName = $this->getParamName()) ? [$strParamName] : [];
+        return ($paramName = $this->getParamName()) ? [$paramName] : [];
     }
 
     /**
-     * {@inheritdoc}
+     * Retrieve the names of all parameters for listing in frontend filter configuration.
+     *
+     * @return string[] the parameters as array. parametername => label
      */
-    public function getParameterFilterNames()
+    public function getParameterFilterNames(): array
     {
-        if ($strParamName = $this->getParamName()) {
+        if ($paramName = $this->getParamName()) {
             return [
-                $strParamName => $this->get('label') ? $this->get('label') : $this->getParamName(),
+                $paramName => $this->get('label') ?: $this->getParamName(),
             ];
         }
 
@@ -117,49 +115,64 @@ class Age extends SimpleLookup
     }
 
     /**
-     * {@inheritdoc}
+     * Retrieve a list of filter widgets for all registered parameters as form field arrays.
+     *
+     * @param string[]|null         $ids                   The ids matching the current filter values.
+     *
+     * @param array                 $filterParams          The current filter url.
+     *
+     * @param array                 $jumpTo                The jumpTo page (array, row data from tl_page).
+     *
+     * @param FrontendFilterOptions $frontendFilterOptions The frontend filter options.
+     *
+     * @return array
      */
     public function getParameterFilterWidgets(
-        $arrIds,
-        $arrFilterUrl,
-        $arrJumpTo,
-        FrontendFilterOptions $objFrontendFilterOptions
+        $ids,
+        $filterParams,
+        $jumpTo,
+        FrontendFilterOptions $frontendFilterOptions
     ): array {
         // If defined as static, return nothing as not to be manipulated via editors.
         if (!$this->enableFEFilterWidget()) {
             return [];
         }
 
-        $arrReturn = [];
+        $return = [];
         $this->addFilterParam($this->getParamName());
+        $attribute = $this->getFilteredAttribute();
 
         // Address search.
-        $arrCount = [];
-        $arrWidget = [
+        $count  = [];
+        $widget = [
             'label'     => [
-                $this->get('label') ? $this->get('label') : $this->getParamName(),
-                'GET: '.$this->getParamName(),
+                $this->get('label') ?: $this->getParamName(),
+                'GET: ' . $this->getParamName(),
             ],
             'inputType' => 'text',
-            'count'     => $arrCount,
-            'showCount' => $objFrontendFilterOptions->isShowCountValues(),
+            'count'     => $count,
+            'showCount' => $frontendFilterOptions->isShowCountValues(),
             'eval'      => [
-                'colname'  => $this->getMetaModel()->getAttributeById($this->get('attr_id'))->getColname(),
+                'colname'  => $attribute ? $attribute->getColName() : '',
                 'urlparam' => $this->getParamName(),
                 'template' => $this->get('template'),
             ],
         ];
 
         // Add filter.
-        $arrReturn[$this->getParamName()] =
-            $this->prepareFrontendFilterWidget($arrWidget, $arrFilterUrl, $arrJumpTo, $objFrontendFilterOptions);
+        $return[$this->getParamName()] =
+            $this->prepareFrontendFilterWidget($widget, $filterParams, $jumpTo, $frontendFilterOptions);
 
-        return $arrReturn;
+        return $return;
     }
 
 
     /**
-     * {@inheritdoc}
+     * Retrieve a list of all registered parameters from the setting as DCA compatible arrays.
+     *
+     * These parameters may be overridden by modules and content elements and the like.
+     *
+     * @return array
      */
     public function getParameterDCA(): array
     {
@@ -170,14 +183,15 @@ class Age extends SimpleLookup
     /**
      * Add Param to global filter params array.
      *
-     * @param string $strParam Name of filter param.
+     * @param string $param Name of filter param.
      *
      * @return void
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
-    private function addFilterParam($strParam): void
+    private function addFilterParam($param): void
     {
-        $GLOBALS['MM_FILTER_PARAMS'][] = $strParam;
+        /** @noinspection UnsupportedStringOffsetOperationsInspection */
+        $GLOBALS['MM_FILTER_PARAMS'][] = $param;
     }
 }

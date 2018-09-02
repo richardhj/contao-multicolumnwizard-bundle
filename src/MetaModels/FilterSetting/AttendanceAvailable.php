@@ -13,6 +13,7 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting;
 
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\FilterCheckboxBundle\FilterSetting\Checkbox;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
@@ -26,8 +27,27 @@ use MetaModels\Filter\Rules\StaticIdList;
  *
  * @package MetaModels\Filter\Setting
  */
-class AttendanceAvailable extends Checkbox
+final class AttendanceAvailable extends Checkbox
 {
+
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * AttendanceAvailable constructor.
+     *
+     * @param            $collection
+     * @param            $data
+     * @param Connection $connection
+     */
+    public function __construct($collection, $data, Connection $connection)
+    {
+        parent::__construct($collection, $data);
+
+        $this->connection = $connection;
+    }
 
     /**
      * Retrieve the attribute we are filtering on.
@@ -57,23 +77,23 @@ class AttendanceAvailable extends Checkbox
      */
     public function prepareRules(IFilter $filter, $filterParams): void
     {
-        $objMetaModel = $this->getMetaModel();
-        $strParamName = $this->getParamName();
-        $objAttribute = $this->getApplicationListMaxAttribute();
+        $metaModel = $this->getMetaModel();
+        $paramName = $this->getParamName();
+        $attribute = $this->getApplicationListMaxAttribute();
 
         // If is a checkbox defined as "no", 1 has to become -1 like with radio fields.
-        if (isset($filterParams[$strParamName])) {
-            $filterParams[$strParamName] =
-                ('1' === $filterParams[$strParamName] && 'no' === $this->get('ynmode')
+        if (isset($filterParams[$paramName])) {
+            $filterParams[$paramName] =
+                ('1' === $filterParams[$paramName] && 'no' === $this->get('ynmode')
                     ? '-1'
-                    : $filterParams[$strParamName]);
+                    : $filterParams[$paramName]);
         }
 
-        if ($objAttribute && $strParamName && !empty($filterParams[$strParamName])) {
+        if ($attribute && $paramName && !empty($filterParams[$paramName])) {
             // Param -1 has to be '' meaning 'really empty'.
-            $filterParams[$strParamName] = ('-1' === $filterParams[$strParamName] ? '' : $filterParams[$strParamName]);
+            $filterParams[$paramName] = ('-1' === $filterParams[$paramName] ? '' : $filterParams[$paramName]);
 
-            $strQuery = sprintf(
+            $query = sprintf(
                 <<<'SQL'
                 SELECT item.id
 FROM %1$s AS item
@@ -94,15 +114,15 @@ WHERE (
 AND startDateTime >= %5$s
 SQL
                 ,
-                $objMetaModel->getTableName(),
+                $metaModel->getTableName(),
                 Attendance::getTable(),
                 'applicationlist_active',
-                $objAttribute->getColName(),
+                $attribute->getColName(),
                 time()
             );
 
-            $objFilterRule = new SimpleQuery($strQuery, [], 'id', $objMetaModel->getServiceContainer()->getDatabase());
-            $filter->addFilterRule($objFilterRule);
+            $filterRule = new SimpleQuery($query, [], 'id', $this->connection);
+            $filter->addFilterRule($filterRule);
 
             return;
         }

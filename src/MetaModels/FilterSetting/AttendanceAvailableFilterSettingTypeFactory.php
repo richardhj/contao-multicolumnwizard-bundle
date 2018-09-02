@@ -13,26 +13,43 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting;
 
+use Doctrine\DBAL\Connection;
 use MetaModels\Filter\Setting\AbstractFilterSettingTypeFactory;
 
 /**
  * Class AttendanceAvailableFilterSettingTypeFactory
+ *
  * @package MetaModels\Filter\Setting
  */
 class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 {
+    /**
+     * @var Connection
+     */
+    private $connection;
 
     /**
      * {@inheritDoc}
      */
-    public function __construct()
+    public function __construct(Connection $connection)
     {
         parent::__construct();
+
+        $this->connection = $connection;
 
         $this
             ->setTypeName('attendance_available')
             ->setTypeIcon('bundles/metamodelsfiltercheckbox/filter_checkbox.png')
             ->setTypeClass(AttendanceAvailable::class)
             ->allowAttributeTypes('numeric');
+    }
+
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createInstance($information, $filterSettings)
+    {
+        return new AttendanceAvailable($filterSettings, $information, $this->connection);
     }
 }
