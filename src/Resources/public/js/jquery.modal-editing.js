@@ -82,7 +82,7 @@
                         element = (null === options.containerToUpdate)
                             ? $(options.container).closest('[class^="ce_"],[class^="mod_"]')
                             : $(options.containerToUpdate);
-                        element.after('<div class="loading__overlay"><div class="loading__loader"><div class="loading__checkmark loading__checkmark--draw"></div></div></div>');
+                        element.after('<div class="loading__overlay"><div class="loading__loader"></div></div>');
 
                         // Update list view
                         $.ajax({
@@ -97,13 +97,12 @@
                                     element.replaceWith(response.html);
 
                                     $('.loading__loader').addClass('loading__loader--complete');
-                                    $('.loading__checkmark').toggle();
 
                                     setTimeout(function () {
                                         $('.loading__overlay').fadeOut(200, function () {
                                             $(this).remove();
                                         });
-                                    }, 800);
+                                    }, 350);
                                 }
                                 else {
                                     location.reload();
@@ -117,7 +116,7 @@
                  * Open modal (after click on trigger)
                  */
                 event.preventDefault();
-                modalContainer.after('<div class="loading__overlay"><div class="loading__loader"><div class="loading__checkmark loading__checkmark--draw"></div></div></div>');
+                modalContainer.after('<div class="loading__overlay"><div class="loading__loader"></div></div>');
 
                 // Load the content for the modal container
                 $.ajax({
@@ -149,13 +148,12 @@
                             modal.dialog('option', 'buttons', buttons);
 
                             $('.loading__loader').addClass('loading__loader--complete');
-                            $('.loading__checkmark').toggle();
 
                             setTimeout(function () {
                                 $('.loading__overlay').fadeOut(200, function () {
                                     $(this).remove();
                                 });
-                            }, 800);
+                            }, 350);
                         }
                         else {
                             location.reload();
