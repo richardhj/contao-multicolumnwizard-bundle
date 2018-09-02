@@ -22,7 +22,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *
  * @package MetaModels\Attribute\OfferDate
  */
-class AttributeTypeFactory extends AbstractAttributeTypeFactory
+final class AttributeTypeFactory extends AbstractAttributeTypeFactory
 {
 
     /**

@@ -23,7 +23,7 @@ use Symfony\Bridge\Doctrine\ManagerRegistry;
  *
  * @package Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting
  */
-class PassEditionFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
+final class PassEditionFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 {
     /**
      * @var ManagerRegistry

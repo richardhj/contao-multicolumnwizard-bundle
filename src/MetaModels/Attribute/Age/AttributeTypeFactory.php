@@ -21,7 +21,7 @@ use MetaModels\Attribute\AbstractAttributeTypeFactory;
  *
  * @package MetaModels\Attribute\Age
  */
-class AttributeTypeFactory extends AbstractAttributeTypeFactory
+final class AttributeTypeFactory extends AbstractAttributeTypeFactory
 {
 
     /**

@@ -21,7 +21,7 @@ use MetaModels\Filter\Setting\AbstractFilterSettingTypeFactory;
  *
  * @package MetaModels\Filter\Setting
  */
-class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
+final class AttendanceAvailableFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 {
     /**
      * @var Connection

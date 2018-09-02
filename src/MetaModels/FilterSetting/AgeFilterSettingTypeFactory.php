@@ -19,7 +19,7 @@ use MetaModels\Filter\Setting\AbstractFilterSettingTypeFactory;
  * Class AgeFilterSettingTypeFactory
  * @package MetaModels\Filter\Setting
  */
-class AgeFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
+final class AgeFilterSettingTypeFactory extends AbstractFilterSettingTypeFactory
 {
 
     /**

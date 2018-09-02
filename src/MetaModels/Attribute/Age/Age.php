@@ -24,7 +24,7 @@ use MetaModels\Render\Template;
  *
  * @package MetaModels\Attribute\Age
  */
-class Age extends BaseComplex
+final class Age extends BaseComplex
 {
 
     /**

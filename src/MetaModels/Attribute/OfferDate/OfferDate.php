@@ -28,7 +28,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  *
  * @package MetaModels\Attribute\OfferDate
  */
-class OfferDate extends BaseComplex
+final class OfferDate extends BaseComplex
 {
 
     /**
