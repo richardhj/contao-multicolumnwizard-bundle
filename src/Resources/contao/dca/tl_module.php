@@ -24,12 +24,6 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['offer_addattendeehost'] = '{title_l
 $GLOBALS['TL_DCA']['tl_module']['palettes']['user_attendances'] = '{title_legend},name,headline,type;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['host_logo'] = '{title_legend},name,headline,type;{config_legend},metamodel,hostLogoDir;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 
-$GLOBALS['TL_DCA']['tl_module']['palettes']['metamodel_list'] = str_replace(
-    ',metamodel_filterparams',
-    ',metamodel_filterparams,metamodel_list_ferienpass_task',
-    $GLOBALS['TL_DCA']['tl_module']['palettes']['metamodel_list']
-);
-
 /**
  * Fields
  */
@@ -65,19 +59,6 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['metamodel_child_list_view'] = [
     'sql'              => "int(10) unsigned NOT NULL default '0'",
 ];
 
-$GLOBALS['TL_DCA']['tl_module']['fields']['metamodel_list_ferienpass_task'] = [
-    'label'            => &$GLOBALS['TL_LANG']['tl_content']['metamodel_list_ferienpass_task'],
-    'exclude'          => true,
-    'inputType'        => 'select',
-    'options' => [
-        'show_offers'
-    ],
-    'eval'             => [
-            'includeBlankOption' => true,
-            'tl_class'           => 'w50',
-        ],
-    'sql'              => "varchar(64) NOT NULL default ''",
-];
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['enableVariants'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_module']['enableVariants'],

@@ -30,6 +30,8 @@ services:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting\PassEditionFilterSettingTypeFactory
         tags:
         - { name: metamodels.filter_factory }
+        arguments:
+          ['@doctrine']
 
     richardhj.ferienpass.metamodels.attribute.age.factory:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\Age\AttributeTypeFactory
@@ -239,11 +241,3 @@ services:
         arguments: ['@doctrine', '@templating', '@translator', '@router']
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages', priority: -10 }
-
-    richardhj.ferienpass.listener.item_list.modify_filter_params:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\ItemList\ModifyPassEditionFilterParameterListener
-        tags:
-            - { name: kernel.event_listener, event: 'metamodels.render-item-list', method: handleRenderItemList }
-            - { name: kernel.event_listener, event: 'metamodels.item-list-modify-filter', method: handleForFrontendList }
-        arguments:
-          ['@doctrine']

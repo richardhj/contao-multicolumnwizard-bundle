@@ -14,19 +14,52 @@
 
 // Age
 $GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['age extends default'] = [
-    '+config' => ['attr_id', 'urlparam', 'label', 'template'],
+    '+config' => [
+        'urlparam',
+        'label',
+        'template'
+    ],
 ];
 
 // Pass edition
-$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['pass_edition extends simplelookup'] = [];
+$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['pass_edition extends default'] = [
+    '+config'   => [
+        'ferienpass_task',
+        'allow_empty',
+    ],
+    '+fefilter' => [
+        'urlparam',
+        'label',
+        'template',
+        'blankoption',
+    ],
+];
+
+$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['fields']['ferienpass_task'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_metamodel_filtersetting']['ferienpass_task'],
+    'reference' => &$GLOBALS['TL_LANG']['tl_metamodel_filtersetting']['ferienpass_task_options'],
+    'exclude'   => true,
+    'inputType' => 'select',
+    'options'   => [
+        'show_offers',
+        'host_editing'
+    ],
+    'eval'      => [
+        'tl_class'           => 'w50',
+        'mandatory'          => true,
+        'includeBlankOption' => true,
+    ],
+    'sql'       => "varchar(64) NOT NULL default ''",
+];
 
 // Attendance available
-$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['attendance_available extends _attribute_']['+config'][] =
-    'urlparam';
-
-$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['attendance_available extends _attribute_']['+fefilter'][] =
-    'label';
-$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['attendance_available extends _attribute_']['+fefilter'][] =
-    'template';
-$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['attendance_available extends _attribute_']['+fefilter'][] =
-    'ynmode';
+$GLOBALS['TL_DCA']['tl_metamodel_filtersetting']['metapalettes']['attendance_available extends default'] = [
+    '+config'   => [
+        'urlparam'
+    ],
+    '+fefilter' => [
+        'label',
+        'template',
+        'ynmode',
+    ]
+];

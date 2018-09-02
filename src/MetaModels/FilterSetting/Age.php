@@ -13,6 +13,7 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting;
 
+use MetaModels\Attribute\IAttribute;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\Rules\SearchAttribute;
 use MetaModels\Filter\Rules\StaticIdList;
@@ -43,6 +44,16 @@ class Age extends SimpleLookup
     public function enableFEFilterWidget(): bool
     {
         return true;
+    }
+
+    /**
+     * Retrieve the attribute we are filtering on.
+     *
+     * @return IAttribute|null
+     */
+    protected function getFilteredAttribute(): ?IAttribute
+    {
+        return $this->getMetaModel()->getAttribute('age');
     }
 
     /**

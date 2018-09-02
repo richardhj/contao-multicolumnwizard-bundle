@@ -13,6 +13,7 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting;
 
+use MetaModels\Attribute\IAttribute;
 use MetaModels\FilterCheckboxBundle\FilterSetting\Checkbox;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use MetaModels\Filter\IFilter;
@@ -27,6 +28,16 @@ use MetaModels\Filter\Rules\StaticIdList;
  */
 class AttendanceAvailable extends Checkbox
 {
+
+    /**
+     * Retrieve the attribute we are filtering on.
+     *
+     * @return IAttribute|null
+     */
+    protected function getApplicationListMaxAttribute(): ?IAttribute
+    {
+        return $this->getMetaModel()->getAttribute('applicationlist_max');
+    }
 
     /**
      * Tells the filter setting to add all of its rules to the passed filter object.
@@ -48,7 +59,7 @@ class AttendanceAvailable extends Checkbox
     {
         $objMetaModel = $this->getMetaModel();
         $strParamName = $this->getParamName();
-        $objAttribute = $objMetaModel->getAttributeById($this->get('attr_id'));
+        $objAttribute = $this->getApplicationListMaxAttribute();
 
         // If is a checkbox defined as "no", 1 has to become -1 like with radio fields.
         if (isset($filterParams[$strParamName])) {

@@ -13,35 +13,37 @@
 
 namespace Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting;
 
-use Contao\Input;
-use Contao\System;
+use MetaModels\Attribute\IAttribute;
 use MetaModels\Filter\IFilter;
 use MetaModels\Filter\Setting\SimpleLookup;
 use MetaModels\FrontendIntegration\FrontendFilterOptions;
 use MetaModels\Filter\Rules\StaticIdList as FilterRuleStaticIdList;
 use MetaModels\Filter\Rules\SearchAttribute as FilterRuleSimpleLookup;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition as PassEditionEntity;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 
 
 /**
  * Class PassEdition
  *
  * This is basically the simple lookup (or select) filter setting with the exception to automatically set the default
- * value to the current pass_release for the host to edit.
+ * value to the current pass_release for the frontend list or the host to edit.
  *
  * @package Richardhj\ContaoFerienpassBundle\MetaModels\FilterSetting
  */
-class PassEdition extends SimpleLookup
+final class PassEdition extends SimpleLookup
 {
 
     /**
-     * Determine if this filter setting shall return all matches if no url param has been specified.
-     *
-     * @return bool true if all matches shall be returned, false otherwise.
+     * @var ManagerRegistry
      */
-    public function allowEmpty(): bool
+    private $doctrine;
+
+    public function __construct($collection, $data, ManagerRegistry $doctrine)
     {
-        return false;
+        parent::__construct($collection, $data);
+
+        $this->doctrine = $doctrine;
     }
 
     /**
@@ -55,6 +57,16 @@ class PassEdition extends SimpleLookup
     }
 
     /**
+     * Retrieve the attribute we are filtering on.
+     *
+     * @return IAttribute|null
+     */
+    protected function getFilteredAttribute(): ?IAttribute
+    {
+        return $this->getMetaModel()->getAttribute('pass_edition');
+    }
+
+    /**
      * Tells the filter setting to add all of its rules to the passed filter object.
      *
      * The filter rules can evaluate the also passed filter url.
@@ -62,39 +74,42 @@ class PassEdition extends SimpleLookup
      * A filter url hereby is a simple hash of name => value layout, it may eventually be interpreted
      * by attributes via IMetaModelAttribute::searchFor() method.
      *
-     * @param IFilter  $objFilter    The filter to append the rules to.
+     * @param IFilter  $filter       The filter to append the rules to.
      *
-     * @param string[] $arrFilterUrl The parameters to evaluate.
+     * @param string[] $filterValues The parameters to evaluate.
      *
      * @return void
      */
-    public function prepareRules(IFilter $objFilter, $arrFilterUrl): void
+    public function prepareRules(IFilter $filter, $filterValues): void
     {
         $metaModel = $this->getMetaModel();
         $attribute = $this->getFilteredAttribute();
         $paramName = $this->getParamName();
 
-        if ($attribute && $paramName) {
-            if ($arrFilterValue = $this->determineFilterValue($arrFilterUrl, $paramName)) {
+        if (null !== $attribute && null !== $paramName) {
+            if ($filterValue = $this->determineFilterValue($filterValues, $paramName)) {
                 if ($metaModel->isTranslated() && $this->get('all_langs')) {
-                    $arrLanguages = $metaModel->getAvailableLanguages();
+                    $languages = $metaModel->getAvailableLanguages();
                 } else {
-                    $arrLanguages = array($metaModel->getActiveLanguage());
+                    $languages = array($metaModel->getActiveLanguage());
                 }
-                $objFilterRule = new FilterRuleSimpleLookup($attribute, $arrFilterValue, $arrLanguages);
-                $objFilter->addFilterRule($objFilterRule);
+
+                $filterRule = new FilterRuleSimpleLookup($attribute, $filterValue, $languages);
+                $filter->addFilterRule($filterRule);
+
                 return;
             }
 
             // We found an attribute but no match in URL. So ignore this filter setting if allow_empty is set.
             if ($this->allowEmpty()) {
-                $objFilter->addFilterRule(new FilterRuleStaticIdList(null));
+                $filter->addFilterRule(new FilterRuleStaticIdList(null));
+
                 return;
             }
         }
 
         // Either no attribute found or no match in url, do not return anything.
-        $objFilter->addFilterRule(new FilterRuleStaticIdList(array()));
+        $filter->addFilterRule(new FilterRuleStaticIdList(array()));
     }
 
     /**
@@ -102,7 +117,7 @@ class PassEdition extends SimpleLookup
      *
      * @param string[]|null         $ids                   The ids matching the current filter values.
      *
-     * @param array                 $filterUrl             The current filter url.
+     * @param array                 $filterValues          The current filter url.
      *
      * @param array                 $jumpTo                The jumpTo page (array, row data from tl_page).
      *
@@ -112,11 +127,10 @@ class PassEdition extends SimpleLookup
      */
     public function getParameterFilterWidgets(
         $ids,
-        $filterUrl,
+        $filterValues,
         $jumpTo,
         FrontendFilterOptions $frontendFilterOptions
     ): array {
-        // If defined as static, return nothing as not to be manipulated via editors.
         if (false === $this->enableFEFilterWidget()) {
             return [];
         }
@@ -148,16 +162,29 @@ class PassEdition extends SimpleLookup
             ]
         ];
 
-        $filterUrl[$this->getParamName()] = $this->determineFilterValue($filterUrl, $this->getParamName());
+        $filterValues[$this->getParamName()] = $this->determineFilterValue($filterValues, $this->getParamName());
 
         return [
             $this->getParamName() => $this->prepareFrontendFilterWidget(
                 $widget,
-                $filterUrl,
+                $filterValues,
                 $jumpTo,
                 $frontendFilterOptions
             )
         ];
+    }
+
+    /**
+     * Retrieve a list of all registered parameters from the setting as DCA compatible arrays.
+     *
+     * These parameters may be overridden by modules and content elements and the like.
+     *
+     * @return array
+     */
+    public function getParameterDCA(): array
+    {
+        // The filter value is not overridable in the module.
+        return [];
     }
 
     /**
@@ -170,10 +197,20 @@ class PassEdition extends SimpleLookup
      */
     private function determineFilterValue($filterValues, $valueName)
     {
-        if (!$filterValues[$valueName]) {
-            $doctrine = System::getContainer()->get('doctrine');
+        if (!$filterValues[$valueName] && $ferienpassTask = $this->get('ferienpass_task')) {
+            $passEdition = null;
 
-            $passEdition = $doctrine->getRepository(PassEditionEntity::class)->findDefaultPassEditionForHost();
+            switch ($ferienpassTask) {
+                case 'show_offers':
+                    $passEdition = $this->doctrine->getRepository(PassEditionEntity::class)->findOneToShowInFrontend();
+                    break;
+
+                case 'host_editing':
+                    $passEdition =
+                        $this->doctrine->getRepository(PassEditionEntity::class)->findDefaultPassEditionForHost();
+                    break;
+            }
+
             if ($passEdition instanceof PassEditionEntity) {
                 return $passEdition->getId();
             }

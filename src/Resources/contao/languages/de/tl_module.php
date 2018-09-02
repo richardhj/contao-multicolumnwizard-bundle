@@ -21,5 +21,3 @@ $GLOBALS['TL_LANG']['tl_module']['enableVariants'][0] = 'Varianten aktivieren';
 $GLOBALS['TL_LANG']['tl_module']['enableVariants'][1] = 'Klicken Sie hier, um die Bearbeitung/Erstellung von Varianten zu ermöglichen.';
 $GLOBALS['TL_LANG']['tl_module']['hostLogoDir'][0] = 'Upload-Pfad für Logos';
 $GLOBALS['TL_LANG']['tl_module']['hostLogoDir'][1] = 'Wählen Sie den Ordner für die Logos aus.';
-$GLOBALS['TL_LANG']['tl_module']['metamodel_list_ferienpass_task'][0] = 'Ferienpass-Aufgabe';
-$GLOBALS['TL_LANG']['tl_module']['metamodel_list_ferienpass_task'][1] = 'Wenn zutreffend, die Aufgabe. Verändert die Ausgabe der Liste (z.B. zeitliche Steuerung).';
