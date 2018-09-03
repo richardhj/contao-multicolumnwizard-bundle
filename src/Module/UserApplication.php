@@ -185,12 +185,14 @@ class UserApplication extends AbstractFrontendModuleController
             ['places' => $vacantPlaces],
             'contao_default'
         );
-        $template->currentApplicationSystemText = $this->translator->trans(
-            'MSC.user_application.current_application_system.'
-            . ((null !== $applicationSystem) ? $applicationSystem->getModel()->type : 'none'),
-            [],
-            'contao_default'
-        );
+        $template->currentApplicationSystemText = (FE_USER_LOGGED_IN && $this->frontendUser->id)
+            ? $this->translator->trans(
+                'MSC.user_application.current_application_system.'
+                . ((null !== $applicationSystem) ? $applicationSystem->getModel()->type : 'none'),
+                [],
+                'contao_default'
+            )
+            : '';
 
         if ($maxParticipants) {
             switch (true) {
