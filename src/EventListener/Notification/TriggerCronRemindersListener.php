@@ -15,6 +15,7 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
 
 
 use Contao\Model\Collection;
+use ContaoCommunityAlliance\Contao\Events\Cron\CronEvent;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use NotificationCenter\Model\Notification;
@@ -44,9 +45,9 @@ class TriggerCronRemindersListener
     /**
      * Check for attendance upcoming this day and trigger the reminder sending
      *
-     * @internal param CronEvent $event
+     * @param CronEvent $event
      */
-    public function handle(): void
+    public function handle(CronEvent $event): void
     {
         /** @var Collection|Attendance $reminders */
         $reminders = AttendanceReminder::findBy(['published=1'], []);
@@ -58,12 +59,12 @@ class TriggerCronRemindersListener
             $remindBefore = deserialize($reminders->remind_before);
             $time         = time();
             $timeEnd      = strtotime(sprintf('+%d %s', $remindBefore['value'], $remindBefore['unit']));
-            $whereStatus  = $reminders->attendance_status ? ' AND status='.(int)$reminders->attendance_status : '';
+            $whereStatus  = $reminders->attendance_status ? ' AND status=' . (int) $reminders->attendance_status : '';
             $attendances  = Attendance::findBy(
                 [
                     "offer IN(SELECT id FROM mm_ferienpass WHERE published=1 AND id IN (SELECT item_id FROM tl_metamodel_offer_date WHERE start > {$time} AND start <= {$timeEnd}))"
-                    .' AND id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0 AND notification=?)'
-                    .$whereStatus,
+                    . ' AND id NOT IN (SELECT attendance FROM tl_ferienpass_attendance_notification WHERE tstamp<>0 AND notification=?)'
+                    . $whereStatus,
                 ],
                 [$reminders->nc_notification]
             );
@@ -102,8 +103,8 @@ class TriggerCronRemindersListener
 
                     try {
                         $this->connection->executeQuery(
-                            'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)'.
-                            " VALUES ({$time}, {$attendances->id}, {$notificationId})".
+                            'INSERT INTO tl_ferienpass_attendance_notification (tstamp, attendance, notification)' .
+                            " VALUES ({$time}, {$attendances->id}, {$notificationId})" .
                             " ON DUPLICATE KEY UPDATE tstamp={$time}"
                         );
                     } catch (DBALException $e) {
