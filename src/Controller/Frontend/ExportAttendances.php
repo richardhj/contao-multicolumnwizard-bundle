@@ -148,8 +148,9 @@ class ExportAttendances
                     $event->setModified($dateTime);
 
                     if ($item instanceof Item) {
-                        $view       =
+                        $view =
                             $this->renderSettingFactory->createCollection($item->getMetaModel(), $this->listViewId);
+
                         $jumpToLink = $item->buildJumpToLink($view);
                         if (true === $jumpToLink['deep']) {
                             $url = $request->getSchemeAndHttpHost() . '/' . $jumpToLink['url'];
@@ -158,7 +159,7 @@ class ExportAttendances
                     }
 
                     //$event->setLocation()
-                    if ($attendance->getStatus() !== AttendanceStatus::findConfirmed()) {
+                    if ($item->get('cancelled') || $attendance->getStatus() !== AttendanceStatus::findConfirmed()) {
                         $event->setCancelled(true);
                     }
 
