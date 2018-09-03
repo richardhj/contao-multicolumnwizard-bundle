@@ -97,12 +97,9 @@
                                     element.replaceWith(response.html);
 
                                     $('.loading__loader').addClass('loading__loader--complete');
-
-                                    setTimeout(function () {
-                                        $('.loading__overlay').fadeOut(200, function () {
-                                            $(this).remove();
-                                        });
-                                    }, 350);
+                                    $('.loading__overlay').fadeOut(200, function () {
+                                        $(this).remove();
+                                    });
                                 }
                                 else {
                                     location.reload();
@@ -148,12 +145,9 @@
                             modal.dialog('option', 'buttons', buttons);
 
                             $('.loading__loader').addClass('loading__loader--complete');
-
-                            setTimeout(function () {
-                                $('.loading__overlay').fadeOut(200, function () {
-                                    $(this).remove();
-                                });
-                            }, 350);
+                            $('.loading__overlay').fadeOut(200, function () {
+                                $(this).remove();
+                            });
                         }
                         else {
                             location.reload();
