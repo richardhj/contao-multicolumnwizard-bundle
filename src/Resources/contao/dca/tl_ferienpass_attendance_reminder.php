@@ -69,8 +69,8 @@ $GLOBALS['TL_DCA'][$table] = [
                 'label'      => &$GLOBALS['TL_LANG'][$table]['delete'],
                 'href'       => 'act=delete',
                 'icon'       => 'delete.gif',
-                'attributes' => 'onclick="if (!confirm(\''.$GLOBALS['TL_LANG']['MSC']['deleteConfirm']
-                                .'\')) return false; Backend.getScrollOffset();"',
+                'attributes' => 'onclick="if (!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm']
+                                . '\')) return false; Backend.getScrollOffset();"',
             ],
             'show'   => [
                 'label' => &$GLOBALS['TL_LANG'][$table]['show'],
@@ -103,7 +103,7 @@ $GLOBALS['TL_DCA'][$table] = [
     // Fields
     'fields'       => [
         'id'                => [
-            'sql' => "int(10) unsigned NOT NULL auto_increment",
+            'sql' => 'int(10) unsigned NOT NULL auto_increment',
         ],
         'tstamp'            => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
@@ -130,6 +130,7 @@ $GLOBALS['TL_DCA'][$table] = [
             'foreignKey'       => 'tl_nc_notification.title',
             'filter'           => true,
             'options_callback' => function () {
+                $options = [];
                 /** @var Connection $connection */
                 $connection    = \Contao\System::getContainer()->get('database_connection');
                 $notifications = $connection->createQueryBuilder()
@@ -140,7 +141,11 @@ $GLOBALS['TL_DCA'][$table] = [
                     ->setParameter('type', 'application_list_reminder')
                     ->execute();
 
-                return $notifications->fetchAll(\PDO::FETCH_COLUMN, 1);
+                while ($row = $notifications->fetch(PDO::FETCH_OBJ)) {
+                    $options[$row->id] = $row->title;
+                }
+
+                return $options;
             },
             'eval'             => [
                 'mandatory'          => true,
@@ -148,33 +153,7 @@ $GLOBALS['TL_DCA'][$table] = [
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
                 'chosen'             => true,
-                'submitOnChange'     => true,
             ],
-            //            'wizard'           => [
-            //                function (DcCompat $dc) {
-            //                    return ($dc->value < 1)
-            //                        ? ''
-            //                        : ' <a href="contao/main.php?do=nc_notifications&table=tl_nc_message&amp;id=' . $dc->value
-            //                          . '&amp;popup=1&amp;nb=1&amp;rt=' . REQUEST_TOKEN . '" title="' . sprintf(
-            //                              specialchars($GLOBALS['TL_LANG']['tl_birthdaymailer']['edit_notification'][1]),
-            //                              $dc->value
-            //                          ) . '" style="padding-left:3px" onclick="Backend.openModalIframe({\'width\':768,\'title\':\''
-            //                          . specialchars(
-            //                              str_replace(
-            //                                  "'",
-            //                                  "\\'",
-            //                                  sprintf(
-            //                                      $GLOBALS['TL_LANG']['tl_birthdaymailer']['edit_notification'][1],
-            //                                      $dc->value
-            //                                  )
-            //                              )
-            //                          ) . '\',\'url\':this.href});return false">' . \Image::getHtml(
-            //                            'alias.gif',
-            //                            $GLOBALS['TL_LANG']['tl_birthdaymailer']['edit_notification'][0],
-            //                            'style="vertical-align:top"'
-            //                        ) . '</a>';
-            //                }
-            //            ],
             'sql'              => "int(10) unsigned NOT NULL default '0'",
             'relation'         => [
                 'type' => 'hasOne',
@@ -196,16 +175,17 @@ $GLOBALS['TL_DCA'][$table] = [
             ),
             'eval'      => [
                 'includeBlankOption' => true,
-                'tl_class'           => 'w50',
+                'multiple'           => true,
+                'chosen'             => true,
+                'tl_class'           => 'clr',
             ],
-            'sql'       => "int(10) NOT NULL default '0'",
+            'sql'       => 'text NULL',
         ],
         'published'         => [
             'label'     => &$GLOBALS['TL_LANG'][$table]['published'],
             'exclude'   => true,
             'inputType' => 'checkbox',
             'eval'      => [
-                //'submitOnChange' => true,
                 'doNotCopy' => true,
             ],
             'sql'       => "char(1) NOT NULL default ''",
