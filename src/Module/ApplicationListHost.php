@@ -47,26 +47,36 @@ class ApplicationListHost extends AbstractFrontendModuleController
 {
 
     /**
+     * The participant model.
+     *
      * @var Participant
      */
     private $participantModel;
 
     /**
+     * The render setting factory.
+     *
      * @var IRenderSettingFactory
      */
     private $renderSettingFactory;
 
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
 
     /**
+     * The authenticated frontend user.
+     *
      * @var FrontendUser
      */
     private $frontendUser;
 
     /**
+     * The filter factory.
+     *
      * @var FilterSettingFactory
      */
     private $filterSettingFactory;
@@ -74,10 +84,10 @@ class ApplicationListHost extends AbstractFrontendModuleController
     /**
      * ApplicationListHost constructor.
      *
-     * @param Participant           $participantModel
-     * @param IRenderSettingFactory $renderSettingFactory
-     * @param TranslatorInterface   $translator
-     * @param FilterSettingFactory  $filterSettingFactory
+     * @param Participant           $participantModel     The participant model.
+     * @param IRenderSettingFactory $renderSettingFactory The render setting factory.
+     * @param TranslatorInterface   $translator           The translator.
+     * @param FilterSettingFactory  $filterSettingFactory The filter factory.
      */
     public function __construct(
         Participant $participantModel,
@@ -95,9 +105,9 @@ class ApplicationListHost extends AbstractFrontendModuleController
     /**
      * Returns the response.
      *
-     * @param Template|object $template
-     * @param ModuleModel     $model
-     * @param Request         $request
+     * @param Template|object $template The template.
+     * @param ModuleModel     $model    The module model.
+     * @param Request         $request  The request.
      *
      * @return Response
      */
@@ -227,7 +237,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
     }
 
     /**
-     * @param string $alias
+     * @param string $alias The url alias.
      *
      * @return IItem
      */
@@ -252,11 +262,11 @@ class ApplicationListHost extends AbstractFrontendModuleController
     }
 
     /**
-     * Add the rendered meta model of this offer to the template
+     * Add the rendered meta model of this offer to the template.
      *
-     * @param Template    $template
-     * @param ModuleModel $model
-     * @param IItem       $offer
+     * @param Template    $template The template.
+     * @param ModuleModel $model    The module model.
+     * @param IItem       $offer    The offer.
      */
     protected function addRenderedMetaModelToTemplate(Template $template, ModuleModel $model, IItem $offer): void
     {

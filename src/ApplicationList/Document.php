@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\ApplicationList;
@@ -19,19 +19,34 @@ use Haste\Haste;
 use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class Document
+ *
+ * @package Richardhj\ContaoFerienpassBundle\ApplicationList
+ */
 class Document
 {
 
     /**
+     * The offer.
+     *
      * @var IItem
      */
     private $offer;
 
+    /**
+     * Document constructor.
+     *
+     * @param IItem $offer The offer.
+     */
     public function __construct(IItem $offer)
     {
         $this->offer = $offer;
     }
 
+    /**
+     * Output document to browser.
+     */
     public function outputToBrowser(): void
     {
         $pdf = $this->generatePDF();
@@ -103,8 +118,6 @@ class Document
 
     /**
      * Generate and return document template
-     *
-     * @param array $tokens
      *
      * @return string
      */
@@ -186,7 +199,7 @@ class Document
     /**
      * Fetch item's attributes by its collection type and add them to template
      *
-     * @param \Template $template
+     * @param \Template $template The template.
      */
     protected function addAttendeesToTemplate($template): void
     {

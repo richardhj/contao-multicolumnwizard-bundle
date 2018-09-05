@@ -35,11 +35,15 @@ class ICal implements FormatInterface
 {
 
     /**
+     * The filesystem.
+     *
      * @var Filesystem
      */
     private $filesystem;
 
     /**
+     * The kernel project directory.
+     *
      * @var string
      */
     private $kernelProjectDir;
@@ -61,7 +65,7 @@ class ICal implements FormatInterface
      *
      * @param IItems         $items The items to process.
      *
-     * @param DataProcessing $model
+     * @param DataProcessing $model The data processing model.
      *
      * @return array
      *
@@ -76,7 +80,7 @@ class ICal implements FormatInterface
         );
 
         // Save the iCal in the tmp path
-        $this->filesystem->dumpFile($this->kernelProjectDir.'/'.$path, $this->createICal($items, $model));
+        $this->filesystem->dumpFile($this->kernelProjectDir . '/' . $path, $this->createICal($items, $model));
 
         return [$path];
     }
@@ -84,9 +88,9 @@ class ICal implements FormatInterface
     /**
      * Create the iCal for given items
      *
-     * @param IItems         $items
+     * @param IItems         $items The items.
      *
-     * @param DataProcessing $model
+     * @param DataProcessing $model The data processing model.
      *
      * @return string
      */
@@ -104,19 +108,19 @@ class ICal implements FormatInterface
                 continue;
             }
 
-            foreach ((array)$date as $period) {
+            foreach ((array) $date as $period) {
                 $event = new Event();
 
-                $dateTime = new DateTime('@'.$period['start']);
+                $dateTime = new DateTime('@' . $period['start']);
                 $event->setDtStart($dateTime);
-                $dateTime = new DateTime('@'.$period['end']);
+                $dateTime = new DateTime('@' . $period['end']);
                 $event->setDtEnd($dateTime);
 
                 /**
                  * @var array $property [ical_field]          The property identifier
                  *                      [metamodel_attribute] The property assigned MetaModel attribute name
                  */
-                foreach ((array)$iCalProperties as $property) {
+                foreach ((array) $iCalProperties as $property) {
                     switch ($property['ical_field']) {
                         case 'summary':
                             $event->setSummary($item->get($property['metamodel_attribute']));

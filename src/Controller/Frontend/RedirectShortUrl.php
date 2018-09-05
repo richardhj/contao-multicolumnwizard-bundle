@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of richardhj/contao-ferienpass.
  *
@@ -7,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Controller\Frontend;
@@ -33,26 +34,36 @@ class RedirectShortUrl
 {
 
     /**
+     * The MetaModels factory.
+     *
      * @var IFactory
      */
     private $factory;
 
     /**
+     * The MetaModels render setting factory.
+     *
      * @var IRenderSettingFactory
      */
     private $renderSettingFactory;
 
     /**
+     * The event dispatcher.
+     *
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
     /**
+     * The render setting ID of the list view.
+     *
      * @var int
      */
     private $listViewId;
 
     /**
+     * The page ID of the list view.
+     *
      * @var int
      */
     private $listPageId;

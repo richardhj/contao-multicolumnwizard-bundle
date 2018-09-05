@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\HostEditing;
@@ -25,11 +25,19 @@ use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 
+/**
+ * Class ComplyWithEditingEndListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\HostEditing
+ */
 class ComplyWithEditingEndListener
 {
 
     use RequestScopeDeterminatorAwareTrait;
+
     /**
+     * Doctrine.
+     *
      * @var ManagerRegistry
      */
     private $doctrine;
@@ -38,7 +46,7 @@ class ComplyWithEditingEndListener
      * EditHandler constructor.
      *
      * @param RequestScopeDeterminator $scopeDeterminator The request mode determinator.
-     * @param ManagerRegistry          $doctrine
+     * @param ManagerRegistry          $doctrine          Doctrine.
      */
     public function __construct(RequestScopeDeterminator $scopeDeterminator, ManagerRegistry $doctrine)
     {
@@ -50,7 +58,7 @@ class ComplyWithEditingEndListener
     /**
      * Handle the event to process the action.
      *
-     * @param ActionEvent $event The action event
+     * @param ActionEvent $event The action event.
      *
      * @return void
      *
@@ -115,9 +123,9 @@ class ComplyWithEditingEndListener
 
 
     /**
-     * Check whether one offer is editable for the host by checking the edit deadline
+     * Check whether one offer is editable for the host by checking the edit deadline.
      *
-     * @param IItem $offer
+     * @param IItem $offer The offer.
      *
      * @return bool
      */
@@ -125,7 +133,7 @@ class ComplyWithEditingEndListener
     {
         $passEditionId = $offer->get('pass_edition')['id'];
         if (!$passEditionId) {
-            throw new \UnexpectedValueException('pass_edition is not set for offer ID '. $offer->get('id'));
+            throw new \UnexpectedValueException('pass_edition is not set for offer ID ' . $offer->get('id'));
         }
 
         $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($passEditionId);

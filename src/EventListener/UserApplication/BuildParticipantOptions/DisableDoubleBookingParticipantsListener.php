@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions;
@@ -20,6 +20,11 @@ use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class DisableDoubleBookingParticipantsListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions
+ */
 class DisableDoubleBookingParticipantsListener
 {
 

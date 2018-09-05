@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
@@ -19,6 +19,11 @@ use MetaModels\DcGeneral\Data\Model;
 use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class MaxApplicationsPostPersistListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass
+ */
 class MaxApplicationsPostPersistListener
 {
 

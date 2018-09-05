@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
@@ -30,6 +30,8 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
 {
 
     /**
+     * The root dir.
+     *
      * @var string
      */
     private $kernelProjectDir;
@@ -37,7 +39,7 @@ class Dropbox implements FilesystemInterface, Filesystem\TwoWaySyncInterface
     /**
      * Dropbox constructor.
      *
-     * @param string $kernelProjectDir
+     * @param string $kernelProjectDir The root dir.
      */
     public function __construct(string $kernelProjectDir)
     {

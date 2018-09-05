@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem;
@@ -18,13 +18,18 @@ use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class NewAttendanceListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem
+ */
 class NewAttendanceListener extends AbstractApplicationSystemListener
 {
 
     /**
      * Set a new attendance in the database.
      *
-     * @param UserSetApplicationEvent $event
+     * @param UserSetApplicationEvent $event The event.
      *
      * @return void
      */

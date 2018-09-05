@@ -7,7 +7,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Controller\Frontend;
@@ -35,16 +35,22 @@ class ExportAttendances
 {
 
     /**
+     * The render setting factory.
+     *
      * @var IRenderSettingFactory
      */
     private $renderSettingFactory;
 
     /**
+     * The id of the MetaModels render setting of the list view.
+     *
      * @var int
      */
     private $listViewId;
 
     /**
+     * The secret.
+     *
      * @var string
      */
     private $secret;
@@ -107,8 +113,8 @@ class ExportAttendances
     }
 
     /**
-     * @param Model\Collection|null $attendances
-     * @param Request               $request
+     * @param Model\Collection|null $attendances The attendances.
+     * @param Request               $request     The request.
      *
      * @return string
      */

@@ -18,26 +18,38 @@ use DOMElement;
 use MetaModels\Attribute\IAttribute;
 use MetaModels\IItem;
 
+/**
+ * Class ConvertDomElementToNativeWidgetEvent
+ *
+ * @package Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml
+ */
 class ConvertDomElementToNativeWidgetEvent
 {
 
     /**
+     * The DOM element.
+     *
      * @var DOMElement
      */
     private $domElement;
 
     /**
+     * The attribute.
+     *
      * @var IAttribute
      */
     private $attribute;
 
     /**
+     * The item.
+     *
      * @var IItem
      */
     private $item;
 
     /**
-     * @var
+     * The value.
+     * @var mixed
      */
     private $value;
 
@@ -49,9 +61,9 @@ class ConvertDomElementToNativeWidgetEvent
     /**
      * ConvertDomElementToNativeWidgetEvent constructor.
      *
-     * @param DOMElement $domElement
-     * @param IAttribute $attribute
-     * @param IItem      $item
+     * @param DOMElement $domElement The DOM element.
+     * @param IAttribute $attribute The attribute.
+     * @param IItem      $item The item.
      */
     public function __construct(DOMElement $domElement, IAttribute $attribute, IItem $item)
     {

@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\PassEditionTask;
@@ -20,10 +20,17 @@ use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 
+/**
+ * Class ApplicationSystemOptions
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\PassEditionTask
+ */
 class ApplicationSystemOptions
 {
 
     /**
+     * Doctrine.
+     *
      * @var ManagerRegistry
      */
     private $doctrine;
@@ -31,7 +38,7 @@ class ApplicationSystemOptions
     /**
      * ApplicationSystemOptions constructor.
      *
-     * @param ManagerRegistry $doctrine
+     * @param ManagerRegistry $doctrine Doctrine.
      */
     public function __construct(ManagerRegistry $doctrine)
     {
@@ -39,7 +46,7 @@ class ApplicationSystemOptions
     }
 
     /**
-     * @param GetPropertyOptionsEvent $event
+     * @param GetPropertyOptionsEvent $event The event.
      */
     public function handle(GetPropertyOptionsEvent $event): void
     {

@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing;
@@ -17,9 +17,16 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataPro
 use MetaModels\IFactory;
 use MultiColumnWizard\Event\GetOptionsEvent;
 
+/**
+ * Class ICalAttributeOptionsListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing
+ */
 class ICalAttributeOptionsListener
 {
     /**
+     * The MetaModels factory.
+     *
      * @var IFactory
      */
     private $factory;

@@ -7,7 +7,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
@@ -15,6 +15,11 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
 
 use MetaModels\IItem;
 
+/**
+ * Trait GetNotificationTokensTrait
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\Notification
+ */
 trait GetNotificationTokensTrait
 {
 
@@ -23,8 +28,8 @@ trait GetNotificationTokensTrait
      * * application_list_status_change
      * * application_list_reminder
      *
-     * @param IItem $participant
-     * @param IItem $offer
+     * @param IItem $participant The participant.
+     * @param IItem $offer       The offer.
      *
      * @return array
      */

@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions;
@@ -22,6 +22,11 @@ use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 
+/**
+ * Class DisableWrongAgeParticipantsListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions
+ */
 class DisableWrongAgeParticipantsListener implements ContainerAwareInterface
 {
 

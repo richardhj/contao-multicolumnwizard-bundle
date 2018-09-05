@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions;
@@ -18,10 +18,17 @@ use Contao\FrontendUser;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 
+/**
+ * Class DisableAlreadyAttendingParticipantsListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions
+ */
 class DisableAlreadyAttendingParticipantsListener
 {
 
     /**
+     * The participants model.
+     *
      * @var Participant
      */
     private $participantsModel;

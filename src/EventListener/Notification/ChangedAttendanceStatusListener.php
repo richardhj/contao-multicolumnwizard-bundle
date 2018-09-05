@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
@@ -21,12 +21,19 @@ use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 
+/**
+ * Class ChangedAttendanceStatusListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\Notification
+ */
 class ChangedAttendanceStatusListener
 {
 
     use GetNotificationTokensTrait;
 
     /**
+     * The offer model.
+     *
      * @var OfferModel
      */
     private $offerModel;
@@ -34,7 +41,7 @@ class ChangedAttendanceStatusListener
     /**
      * ChangedAttendanceStatusListener constructor.
      *
-     * @param OfferModel $offerModel
+     * @param OfferModel $offerModel The offer model.
      */
     public function __construct(OfferModel $offerModel)
     {
@@ -42,9 +49,9 @@ class ChangedAttendanceStatusListener
     }
 
     /**
-     * Send the corresponding notification if the attendance status was changed
+     * Send the corresponding notification if the attendance status was changed.
      *
-     * @param PostSaveModelEvent $event
+     * @param PostSaveModelEvent $event The event.
      */
     public function handle(PostSaveModelEvent $event): void
     {

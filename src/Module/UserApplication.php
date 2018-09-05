@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
@@ -47,31 +47,43 @@ class UserApplication extends AbstractFrontendModuleController
 {
 
     /**
+     * The participant model.
+     *
      * @var Participant
      */
     private $participantModel;
 
     /**
+     * The event dispatcher.
+     *
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
 
     /**
+     * The authenticated frontend user.
+     *
      * @var FrontendUser
      */
     private $frontendUser;
 
     /**
+     * The MetaModels filter factory.
+     *
      * @var IFilterSettingFactory
      */
     private $filterSettingFactory;
 
     /**
+     * The offer model.
+     *
      * @var OfferModel
      */
     private $offerModel;
@@ -79,11 +91,11 @@ class UserApplication extends AbstractFrontendModuleController
     /**
      * UserApplication constructor.
      *
-     * @param Participant              $participantModel
-     * @param EventDispatcherInterface $dispatcher
-     * @param TranslatorInterface      $translator
-     * @param FilterSettingFactory     $filterSettingFactory
-     * @param OfferModel               $offerModel
+     * @param Participant              $participantModel     The participant model.
+     * @param EventDispatcherInterface $dispatcher           The event dispatcher.
+     * @param TranslatorInterface      $translator           The translator.
+     * @param FilterSettingFactory     $filterSettingFactory The MetaModels filter factory.
+     * @param OfferModel               $offerModel           The offer model.
      */
     public function __construct(
         Participant $participantModel,
@@ -101,8 +113,8 @@ class UserApplication extends AbstractFrontendModuleController
     }
 
     /**
-     * @param int    $filterId
-     * @param string $alias
+     * @param int    $filterId The filter id to use.
+     * @param string $alias    The item alias.
      *
      * @return IItem
      */
@@ -128,9 +140,9 @@ class UserApplication extends AbstractFrontendModuleController
     /**
      * Returns the response.
      *
-     * @param Template|object $template
-     * @param ModuleModel     $model
-     * @param Request         $request
+     * @param Template|object $template The template
+     * @param ModuleModel     $model    The module model.
+     * @param Request         $request  The request.
      *
      * @return Response
      */

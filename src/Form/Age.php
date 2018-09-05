@@ -18,6 +18,7 @@ use Richardhj\ContaoFerienpassBundle\Widget\Age as AgeWidget;
 
 /**
  * Class Age
+ *
  * @package Richardhj\ContaoFerienpassBundle\Form
  */
 class Age extends AgeWidget

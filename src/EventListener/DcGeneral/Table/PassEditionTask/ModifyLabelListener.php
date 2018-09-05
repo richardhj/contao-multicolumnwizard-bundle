@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\PassEditionTask;
@@ -18,10 +18,17 @@ use Contao\Config;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use Symfony\Component\Translation\TranslatorInterface;
 
+/**
+ * Class ModifyLabelListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\PassEditionTask
+ */
 class ModifyLabelListener
 {
 
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
@@ -29,13 +36,16 @@ class ModifyLabelListener
     /**
      * ModifyLabelListener constructor.
      *
-     * @param TranslatorInterface $translator
+     * @param TranslatorInterface $translator The translator.
      */
     public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
 
+    /**
+     * @param ModelToLabelEvent $event The event.
+     */
     public function handle(ModelToLabelEvent $event): void
     {
         $environment    = $event->getEnvironment();

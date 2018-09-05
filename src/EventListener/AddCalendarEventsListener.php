@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener;
@@ -31,21 +31,23 @@ class AddCalendarEventsListener
 {
 
     /**
+     * The MetaModels factory.
+     *
      * @var Factory
      */
     private $metaModelsFactory;
 
     /**
-     * All attributes possible for one event
+     * All attributes possible for one event.
      *
      * @var array
      */
     protected static $eventAttributes;
 
     /**
-     * Define event attributes
+     * Define event attributes.
      *
-     * @param Factory $factory
+     * @param Factory $factory The MetaModels factory.
      */
     public function __construct(Factory $factory)
     {
@@ -55,7 +57,7 @@ class AddCalendarEventsListener
     }
 
     /**
-     * Get the event attributes array with name=>translatedName
+     * Get the event attributes array with name=>translatedName.
      *
      * @return array
      */
@@ -74,7 +76,7 @@ class AddCalendarEventsListener
     }
 
     /**
-     * Get the event attributes array
+     * Get the event attributes array.
      *
      * @return array
      */
@@ -85,10 +87,10 @@ class AddCalendarEventsListener
 
 
     /**
-     * Add a MetaModel's items as events
+     * Add a MetaModel's items as events.
      *
-     * @param array $events
-     * @param array $calendars
+     * @param array $events    The events.
+     * @param array $calendars The calendars.
      *
      * @return array
      *
@@ -129,7 +131,7 @@ class AddCalendarEventsListener
                 $end     = 0;
 
                 // Walk each associated attribute
-                foreach ((array)deserialize($calendar->metamodelFields, true) as $attribute) {
+                foreach ((array) deserialize($calendar->metamodelFields, true) as $attribute) {
                     $event[$attribute['calendar_field']] = $items->getItem()->get($attribute['metamodel_field']);
 
                     switch ($attribute['calendar_field']) {
@@ -158,7 +160,7 @@ class AddCalendarEventsListener
                 $span = ContaoCalendar::calculateSpan($start, $end);
 
                 if ($span > 0) {
-                    $date = Date::parse($objPage->dateFormat, $start).' – '.Date::parse($objPage->dateFormat, $end);
+                    $date = Date::parse($objPage->dateFormat, $start) . ' – ' . Date::parse($objPage->dateFormat, $end);
                     $day  = '';
                 }
 
@@ -192,10 +194,7 @@ class AddCalendarEventsListener
                 $event['link']     = $event['title'];
                 $event['target']   = '';
                 $event['title']    = specialchars($event['title'], true);
-//				$arrEvent['href'] = $this->generateEventUrl($objEvents, $strUrl);
-                $event['class'] = ('' !== $event['cssClass']) ? ' '.$event['cssClass'] : '';
-//				$arrEvent['recurring'] = $recurring;
-//				$arrEvent['until'] = $until;
+                $event['class'] = ('' !== $event['cssClass']) ? ' ' . $event['cssClass'] : '';
                 $event['begin']      = $start;
                 $event['end']        = $end;
                 $event['details']    = '';

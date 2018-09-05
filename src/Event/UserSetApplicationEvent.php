@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Event;
@@ -19,6 +19,7 @@ use Symfony\Component\EventDispatcher\Event;
 
 /**
  * Class UserSetApplicationEvent
+ *
  * @package Richardhj\ContaoFerienpassBundle\Event
  */
 class UserSetApplicationEvent extends Event
@@ -27,11 +28,15 @@ class UserSetApplicationEvent extends Event
     public const NAME = 'richardhj.ferienpass.user-application.set-attendance';
 
     /**
+     * The offer.
+     *
      * @var IItem
      */
     protected $offer;
 
     /**
+     * The participant.
+     *
      * @var IItem
      */
     protected $participant;
@@ -39,12 +44,12 @@ class UserSetApplicationEvent extends Event
     /**
      * UserSetApplicationEvent constructor.
      *
-     * @param IItem $offer
-     * @param IItem $participant
+     * @param IItem $offer       The offer.
+     * @param IItem $participant The participant.
      */
     public function __construct(IItem $offer, IItem $participant)
     {
-        $this->offer = $offer;
+        $this->offer       = $offer;
         $this->participant = $participant;
     }
 

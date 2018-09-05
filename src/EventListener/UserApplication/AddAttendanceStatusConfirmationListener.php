@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication;
@@ -18,13 +18,18 @@ use Contao\Model\Event\PostSaveModelEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class AddAttendanceStatusConfirmationListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\UserApplication
+ */
 class AddAttendanceStatusConfirmationListener
 {
 
     /**
-     * Display a message after saving a new attendance
+     * Display a message after saving a new attendance.
      *
-     * @param PostSaveModelEvent $event
+     * @param PostSaveModelEvent $event The event.
      *
      * @return void
      *

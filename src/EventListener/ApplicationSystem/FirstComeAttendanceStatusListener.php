@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem;
@@ -21,12 +21,17 @@ use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
+/**
+ * Class FirstComeAttendanceStatusListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem
+ */
 class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListener
 {
     /**
      * Save the attendance status corresponding to the current application list.
      *
-     * @param PreSaveModelEvent $event
+     * @param PreSaveModelEvent $event The event.
      *
      * @return void
      * @throws \Exception
@@ -75,7 +80,7 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
     /**
      * Save the attendance status corresponding to the current application list.
      *
-     * @param PrePersistModelEvent $event
+     * @param PrePersistModelEvent $event The event.
      *
      * @return void
      */
@@ -123,7 +128,7 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
     /**
      * Find the status that matches the current attendance.
      *
-     * @param Attendance $attendance
+     * @param Attendance $attendance The attendance.
      *
      * @return AttendanceStatus
      */
@@ -170,7 +175,7 @@ class FirstComeAttendanceStatusListener extends AbstractApplicationSystemListene
     /**
      * Get attendance's current position
      *
-     * @param Attendance $attendance
+     * @param Attendance $attendance The attendance.
      *
      * @return integer|null if participant not in attendance list (yet) or has error status
      */

@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Controller\Backend;
@@ -49,10 +49,15 @@ class ErasePersonalData extends Controller
      */
     private $translator;
     /**
+     * The MetaModels factory.
+     *
      * @var IFactory
      */
     private $factory;
+
     /**
+     * The database connection.
+     *
      * @var Connection
      */
     private $connection;
@@ -63,8 +68,8 @@ class ErasePersonalData extends Controller
      *
      * @param EngineInterface     $templating The twig engine.
      * @param TranslatorInterface $translator The translator.
-     * @param IFactory            $factory
-     * @param Connection          $connection
+     * @param IFactory            $factory    The MetaModels factory.
+     * @param Connection          $connection The database connection.
      */
     public function __construct(
         EngineInterface $templating,
@@ -81,7 +86,7 @@ class ErasePersonalData extends Controller
     /**
      * Invoke this.
      *
-     * @param Request $request
+     * @param Request $request The request.
      *
      * @return Response The template data.
      */
@@ -109,6 +114,11 @@ class ErasePersonalData extends Controller
         );
     }
 
+    /**
+     * @param Request $request The request.
+     *
+     * @return string
+     */
     protected function compile(Request $request): string
     {
         $output = '';

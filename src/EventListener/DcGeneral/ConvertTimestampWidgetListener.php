@@ -26,6 +26,11 @@ use ContaoCommunityAlliance\Contao\Bindings\Events\Date\ParseDateEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\DecodePropertyValueForWidgetEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\EncodePropertyValueFromWidgetEvent;
 
+/**
+ * Class ConvertTimestampWidgetListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral
+ */
 class ConvertTimestampWidgetListener
 {
 
@@ -94,7 +99,7 @@ class ConvertTimestampWidgetListener
     }
 
     /**
-     * @param $format
+     * @param string $format May be one of 'date', 'time', 'datim'.
      *
      * @return string
      */

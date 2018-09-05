@@ -27,10 +27,17 @@ use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 use Symfony\Component\Translation\TranslatorInterface;
 
 
+/**
+ * Class LotAttendanceAllocationViewHandler
+ *
+ * @package Richardhj\ContaoFerienpassBundle\DcGeneral\View\ActionHandler
+ */
 class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
 {
 
     /**
+     * The offer model.
+     *
      * @var OfferModel
      */
     private $offerModel;
@@ -41,7 +48,7 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
      * @param RequestScopeDeterminator $scopeDeterminator The request mode determinator.
      * @param TranslatorInterface      $translator        The translator.
      * @param CcaTranslator            $ccaTranslator     The cca translator.
-     * @param OfferModel               $offerModel
+     * @param OfferModel               $offerModel        The offer model.
      */
     public function __construct(
         RequestScopeDeterminator $scopeDeterminator,
@@ -66,12 +73,6 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
     {
         $dataDefinition  = $environment->getDataDefinition();
         $basicDefinition = $environment->getDataDefinition()->getBasicDefinition();
-//        $backendView     = $dataDefinition->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
-//
-//        $backendView->getListingConfig()->setShowColumns(false);
-//
-//        $basicDefinition->setMode(BasicDefinitionInterface::MODE_FLAT);
-
         if ('mm_ferienpass' !== $basicDefinition->getParentDataProvider()) {
             // Set null and the next view handler will handle it.
             return null;
@@ -111,12 +112,6 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
      */
     protected function renderTemplate(ContaoBackendViewTemplate $template, EnvironmentInterface $environment): void
     {
-//        $inputProvider = $environment->getInputProvider();
-//
-//        $languageDomain  = 'contao_' . $environment->getDataDefinition()->getName();
-//
-//        $this->getViewSection($environment->getDataDefinition())->getListingConfig()->setShowColumns(false);
-
         parent::renderTemplate($template, $environment);
 
         /** @var AttendanceStatus|\Model\Collection $status */
@@ -137,31 +132,6 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
 
         $template->set('status', $status);
         $template->set('statusCount', $statusCount);
-
-//        $template->set(
-//            'subHeadline',
-//            \sprintf(
-//                '%s: %s',
-//                $this->translate('MSC.' . $inputProvider->getParameter('mode') . 'Selected', $languageDomain),
-//                $this->translate('MSC.edit_all_select_properties', $languageDomain)
-//            )
-//        );
-//        $template->set('mode', 'none');
-//        $template->set('floatRightSelectButtons', true);
-//        $template->set('selectCheckBoxName', 'properties[]');
-//        $template->set('selectCheckBoxIdPrefix', 'properties_');
-//
-//        if ((null !== $template->get('action'))
-//            && (false !== \strpos($template->get('action'), 'select=properties'))
-//        ) {
-//            $template->set('action', \str_replace('select=properties', 'select=edit', $template->get('action')));
-//        }
-//
-//        if (\count($this->messages) > 0) {
-//            foreach (\array_keys($this->messages) as $messageType) {
-//                $template->set($messageType, $this->messages[$messageType]);
-//            }
-//        }
     }
 
     /**

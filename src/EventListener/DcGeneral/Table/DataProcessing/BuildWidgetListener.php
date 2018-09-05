@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing;
@@ -18,10 +18,17 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\Build
 use MetaModels\Filter\Setting\FilterSettingFactory;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 
+/**
+ * Class BuildWidgetListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing
+ */
 class BuildWidgetListener
 {
 
     /**
+     * The filter factory.
+     *
      * @var FilterSettingFactory
      */
     private $filterSettingFactory;

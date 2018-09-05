@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table;
@@ -19,10 +19,17 @@ use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\View\Command;
 use MetaModels\DcGeneral\Events\MetaModel\BuildMetaModelOperationsEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class AbstractAddAttendancesOperationListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table
+ */
 abstract class AbstractAddAttendancesOperationListener
 {
 
     /**
+     * The table name.
+     *
      * @var string
      */
     private $table;

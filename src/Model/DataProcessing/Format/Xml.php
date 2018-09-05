@@ -46,36 +46,50 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 {
 
     /**
+     * The MetaModels factory.
+     *
      * @var IFactory
      */
     private $factory;
 
     /**
+     * The MetaModels render setting factory.
+     *
      * @var IRenderSettingFactory
      */
     private $renderSettingFactory;
 
     /**
+     * The filesystem component.
+     *
      * @var Filesystem
      */
     private $filesystem;
 
     /**
+     * The database connection.
+     *
      * @var Connection
      */
     private $connection;
 
     /**
+     * The event dispatcher.
+     *
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
     /**
+     * The kernel project dir.
+     *
      * @var string
      */
     private $kernelProjectDir;
 
     /**
+     * The data processing model.
+     *
      * @var DataProcessingModel|null
      */
     private $model;
@@ -127,7 +141,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      *
      * @param IItems              $items The items to process.
      *
-     * @param DataProcessingModel $model
+     * @param DataProcessingModel $model The data processing model.
      *
      * @return array
      *
@@ -146,10 +160,10 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
             $path = sprintf(
                 '%s/xml/%s.xml',
                 $model->getTmpPath(),
-                ($this->isXmlSingleFile() ? 'items' : 'item_'.$id)
+                ($this->isXmlSingleFile() ? 'items' : 'item_' . $id)
             );
 
-            $this->filesystem->dumpFile($this->kernelProjectDir.'/'.$path, $xml);
+            $this->filesystem->dumpFile($this->kernelProjectDir . '/' . $path, $xml);
             $files[] = $path;
         }
 
@@ -157,8 +171,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
     /**
-     * @param array  $files
-     * @param string $originFileSystem
+     * @param array  $files The files.
+     * @param string $originFileSystem The origin file system.
      */
     public function syncFilesFromRemoteSystem(array $files, string $originFileSystem = 'local'): void
     {
@@ -166,7 +180,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
     /**
-     * @param IItems $items
+     * @param IItems $items The items.
      *
      * @return array The xml contents as array in the format ['item_id'=>'xml'] or simply ['xml'] when creating a
      *               single xml file
@@ -213,8 +227,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Get the dom node for a particular item
      *
-     * @param IItem       $item
-     * @param DOMDocument $dom
+     * @param IItem       $item The item.
+     * @param DOMDocument $dom The DOM document.
      *
      * @return DOMElement|null
      *
@@ -310,8 +324,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Try to import a parsed attribute to a dom node if it is a valid xml string or set the dom node value otherwise
      *
-     * @param string     $parsed
-     * @param DOMElement $domAttribute
+     * @param string     $parsed The parsed value.
+     * @param DOMElement $domAttribute The DOM attribute.
      */
     protected function addParsedToDomAttribute(string $parsed, DOMElement $domAttribute)
     {
@@ -326,8 +340,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Take an XML string and import the nodes as children to a given node
      *
-     * @param string  $attributeParsed
-     * @param DOMNode $attributeNode
+     * @param string  $attributeParsed The parsed attribute.
+     * @param DOMNode $attributeNode The DOM node.
      *
      * @throws InvalidXmlException
      */
@@ -431,9 +445,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Check whether an attribute dom node differs from the attribute's database value, track change and save item
      *
-     * @param DOMElement $domAttribute
-     * @param IAttribute $attribute
-     * @param IItem      $item
+     * @param DOMElement $domAttribute The DOM attribute.
+     * @param IAttribute $attribute The attribute.
+     * @param IItem      $item The item.
      */
     protected function trackAttributeChange(DOMElement $domAttribute, IAttribute $attribute, IItem $item)
     {
@@ -505,9 +519,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Try to convert the DOMElement's content to a widget's raw data by the widget type
      *
-     * @param DOMElement $element
-     * @param IAttribute $attribute
-     * @param IItem      $item
+     * @param DOMElement $element The DOM element.
+     * @param IAttribute $attribute The attribute.
+     * @param IItem      $item The item.
      *
      * @return mixed The attribute's data in the same format as the attribute's "raw" data
      *
@@ -531,7 +545,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
     /**
-     * @param IAttribute $attribute
+     * @param IAttribute $attribute The attribute.
      *
      * @return string
      */
@@ -540,7 +554,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         $delimiter = '';
 
         $delimiterConfigs = deserialize($this->model->variant_delimiters, true);
-        foreach ((array)$delimiterConfigs as $delimiterConfig) {
+        foreach ((array) $delimiterConfigs as $delimiterConfig) {
             if ('' === $delimiterConfig['metamodel_attribute']
                 || $attribute->getColName() === $delimiterConfig['metamodel_attribute']
             ) {
@@ -560,7 +574,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Camel Case (with first case uppercase) a column name
      *
-     * @param string $value
+     * @param string $value The string to camelize.
      *
      * @return string
      */

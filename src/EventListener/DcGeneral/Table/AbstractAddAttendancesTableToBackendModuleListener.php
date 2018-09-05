@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table;
@@ -18,10 +18,17 @@ use Contao\Controller;
 use MetaModels\ViewCombination\ViewCombination;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class AbstractAddAttendancesTableToBackendModuleListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table
+ */
 abstract class AbstractAddAttendancesTableToBackendModuleListener
 {
 
     /**
+     * The view combination with information about the current screen.
+     *
      * @var ViewCombination
      */
     private $viewCombination;
@@ -37,7 +44,7 @@ abstract class AbstractAddAttendancesTableToBackendModuleListener
     }
 
     /**
-     * @param string $moduleTable
+     * @param string $moduleTable The table name.
      */
     protected function addTableForModule(string $moduleTable): void
     {
@@ -48,6 +55,6 @@ abstract class AbstractAddAttendancesTableToBackendModuleListener
         Controller::loadDataContainer($moduleTable);
 
         // Add table name to back end module tables
-        $GLOBALS['BE_MOD'][$backendSection]['metamodel_'.$moduleTable]['tables'][] = Attendance::getTable();
+        $GLOBALS['BE_MOD'][$backendSection]['metamodel_' . $moduleTable]['tables'][] = Attendance::getTable();
     }
 }

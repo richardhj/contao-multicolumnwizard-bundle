@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\DependencyInjection;
@@ -45,8 +45,8 @@ class RichardhjContaoFerienpassExtension extends Extension implements PrependExt
     /**
      * Loads a specific configuration.
      *
-     * @param array            $configs
-     * @param ContainerBuilder $container
+     * @param array            $configs   The configurations.
+     * @param ContainerBuilder $container The container builder.
      *
      * @throws \Exception
      */
@@ -61,7 +61,7 @@ class RichardhjContaoFerienpassExtension extends Extension implements PrependExt
     /**
      * Allow an extension to prepend the extension configurations.
      *
-     * @param ContainerBuilder $container
+     * @param ContainerBuilder $container The container builder.
      */
     public function prepend(ContainerBuilder $container): void
     {
@@ -70,7 +70,7 @@ class RichardhjContaoFerienpassExtension extends Extension implements PrependExt
             [
                 'orm' => [
                     'auto_mapping' => true,
-                    'mappings' => [
+                    'mappings'     => [
                         'RichardhjContaoFerienpassBundle' => []
                     ]
                 ]

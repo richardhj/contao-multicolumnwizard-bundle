@@ -26,26 +26,39 @@ use ContaoCommunityAlliance\Translator\TranslatorInterface as CcaTranslator;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 
+/**
+ * Class SortingHelper
+ *
+ * @package Richardhj\ContaoFerienpassBundle\Helper
+ */
 class SortingHelper
 {
 
     /**
+     * The environment.
+     *
      * @var EnvironmentInterface
      */
     private $environment;
 
 
     /**
+     * The data provider.
+     *
      * @var DataProviderInterface
      */
     private $dataProvider;
 
     /**
+     * The event dispatcher.
+     *
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
     /**
+     * The backported translator.
+     *
      * @var CcaTranslator
      */
     private $translator;
@@ -53,9 +66,9 @@ class SortingHelper
     /**
      * SortingHelper constructor.
      *
-     * @param                          $table
-     * @param EventDispatcherInterface $dispatcher
-     * @param CcaTranslator            $translator
+     * @param      string              $table      The table name.
+     * @param EventDispatcherInterface $dispatcher The event dispatcher.
+     * @param CcaTranslator            $translator The backported translator.
      */
     public function __construct($table, EventDispatcherInterface $dispatcher, CcaTranslator $translator)
     {
@@ -70,8 +83,8 @@ class SortingHelper
     /**
      * Update the sorting to set a given model after a given model or at the top if none given
      *
-     * @param ModelIdInterface      $modelId
-     * @param ModelIdInterface|null $previousModelId
+     * @param ModelIdInterface      $modelId         The model id.
+     * @param ModelIdInterface|null $previousModelId The previous model id.
      */
     public function setAttendanceAfter(ModelIdInterface $modelId, ModelIdInterface $previousModelId = null): void
     {
@@ -95,7 +108,7 @@ class SortingHelper
     /**
      * Convert a ModelId to a DC General conform model instance
      *
-     * @param ModelIdInterface $modelId
+     * @param ModelIdInterface $modelId The model id.
      *
      * @return ModelInterface
      */
@@ -107,7 +120,7 @@ class SortingHelper
     }
 
     /**
-     * @param ModelInterface $model
+     * @param ModelInterface $model The model id.
      *
      * @return CollectionInterface|ModelInterface[]|string[]
      */

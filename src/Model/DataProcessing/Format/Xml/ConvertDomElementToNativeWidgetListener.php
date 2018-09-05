@@ -26,9 +26,17 @@ use MetaModels\AttributeTextBundle\Attribute\Text;
 use MetaModels\AttributeUrlBundle\Attribute\Url;
 use Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\OfferDate\OfferDate;
 
+/**
+ * Class ConvertDomElementToNativeWidgetListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml
+ */
 class ConvertDomElementToNativeWidgetListener
 {
 
+    /**
+     * @param ConvertDomElementToNativeWidgetEvent $event The event.
+     */
     public function convertSimpleAttributes(ConvertDomElementToNativeWidgetEvent $event): void
     {
         $attribute = $event->getAttribute();
@@ -74,6 +82,9 @@ class ConvertDomElementToNativeWidgetListener
         $event->setValue($value);
     }
 
+    /**
+     * @param ConvertDomElementToNativeWidgetEvent $event The event.
+     */
     public function convertTableTextAttribute(ConvertDomElementToNativeWidgetEvent $event): void
     {
         $attribute = $event->getAttribute();
@@ -101,7 +112,7 @@ class ConvertDomElementToNativeWidgetListener
                 $r++;
             }
 
-            $widget[$r]['col_'.$c] = $cell->nodeValue;
+            $widget[$r]['col_' . $c] = $cell->nodeValue;
 
             $c++;
         }
@@ -110,6 +121,9 @@ class ConvertDomElementToNativeWidgetListener
         $event->setValue($value);
     }
 
+    /**
+     * @param ConvertDomElementToNativeWidgetEvent $event The event.
+     */
     public function convertFileAttribute(ConvertDomElementToNativeWidgetEvent $event): void
     {
         $attribute = $event->getAttribute();

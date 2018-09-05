@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant;
@@ -18,11 +18,16 @@ use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ModelToLabelEvent;
 use MetaModels\DcGeneral\Data\Model;
 
+/**
+ * Class ModelToLabelListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmParticipant
+ */
 class ModelToLabelListener
 {
 
     /**
-     * Add the member edit link when in participant list view
+     * Add the member edit link when in participant list view.
      *
      * @param ModelToLabelEvent $event The event.
      */
@@ -48,7 +53,7 @@ class ModelToLabelListener
                         // Member ID
                         $parentRaw['id'],
                         // Link
-                        '<i class="fa fa-external-link tl_gray"></i> '.$args[$k],
+                        '<i class="fa fa-external-link tl_gray"></i> ' . $args[$k],
                         // Member edit description
                         sprintf(
                             $GLOBALS['TL_LANG']['tl_member']['edit'][1],

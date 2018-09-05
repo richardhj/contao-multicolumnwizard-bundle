@@ -17,6 +17,11 @@ namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use MetaModels\IItems;
 
+/**
+ * Interface FilesystemInterface
+ *
+ * @package Richardhj\ContaoFerienpassBundle\Model\DataProcessing
+ */
 interface FilesystemInterface
 {
 

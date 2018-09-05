@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
@@ -17,6 +17,7 @@ use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
+use Contao\ModuleModel;
 use Contao\Template;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use MetaModels\Render\Setting\IRenderSettingFactory;
@@ -44,31 +45,43 @@ class UserAttendances extends AbstractFrontendModuleController
 {
 
     /**
+     * The offer model.
+     *
      * @var Offer
      */
     private $offerModel;
 
     /**
+     * The participant model.
+     *
      * @var Participant
      */
     private $participantModel;
 
     /**
+     * The event dispatcher.
+     *
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
     /**
+     * The authenticated frontend user.
+     *
      * @var FrontendUser
      */
     private $frontendUser;
 
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
 
     /**
+     * The MetaModels render setting factory.
+     *
      * @var IRenderSettingFactory
      */
     private $renderSettingFactory;
@@ -77,11 +90,11 @@ class UserAttendances extends AbstractFrontendModuleController
     /**
      * UserAttendances constructor.
      *
-     * @param Offer                    $offerModel
-     * @param Participant              $participantModel
-     * @param EventDispatcherInterface $dispatcher
-     * @param TranslatorInterface      $translator
-     * @param IRenderSettingFactory    $renderSettingFactory
+     * @param Offer                    $offerModel           The offer model.
+     * @param Participant              $participantModel     The participant model.
+     * @param EventDispatcherInterface $dispatcher           The event dispatcher.
+     * @param TranslatorInterface      $translator           The translator.
+     * @param IRenderSettingFactory    $renderSettingFactory The MetaModels render setting factory.
      */
     public function __construct(
         Offer $offerModel,
@@ -101,13 +114,13 @@ class UserAttendances extends AbstractFrontendModuleController
     /**
      * Returns the response.
      *
-     * @param Template|object     $template
-     * @param \Contao\ModuleModel $model
-     * @param Request             $request
+     * @param Template|object $template The template.
+     * @param ModuleModel     $model    The module model.
+     * @param Request         $request  The request.
      *
      * @return Response
      */
-    protected function getResponse(Template $template, \Contao\ModuleModel $model, Request $request): Response
+    protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
         // Delete attendance
         if ('delete' === $request->query->get('action')) {

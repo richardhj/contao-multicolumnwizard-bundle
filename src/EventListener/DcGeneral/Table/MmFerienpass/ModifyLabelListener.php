@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
@@ -23,15 +23,24 @@ use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 
+/**
+ * Class ModifyLabelListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass
+ */
 class ModifyLabelListener
 {
 
     /**
+     * The participant model.
+     *
      * @var Participant
      */
     private $participantsModel;
 
     /**
+     * The offer model.
+     *
      * @var OfferModel
      */
     private $offerModel;
@@ -40,7 +49,7 @@ class ModifyLabelListener
      * ModifyLabelListener constructor.
      *
      * @param Participant $participantsModel The participants model.
-     * @param OfferModel  $offerModel
+     * @param OfferModel  $offerModel        The offer model.
      */
     public function __construct(Participant $participantsModel, OfferModel $offerModel)
     {

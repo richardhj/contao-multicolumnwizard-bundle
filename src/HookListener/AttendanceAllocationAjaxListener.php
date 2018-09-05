@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\HookListener;
@@ -24,19 +24,30 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 
+/**
+ * Class AttendanceAllocationAjaxListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\HookListener
+ */
 class AttendanceAllocationAjaxListener
 {
     /**
+     * The request stack.
+     *
      * @var RequestStack
      */
     private $requestStack;
 
     /**
+     * The event dispatcher.
+     *
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
     /**
+     * The backported translator.
+     *
      * @var CcaTranslator
      */
     private $translator;
@@ -44,9 +55,9 @@ class AttendanceAllocationAjaxListener
     /**
      * AttendanceAllocationAjaxListener constructor.
      *
-     * @param RequestStack             $requestStack
-     * @param EventDispatcherInterface $dispatcher
-     * @param CcaTranslator            $translator
+     * @param RequestStack             $requestStack The request stack.
+     * @param EventDispatcherInterface $dispatcher   The event dispatcher.
+     * @param CcaTranslator            $translator   The backported translator.
      */
     public function __construct(
         RequestStack $requestStack,
@@ -59,9 +70,9 @@ class AttendanceAllocationAjaxListener
     }
 
     /**
-     * Handle the reposition of attendances in the backend
+     * Handle the reposition of attendances in the backend.
      *
-     * @param string $action
+     * @param string $action The action name.
      */
     public function onExecutePostActions($action): void
     {

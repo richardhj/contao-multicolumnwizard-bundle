@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
@@ -22,15 +22,24 @@ use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 use Richardhj\ContaoFerienpassBundle\Exception\NoPassEditionWithActiveHostEditingStageException;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 
+/**
+ * Class FeeUpdatePassEditionOnDuplicateListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass
+ */
 class FeeUpdatePassEditionOnDuplicateListener
 {
 
     /**
+     * The request scope determinator.
+     *
      * @var RequestScopeDeterminator
      */
     private $scopeMatcher;
 
     /**
+     * Doctrine.
+     *
      * @var ManagerRegistry
      */
     private $doctrine;
@@ -38,8 +47,8 @@ class FeeUpdatePassEditionOnDuplicateListener
     /**
      * FrontendPermissionCheckListener constructor.
      *
-     * @param RequestScopeDeterminator $scopeMatcher
-     * @param ManagerRegistry          $doctrine
+     * @param RequestScopeDeterminator $scopeMatcher The request scope determinator.
+     * @param ManagerRegistry          $doctrine     Doctrine.
      */
     public function __construct(RequestScopeDeterminator $scopeMatcher, ManagerRegistry $doctrine)
     {

@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
@@ -21,10 +21,17 @@ use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
 use ContaoCommunityAlliance\DcGeneral\Event\PreEditModelEvent;
 use MetaModels\DcGeneral\Data\Model;
 
+/**
+ * Class FeePermissionCheckListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass
+ */
 class FeePermissionCheckListener
 {
 
     /**
+     * The request scope determinator.
+     *
      * @var RequestScopeDeterminator
      */
     private $scopeMatcher;
@@ -32,7 +39,7 @@ class FeePermissionCheckListener
     /**
      * FrontendPermissionCheckListener constructor.
      *
-     * @param RequestScopeDeterminator $scopeMatcher
+     * @param RequestScopeDeterminator $scopeMatcher The request scope determinator.
      */
     public function __construct(RequestScopeDeterminator $scopeMatcher)
     {
@@ -63,7 +70,7 @@ class FeePermissionCheckListener
         /** @var FrontendUser $user */
         $user = FrontendUser::getInstance();
         if (null !== $model->getId() && $attribute->valueToWidget($item->get('host')) !== $user->ferienpass_host) {
-            throw new AccessDeniedException('Access denied for: '.ModelId::fromModel($model)->getSerialized());
+            throw new AccessDeniedException('Access denied for: ' . ModelId::fromModel($model)->getSerialized());
         }
     }
 }

@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
@@ -19,15 +19,20 @@ use NotificationCenter\Model\Notification;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 
+/**
+ * Class NewAttendanceStatusListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\Notification
+ */
 class NewAttendanceStatusListener
 {
 
     use GetNotificationTokensTrait;
 
     /**
-     * Send the corresponding notification if the attendance status is assigned newly
+     * Send the corresponding notification if the attendance status is assigned newly.
      *
-     * @param PostSaveModelEvent $event
+     * @param PostSaveModelEvent $event The event.
      */
     public function handle(PostSaveModelEvent $event): void
     {

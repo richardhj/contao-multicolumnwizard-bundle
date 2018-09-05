@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Filesystem;
@@ -30,11 +30,15 @@ class Local implements FilesystemInterface
 {
 
     /**
+     * The filesystem component.
+     *
      * @var Filesystem
      */
     private $filesystem;
 
     /**
+     * The kernel project directory.
+     *
      * @var string
      */
     private $kernelProjectDir;

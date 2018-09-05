@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Event;
@@ -27,6 +27,8 @@ class UserAttendancesTableEvent extends Event
     public const NAME = 'richardhj.ferienpass.user-application.table-rows';
 
     /**
+     * The items.
+     *
      * @var array
      */
     private $items;
@@ -34,7 +36,7 @@ class UserAttendancesTableEvent extends Event
     /**
      * UserAttendancesTableEvent constructor.
      *
-     * @param array $items
+     * @param array $items The items.
      */
     public function __construct(array $items)
     {

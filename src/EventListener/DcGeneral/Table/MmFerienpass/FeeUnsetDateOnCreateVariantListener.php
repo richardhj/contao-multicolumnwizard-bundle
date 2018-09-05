@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
@@ -18,10 +18,17 @@ use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use ContaoCommunityAlliance\DcGeneral\Event\PreEditModelEvent;
 use MetaModels\DcGeneral\Data\Model;
 
+/**
+ * Class FeeUnsetDateOnCreateVariantListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass
+ */
 class FeeUnsetDateOnCreateVariantListener
 {
 
     /**
+     * The request scope determinator.
+     *
      * @var RequestScopeDeterminator
      */
     private $scopeMatcher;
@@ -29,7 +36,7 @@ class FeeUnsetDateOnCreateVariantListener
     /**
      * FeeRemoveDateOnCreateListener constructor.
      *
-     * @param RequestScopeDeterminator $scopeMatcher
+     * @param RequestScopeDeterminator $scopeMatcher The request scope determinator.
      */
     public function __construct(RequestScopeDeterminator $scopeMatcher)
     {

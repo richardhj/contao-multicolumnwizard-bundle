@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem;
@@ -19,13 +19,18 @@ use ContaoCommunityAlliance\DcGeneral\Event\PostDeleteModelEvent;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class FirstComeDeletedAttendanceListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem
+ */
 class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListener
 {
 
     /**
      * Update all attendance statuses for one offer.
      *
-     * @param DeleteModelEvent $event
+     * @param DeleteModelEvent $event The event.
      *
      * @return void
      */
@@ -52,7 +57,7 @@ class FirstComeDeletedAttendanceListener extends AbstractApplicationSystemListen
     /**
      * Update all attendance statuses for one offer.
      *
-     * @param PostDeleteModelEvent $event
+     * @param PostDeleteModelEvent $event The event.
      *
      * @return void
      */

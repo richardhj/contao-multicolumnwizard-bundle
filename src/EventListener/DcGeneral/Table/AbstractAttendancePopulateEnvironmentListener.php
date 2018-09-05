@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table;
@@ -20,13 +20,18 @@ use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\BasicDefinitionI
 use ContaoCommunityAlliance\DcGeneral\Factory\Event\PopulateEnvironmentEvent;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
+/**
+ * Class AbstractAttendancePopulateEnvironmentListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table
+ */
 abstract class AbstractAttendancePopulateEnvironmentListener
 {
 
     /**
      * Make the "attendances" table editable as a child table of the offer or participant
      *
-     * @param PopulateEnvironmentEvent $event
+     * @param PopulateEnvironmentEvent $event The event.
      *
      * @throws \ContaoCommunityAlliance\DcGeneral\Exception\DcGeneralRuntimeException
      */
@@ -48,25 +53,5 @@ abstract class AbstractAttendancePopulateEnvironmentListener
         $environment->getDataDefinition()->getBasicDefinition()->setMode(BasicDefinitionInterface::MODE_PARENTEDLIST);
         // Set parent data provider corresponding to pid
         $definition->getBasicDefinition()->setParentDataProvider($modelId->getDataProviderName());
-
-//        // Remove redundant legend (offer_legend in offer view)
-//        $palette = $definition->getPalettesDefinition()->getPaletteByName('default');
-//        switch ($modelId->getDataProviderName()) {
-//            case 'mm_ferienpass':
-//                try {
-//                    $palette->removeLegend($palette->getLegend('offer'));
-//                } catch (DcGeneralRuntimeException $e) {
-//                    // Legend (already) removed. Nothing to do here.
-//                }
-//                break;
-//
-//            case 'mm_participant':
-//                try {
-//                    $palette->removeLegend($palette->getLegend('participant'));
-//                } catch (DcGeneralRuntimeException $e) {
-//                    // Legend (already) removed. Nothing to do here.
-//                }
-//                break;
-//        }
     }
 }

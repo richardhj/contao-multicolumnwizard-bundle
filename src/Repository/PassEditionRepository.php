@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Repository;
@@ -19,6 +19,11 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 
+/**
+ * Class PassEditionRepository
+ *
+ * @package Richardhj\ContaoFerienpassBundle\Repository
+ */
 class PassEditionRepository extends EntityRepository
 {
 

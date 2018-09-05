@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\Notification;
@@ -28,6 +28,8 @@ class TriggerCronRemindersListener
     use GetNotificationTokensTrait;
 
     /**
+     * The database connection.
+     *
      * @var Connection
      */
     private $connection;
@@ -35,7 +37,7 @@ class TriggerCronRemindersListener
     /**
      * TriggerCronRemindersListener constructor.
      *
-     * @param Connection $connection
+     * @param Connection $connection The database connection.
      */
     public function __construct(Connection $connection)
     {
@@ -45,7 +47,7 @@ class TriggerCronRemindersListener
     /**
      * Check for attendance upcoming this day and trigger the reminder sending
      *
-     * @param CronEvent $event
+     * @param CronEvent $event The event.
      */
     public function handle(CronEvent $event): void
     {
@@ -80,8 +82,8 @@ class TriggerCronRemindersListener
     /**
      * Send the attendance reminders. Trigger the notification for each attendance
      *
-     * @param Attendance|Collection $attendances
-     * @param int                   $notificationId
+     * @param Attendance|Collection $attendances    The attendances.
+     * @param int                   $notificationId The notification id.
      */
     private function sendAttendanceReminderNotifications(Collection $attendances, int $notificationId): void
     {

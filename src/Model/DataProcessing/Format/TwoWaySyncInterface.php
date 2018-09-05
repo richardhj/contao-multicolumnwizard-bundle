@@ -23,8 +23,8 @@ interface TwoWaySyncInterface
 {
 
     /**
-     * @param array  $files
-     * @param string $originFileSystem
+     * @param array  $files The files.
+     * @param string $originFileSystem The origin file system.
      */
     public function syncFilesFromRemoteSystem(array $files, string $originFileSystem): void;
 }

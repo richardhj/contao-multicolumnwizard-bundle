@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Model;
@@ -30,6 +30,8 @@ abstract class AbstractSimpleMetaModel
 {
 
     /**
+     * The MetaModel.
+     *
      * @var IMetaModel
      */
     protected $metaModel;
@@ -37,8 +39,8 @@ abstract class AbstractSimpleMetaModel
     /**
      * Load the MetaModel settings
      *
-     * @param Factory $factory
-     * @param string  $tableName
+     * @param Factory $factory   The MetaModels factory.
+     * @param string  $tableName The table name.
      *
      * @throws \RuntimeException
      */

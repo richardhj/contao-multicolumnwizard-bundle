@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\BackendModule;
@@ -56,7 +56,7 @@ class SendMemberAttendancesOverview extends \BackendModule
     /**
      * SendMemberAttendancesOverview constructor.
      *
-     * @param DataContainer|null $dataContainer
+     * @param DataContainer|null $dataContainer The data container.
      *
      * @throws ServiceNotFoundException
      * @throws ServiceCircularReferenceException

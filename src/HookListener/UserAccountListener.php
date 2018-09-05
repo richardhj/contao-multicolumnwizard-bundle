@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\HookListener;
@@ -20,15 +20,24 @@ use Psr\Log\LogLevel;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 
+/**
+ * Class UserAccountListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\HookListener
+ */
 class UserAccountListener
 {
 
     /**
+     * The participant model.
+     *
      * @var Participant
      */
     private $participantsModel;
 
     /**
+     * The logger.
+     *
      * @var LoggerInterface
      */
     private $logger;
@@ -36,8 +45,8 @@ class UserAccountListener
     /**
      * UserAccountListener constructor.
      *
-     * @param Participant     $participantsModel
-     * @param LoggerInterface $logger
+     * @param Participant     $participantsModel The participant model.
+     * @param LoggerInterface $logger            The logger.
      */
     public function __construct(Participant $participantsModel, LoggerInterface $logger)
     {
@@ -48,8 +57,8 @@ class UserAccountListener
     /**
      * Delete a member's participants and attendances
      *
-     * @param integer $userId
-     * @param string  $regClose
+     * @param integer $userId   The user id.
+     * @param string  $regClose The close account action.
      *
      * @internal param \ModuleCloseAccount $module
      */

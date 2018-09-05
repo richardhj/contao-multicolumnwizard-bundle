@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing;
@@ -18,15 +18,24 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\GetPr
 use Doctrine\DBAL\Connection;
 use Richardhj\ContaoFerienpassBundle\Model\Offer;
 
+/**
+ * Class SortAttributeOptionsListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\DataProcessing
+ */
 class SortAttributeOptionsListener
 {
 
     /**
+     * The database connection.
+     *
      * @var Connection
      */
     private $connection;
 
     /**
+     * The offer.
+     *
      * @var Offer
      */
     private $offerModel;
@@ -34,8 +43,8 @@ class SortAttributeOptionsListener
     /**
      * SortAttributeOptionsListener constructor.
      *
-     * @param Connection $connection
-     * @param Offer      $offerModel
+     * @param Connection $connection The database connection.
+     * @param Offer      $offerModel The offer.
      */
     public function __construct(Connection $connection, Offer $offerModel)
     {

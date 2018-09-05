@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
@@ -53,26 +53,36 @@ class AddAttendeeHost extends AbstractFrontendModuleController
 {
 
     /**
+     * The database connection.
+     *
      * @var Connection
      */
     private $connection;
 
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
 
     /**
+     * The participant model.
+     *
      * @var Participant
      */
     private $participantModel;
 
     /**
+     * The offer.
+     *
      * @var IItem|null
      */
     private $offer;
 
     /**
+     * The authenticated frontend user.
+     *
      * @var FrontendUser
      */
     private $frontendUser;
@@ -80,9 +90,9 @@ class AddAttendeeHost extends AbstractFrontendModuleController
     /**
      * AddAttendeeHost constructor.
      *
-     * @param Connection          $connection
-     * @param TranslatorInterface $translator
-     * @param Participant         $participantModel
+     * @param Connection          $connection       The database connection.
+     * @param TranslatorInterface $translator       The translator.
+     * @param Participant         $participantModel The participant model.
      */
     public function __construct(Connection $connection, TranslatorInterface $translator, Participant $participantModel)
     {
@@ -96,9 +106,9 @@ class AddAttendeeHost extends AbstractFrontendModuleController
     /**
      * Returns the response.
      *
-     * @param Template|object $template
-     * @param ModuleModel     $model
-     * @param Request         $request
+     * @param Template|object $template The template.
+     * @param ModuleModel     $model    The module model.
+     * @param Request         $request  The request.
      *
      * @return Response
      */
@@ -264,6 +274,9 @@ class AddAttendeeHost extends AbstractFrontendModuleController
         return $metaModel->findById($id);
     }
 
+    /**
+     * @param array $row The data row.
+     */
     private function addParticipant(array $row): void
     {
         $expr = $this->connection->getExpressionBuilder();
@@ -327,7 +340,7 @@ class AddAttendeeHost extends AbstractFrontendModuleController
     /**
      * Create an attendance for this offer and given participant.
      *
-     * @param int $participantId
+     * @param int $participantId The participant id.
      */
     private function createAttendance(int $participantId): void
     {

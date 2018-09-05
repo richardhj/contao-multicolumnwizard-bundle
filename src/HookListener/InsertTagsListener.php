@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\HookListener;
@@ -22,15 +22,22 @@ class InsertTagsListener
 {
 
     /**
+     * The first come application system.
+     *
      * @var FirstCome
      */
     private $firstComeApplicationSystem;
 
     /**
+     * The secret.
+     *
      * @var string
      */
     private $secret;
+
     /**
+     * The request stack.
+     *
      * @var RequestStack
      */
     private $requestStack;
@@ -50,7 +57,7 @@ class InsertTagsListener
     }
 
     /**
-     * @param string $tag
+     * @param string $tag The insert tag.
      *
      * @return string|false
      */
@@ -75,7 +82,7 @@ class InsertTagsListener
                     }
 
                     return $request->getSchemeAndHttpHost()
-                           .'/share/anmeldungen-ferienpass-'.$member->id.'-'.$token.'.ics';
+                           . '/share/anmeldungen-ferienpass-' . $member->id . '-' . $token . '.ics';
                     break;
             }
         }

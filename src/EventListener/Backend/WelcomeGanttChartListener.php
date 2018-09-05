@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\Backend;
@@ -24,24 +24,37 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Templating\EngineInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
+/**
+ * Class WelcomeGanttChartListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\Backend
+ */
 class WelcomeGanttChartListener
 {
     /**
+     * Doctrine.
+     *
      * @var ManagerRegistry
      */
     private $doctrine;
 
     /**
+     * The twig engine.
+     *
      * @var EngineInterface
      */
     private $templating;
 
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
 
     /**
+     * The router.
+     *
      * @var RouterInterface
      */
     private $router;
@@ -49,10 +62,10 @@ class WelcomeGanttChartListener
     /**
      * WelcomeGanttChartListener constructor.
      *
-     * @param ManagerRegistry     $doctrine
-     * @param EngineInterface     $templating
-     * @param TranslatorInterface $translator
-     * @param RouterInterface     $router
+     * @param ManagerRegistry     $doctrine   Doctrine.
+     * @param EngineInterface     $templating The twig engine.
+     * @param TranslatorInterface $translator The translator.
+     * @param RouterInterface     $router     The router.
      */
     public function __construct(
         ManagerRegistry $doctrine,
@@ -192,6 +205,11 @@ class WelcomeGanttChartListener
         );
     }
 
+    /**
+     * @param PassEditionTask $task The pass edition task entity.
+     *
+     * @return string
+     */
     private function getDescription(PassEditionTask $task): string
     {
         if ($task->getType() === 'custom') {
@@ -213,6 +231,11 @@ class WelcomeGanttChartListener
         );
     }
 
+    /**
+     * @param PassEditionTask $task The pass edition task entity.
+     *
+     * @return string
+     */
     private function getColor(PassEditionTask $task): string
     {
         if ('holiday' === $task->getType()) {
@@ -230,6 +253,11 @@ class WelcomeGanttChartListener
         return $task->getColor();
     }
 
+    /**
+     * @param string $hexColor The hex color of the background.
+     *
+     * @return string
+     */
     private function readableColor($hexColor): string
     {
         $r = hexdec(substr($hexColor, 0, 2));

@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\HostEditing;
@@ -27,25 +27,38 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
 
+/**
+ * Class ItemListRenderingListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\HostEditing
+ */
 class ItemListRenderingListener
 {
 
     /**
+     * The event dispatcher.
+     *
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
 
     /**
+     * The current view combination.
+     *
      * @var ViewCombination
      */
     private $viewCombination;
 
     /**
+     * Doctrine.
+     *
      * @var ManagerRegistry
      */
     private $doctrine;
@@ -56,7 +69,7 @@ class ItemListRenderingListener
      * @param EventDispatcherInterface $dispatcher      The event dispatcher.
      * @param TranslatorInterface      $translator      The translator.
      * @param ViewCombination          $viewCombination The current view combinations.
-     * @param ManagerRegistry          $doctrine
+     * @param ManagerRegistry          $doctrine        Doctrine.
      */
     public function __construct(
         EventDispatcherInterface $dispatcher,
@@ -104,7 +117,7 @@ class ItemListRenderingListener
     /**
      * Add the application list jumpTo as action.
      *
-     * @param ParseItemEvent $event
+     * @param ParseItemEvent $event The event.
      *
      * @return void
      */
@@ -146,7 +159,7 @@ class ItemListRenderingListener
     /**
      * Disable the actions when editing is not allowed.
      *
-     * @param ParseItemEvent $event
+     * @param ParseItemEvent $event The event.
      *
      * @return void
      */
@@ -187,7 +200,7 @@ class ItemListRenderingListener
     /**
      * Check whether one offer is editable for the host by checking the edit deadline.
      *
-     * @param IItem $offer
+     * @param IItem $offer The offer.
      *
      * @return bool
      */
@@ -199,7 +212,7 @@ class ItemListRenderingListener
     /**
      * Check whether one pass edition is in the host editing stage and editable.
      *
-     * @param int $passEditionId
+     * @param int $passEditionId The pass edition id.
      *
      * @return bool
      */

@@ -22,19 +22,31 @@ use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Translation\TranslatorInterface;
 
+/**
+ * Class ExportAttendeeEmailsHandler
+ *
+ * @package Richardhj\ContaoFerienpassBundle\DcGeneral\View\ActionHandler
+ */
 class ExportAttendeeEmailsHandler
 {
 
     /**
+     * The request scope determinator.
+     *
      * @var RequestScopeDeterminator
      */
     private $scopeDeterminator;
 
     /**
+     * The database connection.
+     *
      * @var Connection
      */
     private $connection;
+
     /**
+     * The translator.
+     *
      * @var TranslatorInterface
      */
     private $translator;
@@ -42,9 +54,9 @@ class ExportAttendeeEmailsHandler
     /**
      * ExportAttendeeEmailsHandler constructor.
      *
-     * @param RequestScopeDeterminator $scopeDeterminator
-     * @param Connection               $connection
-     * @param TranslatorInterface      $translator
+     * @param RequestScopeDeterminator $scopeDeterminator The request scope determinator.
+     * @param Connection               $connection        The database connection.
+     * @param TranslatorInterface      $translator        The translator.
      */
     public function __construct(
         RequestScopeDeterminator $scopeDeterminator,
@@ -57,7 +69,7 @@ class ExportAttendeeEmailsHandler
     }
 
     /**
-     * @param ActionEvent $event
+     * @param ActionEvent $event The event.
      */
     public function handleEvent(ActionEvent $event): void
     {
@@ -118,7 +130,7 @@ class ExportAttendeeEmailsHandler
     }
 
     /**
-     * @param $row
+     * @param object $row The member row.
      *
      * @return string
      */

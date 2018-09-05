@@ -36,6 +36,7 @@ class SelectDisabledOptions extends FormSelectMenu
         switch ($key) {
             case 'placeholder':
                 $key = 'data-placeholder'; // for chosen
+
                 $this->arrAttributes[$key] = $value;
                 break;
 

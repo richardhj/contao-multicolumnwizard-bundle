@@ -8,7 +8,7 @@
  * @package   richardhj/contao-ferienpass
  * @author    Richard Henkenjohann <richardhenkenjohann@googlemail.com>
  * @copyright 2015-2018 Richard Henkenjohann
- * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE
+ * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
@@ -22,9 +22,16 @@ use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
 
+/**
+ * Class AttendancesOperationButtonListener
+ *
+ * @package Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass
+ */
 class AttendancesOperationButtonListener
 {
     /**
+     * The offer model.
+     *
      * @var OfferModel
      */
     private $offerModel;
@@ -32,7 +39,7 @@ class AttendancesOperationButtonListener
     /**
      * AttendancesOperationButtonListener constructor.
      *
-     * @param OfferModel $offerModel
+     * @param OfferModel $offerModel The offer model.
      */
     public function __construct(OfferModel $offerModel)
     {
@@ -42,7 +49,7 @@ class AttendancesOperationButtonListener
     /**
      * Alter the "edit attendances" button.
      *
-     * @param GetOperationButtonEvent $event
+     * @param GetOperationButtonEvent $event The event.
      */
     public function handle(GetOperationButtonEvent $event): void
     {
