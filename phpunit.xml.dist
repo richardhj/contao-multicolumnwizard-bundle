@@ -8,10 +8,9 @@
 		 convertWarningsToExceptions="true"
 		 processIsolation="false"
 		 stopOnFailure="false"
-		 syntaxCheck="false"
 		>
 	<testsuites>
-		<testsuite name="Ferienpass tests">
+		<testsuite name="Contao Ferienpass bundle tests">
 			<directory>./tests/</directory>
 		</testsuite>
 	</testsuites>
