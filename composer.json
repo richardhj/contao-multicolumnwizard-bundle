@@ -17,6 +17,8 @@
   },
   "require": {
     "php": "^7.1",
+    "ext-dom": "*",
+    "ext-libxml": "*",
     "codefog/contao-haste": "~4.11",
     "contao/core-bundle": "^4.6",
     "contao/calendar-bundle": "^4.4",
