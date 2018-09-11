@@ -55,6 +55,8 @@ $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['holiday']      
 $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['host_editing_stage']              = 'In der Bearbeitungsphase für Veranstalter können die Veranstalter ihre Angebote erstellen, bearbeiten und löschen.';
 $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['show_offers']                     = 'Die Ferienpass-Angebote werden auf der Webseite angezeigt. Wenn nicht aktiv, erscheint eine leere Ausgabe im Frontend.';
 
+$GLOBALS['TL_LANG']['MSC']['application_list']['inactive'] = 'Dieses Angebot verwendet nicht das Online-Anmeldesystem.';
+
 $GLOBALS['TL_LANG']['MSC']['attendance_status']['confirmed']  = 'Zusage';
 $GLOBALS['TL_LANG']['MSC']['attendance_status']['waiting']    = 'wartend';
 $GLOBALS['TL_LANG']['MSC']['attendance_status']['waitlisted'] = 'Warteliste';

@@ -122,7 +122,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
         }
 
         if (!$offer->get('applicationlist_active')) {
-            Message::addError($this->translator->trans('MSC.applicationList.inactive', [], 'contao_default'));
+            Message::addError($this->translator->trans('MSC.application_list.inactive', [], 'contao_default'));
             $template->message = Message::generate();
 
             return Response::create($template->parse());

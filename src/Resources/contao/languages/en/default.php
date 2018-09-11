@@ -25,4 +25,6 @@ $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['holiday']      
 $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['host_editing_stage']              = 'In the host editing stage, the hosts are allowed to create, edit and delete their offers.';
 $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['show_offers']                     = 'The Ferienpass offers get displayed in the frontend. If not active, an empty result set will get displayed in the frontend.';
 
+$GLOBALS['TL_LANG']['MSC']['application_list']['inactive'] = 'This offer does not use the online application system.';
+
 $GLOBALS['TL_LANG']['MSC']['ferienpass_erase_personal_data']['main_headline'] = 'You might use this tool to delete all parent\'s personal data on this website.';
