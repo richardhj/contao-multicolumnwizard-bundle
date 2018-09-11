@@ -118,6 +118,10 @@ class AddAttendeeHost extends AbstractFrontendModuleController
             throw new PageNotFoundException('Item not found.');
         }
 
+        if (!$this->offer->get('applicationlist_active')) {
+            return Response::create('');
+        }
+
         $hostData = $this->offer->get('host');
         $hostId   = $hostData[MetaModelSelect::SELECT_RAW]['id'];
 
