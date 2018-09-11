@@ -184,6 +184,11 @@ class ItemListRenderingListener
             }
         }
 
+        // Disable copy action if no host editing stage.
+        if (null === $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit()) {
+            $result['actions']['copy']['class'] .= ' disabled';
+        }
+
         // Add attribute.
         if (isset($result['actions']['jumpTo'])) {
             $result['actions']['jumpTo']['attribute'] = 'data-lightbox';
