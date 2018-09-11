@@ -211,7 +211,12 @@ class ItemListRenderingListener
      */
     private function offerIsEditableForHost(IItem $offer): bool
     {
-        return $this->passEditionIsInHostEditingStage($offer->get('pass_edition')['id']);
+        $passEdition = $offer->get('pass_edition');
+        if (null === $passEdition) {
+            throw new \LogicException('Please add "pass_edition" to the active render setting.');
+        }
+
+        return $this->passEditionIsInHostEditingStage($passEdition['id']);
     }
 
     /**
