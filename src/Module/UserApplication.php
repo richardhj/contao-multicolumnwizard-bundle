@@ -113,7 +113,7 @@ class UserApplication extends AbstractFrontendModuleController
     }
 
     /**
-     * @param int    $filterId The filter id to use.
+     * @param int    $filterId The filter ID to fetch the item by alias.
      * @param string $alias    The item alias.
      *
      * @return IItem

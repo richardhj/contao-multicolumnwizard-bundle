@@ -113,7 +113,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
      */
     protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        $offer    = $this->fetchOffer(\Input::get('auto_item'));
+        $offer    = $this->fetchOffer((int) $model->metamodel_filtering, \Input::get('auto_item'));
         $hostData = $offer->get('host');
         $hostId   = $hostData[MetaModelSelect::SELECT_RAW]['id'];
 
@@ -219,6 +219,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
                 $document = new Document($offer);
 
                 $document->outputToBrowser();
+                exit;
             }
 
             // Add download button
@@ -237,13 +238,13 @@ class ApplicationListHost extends AbstractFrontendModuleController
     }
 
     /**
+     * @param int    $filterId The filter ID to fetch the item by alias.
      * @param string $alias The url alias.
      *
      * @return IItem
      */
-    private function fetchOffer(string $alias): IItem
+    private function fetchOffer(int $filterId, string $alias): IItem
     {
-        $filterId         = 1;
         $filterCollection = $this->filterSettingFactory->createCollection($filterId);
         $metaModel        = $filterCollection->getMetaModel();
         $filter           = $metaModel->getEmptyFilter();
