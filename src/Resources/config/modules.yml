@@ -38,6 +38,7 @@ services:
             - '@database_connection'
             - '@translator'
             - '@richardhj.ferienpass.model.participant'
+            - '@metamodels.filter_setting_factory'
 
     richardhj.ferienpass.module.application_list_host:
         class: Richardhj\ContaoFerienpassBundle\Module\ApplicationListHost
