@@ -233,13 +233,21 @@ class Dca implements EventSubscriberInterface
      *
      * @internal param \DataContainer $dc
      */
-    public function getAllMetaModelRenderSettings()
+    public function getAllMetaModelRenderSettings(): array
     {
-        $renderSettings = \Database::getInstance()
-            ->query('SELECT * FROM tl_metamodel_rendersettings');
+        $connection = System::getContainer()->get('database_connection');
+        $statement  = $connection->createQueryBuilder()
+            ->select('id', 'name')
+            ->from('tl_metamodel_rendersettings')
+            ->orderBy('name')
+            ->execute();
 
-        // Sort the render settings.
-        return asort($renderSettings->fetchEach('name'));
+        $return = [];
+        while ($renderSettings = $statement->fetch(\PDO::FETCH_OBJ)) {
+            $return[$renderSettings->id] = $renderSettings->name;
+        }
+
+        return $return;
     }
 
 

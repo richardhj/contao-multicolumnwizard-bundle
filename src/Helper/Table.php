@@ -75,7 +75,7 @@ class Table
             }
 
             if ($rowClass !== null) {
-                $class_tr .= ' '.$rowClass($j, $arrRows, $objModule);
+                $class_tr .= ' '.$rowClass($j, $arrRows);
             }
 
             $class_eo = (($j % 2) == 0) ? ' even' : ' odd';
@@ -92,7 +92,7 @@ class Table
                 }
 
                 if ($cellClass !== null) {
-                    $class_td .= ' '.$cellClass($i, $arrRows, $objModule);
+                    $class_td .= ' '.$cellClass($i, $arrRows);
                 }
 
                 $arrBody['row_'.$j.$class_tr.$class_eo][] = [

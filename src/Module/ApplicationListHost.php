@@ -197,15 +197,14 @@ class ApplicationListHost extends AbstractFrontendModuleController
             Message::addWarning($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
         } else {
             $this->useHeader        = true;
-            $this->max_participants = $maxParticipants;
 
             // Define row class callback
-            $rowClassCallback = function ($j, $rows, $module) {
-                if ($j === ($module->max_participants - 1) && $j !== \count($rows) - 1) {
+            $rowClassCallback = function ($j, $rows) use ($maxParticipants) {
+                if ($j === ($maxParticipants - 1) && $j !== \count($rows) - 1) {
                     return 'last_attendee';
                 }
 
-                if ($j >= $module->max_participants) {
+                if ($j >= $maxParticipants) {
                     return 'waiting_list';
                 }
 
@@ -276,6 +275,6 @@ class ApplicationListHost extends AbstractFrontendModuleController
             ->setMetaModel($model->metamodel, $model->metamodel_rendersettings)
             ->addFilterRule(new StaticIdList([$offer->get('id')]));
 
-        $template->metamodel = $itemRenderer->render($template->metamodel_noparsing, $this);
+        $template->metamodel = $itemRenderer->render($template->metamodel_noparsing, $template);
     }
 }

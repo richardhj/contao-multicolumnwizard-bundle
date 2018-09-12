@@ -14,9 +14,7 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\HostEditing;
 
 
-use Contao\PageModel;
-use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
-use ContaoCommunityAlliance\Contao\Bindings\Events\Controller\GenerateFrontendUrlEvent;
+use Contao\Template;
 use MetaModels\Events\ParseItemEvent;
 use MetaModels\Events\RenderItemListEvent;
 use MetaModels\IItem;
@@ -108,7 +106,10 @@ class ItemListRenderingListener
         if ($passEditionId) {
             $editable = $this->passEditionIsInHostEditingStage($passEditionId);
 
-            $event->getTemplate()->editEnable = $caller->Template->editEnable = $editable;
+            $event->getTemplate()->editEnable = $editable;
+            if ($template = $caller instanceof Template ? $caller : $caller->Template) {
+                $template->editEnable = $editable;
+            }
         }
     }
 
