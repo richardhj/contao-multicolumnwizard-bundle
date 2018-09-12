@@ -27,9 +27,6 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['host_logo'] = '{title_legend},name,
 /**
  * Fields
  */
-$GLOBALS['TL_DCA']['tl_module']['fields']['jumpToApplicationList'] = $GLOBALS['TL_DCA']['tl_module']['fields']['jumpTo'];
-$GLOBALS['TL_DCA']['tl_module']['fields']['jumpToApplicationList']['label'] = &$GLOBALS['TL_LANG']['tl_module']['jumpToApplicationList'];
-
 \Controller::loadDataContainer('tl_content');
 \Controller::loadLanguageFile('tl_content');
 

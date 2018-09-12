@@ -219,7 +219,6 @@ services:
             - '@doctrine'
         tags:
             - { name: kernel.event_listener, event: 'metamodels.render-item-list', method: handleRenderItemList }
-            - { name: kernel.event_listener, event: 'metamodels.parse-item', method: addApplicationListLink }
             - { name: kernel.event_listener, event: 'metamodels.parse-item', method: modifyActionButtons }
 
     richardhj.ferienpass.listener.host_editing.complay_with_host_editing_end:

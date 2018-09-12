@@ -97,8 +97,6 @@ class ItemListRenderingListener
             return;
         }
 
-        $event->getList()->getView()->set('$jump-to-application-list', $caller->jumpTo_application_list);
-
         $passEditionId = \Input::get('pass_edition');
         if (null === $passEditionId) {
             $passEdition = $this->doctrine->getRepository(PassEdition::class)->findDefaultPassEditionForHost();
@@ -112,48 +110,6 @@ class ItemListRenderingListener
 
             $event->getTemplate()->editEnable = $caller->Template->editEnable = $editable;
         }
-    }
-
-    /**
-     * Add the application list jumpTo as action.
-     *
-     * @param ParseItemEvent $event The event.
-     *
-     * @return void
-     */
-    public function addApplicationListLink(ParseItemEvent $event): void
-    {
-        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
-        $settings  = $event->getRenderSettings();
-        $jumpTo    = PageModel::findByPk($settings->get('$jump-to-application-list'));
-        $item      = $event->getItem();
-        $metaModel = $item->getMetaModel();
-        $tableName = $metaModel->getTableName();
-
-        if ('mm_ferienpass' !== $tableName
-            || null === $jumpTo
-            || '3' !== $screen['meta']['id']
-            || !$event->getItem()->get('applicationlist_active')
-        ) {
-            return;
-        }
-
-        $parsed = $event->getResult();
-
-        $generateFrontendUrlEvent = new GenerateFrontendUrlEvent($jumpTo->row(), '/' . $parsed['raw']['alias']);
-        $this->dispatcher->dispatch(
-            ContaoEvents::CONTROLLER_GENERATE_FRONTEND_URL,
-            $generateFrontendUrlEvent
-        );
-
-        $parsed['actions']['applicationlist'] = [
-            'label' => $this->translateLabel('metamodel_show_application_list.0', $metaModel->getTableName()),
-            'title' => $this->translateLabel('metamodel_show_application_list.1', $metaModel->getTableName()),
-            'class' => 'applicationlist',
-            'href'  => $generateFrontendUrlEvent->getUrl(),
-        ];
-
-        $event->setResult($parsed);
     }
 
     /**
@@ -179,19 +135,14 @@ class ItemListRenderingListener
         if (false === $this->offerIsEditableForHost($item)) {
             foreach (['edit', 'delete', 'createvariant'] as $action) {
                 if (isset($result['actions'][$action])) {
-                    $result['actions'][$action]['class'] .= ' disabled';
+                    $result['actions'][$action]['class'] .= ' btn--disabled';
                 }
             }
         }
 
         // Disable copy action if no host editing stage.
         if (null === $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit()) {
-            $result['actions']['copy']['class'] .= ' disabled';
-        }
-
-        // Add attribute.
-        if (isset($result['actions']['jumpTo'])) {
-            $result['actions']['jumpTo']['attribute'] = 'data-lightbox';
+            $result['actions']['copy']['class'] .= ' btn--disabled';
         }
 
         // Remove copy action for variants.
