@@ -18,7 +18,10 @@ use Contao\Controller;
 
 /**
  * Class Message
+ *
  * @package Richardhj\ContaoFerienpassBundle\Helper
+ *
+ * @deprecated Do not use.
  */
 class Message extends Controller
 {
@@ -121,14 +124,14 @@ class Message extends Controller
                 continue;
             }
 
-            $class = strtolower(substr($type, 3)); // Remove prefix
+            $class           = strtolower(substr($type, 3)); // Remove prefix
             $_SESSION[$type] = array_unique($_SESSION[$type]);
 
             foreach ($_SESSION[$type] as $message) {
                 if ('TL_RAW' === $type) {
                     $return .= $message;
                 } else {
-                    $return .= sprintf('<p class="%s">%s</p>%s', $class, $message, "\n");
+                    $return .= sprintf('<p class="alert alert--%s">%s</p>%s', $class, $message, "\n");
                 }
             }
 
