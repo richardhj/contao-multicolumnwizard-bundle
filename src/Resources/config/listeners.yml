@@ -143,13 +143,6 @@ services:
         tags:
             - { name: contao.hook, hook: getAllEvents }
 
-    richardhj.ferienpass.listener.application_system.new_attendance:
-        class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\NewAttendanceListener
-        arguments:
-            - "@richardhj.ferienpass.model.offer"
-        tags:
-            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.set-attendance', method: handle }
-
     richardhj.ferienpass.listener.application_system.first_come.attendance_status:
         class: Richardhj\ContaoFerienpassBundle\EventListener\ApplicationSystem\FirstComeAttendanceStatusListener
         arguments:

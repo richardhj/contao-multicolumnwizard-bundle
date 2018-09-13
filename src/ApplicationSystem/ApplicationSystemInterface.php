@@ -11,10 +11,10 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
-
 namespace Richardhj\ContaoFerienpassBundle\ApplicationSystem;
 
 
+use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEditionTask;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 
@@ -46,4 +46,12 @@ interface ApplicationSystemInterface
      * @param PassEditionTask $task
      */
     public function setPassEditionTask(PassEditionTask $task);
+
+    /**
+     * Handle a new attendance.
+     *
+     * @param IItem $offer       The offer.
+     * @param IItem $participant The participant.
+     */
+    public function setNewAttendance(IItem $offer, IItem $participant): void;
 }
