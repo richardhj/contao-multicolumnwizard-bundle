@@ -113,7 +113,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
      */
     protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        $offer    = $this->fetchOffer(\Input::get('auto_item'));
+        $offer    = $this->fetchOffer((int) $model->metamodel_filtering, \Input::get('auto_item'));
         $hostData = $offer->get('host');
         $hostId   = $hostData[MetaModelSelect::SELECT_RAW]['id'];
 
@@ -122,7 +122,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
         }
 
         if (!$offer->get('applicationlist_active')) {
-            Message::addError($this->translator->trans('MSC.applicationList.inactive', [], 'contao_default'));
+            Message::addError($this->translator->trans('MSC.application_list.inactive', [], 'contao_default'));
             $template->message = Message::generate();
 
             return Response::create($template->parse());
@@ -197,15 +197,14 @@ class ApplicationListHost extends AbstractFrontendModuleController
             Message::addWarning($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
         } else {
             $this->useHeader        = true;
-            $this->max_participants = $maxParticipants;
 
             // Define row class callback
-            $rowClassCallback = function ($j, $rows, $module) {
-                if ($j === ($module->max_participants - 1) && $j !== \count($rows) - 1) {
+            $rowClassCallback = function ($j, $rows) use ($maxParticipants) {
+                if ($j === ($maxParticipants - 1) && $j !== \count($rows) - 1) {
                     return 'last_attendee';
                 }
 
-                if ($j >= $module->max_participants) {
+                if ($j >= $maxParticipants) {
                     return 'waiting_list';
                 }
 
@@ -219,6 +218,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
                 $document = new Document($offer);
 
                 $document->outputToBrowser();
+                exit;
             }
 
             // Add download button
@@ -237,13 +237,13 @@ class ApplicationListHost extends AbstractFrontendModuleController
     }
 
     /**
+     * @param int    $filterId The filter ID to fetch the item by alias.
      * @param string $alias The url alias.
      *
      * @return IItem
      */
-    private function fetchOffer(string $alias): IItem
+    private function fetchOffer(int $filterId, string $alias): IItem
     {
-        $filterId         = 1;
         $filterCollection = $this->filterSettingFactory->createCollection($filterId);
         $metaModel        = $filterCollection->getMetaModel();
         $filter           = $metaModel->getEmptyFilter();
@@ -275,6 +275,6 @@ class ApplicationListHost extends AbstractFrontendModuleController
             ->setMetaModel($model->metamodel, $model->metamodel_rendersettings)
             ->addFilterRule(new StaticIdList([$offer->get('id')]));
 
-        $template->metamodel = $itemRenderer->render($template->metamodel_noparsing, $this);
+        $template->metamodel = $itemRenderer->render($template->metamodel_noparsing, $template);
     }
 }

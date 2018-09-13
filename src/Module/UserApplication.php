@@ -26,7 +26,6 @@ use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
 use Richardhj\ContaoFerienpassBundle\Event\BuildParticipantOptionsForUserApplicationEvent;
-use Richardhj\ContaoFerienpassBundle\Event\UserSetApplicationEvent;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
@@ -113,7 +112,7 @@ class UserApplication extends AbstractFrontendModuleController
     }
 
     /**
-     * @param int    $filterId The filter id to use.
+     * @param int    $filterId The filter ID to fetch the item by alias.
      * @param string $alias    The item alias.
      *
      * @return IItem
@@ -299,16 +298,10 @@ class UserApplication extends AbstractFrontendModuleController
                 )
             );
 
-            // Validate the form
+            // Validate the form and process new applications
             if ($form->validate()) {
-                // Process new applications
                 foreach ((array) $form->fetch('participant') as $participant) {
-                    // Trigger event and let the application system set the attendance
-                    $event = new UserSetApplicationEvent(
-                        $offer,
-                        $this->participantModel->findById($participant)
-                    );
-                    $this->dispatcher->dispatch(UserSetApplicationEvent::NAME, $event);
+                    $applicationSystem->setNewAttendance($offer, $this->participantModel->findById($participant));
                 }
 
                 // Reload page to show confirmation message

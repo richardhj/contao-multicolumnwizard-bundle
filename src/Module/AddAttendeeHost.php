@@ -13,32 +13,24 @@
 
 namespace Richardhj\ContaoFerienpassBundle\Module;
 
-use Contao\BackendTemplate;
-use Contao\Controller;
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\CoreBundle\Exception\RedirectResponseException;
 use Contao\FrontendUser;
 use Contao\Input;
-use Contao\Module;
 use Contao\ModuleModel;
-use Contao\System;
 use Contao\Template;
-use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
 use Doctrine\DBAL\Connection;
 use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
+use MetaModels\Filter\Setting\IFilterSettingFactory;
 use MetaModels\IItem;
 use MetaModels\Item;
-use Patchwork\Utf8;
 use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
-use Richardhj\ContaoFerienpassBundle\Model\Offer;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Form\Form;
 use MetaModels\Attribute\IAttribute;
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\TranslatorInterface;
@@ -74,13 +66,6 @@ class AddAttendeeHost extends AbstractFrontendModuleController
     private $participantModel;
 
     /**
-     * The offer.
-     *
-     * @var IItem|null
-     */
-    private $offer;
-
-    /**
      * The authenticated frontend user.
      *
      * @var FrontendUser
@@ -88,19 +73,31 @@ class AddAttendeeHost extends AbstractFrontendModuleController
     private $frontendUser;
 
     /**
+     * The MetaModels filter setting factory.
+     *
+     * @var IFilterSettingFactory
+     */
+    private $filterSettingFactory;
+
+    /**
      * AddAttendeeHost constructor.
      *
-     * @param Connection          $connection       The database connection.
-     * @param TranslatorInterface $translator       The translator.
-     * @param Participant         $participantModel The participant model.
+     * @param Connection            $connection           The database connection.
+     * @param TranslatorInterface   $translator           The translator.
+     * @param Participant           $participantModel     The participant model.
+     * @param IFilterSettingFactory $filterSettingFactory The MetaModels filter setting factory.
      */
-    public function __construct(Connection $connection, TranslatorInterface $translator, Participant $participantModel)
-    {
-        $this->connection       = $connection;
-        $this->translator       = $translator;
-        $this->participantModel = $participantModel;
-        $this->offer            = $this->fetchOffer();
-        $this->frontendUser     = FrontendUser::getInstance();
+    public function __construct(
+        Connection $connection,
+        TranslatorInterface $translator,
+        Participant $participantModel,
+        IFilterSettingFactory $filterSettingFactory
+    ) {
+        $this->connection           = $connection;
+        $this->translator           = $translator;
+        $this->participantModel     = $participantModel;
+        $this->filterSettingFactory = $filterSettingFactory;
+        $this->frontendUser         = FrontendUser::getInstance();
     }
 
     /**
@@ -114,11 +111,16 @@ class AddAttendeeHost extends AbstractFrontendModuleController
      */
     protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
-        if (null === $this->offer) {
+        $offer = $this->fetchOffer((int) $model->metamodel_filtering, \Input::get('auto_item'));
+        if (null === $offer) {
             throw new PageNotFoundException('Item not found.');
         }
 
-        $hostData = $this->offer->get('host');
+        if (!$offer->get('applicationlist_active')) {
+            return Response::create('');
+        }
+
+        $hostData = $offer->get('host');
         $hostId   = $hostData[MetaModelSelect::SELECT_RAW]['id'];
 
         if ($this->frontendUser->ferienpass_host !== $hostId) {
@@ -231,7 +233,7 @@ class AddAttendeeHost extends AbstractFrontendModuleController
             // Create a new model for each participant
             /** @var array $participantRow */
             foreach ($participantsToAdd as $participantRow) {
-                $this->addParticipant($participantRow);
+                $this->addParticipant($participantRow, $offer);
             }
 
             Message::addConfirmation(
@@ -250,34 +252,35 @@ class AddAttendeeHost extends AbstractFrontendModuleController
     }
 
     /**
-     * @return IItem|null
+     * @param int    $filterId The filter ID to fetch the item by alias.
+     * @param string $alias    The item alias.
      *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @return IItem
      */
-    private function fetchOffer(): ?IItem
+    private function fetchOffer(int $filterId, string $alias): IItem
     {
-        /** @var Offer $metaModel */
-        $metaModel = System::getContainer()->get('richardhj.ferienpass.model.offer');
-        $statement = $this->connection->createQueryBuilder()
-            ->select('id')
-            ->from('mm_ferienpass')
-            ->where('alias=:item')
-            ->setParameter('item', Input::get('auto_item'))
-            ->execute();
+        $filterCollection = $this->filterSettingFactory->createCollection($filterId);
+        $metaModel        = $filterCollection->getMetaModel();
+        $filter           = $metaModel->getEmptyFilter();
 
-        $id = $statement->fetchColumn();
-        if (false === $id) {
-            return null;
+        $filterCollection->addRules($filter, ['auto_item' => $alias]);
+        $items = $metaModel->findByFilter($filter);
+        if (0 === $items->getCount()) {
+            throw new PageNotFoundException('Offer not found (filter ID: ' . $filterId . ').');
         }
 
-        return $metaModel->findById($id);
+        if ($items->getCount() > 1) {
+            throw new \RuntimeException('Offer ambiguous (filter ID: ' . $filterId . ').');
+        }
+
+        return $items->getItem();
     }
 
     /**
-     * @param array $row The data row.
+     * @param array $row   The data row.
+     * @param IItem $offer The participant.
      */
-    private function addParticipant(array $row): void
+    private function addParticipant(array $row, IItem $offer): void
     {
         $expr = $this->connection->getExpressionBuilder();
 
@@ -302,7 +305,7 @@ class AddAttendeeHost extends AbstractFrontendModuleController
             ->execute();
 
         if (false !== $participantId = $statement->fetchColumn()) {
-            $this->createAttendance($participantId);
+            $this->createAttendance($participantId, $offer->get('id'));
 
             return;
         }
@@ -324,9 +327,9 @@ class AddAttendeeHost extends AbstractFrontendModuleController
             ->execute();
 
         if (false !== $memberId = $statement->fetchColumn()) {
-            $memberAttribute = $this->offer->getAttribute('pmember');
+            $memberAttribute = $offer->getAttribute('pmember');
 
-            $participant->set($memberAttribute->getColName(), $memberAttribute->widgetToValue($memberId, $this->offer));
+            $participant->set($memberAttribute->getColName(), $memberAttribute->widgetToValue($memberId, $offer));
         }
 
         // current bug to have the combinedvalues get saved
@@ -334,22 +337,24 @@ class AddAttendeeHost extends AbstractFrontendModuleController
 
         $participant->save();
 
-        $this->createAttendance($participant->get('id'));
+        $this->createAttendance($participant->get('id'), $offer->get('id'));
     }
 
     /**
      * Create an attendance for this offer and given participant.
      *
      * @param int $participantId The participant id.
+     * @param int $offerId       The offer ID.
      */
-    private function createAttendance(int $participantId): void
+    private function createAttendance(int $participantId, int $offerId): void
     {
         $attendance = new Attendance();
 
         $attendance->tstamp      = time();
         $attendance->created     = time();
-        $attendance->offer       = $this->offer->get('id');
+        $attendance->offer       = $offerId;
         $attendance->participant = $participantId;
+
         $attendance->save();
     }
 }
