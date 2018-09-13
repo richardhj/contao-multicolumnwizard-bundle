@@ -7,6 +7,7 @@ services:
           - '@event_dispatcher'
           - '%richardhj.ferienpass.metamodel_list.view.id%'
           - '%richardhj.ferienpass.metamodel_list.page.id%'
+        tags: ['controller.service_arguments']
 
     richardhj.ferienpass.controller.export_attendances:
         class: Richardhj\ContaoFerienpassBundle\Controller\Frontend\ExportAttendances
@@ -14,9 +15,11 @@ services:
           - '@metamodels.render_setting_factory'
           - '%richardhj.ferienpass.metamodel_list.view.id%'
           - '%secret%'
+        tags: ['controller.service_arguments']
 
     richardhj.ferienpass.controller.dropbox_webhook:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook
+        tags: ['controller.service_arguments']
 
     richardhj.ferienpass.controller.backend.erase_personal_data:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\ErasePersonalData
@@ -27,7 +30,7 @@ services:
             - '@database_connection'
         calls:
             - [ setContainer, [ '@service_container' ]]
-        public: true
+        tags: ['controller.service_arguments']
 
     richardhj.ferienpass.application_system.firstcome:
         class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome
