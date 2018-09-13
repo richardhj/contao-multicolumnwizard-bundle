@@ -17,6 +17,7 @@ namespace Richardhj\ContaoFerienpassBundle\ApplicationSystem;
 use MetaModels\IItem;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEditionTask;
 use Richardhj\ContaoFerienpassBundle\Exception\DuplicatedAttendanceException;
+use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\ApplicationSystem;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 
@@ -109,6 +110,22 @@ class AbstractApplicationSystem implements ApplicationSystemInterface
         $attendance->created     = $time;
         $attendance->offer       = $offer->get('id');
         $attendance->participant = $participant->get('id');
+
         $attendance->save();
+    }
+
+    /**
+     * Delete an attendance.
+     *
+     * @param Attendance $attendance The attendance to delete.
+     */
+    public function deleteAttendance(Attendance $attendance): void
+    {
+        if (ToolboxOfferDate::offerStart($attendance->getOffer()) <= time()) {
+            // Check for offer's date
+            throw new \LogicException('The offer of the demanded attendance is in the past.');
+        }
+
+        $attendance->delete();
     }
 }

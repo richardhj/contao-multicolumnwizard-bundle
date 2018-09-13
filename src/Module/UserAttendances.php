@@ -133,25 +133,24 @@ class UserAttendances extends AbstractFrontendModuleController
                 throw new RedirectResponseException($urlBuilder->getUrl());
             }
 
+            $applicationSystem = $this->offerModel->getApplicationSystem($attendanceToDelete->getOffer());
+            if (null === $applicationSystem) {
+                Message::addError('Zurzeit sind keine Abmeldungen möglich');
+            }
+
             if (!$this->participantModel->isProperChild($attendanceToDelete->participant, $this->frontendUser->id)) {
                 throw new AccessDeniedException('Lack of permission to delete order ID ' . $attendanceToDelete->id);
             }
 
-            if (ToolboxOfferDate::offerStart($attendanceToDelete->offer) <= time()) {
-                // Check for offer's date
-                Message::addError($GLOBALS['TL_LANG']['XPT']['attendanceDeleteOfferInPast']);
-            } else {
-                // Delete
-                $attendanceToDelete->delete();
+            $applicationSystem->deleteAttendance($attendanceToDelete);
 
-                Message::addConfirmation($GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation']);
+            Message::addConfirmation($GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation']);
 
-                $urlBuilder = UrlBuilder::fromUrl($request->getUri());
-                $urlBuilder->unsetQueryParameter('action');
-                $urlBuilder->unsetQueryParameter('id');
+            $urlBuilder = UrlBuilder::fromUrl($request->getUri());
+            $urlBuilder->unsetQueryParameter('action');
+            $urlBuilder->unsetQueryParameter('id');
 
-                throw new RedirectResponseException($urlBuilder->getUrl());
-            }
+            throw new RedirectResponseException($urlBuilder->getUrl());
         }
 
         $attendances = Attendance::findByParent($this->frontendUser->id);
