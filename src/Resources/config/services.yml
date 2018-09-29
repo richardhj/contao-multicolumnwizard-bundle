@@ -21,6 +21,12 @@ services:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\DropboxWebhook
         tags: ['controller.service_arguments']
 
+    richardhj.ferienpass.controller.code_validate:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Frontend\CodeValidate
+        tags: ['controller.service_arguments']
+        arguments:
+          ['@database_connection']
+
     richardhj.ferienpass.controller.backend.erase_personal_data:
         class: Richardhj\ContaoFerienpassBundle\Controller\Backend\ErasePersonalData
         arguments:

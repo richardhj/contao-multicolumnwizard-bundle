@@ -15,9 +15,10 @@
 /**
  * Table tl_metamodel_attribute
  */
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['age extends _simpleattribute_']        = [];
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['offer_date extends _simpleattribute_'] = [];
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['alias_trigger_sync extends alias']     = [
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['age extends _simpleattribute_']             = [];
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['ferienpass_code extends _simpleattribute_'] = [];
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['offer_date extends _simpleattribute_']      = [];
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['alias_trigger_sync extends alias']          = [
     '+advanced' => [
         'data_processing',
     ],

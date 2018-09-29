@@ -128,6 +128,7 @@
                             let submit, buttons;
 
                             modalContainer.html(response.html);
+                            modalContainer.trigger('modal:html-loaded');
 
                             submit = modalContainer.find('form input[type=submit]:first');
                             buttons = modal.dialog('option', 'buttons');
