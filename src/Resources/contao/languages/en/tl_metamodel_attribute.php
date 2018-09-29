@@ -11,6 +11,6 @@
  * @license   https://github.com/richardhj/richardhj/contao-ferienpass/blob/master/LICENSE
  */
 
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['age']             = 'Altersbegrenzung';
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['ferienpass_code'] = 'Ferienpass-Code';
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['offer_date']      = 'Angebot-Datum';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['age']             = 'Age';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['ferienpass_code'] = 'Ferienpass code';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['offer_date']      = 'Offer date';

@@ -23,7 +23,7 @@ services:
         class: Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\FerienpassCode\AttributeTypeFactory
         arguments:
         - '@database_connection'
-        - '@event_dispatcher'
+        - '@translator'
         tags:
         - { name: metamodels.attribute_factory }
 

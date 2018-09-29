@@ -87,6 +87,8 @@ $GLOBALS['TL_LANG']['MSC']['yesno'][1] = 'Ja';
 $GLOBALS['TL_LANG']['MSC']['offer_date']['start'][0] = 'Beginn';
 $GLOBALS['TL_LANG']['MSC']['offer_date']['end'][0] = 'Ende';
 
+$GLOBALS['TL_LANG']['MSC']['ferienpass_code_invalid'] = 'Der eingegebene Code ist ungültig oder bereits verwendet worden.';
+
 /**
  * Errors
  */

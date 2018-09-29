@@ -15,6 +15,7 @@ namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\FerienpassCode;
 
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\AbstractAttributeTypeFactory;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class AttributeTypeFactory
@@ -32,16 +33,24 @@ final class AttributeTypeFactory extends AbstractAttributeTypeFactory
     private $connection;
 
     /**
+     * The translator.
+     *
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * {@inheritDoc}
      */
-    public function __construct(Connection $connection)
+    public function __construct(Connection $connection, TranslatorInterface $translator)
     {
         parent::__construct();
 
         $this->connection = $connection;
         $this->typeName   = 'ferienpass_code';
-        $this->typeIcon   = 'bundles/metamodelsattributetext/text.png';
+        $this->typeIcon   = 'bundles/richardhjcontaoferienpass/img/attribute_code.svg';
         $this->typeClass  = FerienpassCode::class;
+        $this->translator = $translator;
     }
 
     /**
@@ -49,6 +58,6 @@ final class AttributeTypeFactory extends AbstractAttributeTypeFactory
      */
     public function createInstance($information, $metaModel)
     {
-        return new $this->typeClass($metaModel, $information, $this->connection);
+        return new $this->typeClass($metaModel, $information, $this->connection, $this->translator);
     }
 }

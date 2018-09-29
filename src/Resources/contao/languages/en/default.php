@@ -28,3 +28,5 @@ $GLOBALS['TL_LANG']['MSC']['welcome_gantt']['task_description']['show_offers']  
 $GLOBALS['TL_LANG']['MSC']['application_list']['inactive'] = 'This offer does not use the online application system.';
 
 $GLOBALS['TL_LANG']['MSC']['ferienpass_erase_personal_data']['main_headline'] = 'You might use this tool to delete all parent\'s personal data on this website.';
+
+$GLOBALS['TL_LANG']['MSC']['ferienpass_code_invalid'] = 'The code you\'ve entered is invalid or already in use.';

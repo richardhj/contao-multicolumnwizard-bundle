@@ -16,6 +16,7 @@ namespace Richardhj\ContaoFerienpassBundle\MetaModels\Attribute\FerienpassCode;
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\BaseComplex;
 use MetaModels\IMetaModel;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * Class FerienpassCode
@@ -33,23 +34,37 @@ final class FerienpassCode extends BaseComplex
     private $connection;
 
     /**
+     * The translator.
+     *
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * Instantiate an MetaModel attribute.
      *
      * Note that you should not use this directly but use the factory classes to instantiate attributes.
      *
-     * @param IMetaModel      $objMetaModel The MetaModel instance this attribute belongs to.
+     * @param IMetaModel          $objMetaModel The MetaModel instance this attribute belongs to.
      *
-     * @param array           $arrData      The information array, for attribute information, refer to documentation of
-     *                                      table tl_metamodel_attribute and documentation of the certain attribute
-     *                                      classes for information what values are understood.
+     * @param array               $arrData      The information array, for attribute information, refer to
+     *                                          documentation of table tl_metamodel_attribute and documentation of the
+     *                                          certain attribute classes for information what values are understood.
      *
-     * @param Connection|null $connection   The database connection.
+     * @param Connection|null     $connection   The database connection.
+     *
+     * @param TranslatorInterface $translator   The translator.
      */
-    public function __construct(IMetaModel $objMetaModel, array $arrData = [], Connection $connection = null)
-    {
+    public function __construct(
+        IMetaModel $objMetaModel,
+        array $arrData = [],
+        Connection $connection = null,
+        TranslatorInterface $translator = null
+    ) {
         parent::__construct($objMetaModel, $arrData);
 
         $this->connection = $connection;
+        $this->translator = $translator;
     }
 
     /**
@@ -127,7 +142,7 @@ final class FerienpassCode extends BaseComplex
             return $value;
         }
 
-        throw new \RuntimeException('Der eingegeben Code ist ungültig oder bereits eingelöst worden.');
+        throw new \RuntimeException($this->translator->trans('MSC.ferienpass_code_invalid', [], 'contao_default'));
     }
 
     /**
