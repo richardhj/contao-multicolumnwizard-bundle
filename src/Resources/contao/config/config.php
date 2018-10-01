@@ -44,7 +44,13 @@ array_insert(
                 'tl_ferienpass_dataprocessing',
             ],
         ],
-        'ferienpass_editions'              => [
+        'ferienpass_codes'                         => [
+            'tables'   => [
+                'tl_ferienpass_code',
+            ],
+            'generate' => [\Richardhj\ContaoFerienpassBundle\BackendModule\GenerateCodes::class, 'generate'],
+        ],
+        'ferienpass_editions'                      => [
             'tables' => [
                 'tl_ferienpass_edition',
                 'tl_ferienpass_edition_task'
@@ -92,7 +98,7 @@ if ('BE' === TL_MODE) {
  * Notification center
  */
 $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
-    (array)$GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'],
+    (array) $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'],
     [
         'ferienpass' => [
             'application_list_status_change' => [

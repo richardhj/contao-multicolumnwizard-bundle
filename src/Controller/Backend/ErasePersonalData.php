@@ -48,6 +48,7 @@ class ErasePersonalData extends Controller
      * @var TranslatorInterface
      */
     private $translator;
+
     /**
      * The MetaModels factory.
      *
@@ -217,7 +218,6 @@ class ErasePersonalData extends Controller
                 throw new RedirectResponseException($request->getUri());
             }
         }
-
 
         $buttonTemplate = new ContaoBackendViewTemplate('dc_general_button');
         $buttonTemplate->setData(

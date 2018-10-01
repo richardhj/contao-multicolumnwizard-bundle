@@ -44,6 +44,9 @@ final class CodeValidate
     }
 
     /**
+     * Validate the code against the ones present in the database. Return a boolean status about the code being valid
+     * or not.
+     *
      * @param Request $request The current request.
      *
      * @return Response
@@ -56,7 +59,7 @@ final class CodeValidate
 
         $data = [];
 
-        $code        = $request->request->get('code') ?? $request->query->get('code');
+        $code        = $request->request->get('code');
         $attributeId = $request->request->get('att_id');
         $itemId      = $request->request->get('item_id');
 
@@ -79,7 +82,7 @@ final class CodeValidate
         $success = (bool) $statement->fetch();
 
         $data['code']    = $code;
-        $data['success'] = true;//$success;
+        $data['success'] = $success;
 
         return JsonResponse::create($data);
     }
