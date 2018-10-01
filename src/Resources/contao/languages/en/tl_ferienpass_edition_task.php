@@ -43,4 +43,5 @@ $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['holiday']    
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['host_editing_stage'] = 'Host editing stage';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['show_offers']        = 'Publish offers';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['application_system'] = 'Application system';
+$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['pay_days']           = 'Pay days';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['custom']             = 'Custom';

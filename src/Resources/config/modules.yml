@@ -13,6 +13,16 @@ services:
             - '@translator'
             - '@metamodels.render_setting_factory'
 
+    richardhj.ferienpass.module.user_attendances_ical_link:
+        class: Richardhj\ContaoFerienpassBundle\Module\UserAttendancesICalLink
+        public: true
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: user_attendances_ical_link, category: ferienpass }
+        arguments:
+            - '%secret%'
+
     richardhj.ferienpass.module.user_application:
         class: Richardhj\ContaoFerienpassBundle\Module\UserApplication
         public: true

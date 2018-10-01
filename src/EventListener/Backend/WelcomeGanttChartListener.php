@@ -250,6 +250,10 @@ class WelcomeGanttChartListener
             return 'e87f89';
         }
 
+        if ('pay_days' === $task->getType()) {
+            return 'aaa2e8';
+        }
+
         return $task->getColor();
     }
 

@@ -22,6 +22,7 @@ use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterfac
 use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousApplicationSystemException;
 use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousHolidayForPassEditionException;
 use Richardhj\ContaoFerienpassBundle\Exception\MissingHolidayForPassEditionException;
+use Richardhj\ContaoFerienpassBundle\Exception\MissingPayDaysForPassEditionException;
 
 /**
  * Class PassEdition
@@ -201,6 +202,28 @@ class PassEdition
     }
 
     /**
+     * Get the pay days task defined for this pass edition.
+     *
+     * @return Collection
+     */
+    public function getPayDays(): Collection
+    {
+        $tasks = $this->getTasks()->filter(
+            function (PassEditionTask $element) {
+                return 'pay_days' === $element->getType();
+            }
+        );
+
+        if ($tasks->isEmpty()) {
+            throw new MissingPayDaysForPassEditionException(
+                'No pay days task found for pass edition ID ' . $this->getId()
+            );
+        }
+
+        return $tasks;
+    }
+
+    /**
      * Get the host editing stages for this pass edition.
      *
      * @return Collection
@@ -215,7 +238,6 @@ class PassEdition
 
         return $tasks;
     }
-
 
     /**
      * Get the host editing stages for this pass edition.
@@ -236,6 +258,35 @@ class PassEdition
         if ($tasks->count() > 1) {
             throw new \LogicException(
                 'More than one host editing stage valid at the moment for pass edition ID' . $this->getId()
+            );
+        }
+
+        if ($tasks->isEmpty()) {
+            return null;
+        }
+
+        return $tasks->current();
+    }
+
+    /**
+     * Get the host editing stages for this pass edition.
+     *
+     * @return PassEditionTask|null
+     */
+    public function getCurrentPayDays(): ?PassEditionTask
+    {
+        $time  = time();
+        $tasks = $this->getTasks()->filter(
+            function (PassEditionTask $element) use ($time) {
+                return 'pay_days' === $element->getType()
+                       && $time >= $element->getPeriodStart()
+                       && $time < $element->getPeriodStop();
+            }
+        );
+
+        if ($tasks->count() > 1) {
+            throw new \LogicException(
+                'More than one pay days tasks is valid at the moment for pass edition ID' . $this->getId()
             );
         }
 

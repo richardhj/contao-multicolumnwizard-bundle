@@ -43,4 +43,5 @@ $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['holiday']    
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['host_editing_stage'] = 'Bearbeitungsphase (Veranstalter)';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['show_offers']        = 'Angebote veröffentlichen';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['application_system'] = 'Anmeldeverfahren';
+$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['pay_days']           = 'Zahltage';
 $GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options']['custom']             = 'Benutzerdefiniert';

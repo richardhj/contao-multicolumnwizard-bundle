@@ -160,6 +160,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
                 'holiday',
                 'host_editing_stage',
                 'application_system',
+                'pay_days',
                 'show_offers',
                 'custom',
             ],
