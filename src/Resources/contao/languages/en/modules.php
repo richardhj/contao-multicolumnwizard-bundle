@@ -19,6 +19,7 @@ $GLOBALS['TL_LANG']['MOD']['ferienpass_editions'][0]                      = 'Fer
 $GLOBALS['TL_LANG']['MOD']['ferienpass_erase_personal_data'][0]           = 'Erase personal data';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_data_processings'][0]              = 'Data processings';
 $GLOBALS['TL_LANG']['MOD']['ferienpass_send_attendance_confirmations'][0] = 'Send attendance confirmations';
+$GLOBALS['TL_LANG']['MOD']['ferienpass_codes'][0]                         = 'Ferienpass codes';
 
 $GLOBALS['TL_LANG']['FMD']['ferienpass']                   = 'Ferienpass';
 $GLOBALS['TL_LANG']['FMD']['user_attendances'][0]          = 'User attendances';

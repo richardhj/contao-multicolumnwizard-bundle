@@ -11,7 +11,7 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
-namespace Richardhj\ContaoFerienpassBundle\BackendModule;
+namespace Richardhj\ContaoFerienpassBundle\Backend;
 
 
 use Contao\System;
@@ -41,20 +41,48 @@ class GenerateCodes
         $this->connection = System::getContainer()->get('database_connection');
     }
 
+
+    /**
+     * Generate a product label and return it as HTML string
+     *
+     * @param $row
+     * @param $label
+     * @param $dc
+     * @param $args
+     *
+     * @return array
+     */
+    public function generateLabel($row, $label, $dc, $args): array
+    {
+        if ($row['activated'] > 0) {
+            $args[0] = sprintf('<span style="text-decoration: line-through;">%s</span>', $args[0]);
+        }
+
+        return $args;
+    }
+
     /**
      * Generated the module.
      *
      * @return string
+     * @throws \Exception
      */
     public function generate(): string
     {
         $success = false;
         if ('generate_codes' === \Input::post('FORM_SUBMIT')) {
-            $quantity = \Input::post('quantity');
+            $quantity    = \Input::post('quantity');
+            $attributeId = $this->connection->createQueryBuilder()
+                ->select('id')
+                ->from('tl_metamodel_attribute')
+                ->where("type='ferienpass_code'")
+                ->execute()
+                ->fetchColumn(0);
+
             while ($quantity--) {
                 $code = $this->generateCode();
                 try {
-                    $this->persistCode($code);
+                    $this->persistCode($attributeId, $code);
                 } catch (UniqueConstraintViolationException $exception) {
                     $quantity++;
                 }
@@ -71,7 +99,7 @@ class GenerateCodes
 <h2 class="sub_headline">Ferienpass-Zugangscodes generieren</h2>
 
 
-' . (($success) ? '<p class="tl_confirm">Die Codes wurden generiert und in der Datenbank gespeichert.</p>' : '') . '
+' . ($success ? '<p class="tl_confirm">Die Codes wurden generiert und in der Datenbank gespeichert.</p>' : '') . '
 
 <form action="' . ampersand(\Environment::get('request'), true) . '" class="tl_form" method="post">
 <div class="tl_formbody_edit">
@@ -98,9 +126,13 @@ class GenerateCodes
     }
 
     /**
+     * Generate one code.
+     *
      * @param int $length
      *
      * @return string
+     *
+     * @throws \Exception
      */
     private function generateCode(int $length = 6): string
     {
@@ -113,11 +145,14 @@ class GenerateCodes
     }
 
     /**
-     * @param string $code
+     * Persist one code in the database.
+     *
+     * @param string $attributeId The id of the code attribute.
+     * @param string $code        The code.
      *
      * @throws UniqueConstraintViolationException If code is not unique in database.
      */
-    private function persistCode(string $code): void
+    private function persistCode($attributeId, string $code): void
     {
         $this->connection->createQueryBuilder()
             ->insert('tl_ferienpass_code')
@@ -129,7 +164,7 @@ class GenerateCodes
                 ]
             )
             ->setParameter(0, time())
-            ->setParameter(1, '0')
+            ->setParameter(1, $attributeId)
             ->setParameter(2, $code)
             ->execute();
     }

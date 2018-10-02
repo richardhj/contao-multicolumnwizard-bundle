@@ -57,48 +57,22 @@ class ModifyLabelListener
         $model = $event->getModel();
         $args  = $event->getArgs();
 
-        foreach ($args as $k => $arg) {
-            switch ($k) {
-                case 'type':
-                    switch ($arg) {
-                        case 'custom':
-                            $args[$k] = $model->getProperty('title');
-                            break;
+        switch ($model->getProperty('type')) {
+            case 'custom':
+                $args['type'] = $model->getProperty('title');
+                break;
 
-                        case 'application_system':
-                            $args[$k] = sprintf(
-                                '%s <span class="tl_gray">(%s)</span>',
-                                $this->translator->trans(
-                                    'tl_ferienpass_edition_task.type_options.' . $arg,
-                                    [],
-                                    'contao_tl_ferienpass_edition_task'
-                                ),
-                                $this->translator->trans(
-                                    'MSC.application_system.' . $model->getProperty('application_system'),
-                                    [],
-                                    'contao_default'
-                                )
-                            );
-                            break;
-
-                        default:
-                            $args[$k] =
-                                $this->translator->trans(
-                                    'tl_ferienpass_edition_task.type_options.' . $arg,
-                                    [],
-                                    'contao_tl_ferienpass_edition_task'
-                                );
-                            break;
-                    }
-                    break;
-
-                case 'period_start':
-                case 'period_stop':
-                    if ($arg) {
-                        $args[$k] = date(Config::get('datimFormat'), (int) $arg);
-                    }
-                    break;
-            }
+            case 'application_system':
+                $args['type'] = sprintf(
+                    '%s <span class="tl_gray">(%s)</span>',
+                    $args['type'],
+                    $this->translator->trans(
+                        'MSC.application_system.' . $model->getProperty('application_system'),
+                        [],
+                        'contao_default'
+                    )
+                );
+                break;
         }
 
         $event->setArgs($args);

@@ -48,7 +48,7 @@ array_insert(
             'tables'   => [
                 'tl_ferienpass_code',
             ],
-            'generate' => [\Richardhj\ContaoFerienpassBundle\BackendModule\GenerateCodes::class, 'generate'],
+            'generate' => [\Richardhj\ContaoFerienpassBundle\Backend\GenerateCodes::class, 'generate'],
         ],
         'ferienpass_editions'                      => [
             'tables' => [

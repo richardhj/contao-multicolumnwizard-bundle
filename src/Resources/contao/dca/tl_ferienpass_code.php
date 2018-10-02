@@ -49,6 +49,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_code'] = [
                 'code'
             ],
             'format' => '%s',
+            'label_callback'        => [\Richardhj\ContaoFerienpassBundle\Backend\GenerateCodes::class, 'generateLabel']
         ],
         'global_operations' => [
             'generate_codes' => [
