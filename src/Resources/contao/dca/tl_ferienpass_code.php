@@ -22,7 +22,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_code'] = [
         'sql'           => [
             'keys' => [
                 'id'   => 'primary',
-                'code' => 'unique'
+                'att_id,code' => 'unique'
             ]
         ]
     ],
