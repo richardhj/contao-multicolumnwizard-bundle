@@ -13,10 +13,9 @@
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\UserApplication;
 
-
 use Contao\Model\Event\PostSaveModelEvent;
-use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Class AddAttendanceStatusConfirmationListener
@@ -25,6 +24,23 @@ use Richardhj\ContaoFerienpassBundle\Model\Attendance;
  */
 class AddAttendanceStatusConfirmationListener
 {
+
+    /**
+     * The session.
+     *
+     * @var Session
+     */
+    private $session;
+
+    /**
+     * AddAttendanceStatusConfirmationListener constructor.
+     *
+     * @param Session $session The session.
+     */
+    public function __construct(Session $session)
+    {
+        $this->session = $session;
+    }
 
     /**
      * Display a message after saving a new attendance.
@@ -54,12 +70,12 @@ class AddAttendanceStatusConfirmationListener
             throw new \RuntimeException('No attendance status given.');
         }
 
-        Message::add(
+        $this->session->getFlashBag()->add(
+            $status->messageType,
             sprintf(
                 $GLOBALS['TL_LANG']['MSC']['user_application']['message'][$status->type],
                 $participantName
-            ),
-            $status->messageType
+            )
         );
     }
 }

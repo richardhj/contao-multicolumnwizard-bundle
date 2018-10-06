@@ -1,0 +1,47 @@
+<script>
+    (function ($) {
+        function getCookie(cname) {
+            var name = cname + '=';
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i].trim();
+                if (0 === c.indexOf(name)) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+
+            return false;
+        }
+
+        function showFlash() {
+            var cookie = getCookie('flashes');
+            if (!cookie) {
+                return;
+            }
+
+            var html,
+                flashes = JSON.parse(decodeURIComponent(cookie)),
+                $container = $('<div>', {class: "flashes"});
+
+            for (var key in flashes) {
+                if (key === 'length' || !flashes.hasOwnProperty(key)) {
+                    continue;
+                }
+
+                html = '<div class="alert alert--' + key + '">';
+                html += flashes[key];
+                html += '</div>';
+            }
+
+            $('body').prepend($container);
+            $container.append(html);
+
+            // Remove the cookie to not show flashes again
+            document.cookie = "flashes=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/";
+        }
+
+        $(document).ready(function () {
+            showFlash();
+        });
+    })(jQuery);
+</script>

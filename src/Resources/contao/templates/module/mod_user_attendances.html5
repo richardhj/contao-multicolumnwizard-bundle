@@ -6,9 +6,6 @@
 <p><?= $this->info ?></p>
 <?php endif ?>
 
-<?php if (strlen($this->message)): ?>
-	<?php echo $this->message; ?>
-<?php endif; ?>
 <?php if (!empty($this->dataTable)): ?>
 	<?php $this->insert('ce_table', $this->dataTable); ?>
 <?php endif ?>

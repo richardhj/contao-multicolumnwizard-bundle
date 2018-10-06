@@ -2,8 +2,8 @@
 
 <?php $this->block('content'); ?>
 
-<?php if (strlen($this->message)): ?>
-	<p><?= $this->message ?></p>
+<?php if (strlen($this->info)): ?>
+    <p class="alert alert--info"><?= $this->info ?></p>
 <?php endif ?>
 
 <?= $this->form ?>

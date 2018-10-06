@@ -26,7 +26,6 @@ use MetaModels\Filter\Setting\FilterSettingFactory;
 use MetaModels\IItem;
 use MetaModels\Render\Setting\IRenderSettingFactory;
 use Richardhj\ContaoFerienpassBundle\ApplicationList\Document;
-use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
@@ -122,8 +121,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
         }
 
         if (!$offer->get('applicationlist_active')) {
-            Message::addError($this->translator->trans('MSC.application_list.inactive', [], 'contao_default'));
-            $template->message = Message::generate();
+            $template->info = $this->translator->trans('MSC.application_list.inactive', [], 'contao_default');
 
             return Response::create($template->parse());
         }
@@ -194,7 +192,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
         }
 
         if (empty($rows)) {
-            Message::addWarning($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
+            $template->info = $this->translator->trans('MSC.noAttendances', [], 'contao_default');
         } else {
             $this->useHeader        = true;
 
@@ -231,7 +229,6 @@ class ApplicationListHost extends AbstractFrontendModuleController
         }
 
         $this->addRenderedMetaModelToTemplate($template, $model, $offer);
-        $template->message = Message::generate();
 
         return Response::create($template->parse());
     }

@@ -21,9 +21,7 @@ use Contao\ModuleModel;
 use Contao\Template;
 use ContaoCommunityAlliance\UrlBuilder\UrlBuilder;
 use MetaModels\Render\Setting\IRenderSettingFactory;
-use ContaoCommunityAlliance\Contao\Bindings\Events\System\LogEvent;
 use Richardhj\ContaoFerienpassBundle\Event\UserAttendancesTableEvent;
-use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Helper\Table;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
@@ -85,7 +83,6 @@ class UserAttendances extends AbstractFrontendModuleController
      */
     private $renderSettingFactory;
 
-
     /**
      * UserAttendances constructor.
      *
@@ -132,9 +129,15 @@ class UserAttendances extends AbstractFrontendModuleController
                 throw new RedirectResponseException($urlBuilder->getUrl());
             }
 
+            $urlBuilder = UrlBuilder::fromUrl($request->getUri());
+            $urlBuilder->unsetQueryParameter('action');
+            $urlBuilder->unsetQueryParameter('id');
+
             $applicationSystem = $this->offerModel->getApplicationSystem($attendanceToDelete->getOffer());
             if (null === $applicationSystem) {
-                Message::addError('Zurzeit sind keine Abmeldungen möglich');
+                $this->addFlash('error', 'Zurzeit sind keine Anmeldungen möglich');
+
+                throw new RedirectResponseException($urlBuilder->getUrl());
             }
 
             if (!$this->participantModel->isProperChild($attendanceToDelete->participant, $this->frontendUser->id)) {
@@ -143,11 +146,7 @@ class UserAttendances extends AbstractFrontendModuleController
 
             $applicationSystem->deleteAttendance($attendanceToDelete);
 
-            Message::addConfirmation($GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation']);
-
-            $urlBuilder = UrlBuilder::fromUrl($request->getUri());
-            $urlBuilder->unsetQueryParameter('action');
-            $urlBuilder->unsetQueryParameter('id');
+            $this->addFlash('confirmation', $GLOBALS['TL_LANG']['MSC']['attendanceDeletedConfirmation']);
 
             throw new RedirectResponseException($urlBuilder->getUrl());
         }
@@ -239,16 +238,13 @@ class UserAttendances extends AbstractFrontendModuleController
             $rows = array_column($items, 'row');
 
             if (\count($rows) <= 1) {
-                Message::addInformation($this->translator->trans('MSC.noAttendances', [], 'contao_default'));
+                $template->info = $this->translator->trans('MSC.noAttendances', [], 'contao_default');
             } else {
                 $template->dataTable = Table::getDataArray($rows, 'user-attendances', $model);
             }
         } else {
-            Message::addWarning($this->translator->trans('MSC.noParticipants', [], 'contao_default'));
+            $template->info = $this->translator->trans('MSC.noParticipants', [], 'contao_default');
         }
-
-        $template->message = Message::generate();
-
         return Response::create($template->parse());
     }
 }

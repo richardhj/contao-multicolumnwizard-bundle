@@ -26,7 +26,6 @@ use MetaModels\AttributeSelectBundle\Attribute\MetaModelSelect;
 use MetaModels\Filter\Setting\IFilterSettingFactory;
 use MetaModels\IItem;
 use MetaModels\Item;
-use Richardhj\ContaoFerienpassBundle\Helper\Message;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\Participant;
 use Haste\Form\Form;
@@ -190,9 +189,7 @@ class AddAttendeeHost extends AbstractFrontendModuleController
 
         // Exit if a new item creation is not allowed
         if (!$dca->iscreatable) {
-            Message::addError($this->translator->trans('MSC.tableClosedInfo', [], 'contao_default'));
-
-            $template->message = Message::generate();
+            $template->info = $this->translator->trans('MSC.tableClosedInfo', [], 'contao_default');
 
             return Response::create($template->parse());
         }
@@ -236,7 +233,8 @@ class AddAttendeeHost extends AbstractFrontendModuleController
                 $this->addParticipant($participantRow, $offer);
             }
 
-            Message::addConfirmation(
+            $this->addFlash(
+                'confirmation',
                 sprintf(
                     $this->translator->trans('MSC.addAttendeeHost.confirmation', [], 'contao_default'),
                     \count($participantsToAdd)
@@ -245,8 +243,7 @@ class AddAttendeeHost extends AbstractFrontendModuleController
             throw new RedirectResponseException($request->getUri());
         }
 
-        $template->message = Message::generate();
-        $template->form    = $form->generate();
+        $template->form = $form->generate();
 
         return Response::create($template->parse());
     }

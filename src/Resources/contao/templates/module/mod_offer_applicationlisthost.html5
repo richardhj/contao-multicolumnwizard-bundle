@@ -4,12 +4,13 @@
 
 <?= $this->metamodel ?>
 
-<?php if (strlen($this->message)): ?>
-	<?php echo $this->message; ?>
+<?php if (strlen($this->info)): ?>
+    <?php echo $this->info; ?>
 <?php endif; ?>
+
 <?php echo $this->download; ?>
 <?php if (!empty($this->dataTable)): ?>
-	<?php $this->insert('ce_table', $this->dataTable); ?>
+    <?php $this->insert('ce_table', $this->dataTable); ?>
 <?php endif; ?>
 
 <?php $this->endblock(); ?>

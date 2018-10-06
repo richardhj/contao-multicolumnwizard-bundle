@@ -11,7 +11,6 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
-use Contao\System;
 use NotificationCenter\Model\Notification;
 use Richardhj\ContaoFerienpassBundle\Helper\Dca;
 

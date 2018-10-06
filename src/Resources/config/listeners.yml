@@ -91,6 +91,8 @@ services:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\AddAttendanceStatusConfirmationListener
         tags:
             - { name: kernel.event_listener, event: 'model.post-save', method: 'handle' }
+        arguments:
+          ['@session']
 
     richardhj.ferienpass.listener.user_application.build_participant_options.disable_already_attending:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\BuildParticipantOptions\DisableAlreadyAttendingParticipantsListener
