@@ -232,6 +232,13 @@ services:
         tags:
             - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 50 }
 
+    richardhj.ferienpass.listener.host_editing.editing_buttons:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\EditingButtonsListener
+        arguments:
+            - "@cca.dc-general.scope-matcher"
+        tags:
+            - { name: kernel.event_listener, event: dc-general.view.contao2backend.get-edit-mode-buttons, method: handleEvent }
+
     richardhj.ferienpass.listener.data_processing.xml.convert_xml_elements:
         class: Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml\ConvertDomElementToNativeWidgetListener
         tags:
