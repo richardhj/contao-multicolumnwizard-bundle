@@ -30,6 +30,7 @@
 
                 html = '<div class="alert alert--' + key + '">';
                 html += flashes[key];
+                html += '<button class="alert__close">Dismiss</button>';
                 html += '</div>';
             }
 
@@ -42,6 +43,11 @@
 
         $(document).ready(function () {
             showFlash();
+            $(document).on('click', '.alert__close', function (event) {
+                event.preventDefault();
+
+                $(this).closest('.alert').remove();
+            })
         });
     })(jQuery);
 </script>
