@@ -3,7 +3,7 @@
 <?php $this->block('content'); ?>
 
 <?php if (strlen($this->info)): ?>
-<p><?= $this->info ?></p>
+<p class="alert alert--info"><?= $this->info ?></p>
 <?php endif ?>
 
 <?php if (!empty($this->dataTable)): ?>
