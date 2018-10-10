@@ -34,7 +34,7 @@
                 html += '</div>';
             }
 
-            $('body').prepend($container);
+            $('#container').before($container);
             $container.append(html);
 
             // Remove the cookie to not show flashes again
