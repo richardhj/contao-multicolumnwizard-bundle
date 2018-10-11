@@ -1,0 +1,44 @@
+<script>
+    (function ($) {
+        var $copylinkbtn = $('.copy-link__btn'),
+            $copylink = $('.copy-link__wrapper'),
+            $input = $copylink.find('input[type="text"]');
+
+        $copylinkbtn.on('click', function () {
+            $copylink.find('.error').remove();
+            $copylink.toggle();
+            $copylink.addClass('active');
+            var $overlay = $('<div>', {class: 'overlay'});
+            $copylink.after($overlay);
+            $overlay.on('click', function () {
+                $copylink.toggle();
+                $overlay.remove();
+            });
+            $input.focus();
+            $input.select();
+        });
+
+        $copylink.on('keydown', function (e) {
+            $copylink.find('.error').remove();
+
+            setTimeout(function () {
+                if ((e.metaKey || e.ctrlKey) && e.keyCode === 67 && isTextSelected($input)) {
+                    $copylink.toggle();
+                    $('.overlay').remove();
+                } else if ((e.metaKey || e.ctrlKey) && e.keyCode === 67 && isTextSelected($input) === false) {
+                    var error = $('<p class="error">The link was not copied, make sure the entire text is selected.</p>');
+                    $copylink.append(error);
+                }
+            }, 100);
+
+            function isTextSelected($input) {
+                if (typeof $input.prop('selectionStart') === "number") {
+                    return $input.prop('selectionStart') === 0 && $input.prop('selectionEnd') === $input.val().length;
+                } else if (typeof document.selection !== "undefined") {
+                    $input.focus();
+                    return document.selection.createRange().text === $input.value;
+                }
+            }
+        });
+    })(jQuery);
+</script>

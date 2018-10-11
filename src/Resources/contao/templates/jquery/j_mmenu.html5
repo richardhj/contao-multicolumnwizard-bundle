@@ -1,0 +1,20 @@
+<?php
+
+// CSS file
+$GLOBALS['TL_CSS'][] = 'https://cdnjs.cloudflare.com/ajax/libs/jQuery.mmenu/7.0.6/jquery.mmenu.all.css';
+
+?>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.mmenu/7.0.6/jquery.mmenu.all.js"></script>
+<script>
+    jQuery(document).ready(function ($) {
+        $('#mainnav').mmenu({
+            'slidingSubmenus': false
+        }, {
+            clone: true,
+            classNames: {
+                'selected': 'active'
+            }
+        });
+    });
+</script>

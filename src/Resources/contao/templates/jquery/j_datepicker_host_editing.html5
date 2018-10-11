@@ -1,0 +1,142 @@
+<?php
+
+$GLOBALS['TL_CSS'][]        = 'https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css';
+$GLOBALS['TL_JAVASCRIPT'][] = 'https://cdn.jsdelivr.net/momentjs/latest/moment.min.js';
+
+$showWidget = false;
+
+/** @var \Richardhj\ContaoFerienpassBundle\Entity\PassEdition|null $passEdition */
+$passEdition = \Contao\System::getContainer()
+    ->get('doctrine')
+    ->getRepository(\Richardhj\ContaoFerienpassBundle\Entity\PassEdition::class)
+    ->findOneToEdit();
+
+if (null !== $passEdition) {
+    $holiday = $passEdition->getHoliday();
+
+    $year    = date('Y', $holiday->getPeriodStart());
+    $minDate = date('d.m.Y. H:i', $holiday->getPeriodStart());
+    $maxDate = date('d.m.Y. H:i', $holiday->getPeriodStop());
+
+    $showWidget = true;
+}
+
+?>
+
+<?php if ($showWidget): ?>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script type="text/javascript">
+        function initPeriodPicker(input) {
+            let tdStart = input.closest('td').next();
+            let tdEnd = tdStart.next();
+            let inputStart = tdStart.find('input');
+            let inputEnd = tdEnd.find('input');
+            input.daterangepicker({
+                'minYear': '<?= $year ?>',
+                'maxYear': '<?= $year ?>',
+                'showWeekNumbers': true,
+                'timePicker': true,
+                'timePicker24Hour': true,
+                'timePickerIncrement': 15,
+                'autoApply': false,
+                'locale': {
+                    'format': 'DD.MM.YYYY HH:mm',
+                    'separator': ' - ',
+                    'applyLabel': 'Datum auswählen',
+                    'cancelLabel': 'Abbrechen',
+                    'fromLabel': 'Von',
+                    'toLabel': 'Bis',
+                    'customRangeLabel': 'Custom',
+                    'weekLabel': 'KW',
+                    'daysOfWeek': ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+                    'monthNames': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+                    'firstDay': 1
+                },
+                'autoUpdateInput': false,
+                'showCustomRangeLabel': false,
+                'minDate': '<?= $minDate ?>',
+                'maxDate': '<?= $maxDate ?>',
+                'buttonClasses': 'btn btn--sm',
+                'applyButtonClasses': 'btn--primary ',
+                'cancelClass': 'btn--secondary'
+            }, function (start, end, label) {
+                inputStart.val(start.format('DD.MM.YYYY HH:mm'));
+                inputEnd.val(end.format('DD.MM.YYYY HH:mm'));
+            });
+
+            if (inputStart.val()) {
+                input.data('daterangepicker').setStartDate(inputStart.val());
+            }
+
+            if (inputEnd.val()) {
+                input.data('daterangepicker').setEndDate(inputEnd.val());
+            }
+
+            if (inputStart.val() || inputEnd.val()) {
+                let isOneDay = input.data('daterangepicker').startDate.isSame(input.data('daterangepicker').endDate, 'day');
+                input.val(input.data('daterangepicker').startDate.format(isOneDay ? 'dddd, DD.MM.YYYY HH:mm' : 'dddd, DD.MM. HH:mm') + ' - ' + input.data('daterangepicker').endDate.format(isOneDay ? 'HH:mm' : 'dddd, DD.MM.YYYY HH:mm'));
+            }
+
+            input.on('apply.daterangepicker', function (ev, picker) {
+                let isOneDay = picker.startDate.isSame(picker.endDate, 'day');
+                $(this).val(picker.startDate.format(isOneDay ? 'dddd, DD.MM.YYYY HH:mm' : 'dddd, DD.MM. HH:mm') + ' - ' + picker.endDate.format(isOneDay ? 'HH:mm' : 'dddd, DD.MM.YYYY HH:mm'));
+                // Hotfix. for some reasons the input gets display-noned.
+                input.css('display', 'block');
+            });
+
+            input.on('cancel.daterangepicker', function (ev, picker) {
+                // Hotfix. for some reasons the input gets display-noned.
+                input.css('display', 'block');
+                $(this).val('');
+            });
+
+            input.on('hide.daterangepicker', function (ev, picker) {
+                // Hotfix. for some reasons the input gets display-noned.
+                input.css('display', 'block');
+            });
+        }
+
+        function initDatePeriodWidget() {
+            let widgetTable = $('#ctrl_date_period');
+            widgetTable.find('thead').css('display', 'none');
+            widgetTable.find('a[data-operations="copy"]').css('visibility', 'hidden');
+            widgetTable.find('tr:first-of-type a[data-operations="delete"]').css('visibility', 'hidden');
+
+            widgetTable.find('tr').each(function () {
+                $(this).prepend($('<td><input type="text" class="text" placeholder="Hier klicken und Datum auswählen"></td>'));
+            });
+
+            widgetTable.find('td:first-child input').each(function () {
+                initPeriodPicker($(this));
+            });
+
+            widgetTable.find('td:not(:first-child)').css('display', 'none');
+
+            $('<a>', {
+                text: 'zusätzliche Zeit für diesen Termin',
+                title: 'Eine zusätzliche Zeit für diesen Termin hinzufügen. Wählen Sie dies nur aus, wenn die gleiche Gruppe von Kindern zu mehreren Zeiten kommen muss.',
+                href: '#',
+                'class': 'btn btn--new add_period tooltip',
+                click: function (e) {
+                    e.preventDefault();
+                    widgetTable.find('tr:last-of-type a[data-operations="copy"]')[0].click();
+                    widgetTable.find('tr:last-of-type a[data-operations="delete"]').css('visibility', 'visible');
+                    widgetTable.find('tr:last-child input').each(function () {
+                        $(this).val('');
+                    });
+                    initPeriodPicker(widgetTable.find('tr:last-child td:first-child input'));
+                }
+            }).appendTo(widgetTable);
+            $('.add_period').tooltip();
+            widgetTable.removeClass('ajax-reload-element-overlay');
+        }
+
+        (function ($) {
+            $('#ctrl_date_period').addClass('ajax-reload-element-overlay');
+            $(document).ready(function () {
+                initDatePeriodWidget();
+            });
+        })(jQuery);
+    </script>
+<?php endif; ?>
+

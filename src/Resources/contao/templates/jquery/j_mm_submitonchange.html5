@@ -1,0 +1,10 @@
+<script>
+    $(function () {
+        $(document).on('change', 'form .submitOnChange input[type="checkbox"]', function () {
+            var $form = $(this).closest('form');
+
+            $form.append('<input type="hidden" name="SUBMIT_TYPE" value="auto">');
+            $form.submit();
+        })
+    });
+</script>

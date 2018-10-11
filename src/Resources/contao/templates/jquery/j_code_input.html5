@@ -1,0 +1,45 @@
+<script src="files/ferienpass-badoldesloe/dist/js/codeInput.jquery.js"></script>
+<script>
+    (function ($) {
+        function initCodeInput() {
+            $('input[name="ferienpass_code"]').each(function () {
+                if (6 === $(this).val().length) {
+                    $(this).attr('readonly', 'readonly');
+                    return;
+                }
+
+                var $widget =$(this).closest('.widget');
+                var $mainFormFields = $widget.siblings('.widget');
+                $widget.prepend('<p class="tl_info">Bitte geben Sie zuerst den persönlichen Code ein, der im Ferienpass abgedruckt ist.</p>');
+                $mainFormFields.hide();
+                $(document).on('code-input:success', function () {
+                    $mainFormFields.fadeIn();
+                    $mainFormFields.find('input').first().focus();
+                });
+
+                var $form = $(this).closest('form');
+                var idRegex = /id=.+?(\d+)$/g;
+                var idMatch = idRegex.exec($form.attr('action'));
+                var itemId = (null !== idMatch) ? idMatch[1] : 0;
+                var $label = $(this).prev('label');
+
+                $(this).attr('placeholder', $label.text());
+                $label.text('');
+                $(this).codeInput({
+                    number: 6,
+                    att_id: 58,
+                    item_id: itemId
+                })
+            });
+        }
+
+        $(document).ready(function () {
+            initCodeInput();
+        });
+
+        // Init code input after modal is loaded
+        $(document).on('modal:html-loaded ajax-reload:completed', function () {
+            initCodeInput();
+        });
+    })(jQuery);
+</script>

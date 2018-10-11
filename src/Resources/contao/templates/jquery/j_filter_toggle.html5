@@ -1,0 +1,23 @@
+<script>
+    (function ($) {
+        var $formbody = $('.mm-filter .formbody');
+        var $toggleLink = $('<a>', {class: "mm-filter__toggle"}).append('Filter anzeigen');
+
+        if ($(window).width() <= 767) {
+            $formbody.hide();
+        }
+
+        $formbody.before($toggleLink);
+        $toggleLink.on('click', function (event) {
+            event.preventDefault();
+
+            if ($formbody.is(':hidden')) {
+                $toggleLink.text('Filter verbergen');
+            } else {
+                $toggleLink.text('Filter anzeigen');
+            }
+
+            $formbody.slideToggle();
+        });
+    })(jQuery);
+</script>

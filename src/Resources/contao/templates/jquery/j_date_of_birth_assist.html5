@@ -1,0 +1,24 @@
+<script type="text/javascript">
+    (function ($) {
+        function initDateOfBirthInputAssist() {
+            var $input = $('input[name="dateOfBirth"]');
+            $input.attr('placeholder', 'tt.mm.jjjj');
+            $input.change(function () {
+                var value = $input.val();
+                var match = value.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+                if (match) {
+                    $(this).val(moment([match[3], match[2] - 1, match[1]]).format('DD.MM.YYYY'));
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            initDateOfBirthInputAssist();
+        });
+
+        // Init date of birth assist after modal is loaded
+        $(document).on('ajaxComplete', function () {
+            initDateOfBirthInputAssist();
+        });
+    })(jQuery);
+</script>

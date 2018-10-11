@@ -1,0 +1,131 @@
+<?php
+
+$GLOBALS['TL_CSS'][]        = 'https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css';
+$GLOBALS['TL_JAVASCRIPT'][] = 'https://cdn.jsdelivr.net/momentjs/latest/moment.min.js';
+
+$showWidget = false;
+
+/** @var \Richardhj\ContaoFerienpassBundle\Entity\PassEdition|null $passEdition */
+$passEdition = \Contao\System::getContainer()
+    ->get('doctrine')
+    ->getRepository(\Richardhj\ContaoFerienpassBundle\Entity\PassEdition::class)
+    ->findOneToShowInFrontend();
+
+if (null !== $passEdition) {
+    $holiday = $passEdition->getHoliday();
+
+    $minDate = date('d.m.Y', $holiday->getPeriodStart());
+    $maxDate = date('d.m.Y', $holiday->getPeriodStop());
+
+    $period = new DatePeriod(
+        new DateTime('@' . $holiday->getPeriodStart()),
+        new DateInterval('P1D'),
+        new DateTime('@' . $holiday->getPeriodStop())
+    );
+
+    $i     = 0;
+    $weeks = [];
+    /** @var DateTime $value */
+    foreach ($period as $k => $value) {
+        if ('1' === $value->format('N')) {
+            $weeks[$i]['start'] = $value;
+        } elseif ($k > 6 && '7' === $value->format('N')) {
+            $weeks[$i]['end'] = $value;
+            $i++;
+        }
+    }
+
+    // Set holiday ranges.
+    $weeks[0]['start']               = new DateTime('@' . $holiday->getPeriodStart());
+    $weeks[count($weeks) - 1]['end'] = new DateTime('@' . $holiday->getPeriodStop());
+
+    $showWidget = true;
+}
+
+?>
+
+<?php if ($showWidget): ?>
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script type="text/javascript">
+        (function ($) {
+            let $dateWidget = $('.widget.date');
+            if ($dateWidget.length > 0) {
+                let $inputStart = $('#ctrl_date_0');
+                let $inputEnd = $('#ctrl_date_1');
+                $dateWidget.append('<input type="text" class="text date__range-input" placeholder="Zeitspanne auswählen">');
+
+                let $input = $('.date__range-input');
+                $input.daterangepicker({
+                    ranges: {
+                        <?php /** @var DateTime[] $period */ foreach ($weeks as $i => $period): ?>
+                        '<?= $i + 1?>. Ferienwoche':
+                            ['<?= $period['start']->format('d.m.Y') ?>', '<?= $period['end']->format('d.m.Y') ?>'],
+                        <?php endforeach; ?>
+                        'Gesamte Ferien': ['<?= $minDate ?>', '<?= $maxDate ?>']
+                    },
+                    'startDate': '<?= $minDate ?>',
+                    'endDate': '<?= $maxDate ?>',
+                    'minYear': '<?= date('Y', $holiday->getPeriodStart()) ?>',
+                    'maxYear': '<?= date('Y', $holiday->getPeriodStop()) ?>',
+                    'showWeekNumbers': true,
+                    'timePicker': false,
+                    'autoApply': false,
+                    'locale': {
+                        'format': 'DD.MM.YYYY',
+                        'separator': ' - ',
+                        'applyLabel': 'Datum auswählen',
+                        'cancelLabel': 'Abbrechen',
+                        'fromLabel': 'Von',
+                        'toLabel': 'Bis',
+                        'customRangeLabel': 'Anderen Zeitraum',
+                        'weekLabel': 'KW',
+                        'daysOfWeek': ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+                        'monthNames': ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+                        'firstDay': 1
+                    },
+                    'autoUpdateInput': true,
+                    'alwaysShowCalendars': false,
+                    'showCustomRangeLabel': true,
+                    'minDate': '<?= $minDate ?>',
+                    'maxDate': '<?= $maxDate ?>',
+                    'buttonClasses': 'btn btn--sm',
+                    'applyButtonClasses': 'btn--primary ',
+                    'cancelClass': 'btn--secondary'
+                }, function (start, end, label) {
+                    $inputStart.val(start.format('DD.MM.YYYY'));
+                    $inputEnd.val(end.format('DD.MM.YYYY'));
+                });
+
+                $inputStart.hide();
+                $inputEnd.hide();
+
+                if ($inputStart.val()) {
+                    $input.data('daterangepicker').setStartDate($inputStart.val());
+                }
+
+                if ($inputEnd.val()) {
+                    $input.data('daterangepicker').setEndDate($inputEnd.val());
+                }
+
+                $input.val($input.data('daterangepicker').startDate.format('DD.MM.') + ' - ' + $input.data('daterangepicker').endDate.format('DD.MM.YYYY'));
+
+                $input.on('apply.daterangepicker', function (ev, picker) {
+                    $input.val($input.data('daterangepicker').startDate.format('DD.MM.') + ' - ' + $input.data('daterangepicker').endDate.format('DD.MM.YYYY'));
+                    // Hotfix. for some reasons the input gets display-noned.
+                    $input.css('display', 'block');
+                });
+
+                $input.on('cancel.daterangepicker', function (ev, picker) {
+                    // Hotfix. for some reasons the input gets display-noned.
+                    $input.css('display', 'block');
+                    $(this).val('');
+                });
+
+                $input.on('hide.daterangepicker', function (ev, picker) {
+                    // Hotfix. for some reasons the input gets display-noned.
+                    $input.css('display', 'block');
+                });
+            }
+        })(jQuery);
+    </script>
+<?php endif; ?>

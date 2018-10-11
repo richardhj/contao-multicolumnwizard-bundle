@@ -1,0 +1,22 @@
+<script>
+    $(document).on('ajax-reload:submitted', function (event) {
+        $(event.target)
+            .after('<div class="loading__overlay"><div class="loading__loader"><div class="loading__checkmark loading__checkmark--draw"></div></div></div>');
+    });
+
+    $(document).on('ajax-reload:completed', function (event) {
+        if ($(event.target).find('.widget.error').length) {
+            $('.loading__loader').addClass('loading__loader--error');
+        } else {
+            $('.loading__loader').addClass('loading__loader--complete');
+        }
+
+        $('.loading__checkmark').toggle();
+
+        setTimeout(function () {
+            $('.loading__overlay').fadeOut(200, function () {
+                $(this).remove();
+            });
+        }, 800);
+    });
+</script>

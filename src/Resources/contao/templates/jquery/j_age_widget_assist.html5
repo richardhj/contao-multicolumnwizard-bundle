@@ -1,0 +1,5 @@
+<script>
+    $('.widget-age input[type="text"]').change(function () {
+        $(this).siblings('input[type="radio"]').prop('checked', true);
+    });
+</script>
