@@ -55,7 +55,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_code'] = [
             'generate_codes' => [
                 'label'      => &$GLOBALS['TL_LANG']['tl_ferienpass_code']['generate_codes'],
                 'href'       => 'key=generate',
-                'class'      => '',
+                'class'      => 'header_new',
                 'attributes' => 'onclick="Backend.getScrollOffset();"',
             ],
             'back'           => [
