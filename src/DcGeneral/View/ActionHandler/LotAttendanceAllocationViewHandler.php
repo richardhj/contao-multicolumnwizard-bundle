@@ -20,12 +20,14 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ActionHandl
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\Translator\TranslatorInterface as CcaTranslator;
-use Richardhj\ContaoFerienpassBundle\ApplicationSystem\Lot;
+use MetaModels\IItem;
+use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
+use Richardhj\ContaoFerienpassBundle\Entity\PassEditionTask;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
 use Richardhj\ContaoFerienpassBundle\Model\Offer as OfferModel;
+use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Component\Translation\TranslatorInterface;
-
 
 /**
  * Class LotAttendanceAllocationViewHandler
@@ -43,22 +45,32 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
     private $offerModel;
 
     /**
+     * Doctrine.
+     *
+     * @var ManagerRegistry
+     */
+    private $doctrine;
+
+    /**
      * AbstractHandler constructor.
      *
      * @param RequestScopeDeterminator $scopeDeterminator The request mode determinator.
      * @param TranslatorInterface      $translator        The translator.
      * @param CcaTranslator            $ccaTranslator     The cca translator.
      * @param OfferModel               $offerModel        The offer model.
+     * @param ManagerRegistry          $doctrine          Doctrine.
      */
     public function __construct(
         RequestScopeDeterminator $scopeDeterminator,
         TranslatorInterface $translator,
         CcaTranslator $ccaTranslator,
-        OfferModel $offerModel
+        OfferModel $offerModel,
+        ManagerRegistry $doctrine
     ) {
         parent::__construct($scopeDeterminator, $translator, $ccaTranslator);
 
         $this->offerModel = $offerModel;
+        $this->doctrine   = $doctrine;
     }
 
     /**
@@ -84,8 +96,8 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
             return null;
         }
 
-        $applicationSystem = $this->offerModel->getApplicationSystem($offer);
-        if (!($applicationSystem instanceof Lot)) {
+        if (false === $this->passEditionHasLotApplicationSystem($offer)) {
+            // The pass edition does not have any lot application system assigned, so we don't need this view.
             return null;
         }
 
@@ -144,5 +156,28 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
     protected function determineTemplate($groupingInformation): ContaoBackendViewTemplate
     {
         return $this->getTemplate('dcbe_general_attendance_allocation_view');
+    }
+
+    /**
+     * Check whether the offer's pass edition has a lot application system in use.
+     *
+     * @param IItem $offer The offer.
+     *
+     * @return bool
+     */
+    private function passEditionHasLotApplicationSystem(IItem $offer): bool
+    {
+        $reference          = $offer->get('pass_edition');
+        $passEdition        = $this->doctrine->getRepository(PassEdition::class)->find($reference['id']);
+        $applicationSystems = $passEdition->getApplicationSystems();
+
+        /** @var PassEditionTask $applicationSystem */
+        foreach ($applicationSystems as $applicationSystem) {
+            if ($applicationSystem->getApplicationSystem() === 'lot') {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

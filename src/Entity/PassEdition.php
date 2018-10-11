@@ -240,6 +240,22 @@ class PassEdition
     }
 
     /**
+     * Get the application system for this pass edition.
+     *
+     * @return Collection
+     */
+    public function getApplicationSystems(): Collection
+    {
+        $tasks = $this->getTasks()->filter(
+            function (PassEditionTask $element) {
+                return 'application_system' === $element->getType();
+            }
+        );
+
+        return $tasks;
+    }
+
+    /**
      * Get the host editing stages for this pass edition.
      *
      * @return PassEditionTask|null

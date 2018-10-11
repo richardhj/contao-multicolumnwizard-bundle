@@ -7,6 +7,7 @@ services:
             - "@translator"
             - "@cca.translator.contao_translator"
             - '@richardhj.ferienpass.model.offer'
+            - '@doctrine'
         tags:
             - { name: kernel.event_listener, event: dc-general.action, method: handleEvent, priority: 150 }
 
