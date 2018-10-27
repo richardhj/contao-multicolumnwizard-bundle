@@ -62,3 +62,13 @@ services:
             - '@metamodels.render_setting_factory'
             - '@translator'
             - '@metamodels.filter_setting_factory'
+
+    richardhj.ferienpass.module.host_privacy_consent:
+        class: Richardhj\ContaoFerienpassBundle\Module\HostPrivacyConsent
+        public: true
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: host_privacy_consent, category: ferienpass }
+        arguments:
+          ['@database_connection']

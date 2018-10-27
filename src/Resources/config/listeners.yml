@@ -252,3 +252,10 @@ services:
         arguments: ['@doctrine', '@templating', '@translator', '@router']
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages', priority: -10 }
+
+
+    richardhj.ferienpass.listener.privacy_consent.host_add_alert:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\PrivacyConsent\HostAddAlert
+        arguments: ['@session', '@contao.framework', '@database_connection']
+        tags:
+            - { name: contao.hook, hook: generatePage }

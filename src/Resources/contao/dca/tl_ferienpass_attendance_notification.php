@@ -25,7 +25,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_attendance_notification'] = [
     // Fields
     'fields' => [
         'id'           => [
-            'sql' => "int(10) unsigned NOT NULL auto_increment",
+            'sql' => 'int(10) unsigned NOT NULL auto_increment',
         ],
         'tstamp'       => [
             'sql' => "int(10) unsigned NOT NULL default '0'",

@@ -1,0 +1,19 @@
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<div class="host-privacy-consent">
+
+    <div class="host-privacy-consent__statement"><?= $this->statement ?></div>
+
+    <?php if ($this->signed): ?>
+        <div class="host-privacy-consent__confirmation">
+            <p class="alert alert--confirmation"><?= $this->confirmation ?></p>
+        </div>
+    <?php else: ?>
+        <div class="host-privacy-consent__signing"><?= $this->signingForm ?></div>
+    <?php endif; ?>
+
+</div>
+
+<?php $this->endblock(); ?>
