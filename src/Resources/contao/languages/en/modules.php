@@ -30,3 +30,5 @@ $GLOBALS['TL_LANG']['FMD']['offer_applicationlisthost'][0] = 'Application list (
 $GLOBALS['TL_LANG']['FMD']['offer_applicationlisthost'][1] = 'Displays all attendees of a particular offer.';
 $GLOBALS['TL_LANG']['FMD']['offer_addattendeehost'][0]     = 'Add attendee (host)';
 $GLOBALS['TL_LANG']['FMD']['offer_addattendeehost'][1]     = 'Allows the host to manually add particpants to the offer.';
+$GLOBALS['TL_LANG']['FMD']['host_privacy_consent'][0]      = 'Host privacy consent';
+$GLOBALS['TL_LANG']['FMD']['host_privacy_consent'][1]      = 'Defines a privacy statement which the hosts have to sign.';
