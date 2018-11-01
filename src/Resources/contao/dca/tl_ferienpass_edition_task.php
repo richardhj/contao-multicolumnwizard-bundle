@@ -154,6 +154,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         ],
         'type'               => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type'],
+            'exclude'   => true,
             'reference' => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options'],
             'inputType' => 'select',
             'options'   => [
@@ -173,6 +174,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         ],
         'title'              => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['title'],
+            'exclude'   => true,
             'inputType' => 'text',
             'eval'      => [
                 'mandatory' => true
@@ -181,6 +183,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         ],
         'application_system' => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['application_system'],
+            'exclude'   => true,
             'reference' => &$GLOBALS['TL_LANG']['MSC']['application_system'],
             'inputType' => 'select',
             'eval'      => [
@@ -217,6 +220,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         ],
         'color'              => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['color'],
+            'exclude'   => true,
             'inputType' => 'text',
             'eval'      => [
                 'colorpicker'    => true,
@@ -228,6 +232,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         ],
         'description'        => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['description'],
+            'exclude'   => true,
             'inputType' => 'textarea',
             'eval'      => [
                 'tl_class' => 'clr long'

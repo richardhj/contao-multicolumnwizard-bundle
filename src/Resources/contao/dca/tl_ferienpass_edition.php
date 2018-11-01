@@ -132,6 +132,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition'] = [
         ],
         'title'  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['title'],
+            'exclude'   => true,
             'inputType' => 'text',
             'eval'      => [
                 'mandatory' => true
