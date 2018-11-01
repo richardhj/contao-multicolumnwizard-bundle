@@ -11,89 +11,126 @@
  * @license   https://github.com/richardhj/contao-ferienpass/blob/master/LICENSE proprietary
  */
 
-namespace Richardhj\ContaoFerienpassBundle\BackendModule;
+namespace Richardhj\ContaoFerienpassBundle\Controller\Backend;
 
-use Contao\BackendUser;
-use Contao\DataContainer;
 use Contao\Image;
-use Contao\Input;
 use Contao\MemberModel;
-use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
 use Doctrine\DBAL\Connection;
 use MetaModels\IFactory;
-use MetaModels\Render\Setting\IRenderSettingFactory;
-use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use MetaModels\Render\Setting\RenderSettingFactory;
 use MetaModels\Render\Template;
 use NotificationCenter\Model\Notification;
-use Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Richardhj\ContaoFerienpassBundle\Model\Attendance;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Templating\EngineInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
-
-/**
- * Class SendMemberAttendancesOverview
- *
- * @package Richardhj\ContaoFerienpassBundle\BackendModule
- */
-class SendMemberAttendancesOverview extends \BackendModule
+class SendAttendancesOverview extends Controller
 {
-
     /**
-     * @var Connection
+     * The twig engine.
+     *
+     * @var EngineInterface
      */
-    private $connection;
+    private $templating;
 
     /**
+     * The translator.
+     *
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * The MetaModels factory.
+     *
      * @var IFactory
      */
     private $factory;
 
     /**
-     * @var IRenderSettingFactory
+     * The database connection.
+     *
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * @var RenderSettingFactory
      */
     private $renderSettingFactory;
 
     /**
-     * SendMemberAttendancesOverview constructor.
+     * Create a new instance.
      *
-     * @param DataContainer|null $dataContainer The data container.
-     *
-     * @throws ServiceNotFoundException
-     * @throws ServiceCircularReferenceException
+     * @param EngineInterface      $templating The twig engine.
+     * @param TranslatorInterface  $translator The translator.
+     * @param IFactory             $factory    The MetaModels factory.
+     * @param Connection           $connection The database connection.
+     * @param RenderSettingFactory $renderSettingFactory
      */
-    public function __construct(DataContainer $dataContainer = null)
-    {
-        parent::__construct($dataContainer);
-
-        $this->strTemplate          = 'dcbe_general_edit';
-        $this->connection           = System::getContainer()->get('database_connection');
-        $this->factory              = System::getContainer()->get('metamodels.factory');
-        $this->renderSettingFactory = System::getContainer()->get('metamodels.render_setting_factory');
+    public function __construct(
+        EngineInterface $templating,
+        TranslatorInterface $translator,
+        IFactory $factory,
+        Connection $connection,
+        RenderSettingFactory $renderSettingFactory
+    ) {
+        $this->templating           = $templating;
+        $this->translator           = $translator;
+        $this->factory              = $factory;
+        $this->connection           = $connection;
+        $this->renderSettingFactory = $renderSettingFactory;
     }
 
     /**
+     * Invoke this.
+     *
+     * @param Request $request The request.
+     *
+     * @return Response The template data.
+     */
+    public function __invoke(Request $request)
+    {
+        return new Response(
+            $this->templating->render(
+                'RichardhjContaoFerienpassBundle::Backend/be_send_attendances_overview.html.twig',
+                [
+                    'stylesheets'  => [
+                    ],
+                    'headline'     => $this->translator->trans(
+                        'MOD.ferienpass_send_attendances_overview.0',
+                        [],
+                        'contao_modules'
+                    ),
+                    'sub_headline' => $this->translator->trans(
+                        'MSC.ferienpass_send_attendances_overview.main_headline',
+                        [],
+                        'contao_default'
+                    ),
+                    'form'         => $this->compile($request),
+                ]
+            )
+        );
+    }
+
+
+    /**
      * Generate the module
+     *
+     * @param Request $request
      *
      * @return string
      */
-    public function generate(): string
-    {
-        if (!BackendUser::getInstance()->isAdmin) {
-            return sprintf('<p class="tl_gerror">%s</p>', 'keine Berechtigung');
-        }
-
-        return parent::generate();
-    }
-
-    /**
-     * Generate the module
-     */
-    protected function compile(): void
+    protected function compile(Request $request): string
     {
         $output     = '';
         $formSubmit = 'send_member_attendances_overview';
 
-        if ($formSubmit === Input::post('FORM_SUBMIT')) {
+        if ($formSubmit === $request->request->get('FORM_SUBMIT')) {
             $this->sendMessages();
         }
 
@@ -198,16 +235,7 @@ HTML;
         $submitButtonTemplate = new ContaoBackendViewTemplate('dc_general_submit_button');
         $submitButtonTemplate->setData($submitButtons);
 
-
-        $this->Template->subHeadline = 'Teilnahmeübersicht an Eltern verschicken';
-        $this->Template->table       = $formSubmit;
-        $this->Template->editButtons = preg_replace('/(\s\s+|\t|\n)/', '', $submitButtonTemplate->parse());
-        $this->Template->fieldsets   = [
-            [
-                'class'   => 'tl_box',
-                'palette' => $output,
-            ],
-        ];
+        return $output;
     }
 
     /**

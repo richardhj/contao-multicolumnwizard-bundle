@@ -88,6 +88,17 @@ class RegisterBackendNavigationListener
             ]
         );
 
+        $this->addMenu(
+            $modules,
+            'ferienpass',
+            'send_attendances_overview',
+            [
+                'label' => $this->translator->trans('MOD.ferienpass_send_attendances_overview.0', [], 'contao_modules'),
+                'title' => $this->translator->trans('MOD.ferienpass_send_attendances_overview.1', [], 'contao_modules'),
+                'route' => 'richardhj.ferienpass.backend.send_attendances_overview',
+            ]
+        );
+
         return $modules;
     }
 

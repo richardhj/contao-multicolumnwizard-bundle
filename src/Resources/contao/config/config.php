@@ -15,7 +15,6 @@ use Richardhj\ContaoFerienpassBundle\Form\SelectDisabledOptions;
 use Richardhj\ContaoFerienpassBundle\Form\OfferDate;
 use Richardhj\ContaoFerienpassBundle\Widget\RequestAccessToken;
 use Richardhj\ContaoFerienpassBundle\Widget\Age;
-use Richardhj\ContaoFerienpassBundle\BackendModule\SendMemberAttendancesOverview;
 use Richardhj\ContaoFerienpassBundle\Model\DataProcessing;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceReminder;
 use Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus;
@@ -30,43 +29,40 @@ array_insert(
     $GLOBALS['BE_MOD']['ferienpass'],
     0,
     [
-        'ferienpass_attendances'                   => [
+        'ferienpass_attendances'          => [
             'tables' => [
                 'tl_ferienpass_attendance',
                 'mm_ferienpass',
             ],
         ],
-        'ferienpass_send_attendance_confirmations' => [
-            'callback' => SendMemberAttendancesOverview::class,
-        ],
-        'ferienpass_data_processings'              => [
+        'ferienpass_data_processings'     => [
             'tables' => [
                 'tl_ferienpass_dataprocessing',
             ],
         ],
-        'ferienpass_codes'                         => [
+        'ferienpass_codes'                => [
             'tables'   => [
                 'tl_ferienpass_code',
             ],
             'generate' => [\Richardhj\ContaoFerienpassBundle\Backend\GenerateCodes::class, 'generate'],
         ],
-        'ferienpass_editions'                      => [
+        'ferienpass_editions'             => [
             'tables' => [
                 'tl_ferienpass_edition',
                 'tl_ferienpass_edition_task'
             ],
         ],
-        'ferienpass_application_systems'           => [
+        'ferienpass_application_systems'  => [
             'tables' => [
                 'tl_ferienpass_applicationsystem',
             ],
         ],
-        'ferienpass_attendance_status'             => [
+        'ferienpass_attendance_status'    => [
             'tables' => [
                 'tl_ferienpass_attendancestatus',
             ],
         ],
-        'ferienpass_attendance_reminders'          => [
+        'ferienpass_attendance_reminders' => [
             'tables' => [
                 'tl_ferienpass_attendance_reminder',
             ],

@@ -30,6 +30,13 @@ richardhj.ferienpass.backend.erase_personal_data:
         _token_check: true
         _controller: richardhj.ferienpass.controller.backend.erase_personal_data
 
+richardhj.ferienpass.backend.send_attendances_overview:
+    path: /contao/ferienpass/send_attendances_overview
+    defaults:
+        _scope: backend
+        _token_check: true
+        _controller: richardhj.ferienpass.controller.backend.send_attendances_overview
+
 richardhj.ferienpass.code_validate:
     path: /ferienpass-code-validate
     defaults:

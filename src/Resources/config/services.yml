@@ -38,6 +38,19 @@ services:
             - [ setContainer, [ '@service_container' ]]
         tags: ['controller.service_arguments']
 
+
+    richardhj.ferienpass.controller.backend.send_attendances_overview:
+        class: Richardhj\ContaoFerienpassBundle\Controller\Backend\SendAttendancesOverview
+        arguments:
+            - "@templating"
+            - "@contao.translation.translator"
+            - '@metamodels.factory'
+            - '@database_connection'
+            - '@metamodels.render_setting_factory'
+        calls:
+        - [ setContainer, [ '@service_container' ]]
+        tags: ['controller.service_arguments']
+
     richardhj.ferienpass.application_system.firstcome:
         class: Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome
         factory: ['Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemFactory', createFirstCome]
