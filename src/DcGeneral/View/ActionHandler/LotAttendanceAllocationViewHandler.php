@@ -85,7 +85,8 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
     {
         $dataDefinition  = $environment->getDataDefinition();
         $basicDefinition = $environment->getDataDefinition()->getBasicDefinition();
-        if ('mm_ferienpass' !== $basicDefinition->getParentDataProvider()) {
+        if ('tl_ferienpass_attendance' !== $basicDefinition->getDataProvider()
+            || 'mm_ferienpass' !== $basicDefinition->getParentDataProvider()) {
             // Set null and the next view handler will handle it.
             return null;
         }
@@ -104,8 +105,7 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
         // Add "attendances" property
         /** @var Contao2BackendViewDefinitionInterface $viewSection */
         $viewSection = $dataDefinition->getDefinition(Contao2BackendViewDefinitionInterface::NAME);
-        $listing     = $viewSection->getListingConfig();
-        $formatter   = $listing->getLabelFormatter($dataDefinition->getName());
+        $formatter   = $viewSection->getListingConfig()->getLabelFormatter($dataDefinition->getName());
 
         $propertyNames   = $formatter->getPropertyNames();
         $propertyNames[] = 'attendances';
