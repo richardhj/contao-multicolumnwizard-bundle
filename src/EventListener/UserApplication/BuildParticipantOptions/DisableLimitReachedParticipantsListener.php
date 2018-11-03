@@ -45,12 +45,13 @@ class DisableLimitReachedParticipantsListener
 
     /**
      * Disable participants from options that have reached their limit.
+     * Consider limit defined in application system model.
      *
      * @param BuildParticipantOptionsForUserApplicationEvent $event The event.
      *
      * @return void
      */
-    public function handle(BuildParticipantOptionsForUserApplicationEvent $event): void
+    public function handleModelLimit(BuildParticipantOptionsForUserApplicationEvent $event): void
     {
         $applicationSystem = $this->offerModel->getApplicationSystem($event->getOffer());
         if (!($applicationSystem instanceof FirstCome)) {
@@ -73,9 +74,56 @@ class DisableLimitReachedParticipantsListener
             if (Attendance::countByParticipantAndDay($option['value']) >= $maxApplicationsPerDay) {
                 $options[$k]['disabled'] = true;
                 $options[$k]['label']    = sprintf(
-                    $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['limit_reached'],
+                    $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['limit_per_day_reached'],
                     $option['label']
                 );
+            }
+        }
+
+        $event->setResult($options);
+    }
+
+    /**
+     * Disable participants from options that have reached their limit.
+     * Consider limit defined in task.
+     *
+     * @param BuildParticipantOptionsForUserApplicationEvent $event The event.
+     *
+     * @return void
+     */
+    public function handleTaskLimit(BuildParticipantOptionsForUserApplicationEvent $event): void
+    {
+        $applicationSystem = $this->offerModel->getApplicationSystem($event->getOffer());
+        if (null === $applicationSystem) {
+            return;
+        }
+
+        $options = $event->getResult();
+
+        $task = $applicationSystem->getPassEditionTask();
+        if (null === $task) {
+            return;
+        }
+
+        if ($task->getMaxApplications() > 0) {
+            foreach ($options as $k => $option) {
+                // Skip if already disabled
+                if ($option['disabled']) {
+                    continue;
+                }
+
+                $countApplications = Attendance::countBy(
+                    'participant=? AND tstamp >= ? AND tstamp <= ?',
+                    [$option['value'], $task->getPeriodStart(), $task->getPeriodStop()]
+                );
+
+                if ($countApplications >= $task->getMaxApplications()) {
+                    $options[$k]['disabled'] = true;
+                    $options[$k]['label']    = sprintf(
+                        $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['option']['label']['limit_reached'],
+                        $option['label']
+                    );
+                }
             }
         }
 

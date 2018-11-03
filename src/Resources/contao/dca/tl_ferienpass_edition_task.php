@@ -19,12 +19,6 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
         'ptable'           => 'tl_ferienpass_edition',
         'switchToEdit'     => false,
         'enableVersioning' => false,
-        'sql'              => [
-            'keys' => [
-                'id'  => 'primary',
-                'pid' => 'index'
-            ],
-        ],
     ],
 
     // DCA config
@@ -123,7 +117,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
 
     // MetaSubSelectPalttes
     'metasubselectpalettes' => [
-        'type' => [
+        'type'               => [
             'custom'             => [
                 'title',
                 'description',
@@ -132,27 +126,28 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
             'application_system' => [
                 'application_system'
             ],
+            'pay_days'           => [
+                'drop_unacknowledged_attendances'
+            ],
+        ],
+        'application_system' => [
+            'lot'       => [
+
+            ],
+            'firstcome' => [
+                'max_applications'
+            ]
         ],
     ],
 
     // Fields
     'fields'                => [
-        'id'                 => [
-            'sql' => 'int(10) unsigned NOT NULL auto_increment',
-        ],
-        'pid'                => [
-            'sql' => "int(10) unsigned NOT NULL default '0'",
-        ],
-        'tstamp'             => [
-            'sql' => "int(10) unsigned NOT NULL default '0'",
-        ],
-        'sorting'            => [
+        'sorting'                         => [
             'label'   => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['sorting'],
             'sorting' => true,
             'flag'    => 11,
-            'sql'     => "int(10) unsigned NOT NULL default '0'",
         ],
-        'type'               => [
+        'type'                            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type'],
             'exclude'   => true,
             'reference' => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['type_options'],
@@ -170,18 +165,16 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
                 'submitOnChange'     => true,
                 'includeBlankOption' => true
             ],
-            'sql'       => "varchar(64) NOT NULL default ''"
         ],
-        'title'              => [
+        'title'                           => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['title'],
             'exclude'   => true,
             'inputType' => 'text',
             'eval'      => [
                 'mandatory' => true
             ],
-            'sql'       => "varchar(255) NOT NULL default ''"
         ],
-        'application_system' => [
+        'application_system'              => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['application_system'],
             'exclude'   => true,
             'reference' => &$GLOBALS['TL_LANG']['MSC']['application_system'],
@@ -190,9 +183,24 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
                 'mandatory'          => true,
                 'includeBlankOption' => true
             ],
-            'sql'       => "varchar(64) NOT NULL default ''"
         ],
-        'period_start'       => [
+        'drop_unacknowledged_attendances' => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['drop_unacknowledged_attendances'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => [
+                'tl_class' => 'w50 m12'
+            ],
+        ],
+        'max_applications'                => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['max_applications'],
+            'inputType' => 'text',
+            'eval'      => [
+                'tl_class' => 'w50',
+                'rgxp'     => 'numeric',
+            ],
+        ],
+        'period_start'                    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['period_start'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -203,9 +211,8 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
                 'datepicker' => true,
                 'tl_class'   => 'w50 wizard',
             ],
-            'sql'       => "varchar(10) NOT NULL default ''",
         ],
-        'period_stop'        => [
+        'period_stop'                     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['period_stop'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -216,9 +223,8 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
                 'datepicker' => true,
                 'tl_class'   => 'w50 wizard',
             ],
-            'sql'       => "varchar(10) NOT NULL default ''",
         ],
-        'color'              => [
+        'color'                           => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['color'],
             'exclude'   => true,
             'inputType' => 'text',
@@ -228,16 +234,14 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
                 'decodeEntities' => true,
                 'tl_class'       => 'w50 wizard'
             ],
-            'sql'       => "char(6) NOT NULL default ''"
         ],
-        'description'        => [
+        'description'                     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition_task']['description'],
             'exclude'   => true,
             'inputType' => 'textarea',
             'eval'      => [
                 'tl_class' => 'clr long'
             ],
-            'sql'       => 'text NULL'
         ],
     ],
 ];

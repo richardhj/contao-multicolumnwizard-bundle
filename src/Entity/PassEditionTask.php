@@ -66,6 +66,12 @@ class PassEditionTask
 
     /**
      * @var int
+     * @ORM\Column(name="max_applications", type="integer")
+     */
+    private $maxApplications;
+
+    /**
+     * @var int
      * @ORM\Column(name="period_start", type="integer")
      */
     private $periodStart;
@@ -188,6 +194,22 @@ class PassEditionTask
     public function setTitle(string $title): void
     {
         $this->title = $title;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxApplications(): int
+    {
+        return $this->maxApplications;
+    }
+
+    /**
+     * @param int $maxApplications
+     */
+    public function setMaxApplications(int $maxApplications): void
+    {
+        $this->maxApplications = $maxApplications;
     }
 
     /**

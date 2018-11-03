@@ -17,11 +17,6 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition'] = [
     'config'       => [
         'dataContainer' => 'General',
         'ctable'        => ['tl_ferienpass_edition_task'],
-        'sql'           => [
-            'keys' => [
-                'id' => 'primary',
-            ],
-        ],
     ],
 
     // DCA config
@@ -124,20 +119,13 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition'] = [
 
     // Fields
     'fields'       => [
-        'id'     => [
-            'sql' => 'int(10) unsigned NOT NULL auto_increment',
-        ],
-        'tstamp' => [
-            'sql' => "int(10) unsigned NOT NULL default '0'",
-        ],
-        'title'  => [
+        'title' => [
             'label'     => &$GLOBALS['TL_LANG']['tl_ferienpass_edition']['title'],
             'exclude'   => true,
             'inputType' => 'text',
             'eval'      => [
                 'mandatory' => true
             ],
-            'sql'       => "varchar(255) NOT NULL default ''"
         ],
     ],
 ];
