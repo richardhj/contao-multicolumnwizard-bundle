@@ -14,6 +14,7 @@
 namespace Richardhj\ContaoFerienpassBundle\EventListener\HostEditing;
 
 
+use Contao\CoreBundle\Routing\UrlGenerator;
 use Contao\Template;
 use MetaModels\Events\ParseItemEvent;
 use MetaModels\Events\RenderItemListEvent;
@@ -32,13 +33,6 @@ use Symfony\Component\Translation\TranslatorInterface;
  */
 class ItemListRenderingListener
 {
-
-    /**
-     * The event dispatcher.
-     *
-     * @var EventDispatcherInterface
-     */
-    private $dispatcher;
 
     /**
      * The translator.
@@ -62,23 +56,30 @@ class ItemListRenderingListener
     private $doctrine;
 
     /**
+     * The url generator.
+     *
+     * @var UrlGenerator
+     */
+    private $urlGenerator;
+
+    /**
      * ItemListRenderingListener constructor.
      *
-     * @param EventDispatcherInterface $dispatcher      The event dispatcher.
      * @param TranslatorInterface      $translator      The translator.
      * @param ViewCombination          $viewCombination The current view combinations.
      * @param ManagerRegistry          $doctrine        Doctrine.
+     * @param UrlGenerator             $urlGenerator The url generator.
      */
     public function __construct(
-        EventDispatcherInterface $dispatcher,
         TranslatorInterface $translator,
         ViewCombination $viewCombination,
-        ManagerRegistry $doctrine
+        ManagerRegistry $doctrine,
+        UrlGenerator $urlGenerator
     ) {
-        $this->dispatcher      = $dispatcher;
         $this->translator      = $translator;
         $this->viewCombination = $viewCombination;
         $this->doctrine        = $doctrine;
+        $this->urlGenerator    = $urlGenerator;
     }
 
     /**
@@ -111,6 +112,41 @@ class ItemListRenderingListener
                 $template->editEnable = $editable;
             }
         }
+    }
+
+    /**
+     * Add the application list jumpTo as action.
+     *
+     * @param ParseItemEvent $event The event.
+     *
+     * @return void
+     */
+    public function addApplicationListLink(ParseItemEvent $event): void
+    {
+        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
+        $metaModel = $event->getItem()->getMetaModel();
+        $tableName = $metaModel->getTableName();
+
+        if ('mm_ferienpass' !== $tableName
+            || '3' !== $screen['meta']['id']
+            || !$event->getItem()->get('applicationlist_active')
+        ) {
+            return;
+        }
+
+        $parsed = $event->getResult();
+
+        $parsed['actions']['applicationlist'] = [
+            'label' => $this->translateLabel('metamodel_show_application_list.0', $metaModel->getTableName()),
+            'title' => $this->translateLabel('metamodel_show_application_list.1', $metaModel->getTableName()),
+            'class' => 'applicationlist',
+            'href'  => $this->urlGenerator->generate(
+                'angebote-verwalten/teilnehmerliste',
+                ['auto_item' => $parsed['raw']['alias']]
+            ),
+        ];
+
+        $event->setResult($parsed);
     }
 
     /**

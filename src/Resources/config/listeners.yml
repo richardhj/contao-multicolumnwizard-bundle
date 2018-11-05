@@ -217,12 +217,13 @@ services:
     richardhj.ferienpass.listener.host_editing.item_list_rendering:
         class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\ItemListRenderingListener
         arguments:
-            - '@event_dispatcher'
             - '@contao.translation.translator'
             - '@metamodels.view_combination'
             - '@doctrine'
+            - '@contao.routing.url_generator'
         tags:
             - { name: kernel.event_listener, event: 'metamodels.render-item-list', method: handleRenderItemList }
+            - { name: kernel.event_listener, event: 'metamodels.parse-item', method: addApplicationListLink }
             - { name: kernel.event_listener, event: 'metamodels.parse-item', method: modifyActionButtons }
 
     richardhj.ferienpass.listener.host_editing.complay_with_host_editing_end:
