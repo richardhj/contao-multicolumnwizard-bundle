@@ -72,11 +72,6 @@ class RegisterBackendNavigationListener
      */
     public function onGetUserNavigation($modules)
     {
-        unset($modules['metamodels']['modules']['support_screen']);
-        if (empty($modules['metamodels']['modules'])) {
-            unset($modules['metamodels']);
-        }
-
         $this->addMenu(
             $modules,
             'ferienpass',
