@@ -22,7 +22,6 @@ use MetaModels\IItem;
 use MetaModels\ViewCombination\ViewCombination;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -65,10 +64,10 @@ class ItemListRenderingListener
     /**
      * ItemListRenderingListener constructor.
      *
-     * @param TranslatorInterface      $translator      The translator.
-     * @param ViewCombination          $viewCombination The current view combinations.
-     * @param ManagerRegistry          $doctrine        Doctrine.
-     * @param UrlGenerator             $urlGenerator The url generator.
+     * @param TranslatorInterface $translator      The translator.
+     * @param ViewCombination     $viewCombination The current view combinations.
+     * @param ManagerRegistry     $doctrine        Doctrine.
+     * @param UrlGenerator        $urlGenerator    The url generator.
      */
     public function __construct(
         TranslatorInterface $translator,
@@ -141,8 +140,8 @@ class ItemListRenderingListener
             'title' => $this->translateLabel('metamodel_show_application_list.1', $metaModel->getTableName()),
             'class' => 'applicationlist',
             'href'  => $this->urlGenerator->generate(
-                'angebote-verwalten/teilnehmerliste',
-                ['auto_item' => $parsed['raw']['alias']]
+                'angebote-verwalten/teilnehmerliste/{item}',
+                ['item' => $parsed['raw']['alias'], 'auto_item' => 'item']
             ),
         ];
 
