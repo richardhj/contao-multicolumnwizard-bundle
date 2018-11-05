@@ -118,7 +118,8 @@ services:
         arguments:
             - '@richardhj.ferienpass.model.offer'
         tags:
-            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handle }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handleModelLimit }
+            - { name: kernel.event_listener, event: 'richardhj.ferienpass.user-application.build-participant-options', method: handleTaskLimit }
 
     richardhj.ferienpass.listener.user_application.disable_copy_participant_action:
         class: Richardhj\ContaoFerienpassBundle\EventListener\UserApplication\DisableCopyParticipantActionListener
