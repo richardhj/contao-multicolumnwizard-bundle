@@ -18,6 +18,7 @@ use Contao\Model;
 use DateTime;
 use Eluceo\iCal\Component\Calendar;
 use Eluceo\iCal\Component\Event;
+use MetaModels\AttributeTextBundle\Attribute\Text;
 use MetaModels\Item;
 use MetaModels\Render\Setting\IRenderSettingFactory;
 use Richardhj\ContaoFerienpassBundle\Helper\ToolboxOfferDate;
@@ -164,12 +165,16 @@ class ExportAttendances
                         }
                     }
 
-                    //$event->setLocation()
+                    if ($item->getMetaModel()->hasAttribute('meeting_point')) {
+                        if ($item->getAttribute('meeting_point') instanceof Text) {
+                            $event->setLocation($item->parseAttribute('meeting_point')['text']);
+                        }
+                    }
+
                     if ($item->get('cancelled') || $attendance->getStatus() !== AttendanceStatus::findConfirmed()) {
                         $event->setCancelled(true);
                     }
 
-                    $event->setUseTimezone(true);
                     $calendar->addComponent($event);
                 }
             }
