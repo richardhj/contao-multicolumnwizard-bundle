@@ -92,7 +92,7 @@ class ExportAttendeeEmailsButtonListener
                    . '\'); return false;';
 
         $buttons['export_attendee_emails'] =
-            '<input type="submit" name="export_attendee_emails" class="tl_submit" value="Export attendee emails" onclick="'
+            '<input type="submit" name="export_attendee_emails" class="tl_submit" value="E-Mail-Adressen von Teilnehmern exportieren" onclick="'
             . $onClick . '">';
 
         $event->setButtons($buttons);
