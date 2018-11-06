@@ -148,6 +148,16 @@ class UserApplication extends AbstractFrontendModuleController
     protected function getResponse(Template $template, ModuleModel $model, Request $request): Response
     {
         $offer = $this->fetchOffer((int) $model->metamodel_filtering, \Input::get('auto_item'));
+        $metaModel = $offer->getMetaModel();
+
+        // Stop if the no application required
+        if ($metaModel->hasAttribute('requires_application') && !$offer->get('requires_application')) {
+            $template->info = $this->translator->trans('MSC.user_application.no_applications', [], 'contao_default');
+
+            //$this->tagResponse(['ferienpass.offer.' . $offer->get('id')]);
+
+            return Response::create($template->parse());
+        }
 
         // Stop if the procedure is not used
         if (!$offer->get('applicationlist_active')) {
@@ -173,8 +183,7 @@ class UserApplication extends AbstractFrontendModuleController
         $actualVacantPlaces = $maxParticipants - $countParticipants;
         $vacantPlaces       = max(0, $actualVacantPlaces);
         $utilization        = ($maxParticipants > 0) ? $countParticipants / $maxParticipants : 0;
-        $variantBase        = $offer->getVariantBase();
-        $variants           = $variantBase->getVariants(null);
+        $variants           = $offer->getVariantBase()->getVariants(null);
 
         $template->showVacantPlaces             = $applicationSystem instanceof FirstCome && $maxParticipants > 0;
         $template->showUtilization              = $applicationSystem instanceof Lot && $utilization >= 0.8;

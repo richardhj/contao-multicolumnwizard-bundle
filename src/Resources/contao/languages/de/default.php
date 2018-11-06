@@ -22,7 +22,8 @@ $GLOBALS['TL_LANG']['MSC']['noParticipants']    = 'Sie müssen vorerst Teilnehme
 
 // User application
 $GLOBALS['TL_LANG']['MSC']['user_application']['active'] = 'Dieses Angebot verwendet das Online-Anmeldeverfahren.';
-$GLOBALS['TL_LANG']['MSC']['user_application']['inactive'] = 'Dieses Angebot verwendet <strong>nicht</strong> das Online-Anmeldeverfahren.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['no_applications'] = 'Es sind keine Anmeldungen notwendig, um am Angebot teilzunehmen.';
+$GLOBALS['TL_LANG']['MSC']['user_application']['inactive'] = 'Bitte melden Sie sich direkt beim Veranstalter, wenn Sie am Angebot teilnehmen wollen.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['past'] = 'Dieses Angebot liegt in der Vergangenheit.';
 $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['label'] = 'Teilnehmer auswählen';
 $GLOBALS['TL_LANG']['MSC']['user_application']['participant']['placeholder'] = 'Hier klicken und Teilnehmer auswählen';

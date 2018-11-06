@@ -167,8 +167,7 @@ class ApplicationListHost extends AbstractFrontendModuleController
                     $parentMember = $participant->get('pmember');
 
                     if ($field === 'dateOfBirth') {
-                        $date  = new DateTime('@' . $participant->get($field));
-                        $value = $date->getAge();
+                        $value = (new DateTime('@' . $participant->get($field)))->getAge();
                     } else {
                         $value = $participant->parseAttribute($field, 'text', $view)['text'];
                     }
