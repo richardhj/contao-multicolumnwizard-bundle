@@ -13,7 +13,6 @@
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass;
 
-
 use Contao\CoreBundle\Exception\AccessDeniedException;
 use Contao\FrontendUser;
 use ContaoCommunityAlliance\DcGeneral\Contao\RequestScopeDeterminator;
@@ -49,12 +48,12 @@ class FeeInitialDataListener
      * FrontendPermissionCheckListener constructor.
      *
      * @param RequestScopeDeterminator $scopeMatcher The request scope determinator.
-     * @param ManagerRegistry          $doctrine     Doctrine.
+     * @param ManagerRegistry $doctrine Doctrine.
      */
     public function __construct(RequestScopeDeterminator $scopeMatcher, ManagerRegistry $doctrine)
     {
         $this->scopeMatcher = $scopeMatcher;
-        $this->doctrine     = $doctrine;
+        $this->doctrine = $doctrine;
     }
 
     /**
@@ -64,10 +63,10 @@ class FeeInitialDataListener
      */
     public function handle(PreEditModelEvent $event): void
     {
-        $environment  = $event->getEnvironment();
-        $definition   = $environment->getDataDefinition();
+        $environment = $event->getEnvironment();
+        $definition = $environment->getDataDefinition();
         $dataProvider = $definition->getBasicDefinition()->getDataProvider();
-        $model        = $event->getModel();
+        $model = $event->getModel();
 
         if (!$model instanceof Model
             || 'mm_ferienpass' !== $dataProvider
@@ -75,7 +74,7 @@ class FeeInitialDataListener
             return;
         }
 
-        $item      = $model->getItem();
+        $item = $model->getItem();
         $attribute = $item->getMetaModel()->getAttribute('host');
 
         /** @var FrontendUser $user */
@@ -87,14 +86,14 @@ class FeeInitialDataListener
         }
 
         // Set current pass_release.
-        $passEdition = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
-        if (null === $passEdition) {
-            throw new NoPassEditionWithActiveHostEditingStageException(
-                'No pass edition with active host editing stage found.'
-            );
-        }
-
         if (null === $item->get('pass_edition')) {
+            $passEdition = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
+            if (null === $passEdition) {
+                throw new NoPassEditionWithActiveHostEditingStageException(
+                    'No pass edition with active host editing stage found.'
+                );
+            }
+
             $item->set('pass_edition', ['id' => $passEdition->getId()]);
         }
     }
