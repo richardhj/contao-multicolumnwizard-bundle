@@ -13,8 +13,8 @@ if (null !== $passEdition) {
     $holiday = $passEdition->getHoliday();
 
     $year = date('Y', $holiday->getPeriodStart());
-    $minDate = date('d.m.Y. H:i', $holiday->getPeriodStart());
-    $maxDate = date('d.m.Y. H:i', $holiday->getPeriodStop());
+    $minDate = date('d.m.Y H:i', $holiday->getPeriodStart());
+    $maxDate = date('d.m.Y H:i', $holiday->getPeriodStop());
 }
 
 ?>
@@ -75,19 +75,6 @@ if (null !== $passEdition) {
         input.on('apply.daterangepicker', function (ev, picker) {
             let isOneDay = picker.startDate.isSame(picker.endDate, 'day');
             $(this).val(picker.startDate.format(isOneDay ? 'dddd, DD.MM.YYYY HH:mm' : 'dddd, DD.MM. HH:mm') + ' - ' + picker.endDate.format(isOneDay ? 'HH:mm' : 'dddd, DD.MM.YYYY HH:mm'));
-            // Hotfix. for some reasons the input gets display-noned.
-            input.css('display', 'block');
-        });
-
-        input.on('cancel.daterangepicker', function (ev, picker) {
-            // Hotfix. for some reasons the input gets display-noned.
-            input.css('display', 'block');
-            $(this).val('');
-        });
-
-        input.on('hide.daterangepicker', function (ev, picker) {
-            // Hotfix. for some reasons the input gets display-noned.
-            input.css('display', 'block');
         });
     }
 
@@ -114,7 +101,7 @@ if (null !== $passEdition) {
             'class': 'btn btn--new add_period tooltip',
             click: function (e) {
                 e.preventDefault();
-                widgetTable.find('tr:last-of-type a[data-operations="copy"]')[0].click();
+                widgetTable.find('tr:last-of-type a[data-operations="new"]')[0].click();
                 widgetTable.find('tr:last-of-type a[data-operations="delete"]').css('visibility', 'visible');
                 widgetTable.find('tr:last-child input').each(function () {
                     $(this).val('');
