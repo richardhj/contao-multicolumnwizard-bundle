@@ -36,9 +36,10 @@ array_insert(
             ],
         ],
         'ferienpass_data_processings'     => [
-            'tables' => [
+            'tables'  => [
                 'tl_ferienpass_dataprocessing',
             ],
+            'execute' => [\Richardhj\ContaoFerienpassBundle\Backend\ExecuteDataProcessing::class, 'execute']
         ],
         'ferienpass_codes'                => [
             'tables'   => [

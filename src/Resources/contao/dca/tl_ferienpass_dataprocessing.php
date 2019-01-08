@@ -79,6 +79,11 @@ $GLOBALS['TL_DCA']['tl_ferienpass_dataprocessing'] = [
                 'href'  => 'act=show',
                 'icon'  => 'show.gif',
             ],
+            'run'   => [
+                'label' => &$GLOBALS['TL_LANG']['tl_ferienpass_dataprocessing']['run'],
+                'href'  => 'key=execute',
+                'icon'  => 'bundles/richardhjcontaoferienpass/img/play-button.svg',
+            ],
         ],
     ],
 
