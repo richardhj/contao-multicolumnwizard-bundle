@@ -159,7 +159,6 @@ class DataProcessing extends Model
             switch ($this->format) {
                 case 'xml':
                     $this->formatHandler = new Xml(
-                        $this->metaModelFactory,
                         $this->renderSettingFactory,
                         $this->filesystemUtil,
                         $this->connection,

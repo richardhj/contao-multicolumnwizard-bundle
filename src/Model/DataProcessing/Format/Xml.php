@@ -46,13 +46,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
 {
 
     /**
-     * The MetaModels factory.
-     *
-     * @var IFactory
-     */
-    private $factory;
-
-    /**
      * The MetaModels render setting factory.
      *
      * @var IRenderSettingFactory
@@ -97,7 +90,6 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Xml constructor.
      *
-     * @param IFactory                 $factory              The MetaModels factory.
      * @param IRenderSettingFactory    $renderSettingFactory The MetaModels render setting factory.
      * @param Filesystem               $filesystem           The filesystem component.
      * @param Connection               $connection           The database connection.
@@ -105,14 +97,12 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * @param string                   $kernelProjectDir     The kernel project dir.
      */
     public function __construct(
-        IFactory $factory,
         IRenderSettingFactory $renderSettingFactory,
         Filesystem $filesystem,
         Connection $connection,
         EventDispatcherInterface $dispatcher,
         string $kernelProjectDir
     ) {
-        $this->factory              = $factory;
         $this->renderSettingFactory = $renderSettingFactory;
         $this->filesystem           = $filesystem;
         $this->connection           = $connection;
@@ -171,7 +161,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     }
 
     /**
-     * @param array  $files The files.
+     * @param array  $files            The files.
      * @param string $originFileSystem The origin file system.
      */
     public function syncFilesFromRemoteSystem(array $files, string $originFileSystem = 'local'): void
@@ -228,7 +218,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * Get the dom node for a particular item
      *
      * @param IItem       $item The item.
-     * @param DOMDocument $dom The DOM document.
+     * @param DOMDocument $dom  The DOM document.
      *
      * @return DOMElement|null
      *
@@ -324,7 +314,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Try to import a parsed attribute to a dom node if it is a valid xml string or set the dom node value otherwise
      *
-     * @param string     $parsed The parsed value.
+     * @param string     $parsed       The parsed value.
      * @param DOMElement $domAttribute The DOM attribute.
      */
     protected function addParsedToDomAttribute(string $parsed, DOMElement $domAttribute)
@@ -341,7 +331,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * Take an XML string and import the nodes as children to a given node
      *
      * @param string  $attributeParsed The parsed attribute.
-     * @param DOMNode $attributeNode The DOM node.
+     * @param DOMNode $attributeNode   The DOM node.
      *
      * @throws InvalidXmlException
      */
@@ -446,8 +436,8 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
      * Check whether an attribute dom node differs from the attribute's database value, track change and save item
      *
      * @param DOMElement $domAttribute The DOM attribute.
-     * @param IAttribute $attribute The attribute.
-     * @param IItem      $item The item.
+     * @param IAttribute $attribute    The attribute.
+     * @param IItem      $item         The item.
      */
     protected function trackAttributeChange(DOMElement $domAttribute, IAttribute $attribute, IItem $item)
     {
@@ -519,9 +509,9 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
     /**
      * Try to convert the DOMElement's content to a widget's raw data by the widget type
      *
-     * @param DOMElement $element The DOM element.
+     * @param DOMElement $element   The DOM element.
      * @param IAttribute $attribute The attribute.
-     * @param IItem      $item The item.
+     * @param IItem      $item      The item.
      *
      * @return mixed The attribute's data in the same format as the attribute's "raw" data
      *
