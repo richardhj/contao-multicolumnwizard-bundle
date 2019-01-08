@@ -265,7 +265,7 @@ class Xml implements FormatInterface, Format\TwoWaySyncInterface
         $root = $dom->createElement('Item');
         $root->setAttribute('item_id', $item->get('id'));
 
-        if ($items->getCount() > 1) {
+        if (null !== $items && $items->getCount() > 1) {
             $root->setAttribute(
                 'variant_ids',
                 implode(

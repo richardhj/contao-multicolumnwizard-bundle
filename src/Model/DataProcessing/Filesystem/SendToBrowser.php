@@ -30,6 +30,7 @@ class SendToBrowser implements FilesystemInterface
 
     /**
      * The kernel project directory.
+     *
      * @var string
      */
     private $kernelProjectDir;
@@ -58,31 +59,35 @@ class SendToBrowser implements FilesystemInterface
 
         if (\count($files) > 1) {
             // Generate a zip file
-            $zipWriter = new ZipWriter($model->getTmpPath().'/export.zip');
+            $zipWriter = new ZipWriter($model->getTmpPath() . '/export.zip');
 
             foreach ($files as $path) {
-                $normalizedPath = str_replace($model->getTmpPath().'/', '', $path);
-                $zipWriter->addFile($normalizedPath);
+                $normalizedPath = str_replace($model->getTmpPath() . '/', '', $path);
+                $zipWriter->addFile($path, $normalizedPath);
             }
 
             $zipWriter->close();
 
-            $response = new BinaryFileResponse(
-                file_get_contents($this->kernelProjectDir.'/'.$model->getTmpPath().'/export.zip')
-            );
+            $response = new BinaryFileResponse($this->kernelProjectDir . '/' . $model->getTmpPath() . '/export.zip');
 
             $response->headers->set(
                 'Content-Disposition',
                 $response->headers->makeDisposition(
                     ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                    $model->export_file_name.'.zip'
+                    $model->export_file_name . '.zip'
                 )
             );
         } elseif ($path = array_shift($files)) {
-            $response = new BinaryFileResponse($this->kernelProjectDir.'/'.$path);
-        }
+            $response = new BinaryFileResponse($this->kernelProjectDir . '/' . $path);
 
-        //clearstatcache(false, $file) see http://symfony.com/doc/2.3/components/http_foundation/introduction.html#serving-files
+            $response->headers->set(
+                'Content-Disposition',
+                $response->headers->makeDisposition(
+                    ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                    basename($path)
+                )
+            );
+        }
 
         if (null !== $response) {
             $response->send();
