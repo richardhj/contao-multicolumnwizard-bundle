@@ -21,6 +21,7 @@ use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBacke
 use ContaoCommunityAlliance\DcGeneral\EnvironmentInterface;
 use ContaoCommunityAlliance\Translator\TranslatorInterface as CcaTranslator;
 use MetaModels\IItem;
+use Richardhj\ContaoFerienpassBundle\ApplicationSystem\FirstCome;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEditionTask;
 use Richardhj\ContaoFerienpassBundle\Model\Attendance;
@@ -142,8 +143,12 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
                 ? $parentModel->getProperty('applicationlist_max') : '-';
         }
 
+        $parentModel = $this->loadParentModel($environment);
+        $offer       = $this->offerModel->findById($parentModel->getId());
+
         $template->set('status', $status);
         $template->set('statusCount', $statusCount);
+        $template->set('isFirstCome', $this->currentApplicationSystem($offer) instanceof FirstCome);
     }
 
     /**
@@ -179,5 +184,13 @@ class LotAttendanceAllocationViewHandler extends ParentedListViewShowAllHandler
         }
 
         return false;
+    }
+
+    private function currentApplicationSystem(IItem $offer)
+    {
+        $reference   = $offer->get('pass_edition');
+        $passEdition = $this->doctrine->getRepository(PassEdition::class)->find($reference['id']);
+
+        return $passEdition->getCurrentApplicationSystem();
     }
 }

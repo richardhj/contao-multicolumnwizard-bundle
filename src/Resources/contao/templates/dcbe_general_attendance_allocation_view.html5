@@ -22,6 +22,13 @@
     <?php if ($this->collection->length() < 1): ?>
         <p class="tl_empty"><?= $GLOBALS['TL_LANG']['MSC']['noResult'] ?></p>
     <?php else: ?>
+
+    <?php if ($this->isFirstCome): ?>
+        <p class="tl_error" style="margin-bottom:20px">Sie befinden sich im Windhund-Verfahren. Bei jeder Änderung
+            werden u.U. sofort Benachrichtigungen an die Eltern geschickt! Alternativ müssen Sie das Losverfahren
+            aktivieren.</p>
+    <?php endif ?>
+
         <div id="table_<?= $this->tableName ?>" class="status-assignment">
 
             <?php /** @var Richardhj\ContaoFerienpassBundle\Model\AttendanceStatus $status */
