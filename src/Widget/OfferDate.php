@@ -52,10 +52,10 @@ class OfferDate extends \MultiColumnWizard
             ],
         ];
 
-        if ('BE' === TL_MODE) {
-            $columnFields['start']['eval']['datepicker'] = true;
-            $columnFields['end']['eval']['datepicker']   = true;
-        }
+//        if ('BE' === TL_MODE) {
+//            $columnFields['start']['eval']['datepicker'] = true;
+//            $columnFields['end']['eval']['datepicker']   = true;
+//        }
 
         $this->columnFields   = $columnFields;
         $this->disableSorting = true;
