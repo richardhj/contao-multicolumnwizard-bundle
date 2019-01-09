@@ -241,6 +241,14 @@ services:
         tags:
             - { name: kernel.event_listener, event: dc-general.view.contao2backend.get-edit-mode-buttons, method: handleEvent }
 
+    richardhj.ferienpass.listener.host_editing.confirmation_message:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\HostEditing\ConfirmationMessageListener
+        arguments: ['@cca.dc-general.scope-matcher', '@session']
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.model.post-persist', method: addFlashPostPersist }
+        calls:
+            - [setScopeDeterminator, ['@cca.dc-general.scope-matcher']]
+
     richardhj.ferienpass.listener.data_processing.xml.convert_xml_elements:
         class: Richardhj\ContaoFerienpassBundle\Model\DataProcessing\Format\Xml\ConvertDomElementToNativeWidgetListener
         tags:
@@ -254,7 +262,6 @@ services:
         arguments: ['@doctrine', '@templating', '@translator', '@router']
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages', priority: -10 }
-
 
     richardhj.ferienpass.listener.privacy_consent.host_add_alert:
         class: Richardhj\ContaoFerienpassBundle\EventListener\PrivacyConsent\HostAddAlert
