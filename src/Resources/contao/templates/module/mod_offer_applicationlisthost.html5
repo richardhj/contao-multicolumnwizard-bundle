@@ -5,7 +5,9 @@
 <?= $this->metamodel ?>
 
 <?php if (strlen($this->info)): ?>
+<p class="alert alert--information">
     <?php echo $this->info; ?>
+</p>
 <?php endif; ?>
 
 <?php echo $this->download; ?>
