@@ -127,7 +127,7 @@ $GLOBALS['TL_DCA']['tl_ferienpass_edition_task'] = [
                 'application_system'
             ],
             'pay_days'           => [
-                'drop_unacknowledged_attendances'
+                //'drop_unacknowledged_attendances'
             ],
         ],
         'application_system' => [
