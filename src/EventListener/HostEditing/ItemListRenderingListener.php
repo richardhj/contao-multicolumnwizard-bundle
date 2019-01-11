@@ -176,13 +176,12 @@ class ItemListRenderingListener
             }
         }
 
-        // Disable copy action if no host editing stage.
-        if (null === $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit()) {
-            $result['actions']['copy']['class'] .= ' btn--disabled';
-        }
+        $currentPassEdition = $this->doctrine->getManager()->getRepository(PassEdition::class)->findOneToEdit();
 
-        // Remove copy action for variants.
-        if ($item->isVariant()) {
+        // Remove copy action if no host editing stage, for variants and for currently editable offers.
+        if (null === $currentPassEdition
+            || $item->isVariant()
+            || $item->get('pass_edition')['id'] === $currentPassEdition->getId()) {
             unset($result['actions']['copy']);
         }
 
