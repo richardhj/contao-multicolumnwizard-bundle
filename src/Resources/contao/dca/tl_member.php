@@ -31,6 +31,7 @@ $GLOBALS['TL_DCA']['tl_member']['fields']['ferienpass_host'] = [
     'exclude'       => true,
     'inputType'     => 'select',
     'foreignKey'    => 'mm_host.name',
+    'filter'        => true,
     'eval'          => [
         'includeBlankOption' => true,
         'chosen'             => true,

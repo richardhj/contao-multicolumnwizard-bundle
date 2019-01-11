@@ -5,3 +5,10 @@ services:
             - '@cca.dc-general.scope-matcher'
         tags:
             - { name: kernel.event_listener, event: 'dc-general.model.pre-edit-model', method: handle }
+
+    richardhj.ferienpass.listener.dc_general.table.mm_host.switch_to_members_operation:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmHost\SwitchToMembersOperationButtonListener
+        tags:
+            - { name: kernel.event_listener, event: 'metamodels.dc-general.events.metamodel.build.metamodel.operations', method: addOperation }
+        arguments:
+          ['@session', '@router']
