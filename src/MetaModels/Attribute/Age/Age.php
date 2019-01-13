@@ -244,12 +244,6 @@ final class Age extends BaseComplex
         $fieldDefinition['inputType']            = 'fp_age';
         $fieldDefinition['eval']['widget_lines'] = [
             [
-                'input_format'  => 'keine Altersbeschränkung',
-                'render_format' => 'keine Altersbeschränkung',
-                'save_format'   => '0',
-                'default'       => true,
-            ],
-            [
                 'input_format'  => 'Kinder ab</label> %s Jahre',
                 'render_format' => 'Kinder ab %s Jahre',
                 'save_format'   => '%s,',
@@ -263,6 +257,12 @@ final class Age extends BaseComplex
                 'input_format'  => 'Kinder von</label> %s bis %s Jahre',
                 'render_format' => 'Kinder von %s bis %s Jahre',
                 'save_format'   => '%s,%s',
+            ],
+            [
+                'input_format'  => 'keine Altersbeschränkung',
+                'render_format' => 'keine Altersbeschränkung',
+                'save_format'   => '0',
+                'default'       => true,
             ],
         ];
 
