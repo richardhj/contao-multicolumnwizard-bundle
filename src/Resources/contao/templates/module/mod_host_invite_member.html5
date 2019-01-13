@@ -17,8 +17,8 @@
     </div>
 
     <div class="host-invite-member__form">
-        <h3>Neuen Mitarbeiter einladen</h3>
-        <p>Sie können einen</p>
+        <h3 class="m-t-1">Neuen Mitarbeiter einladen</h3>
+        <p>Sie können eine neue Person zur Mitarbeit am Ferienpass einladen. Hierfür benötigen wir die E-Mail-Adresse.</p>
         <?= $this->form ?>
     </div>
 </div>

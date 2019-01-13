@@ -190,7 +190,7 @@ class HostInviteMember extends AbstractFrontendModuleController
         $this->addFlash(
             'confirmation',
             sprintf(
-                'Eine Einladung zur Mitarbeit wurde an %s gesendet',
+                'Eine Einladung zur Mitarbeit wurde an <em>%s</em> gesendet.',
                 $email
             )
         );
