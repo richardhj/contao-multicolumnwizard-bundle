@@ -244,8 +244,8 @@ final class Age extends BaseComplex
         $fieldDefinition['inputType']            = 'fp_age';
         $fieldDefinition['eval']['widget_lines'] = [
             [
-                'input_format'  => 'alle Ferienpass-Kinder',
-                'render_format' => 'alle Ferienpass-Kinder',
+                'input_format'  => 'keine Altersbeschränkung',
+                'render_format' => 'keine Altersbeschränkung',
                 'save_format'   => '0',
                 'default'       => true,
             ],
