@@ -255,9 +255,15 @@ services:
         tags:
             - { name: 'contao.hook', hook: 'getSystemMessages', priority: -10 }
 
-
     richardhj.ferienpass.listener.privacy_consent.host_add_alert:
         class: Richardhj\ContaoFerienpassBundle\EventListener\PrivacyConsent\HostAddAlert
         arguments: ['@session', '@contao.framework', '@database_connection']
         tags:
             - { name: contao.hook, hook: generatePage }
+
+    richardhj.ferienpass.listener.host_invite_member:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\HostInvitedMemberListener
+        tags:
+            - { name: 'contao.hook', hook: 'createNewUser' }
+        arguments:
+          ['@database_connection']

@@ -1,0 +1,26 @@
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<div class="host-invite-member">
+    <div class="host-invite-member__overview">
+        <?php if ($this->noCoHosts): ?>
+            <p>Sie sind aktuell die einzige Person mit Zugriff auf Ihre Ferienpass-Angebote.</p>
+        <?php else: ?>
+            <p>Aktuell haben folgende Personen (neben Ihnen) Zugriff auf Ihre Ferienpass-Angebote.</p>
+            <ul>
+                <?php foreach ($this->coHosts as $coHost): ?>
+                    <li><?= $coHost['firstname'] ?> <?= $coHost['lastname'] ?> (<span class="email"><?= $coHost['email'] ?></span>)</li>
+                <?php endforeach ?>
+            </ul>
+        <?php endif ?>
+    </div>
+
+    <div class="host-invite-member__form">
+        <h3>Neuen Mitarbeiter einladen</h3>
+        <p>Sie können einen</p>
+        <?= $this->form ?>
+    </div>
+</div>
+
+<?php $this->endblock(); ?>

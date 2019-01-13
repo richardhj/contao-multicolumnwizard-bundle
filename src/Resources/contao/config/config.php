@@ -235,6 +235,36 @@ $GLOBALS['NOTIFICATION_CENTER']['NOTIFICATION_TYPE'] = array_merge(
                     'member_country',
                 ],
             ],
+            'host_invite_member' => [
+                'recipients'            => [
+                    'invitee_email',
+                ],
+                'email_text'            => [
+                    'link',
+                    'host_*',
+                    'member_*',
+                ],
+                'email_html'            => [
+                    'link',
+                    'host_*',
+                    'member_*',
+                ],
+                'email_sender_name'     => [
+                    'admin_email',
+                ],
+                'email_sender_address'  => [
+                    'admin_email',
+                ],
+                'email_recipient_cc'    => [
+                    'admin_email',
+                ],
+                'email_recipient_bcc'   => [
+                    'admin_email',
+                ],
+                'email_replyTo'         => [
+                    'admin_email',
+                ],
+            ],
         ],
     ]
 );

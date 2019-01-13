@@ -72,3 +72,13 @@ services:
             - { name: contao.frontend_module, type: host_privacy_consent, category: ferienpass }
         arguments:
           ['@database_connection']
+
+    richardhj.ferienpass.module.invite_host:
+        class: Richardhj\ContaoFerienpassBundle\Module\HostInviteMember
+        public: true
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: host_invite_member, category: ferienpass }
+        arguments:
+          ['@metamodels.factory', '@database_connection']

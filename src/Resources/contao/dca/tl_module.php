@@ -33,6 +33,8 @@ $GLOBALS['TL_DCA']['tl_module']['palettes']['host_logo']                  =
     '{title_legend},name,headline,type;{config_legend},metamodel,hostLogoDir;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID,space';
 $GLOBALS['TL_DCA']['tl_module']['palettes']['host_privacy_consent']       =
     '{title_legend},name,headline,type;{text_legend},privacyStatementMarkdown;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID';
+$GLOBALS['TL_DCA']['tl_module']['palettes']['host_invite_member']         =
+    '{title_legend},name,headline,type;{config_legend},jumpTo,nc_notification;{template_legend:hide},customTpl;{protected_legend:hide},protected;{expert_legend:hide},guests,cssID';
 
 /**
  * Fields
@@ -90,11 +92,11 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['hostLogoDir'] = [
 ];
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['privacyStatementMarkdown'] = [
-    'label'         => &$GLOBALS['TL_LANG']['tl_module']['privacyStatementMarkdown'],
-    'exclude'       => true,
-    'search'        => true,
-    'inputType'     => 'textarea',
-    'eval'          => [
+    'label'       => &$GLOBALS['TL_LANG']['tl_module']['privacyStatementMarkdown'],
+    'exclude'     => true,
+    'search'      => true,
+    'inputType'   => 'textarea',
+    'eval'        => [
         'mandatory'      => true,
         'preserveTags'   => true,
         'decodeEntities' => true,
@@ -103,6 +105,6 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['privacyStatementMarkdown'] = [
         'helpwizard'     => true,
         'tl_class'       => 'clr'
     ],
-    'explanation'   => 'insertTags',
-    'sql'           => 'text NULL'
+    'explanation' => 'insertTags',
+    'sql'         => 'text NULL'
 ];
