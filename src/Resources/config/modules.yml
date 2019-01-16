@@ -82,3 +82,13 @@ services:
             - { name: contao.frontend_module, type: host_invite_member, category: ferienpass }
         arguments:
           ['@metamodels.factory', '@database_connection']
+
+    richardhj.ferienpass.module.host_follow_invitation:
+        class: Richardhj\ContaoFerienpassBundle\Module\HostFollowInvitation
+        public: true
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: contao.frontend_module, type: host_follow_invitation, category: ferienpass }
+        arguments:
+          ['@metamodels.factory', '@database_connection']

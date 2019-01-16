@@ -18,11 +18,11 @@ use Contao\MemberModel;
 use Doctrine\DBAL\Connection;
 
 /**
- * Class HostInvitedMemberListener
+ * Class HostInvitedRegistrationListener
  *
  * @package Richardhj\ContaoFerienpassBundle\HookListener
  */
-class HostInvitedMemberListener
+class HostInvitedRegistrationListener
 {
 
     /**
@@ -60,10 +60,10 @@ class HostInvitedMemberListener
             ->select('host')
             ->from('tl_ferienpass_host_invite_token')
             ->where('token=:token')
-            ->andWhere('invited_email=:email')
+            //->andWhere('invited_email=:email')
             ->andWhere('expires>:time')
             ->setParameter('token', $inviteToken)
-            ->setParameter('email', sha1($memberData['email']))
+            //->setParameter('email', sha1($memberData['email']))
             ->setParameter('time', time())
             ->execute();
 
@@ -84,8 +84,6 @@ class HostInvitedMemberListener
         $this->connection->createQueryBuilder()
             ->delete('tl_ferienpass_host_invite_token')
             ->where('token=:token')
-            ->andWhere('invited_email=:email')
-            ->setParameter('token', $inviteToken)
-            ->setParameter('email', sha1($memberData['email']));
+            ->setParameter('token', $inviteToken);
     }
 }

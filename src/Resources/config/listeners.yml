@@ -261,8 +261,8 @@ services:
         tags:
             - { name: contao.hook, hook: generatePage }
 
-    richardhj.ferienpass.listener.host_invite_member:
-        class: Richardhj\ContaoFerienpassBundle\HookListener\HostInvitedMemberListener
+    richardhj.ferienpass.listener.host_invited_registration:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\HostInvitedRegistrationListener
         tags:
             - { name: 'contao.hook', hook: 'createNewUser' }
         arguments:

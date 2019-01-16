@@ -1,0 +1,9 @@
+<?php $this->extend('block_searchable'); ?>
+
+<?php $this->block('content'); ?>
+
+<div class="host-follow-invitation">
+    <p><?= $this->intro ?></p>
+</div>
+
+<?php $this->endblock(); ?>
