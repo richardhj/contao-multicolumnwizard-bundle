@@ -90,30 +90,32 @@ class HostFollowInvitation extends AbstractFrontendModuleController
             throw new AccessDeniedException('Access to this page is not allowed!');
         }
 
-        $tokenData = $statement->fetch(\PDO::FETCH_OBJ);
+        if (false !== $statement) {
+            $tokenData = $statement->fetch(\PDO::FETCH_OBJ);
 
-        $invitingMember = MemberModel::findByPk($tokenData->inviting_member);
-        if (null === $invitingMember) {
-            throw new \RuntimeException('Member not found: ID ' . $tokenData->inviting_member);
+            $invitingMember = MemberModel::findByPk($tokenData->inviting_member);
+            if (null === $invitingMember) {
+                throw new \RuntimeException('Member not found: ID ' . $tokenData->inviting_member);
+            }
+
+            $metaModel = $this->metaModelsFactory->getMetaModel('mm_host');
+            if (null === $metaModel) {
+                throw new \RuntimeException('MetaModel mm_host could not be initialized');
+            }
+
+            $host = $metaModel->findById($tokenData->host);
+            if (null === $host) {
+                throw new \RuntimeException('Host not found: ID' . $tokenData->host);
+            }
+
+            $hostNameParsed = $host->parseAttribute('name');
+
+            $template->intro = sprintf(
+                'Sie wurden von <span class="person-name">%s</span> zur Mitarbeit an den Ferienpass-Angeboten von <span class="host-name">%s</span> eingeladen.',
+                $invitingMember->firstname . ' ' . $invitingMember->lastname,
+                $hostNameParsed['text']
+            );
         }
-
-        $metaModel = $this->metaModelsFactory->getMetaModel('mm_host');
-        if (null === $metaModel) {
-            throw new \RuntimeException('MetaModel mm_host could not be initialized');
-        }
-
-        $host = $metaModel->findById($tokenData->host);
-        if (null === $host) {
-            throw new \RuntimeException('Host not found: ID' . $tokenData->host);
-        }
-
-        $hostNameParsed = $host->parseAttribute('name');
-
-        $template->intro = sprintf(
-            'Sie wurden von <span class="person-name">%s</span> zur Mitarbeit an den Ferienpass-Angeboten von <span class="host-name">%s</span> eingeladen.',
-            $invitingMember->firstname . ' ' . $invitingMember->lastname,
-            $hostNameParsed['text']
-        );
 
         return Response::create($template->parse());
     }
