@@ -70,10 +70,14 @@ class ConfirmationMessageListener
             return;
         }
 
-        if (!$item->get('id')) {
+        if ($item->isVariant()) {
+            if (!$item->get('id')) {
+                $message = 'Der zusätzliche Termin wurde erfolgreich angelegt.';
+            } else {
+                $message = 'Die Änderung des Termin wurde erfolgreich gespeichert.';
+            }
+        } else if (!$item->get('id')) {
             $message = 'Das Angebot wurde erfolgreich neu erstellt.';
-        } else if ($item->isVariant()) {
-            $message = 'Der Termin wurde erfolgreich gespeichert.';
         } else {
             $message = 'Das Angebot wurde erfolgreich gespeichert.';
         }
