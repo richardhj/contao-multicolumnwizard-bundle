@@ -86,36 +86,38 @@ class HostFollowInvitation extends AbstractFrontendModuleController
             ->setParameter('time', time())
             ->execute();
 
-        if (false === $statement && false === (strncmp(Input::get('token'), 'reg-', 4) === 0)) {
-            throw new AccessDeniedException('Access to this page is not allowed!');
+        if (false === $statement) {
+            if (false === (strncmp(Input::get('token'), 'reg-', 4) === 0)) {
+                throw new AccessDeniedException('Access to this page is not allowed!');
+            }
+
+            return Response::create('');
         }
 
-        if (false !== $statement) {
-            $tokenData = $statement->fetch(\PDO::FETCH_OBJ);
+        $tokenData = $statement->fetch(\PDO::FETCH_OBJ);
 
-            $invitingMember = MemberModel::findByPk($tokenData->inviting_member);
-            if (null === $invitingMember) {
-                throw new \RuntimeException('Member not found: ID ' . $tokenData->inviting_member);
-            }
-
-            $metaModel = $this->metaModelsFactory->getMetaModel('mm_host');
-            if (null === $metaModel) {
-                throw new \RuntimeException('MetaModel mm_host could not be initialized');
-            }
-
-            $host = $metaModel->findById($tokenData->host);
-            if (null === $host) {
-                throw new \RuntimeException('Host not found: ID' . $tokenData->host);
-            }
-
-            $hostNameParsed = $host->parseAttribute('name');
-
-            $template->intro = sprintf(
-                'Sie wurden von <span class="person-name">%s</span> zur Mitarbeit an den Ferienpass-Angeboten von <span class="host-name">%s</span> eingeladen.',
-                $invitingMember->firstname . ' ' . $invitingMember->lastname,
-                $hostNameParsed['text']
-            );
+        $invitingMember = MemberModel::findByPk($tokenData->inviting_member);
+        if (null === $invitingMember) {
+            throw new \RuntimeException('Member not found: ID ' . $tokenData->inviting_member);
         }
+
+        $metaModel = $this->metaModelsFactory->getMetaModel('mm_host');
+        if (null === $metaModel) {
+            throw new \RuntimeException('MetaModel mm_host could not be initialized');
+        }
+
+        $host = $metaModel->findById($tokenData->host);
+        if (null === $host) {
+            throw new \RuntimeException('Host not found: ID' . $tokenData->host);
+        }
+
+        $hostNameParsed = $host->parseAttribute('name');
+
+        $template->intro = sprintf(
+            'Sie wurden von <span class="person-name">%s</span> zur Mitarbeit an den Ferienpass-Angeboten von <span class="host-name">%s</span> eingeladen.',
+            $invitingMember->firstname . ' ' . $invitingMember->lastname,
+            $hostNameParsed['text']
+        );
 
         return Response::create($template->parse());
     }
