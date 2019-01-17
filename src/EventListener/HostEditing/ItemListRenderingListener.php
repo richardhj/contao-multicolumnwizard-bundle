@@ -181,7 +181,7 @@ class ItemListRenderingListener
         // Remove copy action if no host editing stage, for variants and for currently editable offers.
         if (null === $currentPassEdition
             || $item->isVariant()
-            || $item->get('pass_edition')['id'] === $currentPassEdition->getId()) {
+            || (int) $item->get('pass_edition')['id'] === $currentPassEdition->getId()) {
             unset($result['actions']['copy']);
         }
 
