@@ -54,11 +54,19 @@ class ConfirmationMessageListener
      */
     public function addFlashPostPersist(PostPersistModelEvent $event): void
     {
+
+
+        //
+        // This event listener is not enabled, as it does not work with the ajax request.
+        // AjaxReloadElement does not trigger the FilterResponseEvent that is necessary to add the (foshttpcache) flashes.
+        //
+
+
         $environment = $event->getEnvironment();
         /** @var Model $originalModel */
         $originalModel = $event->getOriginalModel();
 
-        if ($originalModel instanceof Model
+        if (!($originalModel instanceof Model)
             || false === $this->scopeDeterminator->currentScopeIsFrontend()
             || 'mm_ferienpass' !== $environment->getDataDefinition()->getName()) {
             return;
@@ -76,7 +84,7 @@ class ConfirmationMessageListener
             } else {
                 $message = 'Die Änderung des Termin wurde erfolgreich gespeichert.';
             }
-        } else if (!$item->get('id')) {
+        } elseif (!$item->get('id')) {
             $message = 'Das Angebot wurde erfolgreich neu erstellt.';
         } else {
             $message = 'Das Angebot wurde erfolgreich gespeichert.';

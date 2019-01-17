@@ -1,22 +1,56 @@
 <script>
-    $(document).on('ajax-reload:submitted', function (event) {
-        $(event.target)
-            .after('<div class="loading__overlay"><div class="loading__loader"><div class="loading__checkmark loading__checkmark--draw"></div></div></div>');
-    });
+    (function ($) {
+        $(document).on('ajax-reload:submitted', function (event) {
+            $(event.target)
+                .after('<div class="loading__overlay"><div class="loading__loader"><div class="loading__checkmark loading__checkmark--draw"></div></div></div>');
+        });
 
-    $(document).on('ajax-reload:completed', function (event) {
-        if ($(event.target).find('.widget.error').length) {
-            $('.loading__loader').addClass('loading__loader--error');
-        } else {
-            $('.loading__loader').addClass('loading__loader--complete');
-        }
+        $(document).on('ajax-reload:completed', function (event) {
+            if ($(event.target).find('.widget.error').length) {
+                $('.loading__loader').addClass('loading__loader--error');
+            } else {
+                $('.loading__loader').addClass('loading__loader--complete');
+            }
 
-        $('.loading__checkmark').toggle();
+            $('.loading__checkmark').toggle();
 
-        setTimeout(function () {
-            $('.loading__overlay').fadeOut(200, function () {
-                $(this).remove();
+            setTimeout(function () {
+                $('.loading__overlay').fadeOut(200, function () {
+                    $(this).remove();
+                });
+            }, 800);
+        });
+
+        // The loading circle should be centered within the visible part of the loading overlay.
+        $(document).on('scroll resize ajax-reload:submitted', centerLoadingCircle);
+
+        // https://stackoverflow.com/a/39155935
+        function centerLoadingCircle() {
+            $('.loading__loader').each(function () {
+                var $loader = $(this),
+                    windowHeight = $(window).height(),
+                    windowScrollTop = $(window).scrollTop(),
+                    parentTopEdge = $loader.parent().offset().top,
+                    parentHeight = $loader.parent().height(),
+                    parentVisibleArea = (windowHeight + windowScrollTop - parentTopEdge),
+                    parentBottomEdge = parentHeight - parentVisibleArea,
+                    finalTopPosition = 0;
+                if (parentTopEdge < windowScrollTop) {
+                    if (0 < parentBottomEdge) {
+                        finalTopPosition = (windowHeight / 2) + windowScrollTop - parentTopEdge;
+                    } else {
+                        finalTopPosition = (windowScrollTop - parentTopEdge + parentHeight) / 2;
+                    }
+                } else {
+                    if (0 < parentBottomEdge) {
+                        finalTopPosition = parentVisibleArea / 2;
+                    } else {
+                        finalTopPosition = parentHeight / 2;
+                    }
+                }
+
+                $loader.css('top', finalTopPosition);
             });
-        }, 800);
-    });
+        }
+    })(jQuery);
 </script>
