@@ -1,5 +1,5 @@
 
-<script src="files/ferienpass-luebeck/dist/js/tablesaw.stackonly.jquery.js"></script>
+<script src="files/ferienpass-badoldesloe/dist/js/tablesaw.stackonly.jquery.js"></script>
 <script>
     (function($) {
         $('.mod_user_attendances table').addClass('tablesaw').addClass('tablesaw-stack').attr('data-tablesaw-mode', 'stack');
