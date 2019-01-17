@@ -15,6 +15,7 @@ namespace Richardhj\ContaoFerienpassBundle\Module;
 
 use Contao\CoreBundle\Controller\FrontendModule\AbstractFrontendModuleController;
 use Contao\CoreBundle\Exception\AccessDeniedException;
+use Contao\CoreBundle\Exception\PageNotFoundException;
 use Contao\Input;
 use Contao\MemberModel;
 use Contao\ModuleModel;
@@ -73,7 +74,7 @@ class HostFollowInvitation extends AbstractFrontendModuleController
     {
         $inviteToken = Input::get('invite');
         if (null === $inviteToken) {
-            throw new AccessDeniedException('Access to this page is not allowed!');
+            throw new PageNotFoundException('Missing invite token!');
         }
 
         // Fetch host from invite token.
@@ -89,7 +90,7 @@ class HostFollowInvitation extends AbstractFrontendModuleController
         if (false === $statement) {
             if (false === (strncmp(Input::get('token'), 'RG', 2) === 0)
                 && false === (strncmp(Input::get('token'), 'reg-', 4) === 0)) {
-                throw new AccessDeniedException('Access to this page is not allowed!');
+                throw new PageNotFoundException('Request not allowed!');
             }
 
             return Response::create('');
