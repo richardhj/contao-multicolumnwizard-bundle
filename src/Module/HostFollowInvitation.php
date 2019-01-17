@@ -87,7 +87,8 @@ class HostFollowInvitation extends AbstractFrontendModuleController
             ->execute();
 
         if (false === $statement) {
-            if (false === (strncmp(Input::get('token'), 'reg-', 4) === 0)) {
+            if (false === (strncmp(Input::get('token'), 'RG', 2) === 0)
+                && false === (strncmp(Input::get('token'), 'reg-', 4) === 0)) {
                 throw new AccessDeniedException('Access to this page is not allowed!');
             }
 
