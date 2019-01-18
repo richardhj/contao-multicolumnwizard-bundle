@@ -267,3 +267,8 @@ services:
             - { name: 'contao.hook', hook: 'createNewUser' }
         arguments:
           ['@database_connection']
+
+    richardhj.ferienpass.listener.backend_login_template:
+        class: Richardhj\ContaoFerienpassBundle\HookListener\BackendLoginTemplateListener
+        tags:
+            - { name: 'contao.hook', hook: 'parseTemplate' }
