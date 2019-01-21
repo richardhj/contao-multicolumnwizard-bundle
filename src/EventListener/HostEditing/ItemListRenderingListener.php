@@ -16,12 +16,16 @@ namespace Richardhj\ContaoFerienpassBundle\EventListener\HostEditing;
 
 use Contao\CoreBundle\Routing\UrlGenerator;
 use Contao\Template;
+use MetaModels\ContaoFrontendEditingBundle\EventListener\RenderItemListListener;
 use MetaModels\Events\ParseItemEvent;
 use MetaModels\Events\RenderItemListEvent;
+use MetaModels\FrontendIntegration\HybridList;
 use MetaModels\IItem;
+use MetaModels\MetaModelsEvents;
 use MetaModels\ViewCombination\ViewCombination;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Translation\Exception\InvalidArgumentException;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -41,13 +45,6 @@ class ItemListRenderingListener
     private $translator;
 
     /**
-     * The current view combination.
-     *
-     * @var ViewCombination
-     */
-    private $viewCombination;
-
-    /**
      * Doctrine.
      *
      * @var ManagerRegistry
@@ -62,23 +59,30 @@ class ItemListRenderingListener
     private $urlGenerator;
 
     /**
+     * The event dispatcher.
+     *
+     * @var EventDispatcherInterface
+     */
+    private $dispatcher;
+
+    /**
      * ItemListRenderingListener constructor.
      *
-     * @param TranslatorInterface $translator      The translator.
-     * @param ViewCombination     $viewCombination The current view combinations.
-     * @param ManagerRegistry     $doctrine        Doctrine.
-     * @param UrlGenerator        $urlGenerator    The url generator.
+     * @param TranslatorInterface      $translator   The translator.
+     * @param ManagerRegistry          $doctrine     Doctrine.
+     * @param UrlGenerator             $urlGenerator The url generator.
+     * @param EventDispatcherInterface $dispatcher   The event dispatcher.
      */
     public function __construct(
         TranslatorInterface $translator,
-        ViewCombination $viewCombination,
         ManagerRegistry $doctrine,
-        UrlGenerator $urlGenerator
+        UrlGenerator $urlGenerator,
+        EventDispatcherInterface $dispatcher
     ) {
-        $this->translator      = $translator;
-        $this->viewCombination = $viewCombination;
-        $this->doctrine        = $doctrine;
-        $this->urlGenerator    = $urlGenerator;
+        $this->translator   = $translator;
+        $this->doctrine     = $doctrine;
+        $this->urlGenerator = $urlGenerator;
+        $this->dispatcher   = $dispatcher;
     }
 
     /**
@@ -90,8 +94,14 @@ class ItemListRenderingListener
      */
     public function handleRenderItemList(RenderItemListEvent $event): void
     {
-        $caller = $event->getCaller();
-        if (null === $caller || 'mm_ferienpass' !== $event->getList()->getMetaModel()->getTableName()) {
+        $caller    = $event->getCaller();
+        $metaModel = $event->getList()->getMetaModel();
+        if (!($caller instanceof HybridList) || 'mm_ferienpass' !== $metaModel->getTableName()) {
+            return;
+        }
+
+        $isEditable = $event->getList()->getView()->get(RenderItemListListener::FRONTEND_EDITING_ENABLED_FLAG);
+        if (true !== $isEditable) {
             return;
         }
 
@@ -110,6 +120,9 @@ class ItemListRenderingListener
             if ($template = $caller instanceof Template ? $caller : $caller->Template) {
                 $template->editEnable = $editable;
             }
+
+            $this->dispatcher->addListener(MetaModelsEvents::PARSE_ITEM, [$this, 'addApplicationListLink']);
+            $this->dispatcher->addListener(MetaModelsEvents::PARSE_ITEM, [$this, 'modifyActionButtons']);
         }
     }
 
@@ -122,14 +135,10 @@ class ItemListRenderingListener
      */
     public function addApplicationListLink(ParseItemEvent $event): void
     {
-        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
         $metaModel = $event->getItem()->getMetaModel();
         $tableName = $metaModel->getTableName();
 
-        if ('mm_ferienpass' !== $tableName
-            || '3' !== $screen['meta']['id']
-            || !$event->getItem()->get('applicationlist_active')
-        ) {
+        if ('mm_ferienpass' !== $tableName || !$event->getItem()->get('applicationlist_active')) {
             return;
         }
 
@@ -157,11 +166,10 @@ class ItemListRenderingListener
      */
     public function modifyActionButtons(ParseItemEvent $event): void
     {
-        $screen    = $this->viewCombination->getScreen('mm_ferienpass');
         $item      = $event->getItem();
         $metaModel = $item->getMetaModel();
 
-        if ('3' !== $screen['meta']['id'] || 'mm_ferienpass' !== $metaModel->getTableName()) {
+        if ('mm_ferienpass' !== $metaModel->getTableName()) {
             return;
         }
 
