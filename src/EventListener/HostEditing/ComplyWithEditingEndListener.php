@@ -136,9 +136,9 @@ class ComplyWithEditingEndListener
             throw new \UnexpectedValueException('pass_edition is not set for offer ID ' . $offer->get('id'));
         }
 
-        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($passEditionId);
-        $hostEditingStage = $passEdition->getCurrentHostEditingStage();
+        /** @var PassEdition $passEdition */
+        $passEdition = $this->doctrine->getRepository(PassEdition::class)->find($passEditionId);
 
-        return null !== $hostEditingStage;
+        return $passEdition->isEditableForHosts();
     }
 }

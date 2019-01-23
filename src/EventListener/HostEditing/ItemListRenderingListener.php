@@ -104,7 +104,7 @@ class ItemListRenderingListener
         }
 
         if ($passEditionId) {
-            $editable = $this->passEditionIsInHostEditingStage($passEditionId);
+            $editable = $this->passEditionIsEditableForHosts($passEditionId);
 
             $event->getTemplate()->editEnable = $editable;
             if ($template = $caller instanceof Template ? $caller : $caller->Template) {
@@ -202,7 +202,7 @@ class ItemListRenderingListener
             throw new \LogicException('Please add "pass_edition" to the active render setting.');
         }
 
-        return $this->passEditionIsInHostEditingStage($passEdition['id']);
+        return $this->passEditionIsEditableForHosts($passEdition['id']);
     }
 
     /**
@@ -212,12 +212,12 @@ class ItemListRenderingListener
      *
      * @return bool
      */
-    private function passEditionIsInHostEditingStage(int $passEditionId): bool
+    private function passEditionIsEditableForHosts(int $passEditionId): bool
     {
-        $passEdition      = $this->doctrine->getRepository(PassEdition::class)->find($passEditionId);
-        $hostEditingStage = $passEdition->getCurrentHostEditingStage();
+        /** @var PassEdition $passEdition */
+        $passEdition = $this->doctrine->getRepository(PassEdition::class)->find($passEditionId);
 
-        return null !== $hostEditingStage;
+        return $passEdition->isEditableForHosts();
     }
 
     /**

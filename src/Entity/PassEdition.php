@@ -312,4 +312,18 @@ class PassEdition
 
         return $tasks->current();
     }
+
+    /**
+     * Check whether the host can edit the offers of this pass edition.
+     *
+     * @return bool
+     */
+    public function isEditableForHosts(): bool
+    {
+        $currentHostEditingStage    = $this->getCurrentHostEditingStage();
+        $hasCurrentHostEditingStage = null !== $currentHostEditingStage;
+        $hasHostEditingStages       = $this->getHostEditingStages()->count() > 0;
+
+        return !$hasHostEditingStages || $hasCurrentHostEditingStage;
+    }
 }
