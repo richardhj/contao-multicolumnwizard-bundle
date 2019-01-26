@@ -22,7 +22,6 @@ use Richardhj\ContaoFerienpassBundle\ApplicationSystem\ApplicationSystemInterfac
 use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousApplicationSystemException;
 use Richardhj\ContaoFerienpassBundle\Exception\AmbiguousHolidayForPassEditionException;
 use Richardhj\ContaoFerienpassBundle\Exception\MissingHolidayForPassEditionException;
-use Richardhj\ContaoFerienpassBundle\Exception\MissingPayDaysForPassEditionException;
 
 /**
  * Class PassEdition
@@ -204,9 +203,9 @@ class PassEdition
     /**
      * Get the pay days task defined for this pass edition.
      *
-     * @return Collection
+     * @return Collection|null
      */
-    public function getPayDays(): Collection
+    public function getPayDays(): ?Collection
     {
         $tasks = $this->getTasks()->filter(
             function (PassEditionTask $element) {
@@ -215,9 +214,7 @@ class PassEdition
         );
 
         if ($tasks->isEmpty()) {
-            throw new MissingPayDaysForPassEditionException(
-                'No pay days task found for pass edition ID ' . $this->getId()
-            );
+            return null;
         }
 
         return $tasks;
