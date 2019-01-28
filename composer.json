@@ -42,6 +42,7 @@
     "league/oauth2-client": "^2.3",
     "metamodels/attribute_select": "^2.1@dev",
     "metamodels/core": "^2.1@dev",
+    "metamodels/contao-frontend-editing": "^2.1@dev",
     "metamodels/filter_fromto": "^2.1@dev",
     "metamodels/filter_checkbox": "^2.1@dev",
     "patchwork/utf8": "^1.3",

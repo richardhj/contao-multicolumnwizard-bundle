@@ -13,7 +13,6 @@
 
 namespace Richardhj\ContaoFerienpassBundle\EventListener\HostEditing;
 
-
 use Contao\CoreBundle\Routing\UrlGenerator;
 use Contao\Template;
 use MetaModels\ContaoFrontendEditingBundle\EventListener\RenderItemListListener;
@@ -22,7 +21,6 @@ use MetaModels\Events\RenderItemListEvent;
 use MetaModels\FrontendIntegration\HybridList;
 use MetaModels\IItem;
 use MetaModels\MetaModelsEvents;
-use MetaModels\ViewCombination\ViewCombination;
 use Richardhj\ContaoFerienpassBundle\Entity\PassEdition;
 use Symfony\Bridge\Doctrine\ManagerRegistry;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -100,8 +98,8 @@ class ItemListRenderingListener
             return;
         }
 
-        $isEditable = $event->getList()->getView()->get(RenderItemListListener::FRONTEND_EDITING_ENABLED_FLAG);
-        if (true !== $isEditable) {
+        $isEditableFlag = $event->getList()->getView()->get(RenderItemListListener::FRONTEND_EDITING_ENABLED_FLAG);
+        if (true !== $isEditableFlag) {
             return;
         }
 
