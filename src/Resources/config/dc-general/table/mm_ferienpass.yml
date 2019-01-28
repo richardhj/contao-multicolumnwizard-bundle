@@ -105,3 +105,8 @@ services:
         tags:
             - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-select-mode-buttons', method: handle }
         arguments: ['@translator']
+
+    richardhj.ferienpass.listener.dc_general.table.mm_ferienpass.contact_person_options:
+        class: Richardhj\ContaoFerienpassBundle\EventListener\DcGeneral\Table\MmFerienpass\ContactPersonOptionsListener
+        tags:
+            - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.get-property-options', method: 'onGetPropertyOptions' }
